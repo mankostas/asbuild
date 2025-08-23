@@ -40,7 +40,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $accessToken->plainTextToken,
             'refresh_token' => $refreshToken->plainTextToken,
-            'user' => $user,
+            'user' => $user->load('roles'),
         ]);
     }
 
