@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\AppointmentController;
+use App\Http\Controllers\Api\AppointmentCommentController;
 
 Route::middleware(['api','tenant'])->get('/health', function () {
     return response()->json(['status' => 'ok', 'tenant' => config('tenant.branding')]);
@@ -24,4 +26,11 @@ Route::get('files/{file}/{variant?}', [FileController::class, 'download'])
 Route::prefix('uploads')->group(function () {
     Route::post('chunk', [UploadController::class, 'chunk']);
     Route::delete('cleanup', [UploadController::class, 'cleanup']);
+});
+
+Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
+    Route::apiResource('appointments', AppointmentController::class);
+    Route::apiResource('appointments.comments', AppointmentCommentController::class)
+        ->shallow()
+        ->only(['index', 'store', 'destroy']);
 });
