@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\TenantController;
 
 Route::middleware(['api','tenant'])->get('/health', function () {
     return response()->json(['status' => 'ok', 'tenant' => config('tenant.branding')]);
@@ -32,6 +33,11 @@ Route::get('files/{file}/{variant?}', [FileController::class, 'download'])
 Route::prefix('uploads')->group(function () {
     Route::post('chunk', [UploadController::class, 'chunk']);
     Route::delete('cleanup', [UploadController::class, 'cleanup']);
+});
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::apiResource('tenants', TenantController::class);
+    Route::post('tenants/{tenant}/impersonate', [TenantController::class, 'impersonate']);
 });
 
 Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
