@@ -26,9 +26,10 @@ function createToast() {
   return { toasts, show, dismiss };
 }
 
+export const toast = createToast();
+
 export const toastPlugin = {
   install(app: App) {
-    const toast = createToast();
     app.provide(ToastSymbol, toast);
     app.config.globalProperties.$toast = toast;
   },

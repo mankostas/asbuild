@@ -8,6 +8,7 @@ class Kernel extends HttpKernel
 {
     protected $middleware = [
         \App\Http\Middleware\SecurityHeaders::class,
+        \App\Http\Middleware\RequestId::class,
     ];
 
     protected $middlewareAliases = [

@@ -55,6 +55,7 @@ const routes = [
     meta: { requiresAuth: true },
   },
   { path: '/login', component: () => import('@/views/Auth/LoginView.vue') },
+  { path: '/:pathMatch(.*)*', component: () => import('@/views/ErrorView.vue') },
 ];
 
 const router = createRouter({
