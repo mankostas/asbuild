@@ -17,7 +17,7 @@ class UploadController extends Controller
             'index' => 'required|integer',
             'total' => 'required|integer',
             'filename' => 'required|string',
-            'chunk' => 'required|file',
+            'chunk' => 'required|file|mimes:' . implode(',', config('security.allowed_upload_mimes')) . '|max:' . config('security.max_upload_size'),
         ]);
 
         $path = $request->file('chunk')->storeAs('chunks/' . $data['upload_id'], $data['index']);

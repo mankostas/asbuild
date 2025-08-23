@@ -6,7 +6,9 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
 {
-    protected $middleware = [];
+    protected $middleware = [
+        \App\Http\Middleware\SecurityHeaders::class,
+    ];
 
     protected $middlewareAliases = [
         'tenant' => \App\Http\Middleware\ResolveTenant::class,

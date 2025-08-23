@@ -36,7 +36,7 @@ class EmployeeController extends Controller
             'roles' => 'array',
         ]);
 
-        $password = Str::random(12);
+        $password = Str::random(config('security.password.min_length'));
 
         $user = User::create([
             'name' => $data['name'],

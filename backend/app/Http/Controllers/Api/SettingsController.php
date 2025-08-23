@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class SettingsController extends Controller
 {
@@ -47,7 +48,7 @@ class SettingsController extends Controller
         $data = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email',
-            'password' => 'nullable|confirmed|min:8',
+            'password' => ['nullable', 'confirmed', PasswordRule::min(config('security.password.min_length'))->mixedCase()->numbers()->symbols()],
         ]);
 
         $user = $request->user();
