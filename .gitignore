@@ -1,0 +1,4 @@
+backend/vendor/
+frontend/node_modules/
+backend/.phpunit.result.cache
+frontend/test-results/
