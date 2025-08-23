@@ -29,6 +29,11 @@ const routes = [
     component: () => import('@/views/NotificationCenter.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/reports',
+    component: () => import('@/views/ReportsDashboard.vue'),
+    meta: { requiresAuth: true },
+  },
   { path: '/login', component: () => import('@/views/Auth/LoginView.vue') },
 ];
 
