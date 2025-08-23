@@ -6,20 +6,28 @@ use App\Http\Controllers\Controller;
 use App\Models\Manual;
 use App\Services\FileStorageService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ManualController extends Controller
 {
     public function index(Request $request)
     {
-        $manuals = Manual::where('tenant_id', $request->user()->tenant_id)
-            ->with('file')
-            ->when($request->query('q'), function ($query, $q) {
-                $query->where(function ($q2) use ($q) {
-                    $q2->where('category', 'like', "%{$q}%")
-                        ->orWhereJsonContains('tags', $q);
-                });
-            })
-            ->get();
+        $tenantId = $request->user()->tenant_id;
+        $search = $request->query('q', '');
+        $cacheKey = "manuals:{$tenantId}:{$search}";
+
+        $manuals = Cache::remember($cacheKey, 60, function () use ($request) {
+            return Manual::where('tenant_id', $request->user()->tenant_id)
+                ->with('file')
+                ->when($request->query('q'), function ($query, $q) {
+                    $query->where(function ($q2) use ($q) {
+                        $q2->where('category', 'like', "%{$q}%")
+                            ->orWhereJsonContains('tags', $q);
+                    });
+                })
+                ->get()
+                ->toArray();
+        });
 
         return response()->json($manuals);
     }
@@ -50,7 +58,13 @@ class ManualController extends Controller
     public function show(Manual $manual)
     {
         $this->authorize('view', $manual);
-        return response()->json($manual->load('file'));
+
+        $cacheKey = "manual:{$manual->id}";
+        $data = Cache::remember($cacheKey, 60, function () use ($manual) {
+            return $manual->load('file')->toArray();
+        });
+
+        return response()->json($data);
     }
 
     public function update(Request $request, Manual $manual)
