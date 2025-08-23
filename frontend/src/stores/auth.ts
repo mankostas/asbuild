@@ -1,12 +1,24 @@
 // @ts-nocheck
 import { defineStore } from 'pinia';
 import api from '@/services/api';
+import {
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+  clearTokens,
+} from '@/services/authStorage';
+
+const initialAccess = getAccessToken();
+const initialRefresh = getRefreshToken();
+if (initialAccess) {
+  api.defaults.headers.common['Authorization'] = `Bearer ${initialAccess}`;
+}
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
-    accessToken: localStorage.getItem('access_token') || '',
-    refreshToken: localStorage.getItem('refresh_token') || '',
+    accessToken: initialAccess,
+    refreshToken: initialRefresh,
     impersonator: null as any,
   }),
   getters: {
@@ -20,8 +32,7 @@ export const useAuthStore = defineStore('auth', {
         this.accessToken = data.access_token;
         this.refreshToken = data.refresh_token;
         this.user = data.user;
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
+        setTokens(data.access_token, data.refresh_token);
         api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
       }
     },
@@ -32,8 +43,7 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = '';
       this.refreshToken = '';
       this.user = null;
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+      clearTokens();
       delete api.defaults.headers.common['Authorization'];
       this.impersonator = null;
     },
@@ -44,8 +54,7 @@ export const useAuthStore = defineStore('auth', {
       });
       this.accessToken = data.access_token;
       this.refreshToken = data.refresh_token;
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('refresh_token', data.refresh_token);
+      setTokens(data.access_token, data.refresh_token);
       api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
     },
     async requestPasswordReset(email) {
@@ -64,8 +73,7 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = data.access_token;
       this.refreshToken = data.refresh_token;
       this.user = data.user;
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('refresh_token', data.refresh_token);
+      setTokens(data.access_token, data.refresh_token);
       api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
     },
     stopImpersonation() {
@@ -73,8 +81,7 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = this.impersonator.accessToken;
       this.refreshToken = this.impersonator.refreshToken;
       this.user = this.impersonator.user;
-      localStorage.setItem('access_token', this.accessToken);
-      localStorage.setItem('refresh_token', this.refreshToken);
+      setTokens(this.accessToken, this.refreshToken);
       api.defaults.headers.common['Authorization'] = `Bearer ${this.accessToken}`;
       this.impersonator = null;
     },
