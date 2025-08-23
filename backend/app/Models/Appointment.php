@@ -26,6 +26,8 @@ class Appointment extends Model
         'started_at',
         'completed_at',
         'kau_notes',
+        'form_data',
+        'appointment_type_id',
     ];
 
     protected $casts = [
@@ -34,6 +36,11 @@ class Appointment extends Model
         'sla_end_at' => 'datetime',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
+        'form_data' => 'array',
+    ];
+
+    protected $appends = [
+        'form_schema',
     ];
 
     protected static $transitions = [
@@ -58,6 +65,16 @@ class Appointment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(AppointmentType::class, 'appointment_type_id');
+    }
+
+    public function getFormSchemaAttribute()
+    {
+        return $this->type->form_schema ?? null;
     }
 
     public function canTransitionTo(string $status): bool

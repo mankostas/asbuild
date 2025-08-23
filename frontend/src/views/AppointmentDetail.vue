@@ -2,6 +2,12 @@
   <div v-if="appointment">
     <h2 class="text-xl font-bold mb-2">{{ appointment.title }}</h2>
     <div class="mb-4">Step {{ appointment.completedSteps }} / {{ appointment.totalSteps }}</div>
+    <FormRenderer
+      v-if="appointment.form_schema"
+      v-model="formData"
+      :schema="appointment.form_schema"
+      class="mb-4"
+    />
     <KauInput v-model="kau" class="mb-4" />
     <PhotoCapture @update="onPhotos" class="mb-4" />
     <div class="flex gap-2 mb-4">
@@ -19,6 +25,7 @@ import { useAppointmentsStore } from '@/stores/appointments';
 import { useDraftsStore } from '@/stores/drafts';
 import PhotoCapture from '@/components/appointments/PhotoCapture.vue';
 import KauInput from '@/components/appointments/KauInput.vue';
+import FormRenderer from '@/components/appointments/FormRenderer.vue';
 
 const route = useRoute();
 const appointments = useAppointmentsStore();
@@ -27,6 +34,7 @@ const drafts = useDraftsStore();
 const appointment = ref<any>(null);
 const kau = ref('');
 const photos = ref<File[]>([]);
+const formData = ref<Record<string, any>>({});
 
 onMounted(async () => {
   const id = route.params.id as string;
@@ -35,6 +43,7 @@ onMounted(async () => {
   if (draft) {
     kau.value = draft.kau || '';
     photos.value = draft.photos || [];
+    formData.value = draft.formData || {};
   }
 });
 
@@ -45,7 +54,11 @@ function onPhotos(files: File[]) {
 
 function saveDraft() {
   if (appointment.value) {
-    drafts.save(appointment.value.id, { kau: kau.value, photos: photos.value });
+    drafts.save(appointment.value.id, {
+      kau: kau.value,
+      photos: photos.value,
+      formData: formData.value,
+    });
   }
 }
 
