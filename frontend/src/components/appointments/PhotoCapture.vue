@@ -1,12 +1,6 @@
 <template>
   <div>
-    <input
-      type="file"
-      accept="image/*"
-      capture="environment"
-      multiple
-      @change="onSelect"
-    />
+    <button @click="onSelect" class="bg-blue-600 text-white px-2 py-1">Add Photos</button>
     <div v-if="previews.length" class="flex gap-2 mt-2">
       <img
         v-for="(src, idx) in previews"
@@ -20,16 +14,17 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { pickFiles } from '@/services/native';
 
 const emit = defineEmits(['update']);
 const previews = ref<string[]>([]);
 
-async function onSelect(e: Event) {
-  const files = (e.target as HTMLInputElement).files;
-  if (!files) return;
+async function onSelect() {
+  const files = await pickFiles({ multiple: true, accept: 'image/*', capture: 'environment' });
+  if (!files.length) return;
   const result: File[] = [];
   previews.value = [];
-  for (const file of Array.from(files)) {
+  for (const file of files) {
     const compressed = await compress(file);
     result.push(compressed);
     previews.value.push(URL.createObjectURL(compressed));

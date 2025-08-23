@@ -1,6 +1,8 @@
 // @ts-nocheck
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import api from '@/services/api';
+import { setTokens } from '@/services/authStorage';
 
 const routes = [
   { path: '/', redirect: '/appointments', meta: { requiresAuth: true } },
@@ -65,6 +67,23 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore();
+
+  if (!auth.isAuthenticated) {
+    const access = to.query.access_token || to.query.token;
+    const refresh = to.query.refresh_token || to.query.refresh;
+    if (access && refresh) {
+      auth.accessToken = access;
+      auth.refreshToken = refresh;
+      setTokens(access, refresh);
+      api.defaults.headers.common['Authorization'] = `Bearer ${access}`;
+      const query = { ...to.query };
+      delete query.access_token;
+      delete query.refresh_token;
+      delete query.token;
+      delete query.refresh;
+      return next({ path: to.path, params: to.params, query, hash: to.hash, replace: true });
+    }
+  }
 
   if (!auth.isAuthenticated && auth.refreshToken) {
     try {
