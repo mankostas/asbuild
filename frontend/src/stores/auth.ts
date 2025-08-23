@@ -7,9 +7,11 @@ export const useAuthStore = defineStore('auth', {
     user: null,
     accessToken: localStorage.getItem('access_token') || '',
     refreshToken: localStorage.getItem('refresh_token') || '',
+    impersonator: null as any,
   }),
   getters: {
     isAuthenticated: (state) => !!state.accessToken,
+    isImpersonating: (state) => !!state.impersonator,
   },
   actions: {
     async login(payload) {
@@ -33,6 +35,7 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       delete api.defaults.headers.common['Authorization'];
+      this.impersonator = null;
     },
     async refresh() {
       if (!this.refreshToken) return;
@@ -50,6 +53,30 @@ export const useAuthStore = defineStore('auth', {
     },
     async resetPassword(payload) {
       await api.post('/auth/password/reset', payload);
+    },
+    async impersonate(tenantId) {
+      this.impersonator = {
+        accessToken: this.accessToken,
+        refreshToken: this.refreshToken,
+        user: this.user,
+      };
+      const { data } = await api.post(`/tenants/${tenantId}/impersonate`);
+      this.accessToken = data.access_token;
+      this.refreshToken = data.refresh_token;
+      this.user = data.user;
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('refresh_token', data.refresh_token);
+      api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
+    },
+    stopImpersonation() {
+      if (!this.impersonator) return;
+      this.accessToken = this.impersonator.accessToken;
+      this.refreshToken = this.impersonator.refreshToken;
+      this.user = this.impersonator.user;
+      localStorage.setItem('access_token', this.accessToken);
+      localStorage.setItem('refresh_token', this.refreshToken);
+      api.defaults.headers.common['Authorization'] = `Bearer ${this.accessToken}`;
+      this.impersonator = null;
     },
   },
 });

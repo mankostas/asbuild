@@ -12,7 +12,7 @@ class RoleSeeder extends Seeder
         DB::table('roles')->insert([
             'id' => 1,
             'tenant_id' => 1,
-            'name' => 'admin',
+            'name' => 'SuperAdmin',
             'created_at' => now(),
             'updated_at' => now(),
         ]);

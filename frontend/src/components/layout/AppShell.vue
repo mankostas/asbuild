@@ -1,6 +1,10 @@
 <template>
   <div class="min-h-screen flex flex-col" :data-theme="theme" :data-density="density">
     <a href="#main" class="sr-only focus:not-sr-only focus-ring m-2">{{ t('a11y.skipToContent') }}</a>
+    <div v-if="auth.isImpersonating" class="bg-yellow-400 text-black text-center p-2">
+      Impersonating {{ auth.user?.name }}
+      <button class="underline ml-2" @click="auth.stopImpersonation()">Stop</button>
+    </div>
     <header
       class="sticky top-0 z-10 flex items-center justify-between bg-background p-4 shadow"
       :style="{ backgroundColor: branding.color }"
@@ -16,6 +20,12 @@
           <router-link class="text-blue-600" to="/notifications">Notifications</router-link>
           <router-link class="text-blue-600" to="/reports">Reports</router-link>
           <router-link class="text-blue-600" to="/settings">Settings</router-link>
+          <router-link
+            v-if="auth.user?.roles?.some((r: any) => r.name === 'SuperAdmin')"
+            class="text-blue-600"
+            to="/tenants"
+            >Tenants</router-link
+          >
         </nav>
       </div>
       <div class="flex gap-2 items-center">
@@ -45,6 +55,7 @@ import Toast from '../ui/Toast.vue';
 import UploadQueue from '../appointments/UploadQueue.vue';
 import { useToast } from '../../plugins/toast';
 import { useBrandingStore } from '@/stores/branding';
+import { useAuthStore } from '@/stores/auth';
 
 const theme = ref<'light' | 'dark'>('light');
 const density = ref<'compact' | ''>('');
@@ -53,6 +64,8 @@ const { t, locale } = useI18n();
 const brandingStore = useBrandingStore();
 const branding = computed(() => brandingStore.branding);
 onMounted(() => brandingStore.load());
+
+const auth = useAuthStore();
 
 function toggleTheme() {
   theme.value = theme.value === 'dark' ? 'light' : 'dark';
