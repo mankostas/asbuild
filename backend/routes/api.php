@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AppointmentCommentController;
 use App\Http\Controllers\Api\AppointmentTypeController;
+use App\Http\Controllers\Api\ManualController;
 
 Route::middleware(['api','tenant'])->get('/health', function () {
     return response()->json(['status' => 'ok', 'tenant' => config('tenant.branding')]);
@@ -35,4 +36,7 @@ Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
     Route::apiResource('appointments.comments', AppointmentCommentController::class)
         ->shallow()
         ->only(['index', 'store', 'destroy']);
+    Route::get('manuals/{manual}/download', [ManualController::class, 'download']);
+    Route::post('manuals/{manual}/replace', [ManualController::class, 'replace']);
+    Route::apiResource('manuals', ManualController::class);
 });
