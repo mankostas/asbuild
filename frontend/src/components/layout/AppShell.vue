@@ -7,6 +7,7 @@
         <nav class="flex gap-2">
           <router-link class="text-blue-600" to="/appointments">Appointments</router-link>
           <router-link class="text-blue-600" to="/manuals">Manuals</router-link>
+          <router-link class="text-blue-600" to="/notifications">Notifications</router-link>
         </nav>
       </div>
       <div class="flex gap-2 items-center">

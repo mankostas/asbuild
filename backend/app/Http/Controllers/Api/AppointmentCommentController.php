@@ -6,10 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\AppointmentComment;
 use App\Models\User;
-use App\Notifications\AppointmentCommentMentioned;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Notification;
+use App\Services\Notifier;
 
 class AppointmentCommentController extends Controller
 {
@@ -47,7 +46,14 @@ class AppointmentCommentController extends Controller
             $allowed = $mentioned->filter(fn ($user) => Gate::forUser($user)->allows('view', $appointment));
             if ($allowed->isNotEmpty()) {
                 $comment->mentions()->attach($allowed->pluck('id'));
-                Notification::send($allowed, new AppointmentCommentMentioned($comment));
+                $allowed->each(function ($user) use ($appointment) {
+                    app(Notifier::class)->send(
+                        $user,
+                        'comment',
+                        'You were mentioned in an appointment comment.',
+                        '/appointments/' . $appointment->id
+                    );
+                });
             }
         }
 
