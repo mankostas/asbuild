@@ -3,7 +3,17 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
 const routes = [
-  { path: '/', component: { template: '<div>Home</div>' }, meta: { requiresAuth: true } },
+  { path: '/', redirect: '/appointments', meta: { requiresAuth: true } },
+  {
+    path: '/appointments',
+    component: () => import('@/views/AppointmentList.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/appointments/:id',
+    component: () => import('@/views/AppointmentDetail.vue'),
+    meta: { requiresAuth: true },
+  },
   { path: '/login', component: () => import('@/views/Auth/LoginView.vue') },
 ];
 
