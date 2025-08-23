@@ -24,3 +24,9 @@ if (import.meta.env.VITE_SENTRY_DSN) {
   };
   document.head.appendChild(script);
 }
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js');
+  });
+}

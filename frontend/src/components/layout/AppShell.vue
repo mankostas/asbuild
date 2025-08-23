@@ -37,6 +37,7 @@
         <Button @click="toggleTheme">{{ t('actions.toggleTheme') }}</Button>
         <Button @click="toggleDensity">{{ t('actions.toggleDensity') }}</Button>
         <Button @click="notify">{{ t('actions.toast') }}</Button>
+        <Badge v-if="queue.length" class="bg-blue-600 text-white">{{ queue.length }}</Badge>
       </div>
     </header>
     <main id="main" tabindex="-1" class="flex-1 p-4">
@@ -53,9 +54,12 @@ import { useI18n } from 'vue-i18n';
 import Button from '../ui/Button.vue';
 import Toast from '../ui/Toast.vue';
 import UploadQueue from '../appointments/UploadQueue.vue';
+import Badge from '../ui/Badge.vue';
 import { useToast } from '../../plugins/toast';
 import { useBrandingStore } from '@/stores/branding';
 import { useAuthStore } from '@/stores/auth';
+import { useDraftsStore } from '@/stores/drafts';
+import { storeToRefs } from 'pinia';
 
 const theme = ref<'light' | 'dark'>('light');
 const density = ref<'compact' | ''>('');
@@ -66,6 +70,8 @@ const branding = computed(() => brandingStore.branding);
 onMounted(() => brandingStore.load());
 
 const auth = useAuthStore();
+const drafts = useDraftsStore();
+const { queue } = storeToRefs(drafts);
 
 function toggleTheme() {
   theme.value = theme.value === 'dark' ? 'light' : 'dark';
