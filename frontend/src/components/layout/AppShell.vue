@@ -2,7 +2,13 @@
   <div class="min-h-screen flex flex-col" :data-theme="theme" :data-density="density">
     <a href="#main" class="sr-only focus:not-sr-only focus-ring m-2">{{ t('a11y.skipToContent') }}</a>
     <header class="sticky top-0 z-10 flex items-center justify-between bg-background p-4 shadow">
-      <h1 class="font-bold">{{ t('app.title') }}</h1>
+      <div class="flex items-center gap-4">
+        <h1 class="font-bold">{{ t('app.title') }}</h1>
+        <nav class="flex gap-2">
+          <router-link class="text-blue-600" to="/appointments">Appointments</router-link>
+          <router-link class="text-blue-600" to="/manuals">Manuals</router-link>
+        </nav>
+      </div>
       <div class="flex gap-2 items-center">
         <label class="sr-only" for="language">{{ t('a11y.language') }}</label>
         <select id="language" v-model="locale" class="border rounded p-1 focus-ring">

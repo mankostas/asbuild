@@ -14,6 +14,16 @@ const routes = [
     component: () => import('@/views/AppointmentDetail.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/manuals',
+    component: () => import('@/views/ManualList.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/manuals/:id',
+    component: () => import('@/views/ManualDetail.vue'),
+    meta: { requiresAuth: true },
+  },
   { path: '/login', component: () => import('@/views/Auth/LoginView.vue') },
 ];
 
