@@ -1,0 +1,15 @@
+{
+  "app": { "title": "Asbuild" },
+  "actions": {
+    "toggleTheme": "Αλλαγή θέματος",
+    "toggleDensity": "Αλλαγή πυκνότητας",
+    "toast": "Ειδοποίηση"
+  },
+  "messages": {
+    "helloToast": "Γεια από το τοστ"
+  },
+  "a11y": {
+    "skipToContent": "Μετάβαση στο περιεχόμενο",
+    "language": "Γλώσσα"
+  }
+}
