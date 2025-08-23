@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\TenantController;
+use App\Http\Controllers\Api\GdprController;
 
 Route::middleware(['api','tenant'])->get('/health', function () {
     return response()->json(['status' => 'ok', 'tenant' => config('tenant.branding')]);
@@ -28,7 +29,7 @@ Route::prefix('auth')->group(function () {
 
 Route::get('files/{file}/{variant?}', [FileController::class, 'download'])
     ->name('files.download')
-    ->middleware('signed');
+    ->middleware('signed.url');
 
 Route::prefix('uploads')->group(function () {
     Route::post('chunk', [UploadController::class, 'chunk']);
@@ -59,6 +60,13 @@ Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
     Route::get('settings/branding', [SettingsController::class, 'getBranding']);
     Route::put('settings/branding', [SettingsController::class, 'updateBranding']);
     Route::put('settings/profile', [SettingsController::class, 'updateProfile']);
+
+    Route::prefix('gdpr')->group(function () {
+        Route::get('export', [GdprController::class, 'export']);
+        Route::get('consents', [GdprController::class, 'consents']);
+        Route::put('consents', [GdprController::class, 'updateConsents']);
+        Route::post('delete', [GdprController::class, 'requestDelete']);
+    });
 
     Route::prefix('reports')->group(function () {
         Route::get('kpis', [ReportController::class, 'kpis']);

@@ -35,6 +35,11 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/settings/gdpr',
+    component: () => import('@/views/Settings/GdprView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/reports',
     component: () => import('@/views/ReportsDashboard.vue'),
     meta: { requiresAuth: true },

@@ -8,18 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('audits', function (Blueprint $table) {
+        Schema::create('consents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('action');
-            $table->unsignedBigInteger('target_id')->nullable();
-            $table->json('meta')->nullable();
+            $table->string('name');
+            $table->timestamp('granted_at')->nullable();
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('audits');
+        Schema::dropIfExists('consents');
     }
 };

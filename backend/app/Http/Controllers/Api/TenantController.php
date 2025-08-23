@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\User;
-use App\Models\Audit;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 
 class TenantController extends Controller
@@ -61,7 +61,7 @@ class TenantController extends Controller
         $user->tokens()->delete();
         $accessToken = $user->createToken('access-token', ['*'], now()->addMinutes(15));
         $refreshToken = $user->createToken('refresh-token', ['refresh'], now()->addDays(30));
-        Audit::create([
+        AuditLog::create([
             'user_id' => $request->user()->id,
             'action' => 'impersonate',
             'target_id' => $user->id,
