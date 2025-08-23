@@ -13,3 +13,14 @@ createApp(AppShell)
   .use(router)
   .use(toastPlugin)
   .mount('#app');
+
+if (import.meta.env.VITE_SENTRY_DSN) {
+  const script = document.createElement('script');
+  script.src = 'https://browser.sentry-cdn.com/7.120.0/bundle.min.js';
+  script.crossOrigin = 'anonymous';
+  script.onload = () => {
+    // @ts-ignore
+    Sentry.init({ dsn: import.meta.env.VITE_SENTRY_DSN });
+  };
+  document.head.appendChild(script);
+}
