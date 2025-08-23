@@ -1,14 +1,20 @@
 <template>
   <div class="min-h-screen flex flex-col" :data-theme="theme" :data-density="density">
+    <a href="#main" class="sr-only focus:not-sr-only focus-ring m-2">{{ t('a11y.skipToContent') }}</a>
     <header class="sticky top-0 z-10 flex items-center justify-between bg-background p-4 shadow">
-      <h1 class="font-bold">Asbuild</h1>
-      <div class="flex gap-2">
-        <Button @click="toggleTheme">Toggle Theme</Button>
-        <Button @click="toggleDensity">Toggle Density</Button>
-        <Button @click="notify">Toast</Button>
+      <h1 class="font-bold">{{ t('app.title') }}</h1>
+      <div class="flex gap-2 items-center">
+        <label class="sr-only" for="language">{{ t('a11y.language') }}</label>
+        <select id="language" v-model="locale" class="border rounded p-1 focus-ring">
+          <option value="el">Ελληνικά</option>
+          <option value="en">English</option>
+        </select>
+        <Button @click="toggleTheme">{{ t('actions.toggleTheme') }}</Button>
+        <Button @click="toggleDensity">{{ t('actions.toggleDensity') }}</Button>
+        <Button @click="notify">{{ t('actions.toast') }}</Button>
       </div>
     </header>
-    <main class="flex-1 p-4">
+    <main id="main" tabindex="-1" class="flex-1 p-4">
       <router-view />
     </main>
     <Toast />
@@ -17,12 +23,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Button from '../ui/Button.vue';
 import Toast from '../ui/Toast.vue';
 import { useToast } from '../../plugins/toast';
 
 const theme = ref<'light' | 'dark'>('light');
 const density = ref<'compact' | ''>('');
+const { t, locale } = useI18n();
 
 function toggleTheme() {
   theme.value = theme.value === 'dark' ? 'light' : 'dark';
@@ -34,6 +42,6 @@ function toggleDensity() {
 
 const { show } = useToast();
 function notify() {
-  show('Hello from toast');
+  show(t('messages.helloToast'));
 }
 </script>

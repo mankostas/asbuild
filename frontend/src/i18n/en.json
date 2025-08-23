@@ -1,0 +1,15 @@
+{
+  "app": { "title": "Asbuild" },
+  "actions": {
+    "toggleTheme": "Toggle Theme",
+    "toggleDensity": "Toggle Density",
+    "toast": "Toast"
+  },
+  "messages": {
+    "helloToast": "Hello from toast"
+  },
+  "a11y": {
+    "skipToContent": "Skip to content",
+    "language": "Language"
+  }
+}
