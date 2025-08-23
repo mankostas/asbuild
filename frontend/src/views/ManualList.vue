@@ -16,17 +16,31 @@
         {{ showFavorites ? 'All' : 'Favorites' }}
       </button>
     </div>
+    <button
+      v-if="isAdmin"
+      class="bg-blue-600 text-white px-4 py-2 mb-4"
+      @click="create"
+    >
+      Upload Manual
+    </button>
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <ManualCard
-        v-for="m in filteredManuals"
-        :key="m.id"
-        :manual="m"
-        :favorite="store.favorites.includes(m.id)"
-        :offline="store.offline.includes(m.id)"
-        @open="open"
-        @toggle-favorite="store.toggleFavorite"
-        @offline="toggleOffline"
-      />
+      <div v-for="m in filteredManuals" :key="m.id" class="relative">
+        <ManualCard
+          :manual="m"
+          :favorite="store.favorites.includes(m.id)"
+          :offline="store.offline.includes(m.id)"
+          @open="open"
+          @toggle-favorite="store.toggleFavorite"
+          @offline="toggleOffline"
+        />
+        <button
+          v-if="isAdmin"
+          class="absolute top-2 right-2 text-red-600"
+          @click="remove(m.id)"
+        >
+          Delete
+        </button>
+      </div>
     </div>
     <div v-if="store.recents.length" class="mt-8">
       <h3 class="font-bold mb-2">Recent</h3>
@@ -44,12 +58,16 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useManualsStore } from '@/stores/manuals';
 import ManualCard from '@/components/manuals/ManualCard.vue';
+import api from '@/services/api';
+import { useAuthStore } from '@/stores/auth';
 
 const store = useManualsStore();
 const router = useRouter();
 const search = ref('');
 const category = ref('');
 const showFavorites = ref(false);
+const auth = useAuthStore();
+const isAdmin = computed(() => auth.user?.roles?.some((r: any) => r.name === 'ClientAdmin'));
 
 onMounted(async () => {
   await store.fetch();
@@ -87,5 +105,19 @@ async function toggleOffline(manual: any) {
 function getManualName(id: number) {
   const m = store.manuals.find((m) => m.id === id);
   return m ? m.file?.filename : `#${id}`;
+}
+
+async function create() {
+  const name = prompt('Manual name');
+  if (!name) return;
+  await api.post('/manuals', { name });
+  await store.fetch();
+}
+
+async function remove(id: number) {
+  if (confirm('Delete manual?')) {
+    await api.delete(`/manuals/${id}`);
+    await store.fetch();
+  }
 }
 </script>

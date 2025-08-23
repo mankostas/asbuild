@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ManualController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\EmployeeController;
 
 Route::middleware(['api','tenant'])->get('/health', function () {
     return response()->json(['status' => 'ok', 'tenant' => config('tenant.branding')]);
@@ -46,6 +47,8 @@ Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
     Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
     Route::get('notification-preferences', [NotificationController::class, 'getPreferences']);
     Route::put('notification-preferences', [NotificationController::class, 'updatePreferences']);
+
+    Route::apiResource('employees', EmployeeController::class);
 
     Route::get('settings/branding', [SettingsController::class, 'getBranding']);
     Route::put('settings/branding', [SettingsController::class, 'updateBranding']);
