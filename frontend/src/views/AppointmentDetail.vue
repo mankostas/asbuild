@@ -15,6 +15,7 @@
       <button class="text-blue-600" @click="call">Call</button>
     </div>
     <button class="bg-blue-600 text-white px-4 py-2" @click="completeStep">Complete Step</button>
+    <AppointmentComments v-if="appointment" :appointment-id="appointment.id" class="mt-6" />
   </div>
 </template>
 
@@ -26,6 +27,7 @@ import { useDraftsStore } from '@/stores/drafts';
 import PhotoCapture from '@/components/appointments/PhotoCapture.vue';
 import KauInput from '@/components/appointments/KauInput.vue';
 import FormRenderer from '@/components/appointments/FormRenderer.vue';
+import AppointmentComments from '@/components/appointments/AppointmentComments.vue';
 
 const route = useRoute();
 const appointments = useAppointmentsStore();
