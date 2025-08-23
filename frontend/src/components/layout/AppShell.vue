@@ -1,14 +1,21 @@
 <template>
   <div class="min-h-screen flex flex-col" :data-theme="theme" :data-density="density">
     <a href="#main" class="sr-only focus:not-sr-only focus-ring m-2">{{ t('a11y.skipToContent') }}</a>
-    <header class="sticky top-0 z-10 flex items-center justify-between bg-background p-4 shadow">
+    <header
+      class="sticky top-0 z-10 flex items-center justify-between bg-background p-4 shadow"
+      :style="{ backgroundColor: branding.color }"
+    >
       <div class="flex items-center gap-4">
-        <h1 class="font-bold">{{ t('app.title') }}</h1>
+        <div class="flex items-center gap-2">
+          <img v-if="branding.logo" :src="branding.logo" alt="logo" class="h-6" />
+          <h1 class="font-bold">{{ branding.name || t('app.title') }}</h1>
+        </div>
         <nav class="flex gap-2">
           <router-link class="text-blue-600" to="/appointments">Appointments</router-link>
           <router-link class="text-blue-600" to="/manuals">Manuals</router-link>
           <router-link class="text-blue-600" to="/notifications">Notifications</router-link>
           <router-link class="text-blue-600" to="/reports">Reports</router-link>
+          <router-link class="text-blue-600" to="/settings">Settings</router-link>
         </nav>
       </div>
       <div class="flex gap-2 items-center">
@@ -31,16 +38,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from '../ui/Button.vue';
 import Toast from '../ui/Toast.vue';
 import UploadQueue from '../appointments/UploadQueue.vue';
 import { useToast } from '../../plugins/toast';
+import { useBrandingStore } from '@/stores/branding';
 
 const theme = ref<'light' | 'dark'>('light');
 const density = ref<'compact' | ''>('');
 const { t, locale } = useI18n();
+
+const brandingStore = useBrandingStore();
+const branding = computed(() => brandingStore.branding);
+onMounted(() => brandingStore.load());
 
 function toggleTheme() {
   theme.value = theme.value === 'dark' ? 'light' : 'dark';
