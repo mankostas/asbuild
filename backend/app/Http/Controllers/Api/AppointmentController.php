@@ -4,15 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\AppointmentType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class AppointmentController extends Controller
 {
     public function index(Request $request)
     {
-        $appointments = Appointment::where('tenant_id', $request->user()->tenant_id)->get();
+        $appointments = Appointment::where('tenant_id', $request->user()->tenant_id)
+            ->with('type')
+            ->get();
         return response()->json($appointments);
     }
 
@@ -25,10 +29,18 @@ class AppointmentController extends Controller
             'sla_start_at' => 'nullable|date',
             'sla_end_at' => 'nullable|date',
             'kau_notes' => 'nullable|string',
+            'appointment_type_id' => 'nullable|exists:appointment_types,id',
+            'form_data' => 'nullable|array',
         ]);
 
         $data['tenant_id'] = $request->user()->tenant_id;
         $data['status'] = Appointment::STATUS_DRAFT;
+
+        $type = null;
+        if (isset($data['appointment_type_id'])) {
+            $type = AppointmentType::find($data['appointment_type_id']);
+        }
+        $this->validateAgainstSchema($type, $data['form_data'] ?? []);
 
         $appointment = Appointment::create($data);
 
@@ -38,7 +50,7 @@ class AppointmentController extends Controller
     public function show(Appointment $appointment)
     {
         $this->authorize('view', $appointment);
-        return response()->json($appointment->load('photos', 'comments'));
+        return response()->json($appointment->load('photos', 'comments', 'type'));
     }
 
     public function update(Request $request, Appointment $appointment)
@@ -50,6 +62,8 @@ class AppointmentController extends Controller
             'sla_start_at' => 'nullable|date',
             'sla_end_at' => 'nullable|date',
             'kau_notes' => 'nullable|string',
+            'appointment_type_id' => 'nullable|exists:appointment_types,id',
+            'form_data' => 'nullable|array',
             'status' => [
                 'nullable',
                 Rule::in([
@@ -79,6 +93,14 @@ class AppointmentController extends Controller
             }
         }
 
+        $type = null;
+        if (isset($data['appointment_type_id'])) {
+            $type = AppointmentType::find($data['appointment_type_id']);
+        } else {
+            $type = $appointment->type;
+        }
+        $this->validateAgainstSchema($type, $data['form_data'] ?? $appointment->form_data ?? []);
+
         unset($data['status']);
         $appointment->fill($data);
         $appointment->save();
@@ -91,5 +113,22 @@ class AppointmentController extends Controller
         $this->authorize('delete', $appointment);
         $appointment->delete();
         return response()->json(['message' => 'deleted']);
+    }
+
+    protected function validateAgainstSchema(?AppointmentType $type, array $data): void
+    {
+        if (! $type || ! $type->form_schema) {
+            return;
+        }
+
+        $schema = $type->form_schema;
+        $required = $schema['required'] ?? [];
+        foreach ($required as $field) {
+            if (! array_key_exists($field, $data)) {
+                throw ValidationException::withMessages([
+                    "form_data.$field" => 'required',
+                ]);
+            }
+        }
     }
 }

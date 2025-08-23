@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AppointmentCommentController;
+use App\Http\Controllers\Api\AppointmentTypeController;
 
 Route::middleware(['api','tenant'])->get('/health', function () {
     return response()->json(['status' => 'ok', 'tenant' => config('tenant.branding')]);
@@ -30,6 +31,7 @@ Route::prefix('uploads')->group(function () {
 
 Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
     Route::apiResource('appointments', AppointmentController::class);
+    Route::apiResource('appointment-types', AppointmentTypeController::class);
     Route::apiResource('appointments.comments', AppointmentCommentController::class)
         ->shallow()
         ->only(['index', 'store', 'destroy']);
