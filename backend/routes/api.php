@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AppointmentCommentController;
 use App\Http\Controllers\Api\AppointmentTypeController;
 use App\Http\Controllers\Api\ManualController;
+use App\Http\Controllers\Api\NotificationController;
 
 Route::middleware(['api','tenant'])->get('/health', function () {
     return response()->json(['status' => 'ok', 'tenant' => config('tenant.branding')]);
@@ -39,4 +40,8 @@ Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
     Route::get('manuals/{manual}/download', [ManualController::class, 'download']);
     Route::post('manuals/{manual}/replace', [ManualController::class, 'replace']);
     Route::apiResource('manuals', ManualController::class);
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+    Route::get('notification-preferences', [NotificationController::class, 'getPreferences']);
+    Route::put('notification-preferences', [NotificationController::class, 'updatePreferences']);
 });
