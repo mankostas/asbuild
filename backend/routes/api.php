@@ -20,7 +20,7 @@ Route::middleware(['api','tenant'])->get('/health', function () {
 });
 
 Route::prefix('auth')->group(function () {
-    Route::post('login', [AuthController::class, 'login'])->middleware('throttle:6,1');
+    Route::post('login', [AuthController::class, 'login'])->middleware('throttle:auth');
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('password/email', [AuthController::class, 'sendResetLinkEmail']);
@@ -32,8 +32,8 @@ Route::get('files/{file}/{variant?}', [FileController::class, 'download'])
     ->middleware('signed.url');
 
 Route::prefix('uploads')->group(function () {
-    Route::post('chunk', [UploadController::class, 'chunk']);
-    Route::delete('cleanup', [UploadController::class, 'cleanup']);
+    Route::post('chunk', [UploadController::class, 'chunk'])->middleware('throttle:uploads');
+    Route::delete('cleanup', [UploadController::class, 'cleanup'])->middleware('throttle:uploads');
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {

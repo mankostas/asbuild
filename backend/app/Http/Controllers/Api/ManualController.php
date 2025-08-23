@@ -29,7 +29,7 @@ class ManualController extends Controller
         $this->authorize('create', Manual::class);
 
         $data = $request->validate([
-            'file' => 'required|file',
+            'file' => 'required|file|mimes:' . implode(',', config('security.allowed_upload_mimes')) . '|max:' . config('security.max_upload_size'),
             'category' => 'nullable|string',
             'tags' => 'array',
             'tags.*' => 'string',
@@ -81,7 +81,7 @@ class ManualController extends Controller
         $this->authorize('update', $manual);
 
         $data = $request->validate([
-            'file' => 'required|file',
+            'file' => 'required|file|mimes:' . implode(',', config('security.allowed_upload_mimes')) . '|max:' . config('security.max_upload_size'),
         ]);
 
         $file = $storage->store($request->file('file'));
