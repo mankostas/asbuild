@@ -21,6 +21,10 @@
       </div>
       <button @click="savePrefs" class="mt-2 bg-blue-500 text-white px-4 py-2">Save</button>
     </section>
+    <section>
+      <h1 class="text-xl font-bold mb-4">GDPR</h1>
+      <router-link class="text-blue-600 underline" to="/settings/gdpr">Manage your data</router-link>
+    </section>
   </div>
 </template>
 
@@ -29,6 +33,7 @@ import { ref, onMounted } from 'vue';
 import api from '@/services/api';
 import ProfileForm from '@/components/settings/ProfileForm.vue';
 import BrandingForm from '@/components/settings/BrandingForm.vue';
+import { RouterLink } from 'vue-router';
 
 interface Pref {
   category: string;

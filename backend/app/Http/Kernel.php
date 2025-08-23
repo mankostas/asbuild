@@ -10,5 +10,6 @@ class Kernel extends HttpKernel
 
     protected $middlewareAliases = [
         'tenant' => \App\Http\Middleware\ResolveTenant::class,
+        'signed.url' => \App\Http\Middleware\SignedUrl::class,
     ];
 }
