@@ -18,6 +18,7 @@
       <router-view />
     </main>
     <Toast />
+    <UploadQueue />
   </div>
 </template>
 
@@ -26,6 +27,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from '../ui/Button.vue';
 import Toast from '../ui/Toast.vue';
+import UploadQueue from '../appointments/UploadQueue.vue';
 import { useToast } from '../../plugins/toast';
 
 const theme = ref<'light' | 'dark'>('light');
