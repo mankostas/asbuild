@@ -67,20 +67,20 @@
         </template>
       </Column>
       <Column field="scheduled_at" :header="t('appointments.form.date')" sortable />
-      <Column v-if="isAdmin" :header="t('actions.edit')">
+      <Column v-if="isAdmin" :header="t('actions.actions')">
         <template #body="slotProps">
-          <SplitButton
-            :label="t('actions.edit')"
-            icon="pi pi-pencil"
-            @click="openEdit(slotProps.data)"
-            :model="[
-              {
-                label: t('actions.delete'),
-                icon: 'pi pi-trash',
-                command: () => confirmDelete(slotProps.data),
-              },
-            ]"
-          />
+          <div class="flex gap-2">
+            <Button
+              icon="pi pi-pencil"
+              class="p-button-rounded p-button-text"
+              @click="openEdit(slotProps.data)"
+            />
+            <Button
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-text"
+              @click="confirmDelete(slotProps.data)"
+            />
+          </div>
         </template>
       </Column>
     </DataTable>
@@ -137,7 +137,6 @@ import Toolbar from 'primevue/toolbar';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
-import SplitButton from 'primevue/splitbutton';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
