@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -48,18 +49,23 @@ class EmployeeController extends Controller
         $data = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email',
+            'phone' => 'nullable|string',
+            'address' => 'nullable|string',
             'roles' => 'array',
         ]);
 
         $password = Str::random(config('security.password.min_length'));
 
         $tenantId = $this->getTenantId($request);
+        Tenant::findOrFail($tenantId);
 
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'tenant_id' => $tenantId,
             'password' => Hash::make($password),
+            'phone' => $data['phone'] ?? null,
+            'address' => $data['address'] ?? null,
         ]);
 
         if (! empty($data['roles'])) {
@@ -98,11 +104,19 @@ class EmployeeController extends Controller
 
         $data = $request->validate([
             'name' => 'sometimes|string',
+            'phone' => 'sometimes|string',
+            'address' => 'sometimes|string',
             'roles' => 'array',
         ]);
 
         if (isset($data['name'])) {
             $employee->name = $data['name'];
+        }
+        if (isset($data['phone'])) {
+            $employee->phone = $data['phone'];
+        }
+        if (isset($data['address'])) {
+            $employee->address = $data['address'];
         }
         $employee->save();
 

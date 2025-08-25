@@ -16,6 +16,8 @@ class SuperAdminSeeder extends Seeder
             'email' => 'anastasiou.ks@gmail.com',
             'password' => Hash::make('Swordfish01!@#'),
             'tenant_id' => 1,
+            'phone' => '123-456-7890',
+            'address' => '456 Admin St',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
