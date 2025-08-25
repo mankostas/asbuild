@@ -58,6 +58,7 @@ Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
     Route::put('notification-preferences', [NotificationController::class, 'updatePreferences']);
 
     Route::apiResource('employees', EmployeeController::class);
+    Route::post('employees/{employee}', [EmployeeController::class, 'update']);
 
     Route::get('settings/branding', [SettingsController::class, 'getBranding']);
     Route::put('settings/branding', [SettingsController::class, 'updateBranding']);

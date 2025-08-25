@@ -442,7 +442,7 @@
         {
           "name": "update",
           "request": {
-            "method": "PUT",
+            "method": "POST",
             "header": [
               {
                 "key": "X-Tenant-ID",

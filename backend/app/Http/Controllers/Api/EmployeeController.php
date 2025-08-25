@@ -51,7 +51,7 @@ class EmployeeController extends Controller
             'email' => 'required|email',
             'phone' => 'nullable|string',
             'address' => 'nullable|string',
-            'roles' => 'array',
+            'roles' => 'array|nullable',
             'roles.*' => 'string',
         ]);
 
@@ -74,7 +74,8 @@ class EmployeeController extends Controller
         ]);
 
         if (! empty($data['roles'])) {
-            $roles = Role::whereIn('name', $data['roles'])->pluck('id');
+            $roles = collect($data['roles'])
+                ->map(fn ($name) => Role::firstOrCreate(['name' => $name, 'tenant_id' => $tenantId])->id);
             $roleData = $roles->mapWithKeys(fn ($id) => [$id => ['tenant_id' => $tenantId]]);
             $user->roles()->sync($roleData);
         }
@@ -115,7 +116,7 @@ class EmployeeController extends Controller
             'name' => 'sometimes|string',
             'phone' => 'sometimes|string',
             'address' => 'sometimes|string',
-            'roles' => 'array',
+            'roles' => 'sometimes|array',
             'roles.*' => 'string',
         ]);
 
@@ -134,7 +135,8 @@ class EmployeeController extends Controller
             if (in_array('SuperAdmin', $data['roles'], true)) {
                 abort(403, 'SuperAdmin role cannot be assigned');
             }
-            $roles = Role::whereIn('name', $data['roles'])->pluck('id');
+            $roles = collect($data['roles'])
+                ->map(fn ($name) => Role::firstOrCreate(['name' => $name, 'tenant_id' => $tenantId])->id);
             $roleData = $roles->mapWithKeys(fn ($id) => [$id => ['tenant_id' => $tenantId]]);
             $employee->roles()->sync($roleData);
         }
