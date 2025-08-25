@@ -3,7 +3,8 @@
   "actions": {
     "toggleTheme": "Toggle Theme",
     "toggleDensity": "Toggle Density",
-    "toast": "Toast"
+    "toast": "Toast",
+    "logout": "Logout"
   },
   "messages": {
     "helloToast": "Hello from toast"
@@ -16,5 +17,20 @@
     "title": "Command palette",
     "placeholder": "Type to search...",
     "empty": "No actions"
+  },
+  "profile": {
+    "settings": "Settings"
+  },
+  "routes": {
+    "appointments": "Appointments",
+    "appointmentDetail": "Appointment Detail",
+    "manuals": "Manuals",
+    "manualDetail": "Manual Detail",
+    "reports": "Reports",
+    "settings": "Settings",
+    "gdpr": "GDPR",
+    "notifications": "Notifications",
+    "employees": "Employees",
+    "tenants": "Tenants"
   }
 }
