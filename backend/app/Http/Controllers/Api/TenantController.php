@@ -30,9 +30,17 @@ class TenantController extends Controller
             'name' => 'required|string',
             'quota_storage_mb' => 'integer',
             'features' => 'array',
+            'phone' => 'nullable|string',
+            'address' => 'nullable|string',
         ]);
         $tenant = Tenant::create($data);
         return response()->json($tenant, 201);
+    }
+
+    public function show(Request $request, Tenant $tenant)
+    {
+        $this->ensureSuperAdmin($request);
+        return $tenant;
     }
 
     public function update(Request $request, Tenant $tenant)
@@ -42,6 +50,8 @@ class TenantController extends Controller
             'name' => 'sometimes|string',
             'quota_storage_mb' => 'integer',
             'features' => 'array',
+            'phone' => 'sometimes|nullable|string',
+            'address' => 'sometimes|nullable|string',
         ]);
         $tenant->update($data);
         return $tenant;

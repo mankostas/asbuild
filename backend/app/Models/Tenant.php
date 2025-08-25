@@ -10,6 +10,8 @@ class Tenant extends Model
         'name',
         'quota_storage_mb',
         'features',
+        'phone',
+        'address',
     ];
 
     protected $casts = [
