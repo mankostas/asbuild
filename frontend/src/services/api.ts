@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import { toast } from '@/plugins/toast';
+import toast from '@/plugins/toast';
 
 export interface ApiError {
   message: string;
