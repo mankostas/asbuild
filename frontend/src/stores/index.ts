@@ -1,3 +1,8 @@
-import { createPinia } from 'pinia';
+import { createPinia, setActivePinia } from 'pinia';
 
-export default createPinia();
+export const pinia = createPinia();
+
+// Ensure Pinia is active for usages outside of Vue components
+setActivePinia(pinia);
+
+export default pinia;
