@@ -28,12 +28,19 @@
       </Column>
       <Column v-if="isAdmin" header="Actions">
         <template #body="slotProps">
-          <Button
-            icon="pi pi-trash"
-            severity="danger"
-            text
-            @click="remove(slotProps.data.id)"
-          />
+          <div class="flex gap-2">
+            <Button
+              icon="pi pi-pencil"
+              text
+              @click="openEdit(slotProps.data)"
+            />
+            <Button
+              icon="pi pi-trash"
+              severity="danger"
+              text
+              @click="remove(slotProps.data.id)"
+            />
+          </div>
         </template>
       </Column>
     </DataTable>
@@ -41,6 +48,15 @@
       <div class="flex flex-col gap-2">
         <InputText v-model="newTitle" placeholder="Title" />
         <Button label="Save" @click="create" />
+      </div>
+    </Dialog>
+    <Dialog v-model:visible="showEdit" header="Edit Appointment" modal>
+      <div class="flex flex-col gap-3">
+        <InputText v-model="editTitle" placeholder="Title" />
+        <div class="flex justify-end gap-2">
+          <Button label="Cancel" text @click="showEdit = false" />
+          <Button label="Update" @click="update" />
+        </div>
       </div>
     </Dialog>
   </div>
@@ -65,6 +81,9 @@ const auth = useAuthStore();
 const isAdmin = computed(() => auth.user?.roles?.some((r: any) => r.name === 'ClientAdmin'));
 const showDialog = ref(false);
 const newTitle = ref('');
+const showEdit = ref(false);
+const editTitle = ref('');
+const editingId = ref<number | null>(null);
 
 onMounted(() => {
   store.fetch();
@@ -83,5 +102,20 @@ async function remove(id: number) {
     await api.delete(`/appointments/${id}`);
     await store.fetch();
   }
+}
+
+function openEdit(appointment: any) {
+  editingId.value = appointment.id;
+  editTitle.value = appointment.title;
+  showEdit.value = true;
+}
+
+async function update() {
+  if (!editingId.value || !editTitle.value) return;
+  await api.put(`/appointments/${editingId.value}`, { title: editTitle.value });
+  await store.fetch();
+  showEdit.value = false;
+  editingId.value = null;
+  editTitle.value = '';
 }
 </script>
