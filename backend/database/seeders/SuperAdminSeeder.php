@@ -13,8 +13,8 @@ class SuperAdminSeeder extends Seeder
         DB::table('users')->insert([
             'id' => 1,
             'name' => 'Super Admin',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
+            'email' => 'anastasiou.ks@gmail.com',
+            'password' => Hash::make('Swordfish01!@#'),
             'tenant_id' => 1,
             'created_at' => now(),
             'updated_at' => now(),

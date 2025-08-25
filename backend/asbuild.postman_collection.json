@@ -1,1153 +1,1286 @@
 {
-  "info": {
-    "name": "ASBuild API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "auth": {
-    "type": "bearer",
-    "bearer": [
-      {
-        "key": "token",
-        "value": "{{access_token}}",
-        "type": "string"
-      }
-    ]
-  },
-  "item": [
-    {
-      "name": "appointment-types",
-      "item": [
-        {
-          "name": "index",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/appointment-types",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "appointment-types"
-              ]
-            }
-          }
-        },
-        {
-          "name": "store",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/appointment-types",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "appointment-types"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Type A\",\n  \"form_schema\": \"{}\",\n  \"fields_summary\": \"{}\"\n}"
-            }
-          }
-        },
-        {
-          "name": "show",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/appointment-types/{appointment_type}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "appointment-types",
-                "{appointment_type}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "update",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/appointment-types/{appointment_type}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "appointment-types",
-                "{appointment_type}"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Type\"\n}"
-            }
-          }
-        },
-        {
-          "name": "destroy",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/appointment-types/{appointment_type}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "appointment-types",
-                "{appointment_type}"
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "appointments",
-      "item": [
-        {
-          "name": "index",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/appointments",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "appointments"
-              ]
-            }
-          }
-        },
-        {
-          "name": "store",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/appointments",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "appointments"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"scheduled_at\": \"2024-01-01T00:00:00Z\",\n  \"kau_notes\": \"Notes\"\n}"
-            }
-          }
-        },
-        {
-          "name": "show",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/appointments/{appointment}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "appointments",
-                "{appointment}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "update",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/appointments/{appointment}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "appointments",
-                "{appointment}"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"scheduled_at\": \"2024-01-02T00:00:00Z\",\n  \"status\": \"completed\"\n}"
-            }
-          }
-        },
-        {
-          "name": "destroy",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/appointments/{appointment}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "appointments",
-                "{appointment}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "comments",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/appointments/{appointment}/comments",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "appointments",
-                "{appointment}",
-                "comments"
-              ]
-            }
-          }
-        },
-        {
-          "name": "comments",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/appointments/{appointment}/comments",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "appointments",
-                "{appointment}",
-                "comments"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"body\": \"Comment text\"\n}"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "comments",
-      "item": [
-        {
-          "name": "destroy",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/comments/{comment}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "comments",
-                "{comment}"
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "employees",
-      "item": [
-        {
-          "name": "index",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/employees",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "employees"
-              ]
-            }
-          }
-        },
-        {
-          "name": "store",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/employees",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "employees"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\"\n}"
-            }
-          }
-        },
-        {
-          "name": "show",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/employees/{employee}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "employees",
-                "{employee}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "update",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/employees/{employee}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "employees",
-                "{employee}"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Employee\"\n}"
-            }
-          }
-        },
-        {
-          "name": "destroy",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/employees/{employee}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "employees",
-                "{employee}"
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "files",
-      "item": [
-        {
-          "name": "download",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/files/{file}/{variant?}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "files",
-                "{file}",
-                "{variant?}"
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "manuals",
-      "item": [
-        {
-          "name": "index",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/manuals",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "manuals"
-              ]
-            }
-          }
-        },
-        {
-          "name": "store",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/manuals",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "manuals"
-              ]
-            },
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "file",
-                  "src": "/path/to/file",
-                  "type": "file"
-                },
-                {
-                  "key": "category",
-                  "value": "general"
-                },
-                {
-                  "key": "tags",
-                  "value": "[]"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "show",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/manuals/{manual}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "manuals",
-                "{manual}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "update",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/manuals/{manual}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "manuals",
-                "{manual}"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"key\": \"value\"\n}"
-            }
-          }
-        },
-        {
-          "name": "destroy",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/manuals/{manual}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "manuals",
-                "{manual}"
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "tenants",
-      "item": [
-        {
-          "name": "index",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/tenants",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "tenants"
-              ]
-            }
-          }
-        },
-        {
-          "name": "store",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/tenants",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "tenants"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Example Tenant\"\n}"
-            }
-          }
-        },
-        {
-          "name": "show",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/tenants/{tenant}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "tenants",
-                "{tenant}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "update",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/tenants/{tenant}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "tenants",
-                "{tenant}"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Tenant\"\n}"
-            }
-          }
-        },
-        {
-          "name": "destroy",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/tenants/{tenant}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "tenants",
-                "{tenant}"
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "login",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/auth/login",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "auth",
-            "login"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "const json = pm.response.json();",
-              "pm.environment.set('access_token', json.access_token);",
-              "pm.environment.set('refresh_token', json.refresh_token);"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "api/auth/logout",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/auth/logout",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "auth",
-            "logout"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"key\": \"value\"\n}"
-        }
-      }
-    },
-    {
-      "name": "api/auth/password/email",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/auth/password/email",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "auth",
-            "password",
-            "email"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"jane@example.com\"\n}"
-        }
-      }
-    },
-    {
-      "name": "api/auth/password/reset",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/auth/password/reset",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "auth",
-            "password",
-            "reset"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"token\": \"token\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"newpassword\",\n  \"password_confirmation\": \"newpassword\"\n}"
-        }
-      }
-    },
-    {
-      "name": "api/auth/refresh",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/auth/refresh",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "auth",
-            "refresh"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"refresh_token\": \"token\"\n}"
-        }
-      }
-    },
-    {
-      "name": "api/gdpr/consents",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/gdpr/consents",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "gdpr",
-            "consents"
-          ]
-        }
-      }
-    },
-    {
-      "name": "api/gdpr/consents",
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/gdpr/consents",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "gdpr",
-            "consents"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"key\": \"value\"\n}"
-        }
-      }
-    },
-    {
-      "name": "api/gdpr/delete",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/gdpr/delete",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "gdpr",
-            "delete"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"key\": \"value\"\n}"
-        }
-      }
-    },
-    {
-      "name": "api/gdpr/export",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/gdpr/export",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "gdpr",
-            "export"
-          ]
-        }
-      }
-    },
-    {
-      "name": "api/health",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/health",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "health"
-          ]
-        }
-      }
-    },
-    {
-      "name": "api/manuals/{manual}/download",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/manuals/{manual}/download",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "manuals",
-            "{manual}",
-            "download"
-          ]
-        }
-      }
-    },
-    {
-      "name": "api/manuals/{manual}/replace",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/manuals/{manual}/replace",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "manuals",
-            "{manual}",
-            "replace"
-          ]
-        },
-        "body": {
-          "mode": "formdata",
-          "formdata": [
-            {
-              "key": "file",
-              "src": "/path/to/file",
-              "type": "file"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "api/notification-preferences",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/notification-preferences",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "notification-preferences"
-          ]
-        }
-      }
-    },
-    {
-      "name": "api/notification-preferences",
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/notification-preferences",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "notification-preferences"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": true,\n  \"sms\": false\n}"
-        }
-      }
-    },
-    {
-      "name": "api/notifications",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/notifications",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "notifications"
-          ]
-        }
-      }
-    },
-    {
-      "name": "api/notifications/{notification}/read",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/notifications/{notification}/read",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "notifications",
-            "{notification}",
-            "read"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"key\": \"value\"\n}"
-        }
-      }
-    },
-    {
-      "name": "api/reports/export",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/reports/export",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "reports",
-            "export"
-          ]
-        }
-      }
-    },
-    {
-      "name": "api/reports/kpis",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/reports/kpis",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "reports",
-            "kpis"
-          ]
-        }
-      }
-    },
-    {
-      "name": "api/reports/materials",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/reports/materials",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "reports",
-            "materials"
-          ]
-        }
-      }
-    },
-    {
-      "name": "api/settings/branding",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/settings/branding",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "settings",
-            "branding"
-          ]
-        }
-      }
-    },
-    {
-      "name": "api/settings/branding",
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/settings/branding",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "settings",
-            "branding"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"color\": \"#000000\"\n}"
-        }
-      }
-    },
-    {
-      "name": "api/settings/profile",
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/settings/profile",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "settings",
-            "profile"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\"\n}"
-        }
-      }
-    },
-    {
-      "name": "api/tenants/{tenant}/impersonate",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/tenants/{tenant}/impersonate",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "tenants",
-            "{tenant}",
-            "impersonate"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"key\": \"value\"\n}"
-        }
-      }
-    },
-    {
-      "name": "api/uploads/chunk",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/uploads/chunk",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "uploads",
-            "chunk"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"key\": \"value\"\n}"
-        }
-      }
-    },
-    {
-      "name": "api/uploads/cleanup",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/uploads/cleanup",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "uploads",
-            "cleanup"
-          ]
-        }
-      }
-    }
-  ]
+	"info": {
+		"_postman_id": "9f6948be-10eb-41b5-90e5-4eee11b96500",
+		"name": "ASBuild API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7660925",
+		"_collection_link": "https://gofiber-6797.postman.co/workspace/4677c633-7f3c-4580-b3d7-8d55ba0861e3/collection/7660925-9f6948be-10eb-41b5-90e5-4eee11b96500?action=share&source=collection_link&creator=7660925"
+	},
+	"item": [
+		{
+			"name": "appointment-types",
+			"item": [
+				{
+					"name": "index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/appointment-types",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointment-types"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Type A\",\n  \"form_schema\": \"{}\",\n  \"fields_summary\": \"{}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/appointment-types",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointment-types"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "show",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/appointment-types/{appointment_type}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointment-types",
+								"{appointment_type}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Type\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/appointment-types/{appointment_type}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointment-types",
+								"{appointment_type}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/appointment-types/{appointment_type}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointment-types",
+								"{appointment_type}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "appointments",
+			"item": [
+				{
+					"name": "index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/appointments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"scheduled_at\": \"2024-01-01T00:00:00Z\",\n  \"kau_notes\": \"Notes\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/appointments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "show",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/appointments/{appointment}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"{appointment}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"scheduled_at\": \"2024-01-02T00:00:00Z\",\n  \"status\": \"completed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/appointments/{appointment}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"{appointment}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/appointments/{appointment}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"{appointment}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "comments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/appointments/{appointment}/comments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"{appointment}",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "comments",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"body\": \"Comment text\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/appointments/{appointment}/comments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"{appointment}",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "comments",
+			"item": [
+				{
+					"name": "destroy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/comments/{comment}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"comments",
+								"{comment}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "employees",
+			"item": [
+				{
+					"name": "index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/employees",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/employees",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "show",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/employees/{employee}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"employees",
+								"{employee}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Employee\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/employees/{employee}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"employees",
+								"{employee}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/employees/{employee}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"employees",
+								"{employee}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "files",
+			"item": [
+				{
+					"name": "download",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/files/{file}/{variant?}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"files",
+								"{file}",
+								"{variant"
+							],
+							"query": [
+								{
+									"key": "}",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "manuals",
+			"item": [
+				{
+					"name": "index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/manuals",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"manuals"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/path/to/file"
+								},
+								{
+									"key": "category",
+									"value": "general"
+								},
+								{
+									"key": "tags",
+									"value": "[]"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/manuals",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"manuals"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "show",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/manuals/{manual}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"manuals",
+								"{manual}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"key\": \"value\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/manuals/{manual}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"manuals",
+								"{manual}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/manuals/{manual}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"manuals",
+								"{manual}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "tenants",
+			"item": [
+				{
+					"name": "index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/tenants",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tenants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Example Tenant\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tenants",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tenants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "show",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/tenants/{tenant}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tenants",
+								"{tenant}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Tenant\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tenants/{tenant}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tenants",
+								"{tenant}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/tenants/{tenant}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tenants",
+								"{tenant}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();",
+							"pm.environment.set('access_token', json.access_token);",
+							"pm.environment.set('refresh_token', json.refresh_token);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/auth/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/auth/logout",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"key\": \"value\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/auth/logout",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/auth/password/email",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"jane@example.com\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/auth/password/email",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"password",
+						"email"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/auth/password/reset",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"token\": \"token\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"newpassword\",\n  \"password_confirmation\": \"newpassword\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/auth/password/reset",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"password",
+						"reset"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/auth/refresh",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"refresh_token\": \"token\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/auth/refresh",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"refresh"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/gdpr/consents",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/gdpr/consents",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"gdpr",
+						"consents"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/gdpr/consents",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"key\": \"value\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/gdpr/consents",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"gdpr",
+						"consents"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/gdpr/delete",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"key\": \"value\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/gdpr/delete",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"gdpr",
+						"delete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/gdpr/export",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/gdpr/export",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"gdpr",
+						"export"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/health",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/manuals/{manual}/download",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/manuals/{manual}/download",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"manuals",
+						"{manual}",
+						"download"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/manuals/{manual}/replace",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/path/to/file"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/manuals/{manual}/replace",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"manuals",
+						"{manual}",
+						"replace"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/notification-preferences",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/notification-preferences",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"notification-preferences"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/notification-preferences",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": true,\n  \"sms\": false\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/notification-preferences",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"notification-preferences"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/notifications",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/notifications",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"notifications"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/notifications/{notification}/read",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"key\": \"value\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/notifications/{notification}/read",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"notifications",
+						"{notification}",
+						"read"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/reports/export",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/reports/export",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"reports",
+						"export"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/reports/kpis",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/reports/kpis",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"reports",
+						"kpis"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/reports/materials",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/reports/materials",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"reports",
+						"materials"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/settings/branding",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/settings/branding",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"settings",
+						"branding"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/settings/branding",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"color\": \"#000000\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/settings/branding",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"settings",
+						"branding"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/settings/profile",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/settings/profile",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"settings",
+						"profile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/tenants/{tenant}/impersonate",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"key\": \"value\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/tenants/{tenant}/impersonate",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"tenants",
+						"{tenant}",
+						"impersonate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/uploads/chunk",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"key\": \"value\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/uploads/chunk",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"uploads",
+						"chunk"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/uploads/cleanup",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/uploads/cleanup",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"uploads",
+						"cleanup"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "email",
+			"value": "anastasiou.ks@gmail.com",
+			"type": "string"
+		},
+		{
+			"key": "password",
+			"value": "Swordfish01!@#",
+			"type": "string"
+		}
+	]
 }
