@@ -1,10 +1,14 @@
 <template>
   <button
     :class="[
-      'inline-flex items-center justify-center rounded font-medium focus-ring',
+      'inline-flex items-center justify-center rounded-2xl font-medium focus-ring',
       sizeClasses,
       variantClasses,
+      full ? 'w-full' : '',
+      disabled || loading ? 'opacity-50 pointer-events-none' : '',
     ]"
+    :disabled="disabled || loading"
+    :aria-busy="loading ? 'true' : undefined"
   >
     <slot />
   </button>
@@ -15,10 +19,19 @@ import { computed } from 'vue';
 
 const props = withDefaults(
   defineProps<{
-    variant?: 'primary' | 'secondary' | 'ghost';
+    variant?: 'primary' | 'secondary' | 'ghost' | 'destructive';
     size?: 'sm' | 'md' | 'lg';
+    disabled?: boolean;
+    loading?: boolean;
+    full?: boolean;
   }>(),
-  { variant: 'primary', size: 'md' }
+  {
+    variant: 'primary',
+    size: 'md',
+    disabled: false,
+    loading: false,
+    full: false,
+  },
 );
 
 const variantClasses = computed(() => {
@@ -27,6 +40,8 @@ const variantClasses = computed(() => {
       return 'bg-foreground/10 text-foreground hover:bg-foreground/20';
     case 'ghost':
       return 'bg-transparent hover:bg-foreground/10';
+    case 'destructive':
+      return 'bg-red-600 text-white hover:bg-red-700';
     default:
       return 'bg-primary text-primary-foreground hover:opacity-90';
   }

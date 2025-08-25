@@ -1,5 +1,9 @@
 <template>
-  <div class="fixed bottom-0 right-0 p-4 space-y-2">
+  <div
+    class="fixed bottom-0 right-0 space-y-2 p-4"
+    aria-live="polite"
+    role="alert"
+  >
     <div
       v-for="t in toasts"
       :key="t.id"

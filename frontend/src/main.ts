@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createApp } from 'vue';
 import router from './router';
 import stores from './stores';
