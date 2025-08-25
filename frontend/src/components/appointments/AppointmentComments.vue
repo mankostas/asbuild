@@ -9,10 +9,10 @@
         </li>
       </ul>
     </div>
-    <div class="mt-4">
-      <textarea v-model="body" class="w-full border p-2" rows="3" placeholder="Add a comment"></textarea>
-      <input type="text" v-model="fileIds" placeholder="File IDs comma separated" class="w-full border p-2 mt-2" />
-      <button class="bg-blue-600 text-white px-4 py-2 mt-2" @click="submit">Comment</button>
+    <div class="mt-4 flex flex-col gap-2">
+      <Textarea v-model="body" rows="3" placeholder="Add a comment" />
+      <InputText v-model="fileIds" placeholder="File IDs comma separated" />
+      <Button label="Comment" @click="submit" />
     </div>
   </div>
 </template>
@@ -20,6 +20,9 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import api from '@/services/api';
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import Textarea from 'primevue/textarea';
 
 const props = defineProps<{ appointmentId: number | string }>();
 

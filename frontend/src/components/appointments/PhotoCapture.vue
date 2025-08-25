@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button @click="onSelect" class="bg-blue-600 text-white px-2 py-1">Add Photos</button>
+    <Button label="Add Photos" @click="onSelect" />
     <div v-if="previews.length" class="flex gap-2 mt-2">
       <img
         v-for="(src, idx) in previews"
@@ -15,6 +15,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { pickFiles } from '@/services/native';
+import Button from 'primevue/button';
 
 const emit = defineEmits(['update']);
 const previews = ref<string[]>([]);

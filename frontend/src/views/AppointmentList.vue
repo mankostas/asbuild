@@ -1,48 +1,75 @@
 <template>
   <div>
     <h2 class="text-xl font-bold mb-4">Appointments</h2>
-    <button
+    <Button
       v-if="isAdmin"
-      class="bg-blue-600 text-white px-4 py-2 mb-4"
-      @click="create"
-    >
-      New Appointment
-    </button>
-    <ul>
-      <li v-for="a in appointments" :key="a.id" class="mb-2 flex gap-2 items-center">
-        <router-link :to="`/appointments/${a.id}`" class="text-blue-600">
-          {{ a.title }} - {{ a.completedSteps }}/{{ a.totalSteps }}
-        </router-link>
-        <button v-if="isAdmin" class="text-red-600 ml-auto" @click="remove(a.id)">
-          Delete
-        </button>
-      </li>
-    </ul>
+      label="New Appointment"
+      icon="pi pi-plus"
+      class="mb-4"
+      @click="showDialog = true"
+    />
+    <DataTable :value="appointments">
+      <Column field="title" header="Title">
+        <template #body="slotProps">
+          <router-link
+            :to="`/appointments/${slotProps.data.id}`"
+            class="text-blue-600"
+          >
+            {{
+              slotProps.data.title
+            }} - {{ slotProps.data.completedSteps }}/{{ slotProps.data.totalSteps }}
+          </router-link>
+        </template>
+      </Column>
+      <Column v-if="isAdmin" header="Actions">
+        <template #body="slotProps">
+          <Button
+            icon="pi pi-trash"
+            severity="danger"
+            text
+            @click="remove(slotProps.data.id)"
+          />
+        </template>
+      </Column>
+    </DataTable>
+    <Dialog v-model:visible="showDialog" header="New Appointment" modal>
+      <div class="flex flex-col gap-2">
+        <InputText v-model="newTitle" placeholder="Title" />
+        <Button label="Save" @click="create" />
+      </div>
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppointmentsStore } from '@/stores/appointments';
 import api from '@/services/api';
 import { useAuthStore } from '@/stores/auth';
+import Button from 'primevue/button';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Dialog from 'primevue/dialog';
+import InputText from 'primevue/inputtext';
 
 const store = useAppointmentsStore();
 const { appointments } = storeToRefs(store);
 const auth = useAuthStore();
 const isAdmin = computed(() => auth.user?.roles?.some((r: any) => r.name === 'ClientAdmin'));
+const showDialog = ref(false);
+const newTitle = ref('');
 
 onMounted(() => {
   store.fetch();
 });
 
 async function create() {
-  const title = prompt('Title');
-  if (title) {
-    await api.post('/appointments', { title });
-    await store.fetch();
-  }
+  if (!newTitle.value) return;
+  await api.post('/appointments', { title: newTitle.value });
+  await store.fetch();
+  newTitle.value = '';
+  showDialog.value = false;
 }
 
 async function remove(id: number) {

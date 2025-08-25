@@ -6,10 +6,10 @@
       class="mb-4"
     >
       <label :for="key" class="block mb-1">{{ key }}</label>
-      <input
+      <InputText
         v-model="model[key]"
         :id="key"
-        class="border p-2 w-full"
+        class="w-full"
         :required="schema.required && schema.required.includes(key)"
       />
     </div>
@@ -18,6 +18,7 @@
 
 <script setup lang="ts">
 import { reactive, watch } from 'vue';
+import InputText from 'primevue/inputtext';
 
 interface Schema {
   properties: Record<string, any>;

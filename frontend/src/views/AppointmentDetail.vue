@@ -11,10 +11,10 @@
     <KauInput v-model="kau" class="mb-4" />
     <PhotoCapture @update="onPhotos" class="mb-4" />
     <div class="flex gap-2 mb-4">
-      <button class="text-blue-600" @click="openMap">Map</button>
-      <button class="text-blue-600" @click="call">Call</button>
+      <Button label="Map" text @click="openMap" />
+      <Button label="Call" text @click="call" />
     </div>
-    <button class="bg-blue-600 text-white px-4 py-2" @click="completeStep">Complete Step</button>
+    <Button label="Complete Step" @click="completeStep" />
     <AppointmentComments v-if="appointment" :appointment-id="appointment.id" class="mt-6" />
   </div>
 </template>
@@ -28,6 +28,7 @@ import PhotoCapture from '@/components/appointments/PhotoCapture.vue';
 import KauInput from '@/components/appointments/KauInput.vue';
 import FormRenderer from '@/components/appointments/FormRenderer.vue';
 import AppointmentComments from '@/components/appointments/AppointmentComments.vue';
+import Button from 'primevue/button';
 
 const route = useRoute();
 const appointments = useAppointmentsStore();
