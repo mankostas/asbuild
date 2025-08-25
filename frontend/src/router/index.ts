@@ -53,7 +53,7 @@ export const routes = [
   {
     path: '/tenants',
     component: () => import('@/views/TenantList.vue'),
-    meta: { requiresAuth: true, breadcrumb: 'routes.tenants' },
+    meta: { requiresAuth: true, admin: true, super: true, breadcrumb: 'routes.tenants' },
   },
   { path: '/login', component: () => import('@/views/Auth/LoginView.vue') },
   {
@@ -103,11 +103,15 @@ router.beforeEach(async (to, from, next) => {
     return next('/login');
   }
 
-  if (
-    to.meta.admin &&
-    !auth.user?.roles?.some((r: any) => r.name === 'ClientAdmin')
-  ) {
-    return next('/');
+  if (to.meta.admin) {
+    const roles = auth.user?.roles?.map((r: any) => r.name) || [];
+    if (to.meta.super) {
+      if (!roles.includes('SuperAdmin')) {
+        return next('/');
+      }
+    } else if (!roles.some((r) => ['ClientAdmin', 'SuperAdmin'].includes(r))) {
+      return next('/');
+    }
   }
 
   if (to.path === '/login' && auth.isAuthenticated) {
