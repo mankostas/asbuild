@@ -48,7 +48,7 @@ Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
     Route::apiResource('appointment-types', AppointmentTypeController::class);
     Route::apiResource('appointments.comments', AppointmentCommentController::class)
         ->shallow()
-        ->only(['index', 'store', 'destroy']);
+        ->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::get('manuals/{manual}/download', [ManualController::class, 'download']);
     Route::post('manuals/{manual}/replace', [ManualController::class, 'replace']);
     Route::apiResource('manuals', ManualController::class);

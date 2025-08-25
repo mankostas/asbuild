@@ -33,8 +33,8 @@
           },
           "response": []
         },
-        {
-          "name": "store",
+          {
+            "name": "store",
           "request": {
             "method": "POST",
             "header": [
@@ -121,8 +121,8 @@
           },
           "response": []
         },
-        {
-          "name": "update",
+          {
+            "name": "update",
           "request": {
             "method": "PUT",
             "header": [
@@ -171,10 +171,10 @@
               ]
             }
           },
-          "response": []
-        }
-      ]
-    },
+            "response": []
+          },
+        ]
+      },
     {
       "name": "appointments",
       "item": [
@@ -201,9 +201,9 @@
           },
           "response": []
         },
-        {
-          "name": "store",
-          "request": {
+          {
+            "name": "store type A",
+            "request": {
             "method": "POST",
             "header": [
               {
@@ -257,9 +257,9 @@
           },
           "response": []
         },
-        {
-          "name": "update",
-          "request": {
+          {
+            "name": "update type A",
+            "request": {
             "method": "PUT",
             "header": [
               {
@@ -364,7 +364,7 @@
           "response": []
         },
         {
-          "name": "store with type fields",
+          "name": "store detailed type",
           "request": {
             "method": "POST",
             "header": [
@@ -393,13 +393,93 @@
               ]
             }
           },
-          "response": []
-        }
-      ]
-    },
+            "response": []
+          },
+          {
+            "name": "update detailed type",
+            "request": {
+              "method": "PUT",
+              "header": [
+                {
+                  "key": "X-Tenant-ID",
+                  "value": "{{tenant_id}}"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\\n  \\\"scheduled_at\\\": \\\"2024-01-03T00:00:00Z\\\",\\n  \\\"sla_start_at\\\": \\\"2024-01-03T08:00:00Z\\\",\\n  \\\"sla_end_at\\\": \\\"2024-01-03T17:00:00Z\\\",\\n  \\\"kau_notes\\\": \\\"Updated notes\\\",\\n  \\\"appointment_type_id\\\": 2,\\n  \\\"form_data\\\": {\\n    \\\"title\\\": \\\"Install\\\",\\n    \\\"priority\\\": 2,\\n    \\\"done\\\": true\\n  },\\n  \\\"status\\\": \\\"completed\\\"\\n}"
+              },
+              "url": {
+                "raw": "{{base_url}}/api/appointments/{appointment}",
+                "host": [
+                  "{{base_url}}"
+                ],
+                "path": [
+                  "api",
+                  "appointments",
+                  "{appointment}"
+                ]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
     {
       "name": "comments",
       "item": [
+        {
+          "name": "show",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenant_id}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/comments/{comment}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "comments",
+                "{comment}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenant_id}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \\\"body\\\": \\\"Updated comment\\\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/comments/{comment}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "comments",
+                "{comment}"
+              ]
+            }
+          },
+          "response": []
+        },
         {
           "name": "destroy",
           "request": {
