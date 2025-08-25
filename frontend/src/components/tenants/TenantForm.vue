@@ -9,6 +9,14 @@
       <input v-model.number="form.quota_storage_mb" type="number" class="border p-2 w-full" />
     </div>
     <div class="mb-2">
+      <label class="block">Phone</label>
+      <input v-model="form.phone" class="border p-2 w-full" />
+    </div>
+    <div class="mb-2">
+      <label class="block">Address</label>
+      <input v-model="form.address" class="border p-2 w-full" />
+    </div>
+    <div class="mb-2">
       <label class="block">Features (JSON)</label>
       <textarea v-model="form.features" class="border p-2 w-full"></textarea>
     </div>
@@ -22,7 +30,7 @@ import api from '@/services/api';
 
 const emit = defineEmits(['saved']);
 
-const form = ref({ name: '', quota_storage_mb: 0, features: '{}' });
+const form = ref({ name: '', quota_storage_mb: 0, phone: '', address: '', features: '{}' });
 
 async function submit() {
   let payload = { ...form.value };
@@ -33,6 +41,6 @@ async function submit() {
   }
   await api.post('/tenants', payload);
   emit('saved');
-  form.value = { name: '', quota_storage_mb: 0, features: '{}' };
+  form.value = { name: '', quota_storage_mb: 0, phone: '', address: '', features: '{}' };
 }
 </script>

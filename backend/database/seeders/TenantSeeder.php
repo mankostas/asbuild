@@ -14,6 +14,8 @@ class TenantSeeder extends Seeder
             'name' => 'Default Tenant',
             'quota_storage_mb' => 0,
             'features' => json_encode([]),
+            'phone' => '123-456-7890',
+            'address' => '123 Main St',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
