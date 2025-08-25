@@ -298,14 +298,19 @@
 			]
 		},
 		{
-			"name": "employees",
-			"item": [
-				{
-					"name": "index",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
+                        "name": "employees",
+                        "item": [
+                                {
+                                        "name": "index",
+                                        "request": {
+                                                "method": "GET",
+                                                "header": [
+                                                        {
+                                                                "key": "X-Tenant-ID",
+                                                                "value": "{{tenant_id}}"
+                                                        }
+                                                ],
+                                                "url": {
 							"raw": "{{base_url}}/api/employees",
 							"host": [
 								"{{base_url}}"
@@ -318,12 +323,17 @@
 					},
 					"response": []
 				},
-				{
-					"name": "store",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
+                                {
+                                        "name": "store",
+                                        "request": {
+                                                "method": "POST",
+                                                "header": [
+                                                        {
+                                                                "key": "X-Tenant-ID",
+                                                                "value": "{{tenant_id}}"
+                                                        }
+                                                ],
+                                                "body": {
 							"mode": "raw",
 							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\"\n}"
 						},
@@ -340,12 +350,17 @@
 					},
 					"response": []
 				},
-				{
-					"name": "show",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
+                                {
+                                        "name": "show",
+                                        "request": {
+                                                "method": "GET",
+                                                "header": [
+                                                        {
+                                                                "key": "X-Tenant-ID",
+                                                                "value": "{{tenant_id}}"
+                                                        }
+                                                ],
+                                                "url": {
 							"raw": "{{base_url}}/api/employees/{employee}",
 							"host": [
 								"{{base_url}}"
@@ -359,12 +374,17 @@
 					},
 					"response": []
 				},
-				{
-					"name": "update",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
+                                {
+                                        "name": "update",
+                                        "request": {
+                                                "method": "PUT",
+                                                "header": [
+                                                        {
+                                                                "key": "X-Tenant-ID",
+                                                                "value": "{{tenant_id}}"
+                                                        }
+                                                ],
+                                                "body": {
 							"mode": "raw",
 							"raw": "{\n  \"name\": \"Updated Employee\"\n}"
 						},
@@ -382,12 +402,17 @@
 					},
 					"response": []
 				},
-				{
-					"name": "destroy",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
+                                {
+                                        "name": "destroy",
+                                        "request": {
+                                                "method": "DELETE",
+                                                "header": [
+                                                        {
+                                                                "key": "X-Tenant-ID",
+                                                                "value": "{{tenant_id}}"
+                                                        }
+                                                ],
+                                                "url": {
 							"raw": "{{base_url}}/api/employees/{employee}",
 							"host": [
 								"{{base_url}}"
