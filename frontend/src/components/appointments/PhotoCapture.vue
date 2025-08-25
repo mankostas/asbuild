@@ -1,34 +1,22 @@
 <template>
   <div>
     <Button label="Add Photos" @click="onSelect" />
-    <div v-if="previews.length" class="flex gap-2 mt-2">
-      <img
-        v-for="(src, idx) in previews"
-        :key="idx"
-        :src="src"
-        class="w-20 h-20 object-cover border"
-      />
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { pickFiles } from '@/services/native';
 import Button from 'primevue/button';
 
 const emit = defineEmits(['update']);
-const previews = ref<string[]>([]);
 
 async function onSelect() {
   const files = await pickFiles({ multiple: true, accept: 'image/*', capture: 'environment' });
   if (!files.length) return;
   const result: File[] = [];
-  previews.value = [];
   for (const file of files) {
     const compressed = await compress(file);
     result.push(compressed);
-    previews.value.push(URL.createObjectURL(compressed));
   }
   emit('update', result);
 }
