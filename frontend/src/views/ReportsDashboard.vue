@@ -1,36 +1,37 @@
 <template>
-  <div>
-    <h2 class="text-xl font-bold mb-4">Reports</h2>
-    <div class="mb-4 flex flex-wrap items-end gap-2">
-      <select v-model="range" class="border rounded p-1">
-        <option value="today">Today</option>
-        <option value="7">Last 7 days</option>
-        <option value="30">Last 30 days</option>
-        <option value="custom">Custom</option>
-      </select>
-      <input
-        v-if="range === 'custom'"
-        type="date"
-        v-model="from"
-        class="border rounded p-1"
-      />
-      <input
-        v-if="range === 'custom'"
-        type="date"
-        v-model="to"
-        class="border rounded p-1"
-      />
-      <Button @click="fetchData">Apply</Button>
-      <Button @click="exportCsv">Export CSV</Button>
+  <div class="mx-auto max-w-7xl space-y-8 p-6">
+    <div
+      class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
+    >
+      <h2 class="text-3xl font-bold tracking-tight">Reports</h2>
+      <div class="flex flex-wrap items-end gap-2">
+        <Select v-model="range" class="w-40">
+          <option value="today">Today</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="custom">Custom</option>
+        </Select>
+        <Input
+          v-if="range === 'custom'"
+          type="date"
+          v-model="from"
+          class="w-40"
+        />
+        <Input
+          v-if="range === 'custom'"
+          type="date"
+          v-model="to"
+          class="w-40"
+        />
+        <Button @click="fetchData">Apply</Button>
+        <Button variant="secondary" @click="exportCsv">Export CSV</Button>
+      </div>
     </div>
-    <KpiCards :kpis="kpis" class="mb-6" />
-    <ChartCard title="Materials" type="bar" :series="materialSeries" />
-    <ChartCard
-      title="Materials Trend"
-      type="line"
-      :series="materialSeries"
-      class="mt-6"
-    />
+    <KpiCards :kpis="kpis" />
+    <div class="grid gap-6 md:grid-cols-2">
+      <ChartCard title="Materials" type="bar" :series="materialSeries" />
+      <ChartCard title="Materials Trend" type="line" :series="materialSeries" />
+    </div>
   </div>
 </template>
 
@@ -38,6 +39,8 @@
 import { ref, onMounted, computed } from 'vue';
 import api from '@/services/api';
 import Button from '@/components/ui/Button.vue';
+import Input from '@/components/ui/Input.vue';
+import Select from '@/components/ui/Select.vue';
 import KpiCards from '@/components/reports/KpiCards.vue';
 import ChartCard from '@/components/reports/ChartCard.vue';
 

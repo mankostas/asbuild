@@ -1,7 +1,7 @@
 <template>
-  <Card class="p-4">
-    <h3 class="mb-2 font-bold">{{ title }}</h3>
-    <div v-if="!hasData" class="flex h-40 items-center justify-center">
+  <Card class="flex flex-col gap-4 p-6">
+    <h3 class="text-lg font-semibold tracking-tight">{{ title }}</h3>
+    <div v-if="!hasData" class="flex h-56 items-center justify-center">
       <Skeleton class="h-full w-full" />
     </div>
     <component
@@ -9,6 +9,7 @@
       :is="chartComponent"
       :data="chartData"
       :options="chartOptions"
+      class="h-64"
     />
   </Card>
 </template>
@@ -72,6 +73,7 @@ const chartData = computed(() => ({
 
 const chartOptions = computed(() => ({
   responsive: true,
+  maintainAspectRatio: false,
   plugins: { legend: { display: true } },
   scales: {
     x: { type: inferTime(props.series) ? 'time' : 'category' },

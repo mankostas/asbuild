@@ -1,8 +1,12 @@
 <template>
-  <div class="grid gap-4 md:grid-cols-4">
-    <Card v-for="k in kpis" :key="k.label">
-      <div class="text-sm text-gray-500">{{ k.label }}</div>
-      <div class="text-2xl font-bold">{{ k.value }}</div>
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <Card
+      v-for="k in kpis"
+      :key="k.label"
+      class="flex flex-col gap-1 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent"
+    >
+      <span class="text-sm font-medium text-foreground/70">{{ k.label }}</span>
+      <span class="text-3xl font-bold tracking-tight">{{ k.value }}</span>
     </Card>
   </div>
 </template>
