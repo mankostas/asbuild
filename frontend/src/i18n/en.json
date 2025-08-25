@@ -11,5 +11,10 @@
   "a11y": {
     "skipToContent": "Skip to content",
     "language": "Language"
+  },
+  "commandPalette": {
+    "title": "Command palette",
+    "placeholder": "Type to search...",
+    "empty": "No actions"
   }
 }

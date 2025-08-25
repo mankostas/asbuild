@@ -8,28 +8,50 @@
         <option value="30">Last 30 days</option>
         <option value="custom">Custom</option>
       </select>
-      <input v-if="range === 'custom'" type="date" v-model="from" class="border rounded p-1" />
-      <input v-if="range === 'custom'" type="date" v-model="to" class="border rounded p-1" />
+      <input
+        v-if="range === 'custom'"
+        type="date"
+        v-model="from"
+        class="border rounded p-1"
+      />
+      <input
+        v-if="range === 'custom'"
+        type="date"
+        v-model="to"
+        class="border rounded p-1"
+      />
       <Button @click="fetchData">Apply</Button>
       <Button @click="exportCsv">Export CSV</Button>
     </div>
     <KpiCards :kpis="kpis" class="mb-6" />
-    <SimpleChart title="Materials" :data="materials" />
+    <ChartCard title="Materials" type="bar" :series="materialSeries" />
+    <ChartCard
+      title="Materials Trend"
+      type="line"
+      :series="materialSeries"
+      class="mt-6"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import api from '@/services/api';
 import Button from '@/components/ui/Button.vue';
 import KpiCards from '@/components/reports/KpiCards.vue';
-import SimpleChart from '@/components/reports/SimpleChart.vue';
+import ChartCard from '@/components/reports/ChartCard.vue';
 
 const range = ref('today');
 const from = ref('');
 const to = ref('');
 const kpis = ref([] as any);
 const materials = ref([] as any);
+const materialSeries = computed(() => [
+  {
+    label: 'Materials',
+    data: materials.value.map((m: any) => ({ x: m.label, y: m.value })),
+  },
+]);
 
 function params() {
   if (range.value === 'custom') {
@@ -47,7 +69,10 @@ async function fetchData() {
     { label: 'Failed uploads', value: data.failed_uploads },
   ];
   const mat = await api.get('/reports/materials', { params: params() });
-  materials.value = mat.data.map((m: any) => ({ label: m.category || 'Uncategorized', value: m.count }));
+  materials.value = mat.data.map((m: any) => ({
+    label: m.category || 'Uncategorized',
+    value: m.count,
+  }));
 }
 
 async function exportCsv() {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import api from '@/services/api';
@@ -57,7 +56,10 @@ const routes = [
     meta: { requiresAuth: true },
   },
   { path: '/login', component: () => import('@/views/Auth/LoginView.vue') },
-  { path: '/:pathMatch(.*)*', component: () => import('@/views/ErrorView.vue') },
+  {
+    path: '/:pathMatch(.*)*',
+    component: () => import('@/views/ErrorView.vue'),
+  },
 ];
 
 const router = createRouter({
@@ -81,7 +83,13 @@ router.beforeEach(async (to, from, next) => {
       delete query.refresh_token;
       delete query.token;
       delete query.refresh;
-      return next({ path: to.path, params: to.params, query, hash: to.hash, replace: true });
+      return next({
+        path: to.path,
+        params: to.params,
+        query,
+        hash: to.hash,
+        replace: true,
+      });
     }
   }
 
@@ -95,7 +103,10 @@ router.beforeEach(async (to, from, next) => {
     return next('/login');
   }
 
-  if (to.meta.admin && !auth.user?.roles?.some((r: any) => r.name === 'ClientAdmin')) {
+  if (
+    to.meta.admin &&
+    !auth.user?.roles?.some((r: any) => r.name === 'ClientAdmin')
+  ) {
     return next('/');
   }
 

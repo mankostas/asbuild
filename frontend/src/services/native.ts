@@ -1,7 +1,12 @@
-// @ts-nocheck
-export async function pickFiles(options = {}) {
-  if (window.native?.pickFiles) {
-    return await window.native.pickFiles(options);
+interface FileOptions {
+  accept?: string;
+  capture?: string;
+  multiple?: boolean;
+}
+
+export async function pickFiles(options: FileOptions = {}): Promise<File[]> {
+  if ((window as any).native?.pickFiles) {
+    return await (window as any).native.pickFiles(options);
   }
   return new Promise((resolve) => {
     const input = document.createElement('input');
@@ -16,10 +21,14 @@ export async function pickFiles(options = {}) {
   });
 }
 
-export async function capturePhoto(options = {}) {
-  if (window.native?.capturePhoto) {
-    return await window.native.capturePhoto(options);
+export async function capturePhoto(options: FileOptions = {}) {
+  if ((window as any).native?.capturePhoto) {
+    return await (window as any).native.capturePhoto(options);
   }
-  const files = await pickFiles({ accept: 'image/*', capture: 'environment', ...options });
+  const files = await pickFiles({
+    accept: 'image/*',
+    capture: 'environment',
+    ...options,
+  });
   return files[0];
 }

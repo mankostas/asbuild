@@ -22,12 +22,14 @@ export default {
         DEFAULT: 'var(--radius)',
         md: 'var(--radius-md)',
         lg: 'var(--radius-lg)',
+        '2xl': 'var(--radius-2xl)',
       },
       boxShadow: {
         sm: 'var(--shadow-sm)',
         DEFAULT: 'var(--shadow)',
+        lg: 'var(--shadow-lg)',
       },
     },
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
 } satisfies Config;

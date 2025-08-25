@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { defineStore } from 'pinia';
 import { openDB } from 'idb';
 import api from '@/services/api';
@@ -11,40 +10,49 @@ const dbPromise = openDB('manuals', 1, {
 
 export const useManualsStore = defineStore('manuals', {
   state: () => ({
-    manuals: [],
-    favorites: JSON.parse(localStorage.getItem('manualFavorites') || '[]'),
-    recents: JSON.parse(localStorage.getItem('manualRecents') || '[]'),
-    offline: [],
+    manuals: [] as any[],
+    favorites: JSON.parse(
+      localStorage.getItem('manualFavorites') || '[]',
+    ) as string[],
+    recents: JSON.parse(
+      localStorage.getItem('manualRecents') || '[]',
+    ) as string[],
+    offline: [] as string[],
   }),
   actions: {
     async fetch(q = '') {
       try {
-        const { data } = await api.get('/manuals', q ? { params: { q } } : undefined);
+        const { data } = await api.get(
+          '/manuals',
+          q ? { params: { q } } : undefined,
+        );
         this.manuals = data;
       } catch (e) {
         this.manuals = [];
       }
     },
-    async get(id) {
+    async get(id: string) {
       if (!this.manuals.length) await this.fetch();
-      return this.manuals.find((m) => m.id == id);
+      return this.manuals.find((m: any) => m.id == id);
     },
-    async downloadPdf(id) {
-      const { data } = await api.get(`/manuals/${id}/download`, { responseType: 'blob' });
+    async downloadPdf(id: string) {
+      const { data } = await api.get(`/manuals/${id}/download`, {
+        responseType: 'blob',
+      });
       return data;
     },
-    async keepOffline(manual) {
+    async keepOffline(manual: any) {
       const blob = await this.downloadPdf(manual.id);
       const db = await dbPromise;
       await db.put('pdfs', { blob, updated_at: manual.updated_at }, manual.id);
       if (!this.offline.includes(manual.id)) this.offline.push(manual.id);
     },
-    async removeOffline(id) {
+    async removeOffline(id: string) {
       const db = await dbPromise;
       await db.delete('pdfs', id);
       this.offline = this.offline.filter((i) => i !== id);
     },
-    async isOffline(id) {
+    async isOffline(id: string) {
       if (this.offline.includes(id)) return true;
       const db = await dbPromise;
       const exists = await db.get('pdfs', id);
@@ -54,15 +62,15 @@ export const useManualsStore = defineStore('manuals', {
       }
       return false;
     },
-    async loadOffline(id) {
+    async loadOffline(id: string) {
       const db = await dbPromise;
       return db.get('pdfs', id);
     },
     async loadOfflineList() {
       const db = await dbPromise;
-      this.offline = await db.getAllKeys('pdfs');
+      this.offline = (await db.getAllKeys('pdfs')) as string[];
     },
-    toggleFavorite(id) {
+    toggleFavorite(id: string) {
       if (this.favorites.includes(id)) {
         this.favorites = this.favorites.filter((f) => f !== id);
       } else {
@@ -70,7 +78,7 @@ export const useManualsStore = defineStore('manuals', {
       }
       localStorage.setItem('manualFavorites', JSON.stringify(this.favorites));
     },
-    addRecent(id) {
+    addRecent(id: string) {
       this.recents = [id, ...this.recents.filter((r) => r !== id)].slice(0, 10);
       localStorage.setItem('manualRecents', JSON.stringify(this.recents));
     },

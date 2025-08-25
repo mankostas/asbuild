@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { defineStore } from 'pinia';
 import api from '@/services/api';
 import {
@@ -14,26 +13,36 @@ if (initialAccess) {
   api.defaults.headers.common['Authorization'] = `Bearer ${initialAccess}`;
 }
 
+interface LoginPayload {
+  email: string;
+  password: string;
+}
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null,
-    accessToken: initialAccess,
-    refreshToken: initialRefresh,
-    impersonator: null as any,
+    user: null as any,
+    accessToken: initialAccess as string | null,
+    refreshToken: initialRefresh as string | null,
+    impersonator: null as {
+      accessToken: string;
+      refreshToken: string;
+      user: any;
+    } | null,
   }),
   getters: {
     isAuthenticated: (state) => !!state.accessToken,
     isImpersonating: (state) => !!state.impersonator,
   },
   actions: {
-    async login(payload) {
+    async login(payload: LoginPayload) {
       const { data } = await api.post('/auth/login', payload);
       if (data.access_token) {
         this.accessToken = data.access_token;
         this.refreshToken = data.refresh_token;
         this.user = data.user;
         setTokens(data.access_token, data.refresh_token);
-        api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
+        api.defaults.headers.common['Authorization'] =
+          `Bearer ${data.access_token}`;
       }
     },
     async logout() {
@@ -55,18 +64,19 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = data.access_token;
       this.refreshToken = data.refresh_token;
       setTokens(data.access_token, data.refresh_token);
-      api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
+      api.defaults.headers.common['Authorization'] =
+        `Bearer ${data.access_token}`;
     },
-    async requestPasswordReset(email) {
+    async requestPasswordReset(email: string) {
       await api.post('/auth/password/email', { email });
     },
-    async resetPassword(payload) {
+    async resetPassword(payload: Record<string, any>) {
       await api.post('/auth/password/reset', payload);
     },
-    async impersonate(tenantId) {
+    async impersonate(tenantId: string) {
       this.impersonator = {
-        accessToken: this.accessToken,
-        refreshToken: this.refreshToken,
+        accessToken: this.accessToken || '',
+        refreshToken: this.refreshToken || '',
         user: this.user,
       };
       const { data } = await api.post(`/tenants/${tenantId}/impersonate`);
@@ -74,7 +84,8 @@ export const useAuthStore = defineStore('auth', {
       this.refreshToken = data.refresh_token;
       this.user = data.user;
       setTokens(data.access_token, data.refresh_token);
-      api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
+      api.defaults.headers.common['Authorization'] =
+        `Bearer ${data.access_token}`;
     },
     stopImpersonation() {
       if (!this.impersonator) return;
@@ -82,7 +93,8 @@ export const useAuthStore = defineStore('auth', {
       this.refreshToken = this.impersonator.refreshToken;
       this.user = this.impersonator.user;
       setTokens(this.accessToken, this.refreshToken);
-      api.defaults.headers.common['Authorization'] = `Bearer ${this.accessToken}`;
+      api.defaults.headers.common['Authorization'] =
+        `Bearer ${this.accessToken}`;
       this.impersonator = null;
     },
   },

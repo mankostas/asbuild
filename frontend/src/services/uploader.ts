@@ -1,7 +1,11 @@
-// @ts-nocheck
 import api from '@/services/api';
 
-export async function uploadFile(file, options = {}) {
+export interface UploadOptions {
+  chunkSize?: number;
+  onProgress?: (percent: number) => void;
+}
+
+export async function uploadFile(file: File, options: UploadOptions = {}) {
   const chunkSize = options.chunkSize || 1024 * 1024;
   const uploadId = crypto.randomUUID();
   const total = Math.ceil(file.size / chunkSize);
