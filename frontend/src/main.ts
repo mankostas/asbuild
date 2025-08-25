@@ -4,6 +4,10 @@ import stores from './stores';
 import AppShell from './components/layout/AppShell.vue';
 import { toastPlugin } from './plugins/toast';
 import i18n from './i18n';
+import PrimeVue from 'primevue/config';
+import 'primevue/resources/themes/saga-blue/theme.css';
+import 'primevue/resources/primevue.min.css';
+import 'primeicons/primeicons.css';
 import './styles/tokens.css';
 
 createApp(AppShell)
@@ -11,6 +15,7 @@ createApp(AppShell)
   .use(i18n)
   .use(router)
   .use(toastPlugin)
+  .use(PrimeVue)
   .mount('#app');
 
 if (import.meta.env.VITE_SENTRY_DSN) {

@@ -1,19 +1,21 @@
 <template>
   <div>
     <label class="block font-medium mb-1">{{ label }}</label>
-    <input
+    <InputText
       v-model="value"
       type="text"
-      class="border rounded p-2 w-full"
+      class="w-full"
       :placeholder="placeholder"
       @change="onChange"
     />
-    <button class="mt-2 text-blue-600" @click="scan">Scan</button>
+    <Button class="mt-2" label="Scan" text @click="scan" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import InputText from 'primevue/inputtext';
+import Button from 'primevue/button';
 
 const props = defineProps({
   modelValue: String,
