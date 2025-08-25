@@ -4,48 +4,57 @@
       {{ t('a11y.skipToContent') }}
     </a>
     <CommandPalette :open="isOpen" :actions="paletteActions" @close="close" />
-    <header
-      class="sticky top-0 z-20 flex items-center justify-between bg-background p-4 shadow"
-    >
-      <div class="flex items-center gap-2">
-        <Button
-          class="mr-2 md:hidden"
-          icon="pi pi-bars"
-          aria-label="Menu"
-          @click="sidebarOpen = true"
-          text
-        />
-        <div class="flex items-center gap-2">
-          <img
-            v-if="branding.logo"
-            :src="branding.logo"
-            alt="logo"
-            class="h-6"
+    <header class="sticky top-0 z-20 bg-background shadow">
+      <Menubar :model="[]" class="!border-none">
+        <template #start>
+          <Button
+            class="mr-2 md:hidden"
+            icon="pi pi-bars"
+            aria-label="Menu"
+            @click="sidebarOpen = true"
+            text
           />
-          <h1 class="font-bold">{{ branding.name || t('app.title') }}</h1>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <Dropdown
-          v-model="locale"
-          :options="languages"
-          optionLabel="label"
-          optionValue="value"
-          class="w-32"
-        />
-        <Button @click="toggleTheme" :label="t('actions.toggleTheme')" text />
-        <Button @click="toggleDensity" :label="t('actions.toggleDensity')" text />
-        <Badge v-if="queue.length" :value="queue.length" />
-        <Button
-          icon="pi pi-search"
-          aria-label="Command"
-          @click="open(paletteActions)"
-          text
-        />
-      </div>
+          <div class="flex items-center gap-2">
+            <img
+              v-if="branding.logo"
+              :src="branding.logo"
+              alt="logo"
+              class="h-6"
+            />
+            <h1 class="font-bold">{{ branding.name || t('app.title') }}</h1>
+          </div>
+        </template>
+        <template #end>
+          <Dropdown
+            v-model="locale"
+            :options="languages"
+            optionLabel="label"
+            optionValue="value"
+            class="w-32"
+          />
+          <Button @click="toggleTheme" :label="t('actions.toggleTheme')" text />
+          <Button @click="toggleDensity" :label="t('actions.toggleDensity')" text />
+          <Button icon="pi pi-bell" class="p-overlay-badge" text>
+            <Badge v-if="queue.length" :value="queue.length" />
+          </Button>
+          <Button
+            icon="pi pi-search"
+            aria-label="Command"
+            @click="open(paletteActions)"
+            text
+          />
+          <Avatar
+            icon="pi pi-user"
+            class="cursor-pointer"
+            @click="profileMenu?.toggle($event)"
+          />
+          <TieredMenu ref="profileMenu" :model="profileItems" popup />
+        </template>
+      </Menubar>
+      <Breadcrumb :home="home" :model="breadcrumbs" class="px-4 py-2" />
     </header>
     <Sidebar v-model:visible="sidebarOpen">
-      <Menu :model="menuItems" class="w-full" />
+      <PanelMenu :model="menuItems" class="w-full" />
     </Sidebar>
     <main id="main" tabindex="-1" class="p-4">
       <router-view />
@@ -59,12 +68,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 import Button from 'primevue/button';
 import Toast from 'primevue/toast';
 import UploadQueue from '../appointments/UploadQueue.vue';
 import Badge from 'primevue/badge';
 import Sidebar from 'primevue/sidebar';
-import Menu from 'primevue/menu';
+import PanelMenu from 'primevue/panelmenu';
+import Menubar from 'primevue/menubar';
+import Breadcrumb from 'primevue/breadcrumb';
+import Avatar from 'primevue/avatar';
+import TieredMenu from 'primevue/tieredmenu';
 import Dropdown from 'primevue/dropdown';
 import { useBrandingStore } from '@/stores/branding';
 import { useAuthStore } from '@/stores/auth';
@@ -77,6 +91,7 @@ const theme = ref<'light' | 'dark'>('light');
 const density = ref<'compact' | ''>('');
 const sidebarOpen = ref(false);
 const { t, locale } = useI18n();
+const route = useRoute();
 
 const languages = [
   { label: 'Ελληνικά', value: 'el' },
@@ -93,16 +108,29 @@ const { queue } = storeToRefs(drafts);
 
 const menuItems = computed(() => {
   const items = [
-    { label: 'Appointments', to: '/appointments' },
-    { label: 'Manuals', to: '/manuals' },
-    { label: 'Reports', to: '/reports' },
-    { label: 'Settings', to: '/settings' },
+    { label: t('routes.appointments'), icon: 'pi pi-calendar', to: '/appointments' },
+    { label: t('routes.manuals'), icon: 'pi pi-book', to: '/manuals' },
+    { label: t('routes.reports'), icon: 'pi pi-chart-bar', to: '/reports' },
+    { label: t('routes.settings'), icon: 'pi pi-cog', to: '/settings' },
   ];
   if (auth.user?.roles?.some((r: any) => r.name === 'SuperAdmin')) {
-    items.push({ label: 'Tenants', to: '/tenants' });
+    items.push({ label: t('routes.tenants'), icon: 'pi pi-building', to: '/tenants' });
   }
   return items;
 });
+
+const profileMenu = ref();
+const profileItems = computed(() => [
+  { label: t('profile.settings'), to: '/settings' },
+  { label: t('actions.logout'), command: () => auth.logout() },
+]);
+
+const breadcrumbs = computed(() =>
+  route.matched
+    .filter((r) => r.meta?.breadcrumb)
+    .map((r) => ({ label: t(r.meta.breadcrumb as string), to: r.path })),
+);
+const home = { icon: 'pi pi-home', to: '/' };
 
 function toggleTheme() {
   theme.value = theme.value === 'dark' ? 'light' : 'dark';

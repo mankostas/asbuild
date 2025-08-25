@@ -3,7 +3,8 @@
   "actions": {
     "toggleTheme": "Αλλαγή θέματος",
     "toggleDensity": "Αλλαγή πυκνότητας",
-    "toast": "Ειδοποίηση"
+    "toast": "Ειδοποίηση",
+    "logout": "Αποσύνδεση"
   },
   "messages": {
     "helloToast": "Γεια από το τοστ"
@@ -16,5 +17,20 @@
     "title": "Παλέτα εντολών",
     "placeholder": "Πληκτρολογήστε για αναζήτηση...",
     "empty": "Καμία ενέργεια"
+  },
+  "profile": {
+    "settings": "Ρυθμίσεις"
+  },
+  "routes": {
+    "appointments": "Ραντεβού",
+    "appointmentDetail": "Λεπτομέρειες Ραντεβού",
+    "manuals": "Εγχειρίδια",
+    "manualDetail": "Λεπτομέρειες Εγχειριδίου",
+    "reports": "Αναφορές",
+    "settings": "Ρυθμίσεις",
+    "gdpr": "GDPR",
+    "notifications": "Ειδοποιήσεις",
+    "employees": "Υπάλληλοι",
+    "tenants": "Μισθωτές"
   }
 }

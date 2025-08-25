@@ -9,6 +9,7 @@ import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 import ConfirmationService from 'primevue/confirmationservice';
 import ConfirmDialog from 'primevue/confirmdialog';
+import { createRouter, createWebHistory } from 'vue-router';
 
 vi.mock('@/stores/branding', () => ({
   useBrandingStore: () => ({ branding: {}, load: vi.fn() }),
@@ -41,17 +42,21 @@ Object.defineProperty(window, 'matchMedia', {
 describe('AppShell notifications', () => {
   it('triggers toast and confirm dialog', async () => {
     const app = createApp(AppShell);
+    const router = createRouter({
+      history: createWebHistory(),
+      routes: [{ path: '/', component: { template: '<div />' } }],
+    });
+    app.use(router);
     app.use(createPinia());
     app.use(i18n);
     app.use(PrimeVue);
     app.use(ToastService);
     app.use(ConfirmationService);
     app.component('ConfirmDialog', ConfirmDialog);
-    app.component('router-link', { template: '<a><slot /></a>' });
-    app.component('router-view', { template: '<div />' });
     const div = document.createElement('div');
     document.body.appendChild(div);
     app.mount(div);
+    await router.isReady();
 
     app.config.globalProperties.$toast.add({ severity: 'info', summary: 'test', detail: 'hello' });
     await nextTick();
