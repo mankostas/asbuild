@@ -4,7 +4,11 @@
     "toggleTheme": "Toggle Theme",
     "toggleDensity": "Toggle Density",
     "toast": "Toast",
-    "logout": "Logout"
+    "logout": "Logout",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel"
   },
   "messages": {
     "helloToast": "Hello from toast"
@@ -32,5 +36,32 @@
     "notifications": "Notifications",
     "employees": "Employees",
     "tenants": "Tenants"
+  },
+  "appointments": {
+    "new": "New Appointment",
+    "edit": "Edit Appointment",
+    "form": {
+      "title": "Title",
+      "date": "Scheduled At",
+      "status": "Status"
+    },
+    "filters": {
+      "global": "Search appointments",
+      "statusPlaceholder": "Select statuses"
+    },
+    "messages": {
+      "created": "Appointment created",
+      "updated": "Appointment updated",
+      "deleted": "Appointment deleted",
+      "deleteConfirm": "Delete appointment?",
+      "error": "Operation failed",
+      "empty": "No appointments",
+      "titleRequired": "Title is required"
+    },
+    "status": {
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "completed": "Completed"
+    }
   }
 }
