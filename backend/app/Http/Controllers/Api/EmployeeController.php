@@ -14,16 +14,31 @@ class EmployeeController extends Controller
 {
     protected function ensureAdmin(Request $request): void
     {
-        if (! $request->user()->hasRole('ClientAdmin')) {
+        if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
             abort(403);
         }
+    }
+
+    protected function getTenantId(Request $request): int
+    {
+        if ($request->user()->hasRole('SuperAdmin')) {
+            $tenantId = app('tenant_id');
+            if (! $tenantId) {
+                abort(400, 'Tenant ID required');
+            }
+            return (int) $tenantId;
+        }
+
+        return (int) $request->user()->tenant_id;
     }
 
     public function index(Request $request)
     {
         $this->ensureAdmin($request);
 
-        return User::where('tenant_id', $request->user()->tenant_id)->with('roles')->get();
+        $tenantId = $this->getTenantId($request);
+
+        return User::where('tenant_id', $tenantId)->with('roles')->get();
     }
 
     public function store(Request $request)
@@ -38,16 +53,19 @@ class EmployeeController extends Controller
 
         $password = Str::random(config('security.password.min_length'));
 
+        $tenantId = $this->getTenantId($request);
+
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'tenant_id' => $request->user()->tenant_id,
+            'tenant_id' => $tenantId,
             'password' => Hash::make($password),
         ]);
 
         if (! empty($data['roles'])) {
             $roles = Role::whereIn('name', $data['roles'])->pluck('id');
-            $user->roles()->sync($roles);
+            $roleData = $roles->mapWithKeys(fn ($id) => [$id => ['tenant_id' => $tenantId]]);
+            $user->roles()->sync($roleData);
         }
 
         Mail::raw("You have been invited. Temporary password: {$password}", function ($m) use ($user) {
@@ -57,9 +75,26 @@ class EmployeeController extends Controller
         return response()->json($user->load('roles'), 201);
     }
 
+    public function show(Request $request, User $employee)
+    {
+        $this->ensureAdmin($request);
+
+        $tenantId = $this->getTenantId($request);
+        if ($employee->tenant_id !== $tenantId) {
+            abort(404);
+        }
+
+        return $employee->load('roles');
+    }
+
     public function update(Request $request, User $employee)
     {
         $this->ensureAdmin($request);
+
+        $tenantId = $this->getTenantId($request);
+        if ($employee->tenant_id !== $tenantId) {
+            abort(404);
+        }
 
         $data = $request->validate([
             'name' => 'sometimes|string',
@@ -73,7 +108,8 @@ class EmployeeController extends Controller
 
         if (array_key_exists('roles', $data)) {
             $roles = Role::whereIn('name', $data['roles'])->pluck('id');
-            $employee->roles()->sync($roles);
+            $roleData = $roles->mapWithKeys(fn ($id) => [$id => ['tenant_id' => $tenantId]]);
+            $employee->roles()->sync($roleData);
         }
 
         return $employee->load('roles');
@@ -82,6 +118,12 @@ class EmployeeController extends Controller
     public function destroy(Request $request, User $employee)
     {
         $this->ensureAdmin($request);
+
+        $tenantId = $this->getTenantId($request);
+        if ($employee->tenant_id !== $tenantId) {
+            abort(404);
+        }
+
         $employee->delete();
         return response()->noContent();
     }
