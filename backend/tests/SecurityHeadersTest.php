@@ -10,5 +10,6 @@ class SecurityHeadersTest extends TestCase
 
         $response->assertStatus(204);
         $response->assertHeader('Access-Control-Allow-Origin', '*');
+        $response->assertHeader('Access-Control-Allow-Credentials', 'true');
     }
 }
