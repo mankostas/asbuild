@@ -38,8 +38,8 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-describe('AppShell', () => {
-  it('renders and toggles', async () => {
+describe('AppShell notifications', () => {
+  it('triggers toast and confirm dialog', async () => {
     const app = createApp(AppShell);
     app.use(createPinia());
     app.use(i18n);
@@ -52,14 +52,21 @@ describe('AppShell', () => {
     const div = document.createElement('div');
     document.body.appendChild(div);
     app.mount(div);
-    const skip = div.querySelector('a[href="#main"]') as HTMLAnchorElement;
-    expect(skip).not.toBeNull();
-    const buttons = div.querySelectorAll('button');
-    (buttons[1] as HTMLButtonElement).click();
-    (buttons[2] as HTMLButtonElement).click();
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
+
+    app.config.globalProperties.$toast.add({ severity: 'info', summary: 'test', detail: 'hello' });
     await nextTick();
-    const palette = div.querySelector('[role="dialog"]');
-    expect(palette).not.toBeNull();
+    await new Promise((r) => setTimeout(r, 0));
+    const toast = document.body.querySelector('.p-toast-message');
+    expect(toast).not.toBeNull();
+
+    app.config.globalProperties.$confirm.require({
+      message: 'Are you sure?',
+      header: 'Confirm',
+      accept: vi.fn(),
+    });
+    await nextTick();
+    await new Promise((r) => setTimeout(r, 0));
+    const dialog = document.body.querySelector('.p-confirm-dialog, .p-dialog');
+    expect(dialog).not.toBeNull();
   });
 });

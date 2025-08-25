@@ -51,6 +51,7 @@
       <router-view />
     </main>
     <Toast />
+    <ConfirmDialog />
     <UploadQueue />
   </div>
 </template>
@@ -59,7 +60,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from 'primevue/button';
-import Toast from '../ui/Toast.vue';
+import Toast from 'primevue/toast';
 import UploadQueue from '../appointments/UploadQueue.vue';
 import Badge from 'primevue/badge';
 import Sidebar from 'primevue/sidebar';
