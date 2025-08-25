@@ -10,9 +10,14 @@ class SecurityHeaders
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $response = $next($request);
-
         $cors = config('security.cors');
+
+        if ($request->isMethod('OPTIONS')) {
+            $response = response('', 204);
+        } else {
+            $response = $next($request);
+        }
+
         $response->headers->set('Access-Control-Allow-Origin', implode(',', $cors['allowed_origins'] ?? ['*']));
         $response->headers->set('Access-Control-Allow-Methods', implode(',', $cors['allowed_methods'] ?? ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']));
         $response->headers->set('Access-Control-Allow-Headers', implode(',', $cors['allowed_headers'] ?? ['Content-Type', 'Authorization', 'X-Requested-With']));
