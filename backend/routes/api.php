@@ -33,7 +33,7 @@ Route::get('files/{file}/{variant?}', [FileController::class, 'download'])
     ->name('files.download')
     ->middleware('signed.url');
 
-Route::prefix('uploads')->group(function () {
+Route::prefix('uploads')->middleware(['auth:sanctum', 'tenant'])->group(function () {
     Route::post('chunk', [UploadController::class, 'chunk'])->middleware('throttle:uploads');
     Route::delete('cleanup', [UploadController::class, 'cleanup'])->middleware('throttle:uploads');
 });

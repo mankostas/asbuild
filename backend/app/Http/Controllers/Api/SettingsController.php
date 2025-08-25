@@ -10,14 +10,23 @@ use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class SettingsController extends Controller
 {
+    protected function ensureAdmin(Request $request): void
+    {
+        if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
+            abort(403);
+        }
+    }
+
     public function getBranding(Request $request)
     {
+        $this->ensureAdmin($request);
         $branding = json_decode(config('tenant.branding') ?? '{}', true);
         return response()->json($branding);
     }
 
     public function updateBranding(Request $request)
     {
+        $this->ensureAdmin($request);
         $data = $request->validate([
             'name' => 'nullable|string',
             'color' => 'nullable|string',
