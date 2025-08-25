@@ -3,16 +3,21 @@ import axios from 'axios';
 import { toast } from '@/plugins/toast';
 
 // Resolve API URL from available environment variables.
+// When both a base domain (API_URL) and a path (VITE_API_URL) are provided,
+// concatenate them so requests are routed through the intended API prefix.
 // Vite inlines missing variables as the string "undefined", so explicitly
 // guard against that case before falling back to the default `/api` path.
-const envApiUrl =
-  (import.meta.env.API_URL && import.meta.env.API_URL !== 'undefined'
-    ? import.meta.env.API_URL
-    : undefined) ||
-  (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== 'undefined'
-    ? import.meta.env.VITE_API_URL
-    : undefined) ||
-  '/api';
+function cleanEnv(key) {
+  const value = import.meta.env[key];
+  return value && value !== 'undefined' ? value : undefined;
+}
+
+const apiDomain = cleanEnv('API_URL');
+const apiPath = cleanEnv('VITE_API_URL');
+
+const envApiUrl = apiDomain
+  ? apiDomain.replace(/\/$/, '') + (apiPath ? (apiPath.startsWith('/') ? apiPath : '/' + apiPath) : '')
+  : apiPath || '/api';
 
 const api = axios.create({
   baseURL: envApiUrl,
