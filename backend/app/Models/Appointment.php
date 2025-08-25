@@ -67,6 +67,11 @@ class Appointment extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
     public function type(): BelongsTo
     {
         return $this->belongsTo(AppointmentType::class, 'appointment_type_id');
