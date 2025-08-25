@@ -2,7 +2,7 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "asbuild/backend",
     "type": "project",
-    "description": "Backend for Asbuild",
+    "description": "Backend for laravelForReference",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
