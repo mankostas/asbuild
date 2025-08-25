@@ -9,7 +9,7 @@ class SecurityHeadersTest extends TestCase
         $response = $this->options('/api/health');
 
         $response->assertStatus(204);
-        $response->assertHeader('Access-Control-Allow-Origin', '*');
+        $response->assertHeader('Access-Control-Allow-Origin', config('security.cors.allowed_origins')[0]);
         $response->assertHeader('Access-Control-Allow-Credentials', 'true');
     }
 }

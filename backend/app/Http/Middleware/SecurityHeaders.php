@@ -20,8 +20,11 @@ class SecurityHeaders
 
         $allowedOrigins = $cors['allowed_origins'] ?? ['*'];
         $origin = $request->headers->get('Origin');
+
         if (in_array('*', $allowedOrigins)) {
-            $response->headers->set('Access-Control-Allow-Origin', $origin ?? '*');
+            if ($origin) {
+                $response->headers->set('Access-Control-Allow-Origin', $origin);
+            }
         } elseif ($origin && in_array($origin, $allowedOrigins)) {
             $response->headers->set('Access-Control-Allow-Origin', $origin);
         } elseif (!empty($allowedOrigins)) {
