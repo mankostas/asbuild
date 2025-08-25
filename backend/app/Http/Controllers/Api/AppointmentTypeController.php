@@ -9,6 +9,13 @@ use Illuminate\Validation\ValidationException;
 
 class AppointmentTypeController extends Controller
 {
+    protected function ensureAdmin(Request $request): void
+    {
+        if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
+            abort(403);
+        }
+    }
+
     public function index()
     {
         return response()->json(AppointmentType::all());
@@ -16,6 +23,7 @@ class AppointmentTypeController extends Controller
 
     public function store(Request $request)
     {
+        $this->ensureAdmin($request);
         $data = $this->validateSchema($request);
         $type = AppointmentType::create($data);
         return response()->json($type, 201);
@@ -28,13 +36,15 @@ class AppointmentTypeController extends Controller
 
     public function update(Request $request, AppointmentType $appointmentType)
     {
+        $this->ensureAdmin($request);
         $data = $this->validateSchema($request);
         $appointmentType->update($data);
         return response()->json($appointmentType);
     }
 
-    public function destroy(AppointmentType $appointmentType)
+    public function destroy(Request $request, AppointmentType $appointmentType)
     {
+        $this->ensureAdmin($request);
         $appointmentType->delete();
         return response()->json(['message' => 'deleted']);
     }

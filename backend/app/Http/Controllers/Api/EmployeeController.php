@@ -52,7 +52,12 @@ class EmployeeController extends Controller
             'phone' => 'nullable|string',
             'address' => 'nullable|string',
             'roles' => 'array',
+            'roles.*' => 'string',
         ]);
+
+        if (! empty($data['roles']) && in_array('SuperAdmin', $data['roles'], true)) {
+            abort(403, 'SuperAdmin role cannot be assigned');
+        }
 
         $password = Str::random(config('security.password.min_length'));
 
@@ -102,11 +107,16 @@ class EmployeeController extends Controller
             abort(404);
         }
 
+        if ($employee->hasRole('SuperAdmin')) {
+            abort(403, 'Cannot modify a SuperAdmin');
+        }
+
         $data = $request->validate([
             'name' => 'sometimes|string',
             'phone' => 'sometimes|string',
             'address' => 'sometimes|string',
             'roles' => 'array',
+            'roles.*' => 'string',
         ]);
 
         if (isset($data['name'])) {
@@ -121,6 +131,9 @@ class EmployeeController extends Controller
         $employee->save();
 
         if (array_key_exists('roles', $data)) {
+            if (in_array('SuperAdmin', $data['roles'], true)) {
+                abort(403, 'SuperAdmin role cannot be assigned');
+            }
             $roles = Role::whereIn('name', $data['roles'])->pluck('id');
             $roleData = $roles->mapWithKeys(fn ($id) => [$id => ['tenant_id' => $tenantId]]);
             $employee->roles()->sync($roleData);
@@ -136,6 +149,10 @@ class EmployeeController extends Controller
         $tenantId = $this->getTenantId($request);
         if ($employee->tenant_id !== $tenantId) {
             abort(404);
+        }
+
+        if ($employee->hasRole('SuperAdmin')) {
+            abort(403, 'Cannot delete a SuperAdmin');
         }
 
         $employee->delete();

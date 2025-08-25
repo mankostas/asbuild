@@ -12,6 +12,13 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
+    protected function ensureAdmin(Request $request): void
+    {
+        if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
+            abort(403);
+        }
+    }
+
     protected function dateRange(Request $request): array
     {
         $range = $request->query('range');
@@ -39,6 +46,7 @@ class ReportController extends Controller
 
     public function kpis(Request $request)
     {
+        $this->ensureAdmin($request);
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
 
@@ -71,6 +79,7 @@ class ReportController extends Controller
 
     public function materials(Request $request)
     {
+        $this->ensureAdmin($request);
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
 
@@ -85,6 +94,7 @@ class ReportController extends Controller
 
     public function export(Request $request): StreamedResponse
     {
+        $this->ensureAdmin($request);
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
 
