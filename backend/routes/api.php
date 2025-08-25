@@ -20,7 +20,9 @@ Route::middleware(['api','tenant'])->get('/health', function () {
 });
 
 Route::prefix('auth')->group(function () {
-    Route::post('login', [AuthController::class, 'login'])->middleware('throttle:auth');
+    Route::post('login', [AuthController::class, 'login'])
+        ->middleware('throttle:auth')
+        ->name('login');
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('password/email', [AuthController::class, 'sendResetLinkEmail']);
