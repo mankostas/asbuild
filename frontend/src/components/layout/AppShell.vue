@@ -113,6 +113,9 @@ const menuItems = computed(() => {
     { label: t('routes.reports'), icon: 'pi pi-chart-bar', to: '/reports' },
     { label: t('routes.settings'), icon: 'pi pi-cog', to: '/settings' },
   ];
+  if (auth.user?.roles?.some((r: any) => ['ClientAdmin', 'SuperAdmin'].includes(r.name))) {
+    items.push({ label: t('routes.employees'), icon: 'pi pi-users', to: '/employees' });
+  }
   if (auth.user?.roles?.some((r: any) => r.name === 'SuperAdmin')) {
     items.push({ label: t('routes.tenants'), icon: 'pi pi-building', to: '/tenants' });
   }
