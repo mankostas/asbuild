@@ -14,7 +14,7 @@ return Application::configure(
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->append([
+        $middleware->prepend([
             \App\Http\Middleware\SecurityHeaders::class,
             \App\Http\Middleware\RequestId::class,
             \App\Http\Middleware\ETag::class,
