@@ -18,7 +18,16 @@ class SecurityHeaders
             $response = $next($request);
         }
 
-        $response->headers->set('Access-Control-Allow-Origin', implode(',', $cors['allowed_origins'] ?? ['*']));
+        $allowedOrigins = $cors['allowed_origins'] ?? ['*'];
+        $origin = $request->headers->get('Origin');
+        if (in_array('*', $allowedOrigins)) {
+            $response->headers->set('Access-Control-Allow-Origin', $origin ?? '*');
+        } elseif ($origin && in_array($origin, $allowedOrigins)) {
+            $response->headers->set('Access-Control-Allow-Origin', $origin);
+        } elseif (!empty($allowedOrigins)) {
+            $response->headers->set('Access-Control-Allow-Origin', $allowedOrigins[0]);
+        }
+        $response->headers->set('Access-Control-Allow-Credentials', 'true');
         $response->headers->set('Access-Control-Allow-Methods', implode(',', $cors['allowed_methods'] ?? ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']));
         $response->headers->set('Access-Control-Allow-Headers', implode(',', $cors['allowed_headers'] ?? ['Content-Type', 'Authorization', 'X-Requested-With']));
 
