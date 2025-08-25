@@ -19,6 +19,20 @@ const api = axios.create({
   withCredentials: true,
 });
 
+let csrfFetched = false;
+
+api.interceptors.request.use(async (config) => {
+  if (
+    !csrfFetched &&
+    config.method &&
+    ['post', 'put', 'patch', 'delete'].includes(config.method.toLowerCase())
+  ) {
+    csrfFetched = true;
+    await api.get('/sanctum/csrf-cookie', { baseURL: '/' });
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import MockAdapter from 'axios-mock-adapter';
 import { setActivePinia, createPinia } from 'pinia';
 
@@ -12,6 +12,7 @@ describe('auth store', () => {
   let auth: any;
 
   beforeEach(async () => {
+    vi.resetModules();
     const store: Record<string, string> = {};
     // @ts-ignore
     globalThis.localStorage = {
@@ -26,6 +27,7 @@ describe('auth store', () => {
 
     setActivePinia(createPinia());
     mock = new MockAdapter(api);
+    mock.onGet('/sanctum/csrf-cookie').reply(204);
     memory = { accessToken: '', refreshToken: '' };
     injectStorage({
       getAccessToken: () => memory.accessToken,
