@@ -5,8 +5,7 @@ import AppShell from './components/layout/AppShell.vue';
 import { toastPlugin } from './plugins/toast';
 import i18n from './i18n';
 import PrimeVue from 'primevue/config';
-import 'primevue/resources/themes/saga-blue/theme.css';
-import 'primevue/resources/primevue.min.css';
+import Aura from '@primevue/themes/aura';
 import 'primeicons/primeicons.css';
 import './styles/tokens.css';
 
@@ -15,7 +14,7 @@ createApp(AppShell)
   .use(i18n)
   .use(router)
   .use(toastPlugin)
-  .use(PrimeVue)
+  .use(PrimeVue, { theme: { preset: Aura } })
   .mount('#app');
 
 if (import.meta.env.VITE_SENTRY_DSN) {
