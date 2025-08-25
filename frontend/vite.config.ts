@@ -6,6 +6,7 @@ import path from 'path';
 export default defineConfig({
   plugins: [vue()],
   base: '',
+  envPrefix: ['VITE_', 'API_'],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
