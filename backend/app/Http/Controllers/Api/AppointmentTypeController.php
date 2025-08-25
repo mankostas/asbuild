@@ -37,7 +37,7 @@ class AppointmentTypeController extends Controller
     public function update(Request $request, AppointmentType $appointmentType)
     {
         $this->ensureAdmin($request);
-        $data = $this->validateSchema($request);
+        $data = $this->validateSchema($request, false);
         $appointmentType->update($data);
         return response()->json($appointmentType);
     }
@@ -49,13 +49,14 @@ class AppointmentTypeController extends Controller
         return response()->json(['message' => 'deleted']);
     }
 
-    protected function validateSchema(Request $request): array
+    protected function validateSchema(Request $request, bool $nameRequired = true): array
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
+        $rules = [
+            'name' => ($nameRequired ? 'required' : 'sometimes') . '|string|max:255',
             'form_schema' => 'nullable|json',
             'fields_summary' => 'nullable|json',
-        ]);
+        ];
+        $validated = $request->validate($rules);
 
         foreach (['form_schema', 'fields_summary'] as $field) {
             if (isset($validated[$field])) {

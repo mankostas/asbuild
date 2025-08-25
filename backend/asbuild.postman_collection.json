@@ -66,6 +66,38 @@
           "response": []
         },
         {
+          "name": "store with form fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenant_id}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Detailed Type\",\n  \"form_schema\": \"{\\\"type\\\": \\\"object\\\", \\\"properties\\\": {\\\"title\\\": {\\\"type\\\": \\\"string\\\"}, \\\"priority\\\": {\\\"type\\\": \\\"integer\\\"}, \\\"done\\\": {\\\"type\\\": \\\"boolean\\\"}}, \\\"required\\\": [\\\"title\\\"]}\",\n  \"fields_summary\": \"{\\\"title\\\": \\\"string\\\", \\\"priority\\\": \\\"integer\\\", \\\"done\\\": \\\"boolean\\\"}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/appointment-types",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "appointment-types"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "show",
           "request": {
             "method": "GET",
@@ -326,6 +358,38 @@
                 "appointments",
                 "{appointment}",
                 "comments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "store with type fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "{{tenant_id}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"scheduled_at\": \"2024-01-03T00:00:00Z\",\\n  \"sla_start_at\": \"2024-01-03T08:00:00Z\",\\n  \"sla_end_at\": \"2024-01-03T17:00:00Z\",\\n  \"kau_notes\": \"Notes\",\\n  \"appointment_type_id\": 2,\\n  \"form_data\": {\\n    \"title\": \"Install\",\\n    \"priority\": 1,\\n    \"done\": false\\n  }\\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/appointments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "appointments"
               ]
             }
           },
