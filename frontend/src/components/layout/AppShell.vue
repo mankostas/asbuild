@@ -54,7 +54,23 @@
       <Breadcrumb :home="home" :model="breadcrumbs" class="px-4 py-2" />
     </header>
     <Sidebar v-model:visible="sidebarOpen">
-      <PanelMenu :model="menuItems" class="w-full" />
+      <nav class="w-56 p-2 space-y-1">
+        <RouterLink
+          v-for="item in menuItems"
+          :key="item.to"
+          :to="item.to"
+          :class="[
+            'flex items-center gap-3 p-2 rounded transition-colors',
+            route.path.startsWith(item.to)
+              ? 'bg-primary-100 font-medium'
+              : 'hover:bg-primary-50'
+          ]"
+          @click="sidebarOpen = false"
+        >
+          <i :class="item.icon"></i>
+          <span>{{ item.label }}</span>
+        </RouterLink>
+      </nav>
     </Sidebar>
     <main id="main" tabindex="-1" class="p-4">
       <router-view />
@@ -74,7 +90,6 @@ import Toast from 'primevue/toast';
 import UploadQueue from '../appointments/UploadQueue.vue';
 import Badge from 'primevue/badge';
 import Sidebar from 'primevue/sidebar';
-import PanelMenu from 'primevue/panelmenu';
 import Menubar from 'primevue/menubar';
 import Breadcrumb from 'primevue/breadcrumb';
 import Avatar from 'primevue/avatar';
