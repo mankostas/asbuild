@@ -1,14 +1,19 @@
 <template>
   <div>
-    <h2 class="text-xl font-bold mb-4">Appointments</h2>
-    <Button
-      v-if="isAdmin"
-      label="New Appointment"
-      icon="pi pi-plus"
-      class="mb-4"
-      @click="showDialog = true"
-    />
-    <DataTable :value="appointments">
+    <Toolbar class="mb-4">
+      <template #start>
+        <h2 class="text-xl font-bold">Appointments</h2>
+      </template>
+      <template #end>
+        <Button
+          v-if="isAdmin"
+          label="New Appointment"
+          icon="pi pi-plus"
+          @click="showDialog = true"
+        />
+      </template>
+    </Toolbar>
+    <DataTable :value="appointments" paginator :rows="10">
       <Column field="title" header="Title">
         <template #body="slotProps">
           <router-link
@@ -52,6 +57,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
+import Toolbar from 'primevue/toolbar';
 
 const store = useAppointmentsStore();
 const { appointments } = storeToRefs(store);
