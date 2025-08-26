@@ -34,9 +34,7 @@
           />
           <Button @click="toggleTheme" :label="t('actions.toggleTheme')" text />
           <Button @click="toggleDensity" :label="t('actions.toggleDensity')" text />
-          <Button icon="pi pi-bell" class="p-overlay-badge" text>
-            <Badge v-if="queue.length" :value="queue.length" />
-          </Button>
+          <Bell />
           <Button
             icon="pi pi-search"
             aria-label="Command"
@@ -88,7 +86,7 @@ import { useRoute } from 'vue-router';
 import Button from 'primevue/button';
 import Toast from 'primevue/toast';
 import UploadQueue from '../appointments/UploadQueue.vue';
-import Badge from 'primevue/badge';
+import Bell from '@/components/notifications/Bell.vue';
 import Sidebar from 'primevue/sidebar';
 import Menubar from 'primevue/menubar';
 import Breadcrumb from 'primevue/breadcrumb';
@@ -97,8 +95,6 @@ import TieredMenu from 'primevue/tieredmenu';
 import Dropdown from 'primevue/dropdown';
 import { useBrandingStore } from '@/stores/branding';
 import { useAuthStore } from '@/stores/auth';
-import { useDraftsStore } from '@/stores/drafts';
-import { storeToRefs } from 'pinia';
 import CommandPalette from './CommandPalette.vue';
 import { useCommandPalette } from '@/composables/useCommandPalette';
 
@@ -126,8 +122,6 @@ const branding = computed(() => brandingStore.branding);
 onMounted(() => brandingStore.load());
 
 const auth = useAuthStore();
-const drafts = useDraftsStore();
-const { queue } = storeToRefs(drafts);
 
 const menuItems = computed(() => {
   const items = [
