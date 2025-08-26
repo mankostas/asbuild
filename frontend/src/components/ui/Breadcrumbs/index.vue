@@ -1,46 +1,49 @@
 <template>
   <div class="md:mb-6 mb-4 flex space-x-3 rtl:space-x-reverse">
     <h4
-      v-if="this.$route.name && !this.$route.meta.groupParent"
-      :class="
-        this.$route.meta.groupParent
-          ? 'lg:border-r lg:border-secondary-500'
-          : ''
-      "
+      v-if="!route.meta.groupParent"
+      :class="route.meta.groupParent ? 'lg:border-r lg:border-secondary-500' : ''"
       class="font-medium lg:text-2xl text-xl capitalize text-slate-900 inline-block ltr:pr-4 rtl:pl-4"
     >
-      {{ this.$route.name.replace("-", " ") }}
+      {{ t(route.meta.breadcrumb as string) }}
     </h4>
-    <ul class="breadcrumbs" v-if="this.$route.meta.groupParent">
+    <ul class="breadcrumbs" v-else>
       <li class="text-primary-500">
-        <router-link :to="{ name: 'home' }" class="text-lg">
+        <RouterLink :to="{ name: 'dashboard' }" class="text-lg">
           <Icon icon="heroicons-outline:home" />
-        </router-link>
+        </RouterLink>
         <span class="breadcrumbs-icon rtl:transform rtl:rotate-180">
           <Icon icon="heroicons:chevron-right" />
         </span>
       </li>
-      <li class="text-primary-500">
-        <button type="button" class="capitalize">
-          {{ this.$route.meta.groupParent }}
-        </button>
+      <li class="text-primary-500" v-if="parentRoute">
+        <RouterLink :to="{ name: parentRoute.name }" class="capitalize">
+          {{ t(parentRoute.meta.breadcrumb as string) }}
+        </RouterLink>
         <span class="breadcrumbs-icon rtl:transform rtl:rotate-180">
           <Icon icon="heroicons:chevron-right" />
         </span>
       </li>
       <li class="capitalize text-slate-500 dark:text-slate-400">
-        {{ this.$route.name.replace("-", " ") }}
+        {{ t(route.meta.breadcrumb as string) }}
       </li>
     </ul>
   </div>
 </template>
-<script>
-import Icon from "@/components/Icon";
-export default {
-  components: {
-    Icon,
-  },
-};
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import Icon from '@/components/Icon';
+
+const route = useRoute();
+const router = useRouter();
+const { t } = useI18n();
+
+const parentRoute = computed(() => {
+  if (!route.meta.groupParent) return undefined;
+  return router.getRoutes().find((r) => r.name === route.meta.groupParent);
+});
 </script>
 <style lang="scss">
 .breadcrumbs {
