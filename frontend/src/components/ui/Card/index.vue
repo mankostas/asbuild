@@ -3,8 +3,8 @@
  :class="
       cn('card rounded-md bg-white dark:bg-slate-800', props.class, {
         ' border border-gray-5002 dark:border-slate-700':
-          this.$store.themeSettingsStore.skin === 'bordered',
-        'shadow-base': this.$store.themeSettingsStore.skin !== 'bordered',
+          themeSettingsStore.skin === 'bordered',
+        'shadow-base': themeSettingsStore.skin !== 'bordered',
       })
     "
     v-if="!overlay"
@@ -83,6 +83,15 @@
 </template>
 <script setup>
 import { cn } from "@/lib/utils";
+import { useThemeSettingsStore } from "@/stores/themeSettings";
+import { createPinia, getActivePinia, setActivePinia } from "pinia";
+
+const pinia = getActivePinia() || createPinia();
+if (!getActivePinia()) {
+  setActivePinia(pinia);
+}
+const themeSettingsStore = useThemeSettingsStore(pinia);
+
 const props = defineProps({
   class: {
     type: String,

@@ -77,6 +77,7 @@ Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
     });
 
     Route::prefix('reports')->group(function () {
+        Route::get('overview', [ReportController::class, 'overview']);
         Route::get('kpis', [ReportController::class, 'kpis']);
         Route::get('materials', [ReportController::class, 'materials']);
         Route::get('export', [ReportController::class, 'export']);

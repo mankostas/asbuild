@@ -44,6 +44,62 @@ class ReportController extends Controller
         return ['from' => $from, 'to' => $to];
     }
 
+    public function overview(Request $request)
+    {
+        $this->ensureAdmin($request);
+        $range = $this->dateRange($request);
+        $tenantId = $request->user()->tenant_id;
+
+        $base = Appointment::where('tenant_id', $tenantId)
+            ->whereNotNull('completed_at')
+            ->whereBetween('completed_at', [$range['from'], $range['to']]);
+
+        $completed = (clone $base)->count();
+        $onTime = (clone $base)
+            ->whereNotNull('sla_end_at')
+            ->whereColumn('completed_at', '<=', 'sla_end_at')
+            ->count();
+        $onTimePercentage = $completed > 0 ? ($onTime / $completed) * 100 : 0;
+
+        $avgDurationSeconds = (clone $base)
+            ->whereNotNull('started_at')
+            ->select(DB::raw('AVG(TIMESTAMPDIFF(SECOND, started_at, completed_at)) as avg'))
+            ->value('avg') ?? 0;
+        $avgDurationMinutes = $avgDurationSeconds / 60;
+
+        $failedUploads = DB::table('upload_chunks')->count();
+
+        $kpis = [
+            ['label' => 'Completed', 'value' => $completed],
+            ['label' => 'On Time %', 'value' => round($onTimePercentage, 2)],
+            ['label' => 'Avg Duration (min)', 'value' => round($avgDurationMinutes, 2)],
+            ['label' => 'Failed Uploads', 'value' => $failedUploads],
+        ];
+
+        $chartData = Appointment::where('tenant_id', $tenantId)
+            ->whereNotNull('completed_at')
+            ->whereBetween('completed_at', [$range['from'], $range['to']])
+            ->select(DB::raw('DATE(completed_at) as date'), DB::raw('count(*) as count'))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(fn ($row) => ['x' => $row->date, 'y' => $row->count]);
+
+        return response()->json([
+            'kpis' => $kpis,
+            'chart' => [
+                'title' => 'Completed Appointments',
+                'type' => 'line',
+                'series' => [
+                    [
+                        'label' => 'Appointments',
+                        'data' => $chartData,
+                    ],
+                ],
+            ],
+        ]);
+    }
+
     public function kpis(Request $request)
     {
         $this->ensureAdmin($request);
