@@ -28,6 +28,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
 import api from '@/services/api';
+import Swal from 'sweetalert2';
 
 const router = useRouter();
 const tableKey = ref(0);
@@ -72,7 +73,12 @@ function edit(id: number) {
 }
 
 async function remove(id: number) {
-  if (confirm('Delete type?')) {
+  const res = await Swal.fire({
+    title: 'Delete type?',
+    icon: 'warning',
+    showCancelButton: true,
+  });
+  if (res.isConfirmed) {
     await api.delete(`/appointment-types/${id}`);
     all.value = [];
     reload();

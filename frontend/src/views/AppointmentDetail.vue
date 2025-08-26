@@ -43,7 +43,6 @@
       </div>
     </template>
   </Card>
-  <ConfirmDialog />
 </template>
 
 <script setup lang="ts">
@@ -63,15 +62,13 @@ import TabPanel from 'primevue/tabpanel';
 import Steps from 'primevue/steps';
 import Message from 'primevue/message';
 import Galleria from 'primevue/galleria';
-import ConfirmDialog from 'primevue/confirmdialog';
-import { useConfirm } from 'primevue/useconfirm';
-import { useToast } from 'primevue/usetoast';
+import Swal from 'sweetalert2';
+import { useNotify } from '@/plugins/notify';
 
 const route = useRoute();
 const appointments = useAppointmentsStore();
 const drafts = useDraftsStore();
-const confirm = useConfirm();
-const toast = useToast();
+const notify = useNotify();
 
 const appointment = ref<any>(null);
 const kau = ref('');
@@ -131,19 +128,19 @@ function completeStep() {
   appointment.value.completedSteps++;
   dirty.value = false;
   saveDraft();
-  toast.add({ severity: 'success', summary: 'Step completed', life: 3000 });
+  notify.success('Step completed', { timeout: 3000 });
 }
 
-onBeforeRouteLeave((to, from, next) => {
+onBeforeRouteLeave(async (to, from, next) => {
   if (dirty.value) {
-    confirm.require({
-      message: 'You have unsaved changes. Leave anyway?',
-      accept: () => next(),
-      reject: () => next(false),
+    const res = await Swal.fire({
+      title: 'You have unsaved changes. Leave anyway?',
+      icon: 'warning',
+      showCancelButton: true,
     });
-  } else {
-    next();
+    return res.isConfirmed ? next() : next(false);
   }
+  next();
 });
 
 function openMap() {

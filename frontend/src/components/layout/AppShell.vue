@@ -73,8 +73,6 @@
     <main id="main" tabindex="-1" class="p-4">
       <router-view />
     </main>
-    <Toast />
-    <ConfirmDialog />
     <UploadQueue />
   </div>
 </template>
@@ -84,7 +82,6 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import Button from 'primevue/button';
-import Toast from 'primevue/toast';
 import UploadQueue from '../appointments/UploadQueue.vue';
 import Bell from '@/components/notifications/Bell.vue';
 import Sidebar from 'primevue/sidebar';

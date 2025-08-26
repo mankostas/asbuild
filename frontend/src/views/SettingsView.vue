@@ -44,7 +44,7 @@ import Tabs from '@/components/ui/Tabs.vue';
 import Button from '@/components/ui/Button/index.vue';
 import Switch from '@/components/ui/Switch/index.vue';
 import { RouterLink } from 'vue-router';
-import { useToast } from '@/plugins/toast';
+import { useNotify } from '@/plugins/notify';
 
 interface Pref {
   category: string;
@@ -62,7 +62,7 @@ const tabs = [
 const active = ref('profile');
 const prefs = ref<Pref[]>([]);
 const initialPrefs = ref<Pref[]>([]);
-const toast = useToast();
+const notify = useNotify();
 
 async function load() {
   const { data } = await api.get('/notification-preferences');
@@ -78,7 +78,7 @@ async function savePrefs() {
   if (!dirty.value) return;
   await api.put('/notification-preferences', prefs.value);
   initialPrefs.value = JSON.parse(JSON.stringify(prefs.value));
-  toast.add({ severity: 'success', summary: 'Preferences saved', detail: '' });
+  notify.success('Preferences saved');
 }
 
 onMounted(load);

@@ -67,7 +67,7 @@ import * as yup from "yup";
 
 import { inject } from "vue";
 import { useRouter } from "vue-router";
-import { useToast } from "vue-toastification";
+import { useNotify } from "@/plugins/notify";
 export default {
   components: {
     Textinput,
@@ -85,7 +85,7 @@ export default {
       name: yup.string().required("Full name is required"),
     });
     const swal = inject("$swal");
-    const toast = useToast();
+    const notify = useNotify();
     const router = useRouter();
 
     // Create a form context with the validation schema
@@ -106,11 +106,9 @@ export default {
         users.push(values);
         localStorage.setItem("users", JSON.stringify(users));
         router.push("/");
-        // use vue-toast-notification app use
-        toast.success -
-          500(" Account Create successfully", {
-            timeout: 2000,
-          });
+        notify.success("Account Create successfully", {
+          timeout: 2000,
+        });
       } else {
         // use sweetalert 2
         swal.fire({

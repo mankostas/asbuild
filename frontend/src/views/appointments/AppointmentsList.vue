@@ -36,10 +36,10 @@ import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
 import api from '@/services/api';
-import { useToast } from '@/plugins/toast';
+import { useNotify } from '@/plugins/notify';
 
 const router = useRouter();
-const toast = useToast();
+const notify = useNotify();
 
 const statusFilter = ref('');
 const startDate = ref('');
@@ -138,7 +138,7 @@ async function updateStatus(row: any, status: string) {
     reload();
   } catch (e: any) {
     if (e.status === 422) {
-      toast.add({ severity: 'error', summary: 'Invalid status transition', detail: '' });
+      notify.error('Invalid status transition');
     }
   }
 }

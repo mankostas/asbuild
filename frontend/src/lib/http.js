@@ -6,7 +6,7 @@ import {
 } from '../config/app';
 import { useAuthStore } from '../store/auth';
 import { useTenantStore } from '../store/tenant';
-import { useToastStore } from '../store/toast';
+import notify from '@/plugins/notify';
 
 const http = axios.create({
   baseURL: API_BASE_URL,
@@ -38,7 +38,6 @@ http.interceptors.response.use(
         await auth.logout();
       }
     }
-    const toast = useToastStore();
     const normalized = {
       status: response?.status ?? 0,
       code: response?.data?.code,
@@ -47,7 +46,7 @@ http.interceptors.response.use(
         : 'Network error. Please try again.',
       details: response?.data?.details,
     };
-    toast.add(normalized.message);
+    notify.error(normalized.message);
     return Promise.reject(normalized);
   }
 );

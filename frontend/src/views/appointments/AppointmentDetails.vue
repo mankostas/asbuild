@@ -75,12 +75,12 @@ import api from '@/services/api';
 import Card from '@/components/ui/Card/index.vue';
 import Tabs from '@/components/ui/Tabs.vue';
 import Button from '@/components/ui/Button/index.vue';
-import { useToast } from 'vue-toastification';
+import { useNotify } from '@/plugins/notify';
 import CommentsThread from '@/components/comments/CommentsThread.vue';
 import CommentEditor from '@/components/comments/CommentEditor.vue';
 
 const route = useRoute();
-const toast = useToast();
+const notify = useNotify();
 
 const appointment = ref<any>(null);
 
@@ -137,10 +137,10 @@ async function updateStatus(status: string) {
   try {
     await api.patch(`/appointments/${appointment.value.id}`, { status });
     appointment.value.status = status;
-    toast.success('Status updated');
+    notify.success('Status updated');
   } catch (e: any) {
     if (e.status === 422) {
-      toast.error('Invalid status transition');
+      notify.error('Invalid status transition');
     }
   }
 }

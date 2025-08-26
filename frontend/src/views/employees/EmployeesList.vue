@@ -32,13 +32,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject } from 'vue';
+import { ref } from 'vue';
 import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
 import Button from '@/components/ui/Button/index.vue';
 import api from '@/services/api';
-import { useToast } from '@/plugins/toast';
+import { useNotify } from '@/plugins/notify';
+import Swal from 'sweetalert2';
 
-const toast = useToast();
+const notify = useNotify();
 const tableKey = ref(0);
 const all = ref<any[]>([]);
 
@@ -95,29 +96,23 @@ function reload() {
   tableKey.value++;
 }
 
-const swal = inject('$swal');
-
 async function remove(id: number) {
-  const result = await swal?.fire({
+  const result = await Swal.fire({
     title: 'Delete employee?',
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Yes, delete',
   });
-  if (!result?.isConfirmed) return;
+  if (!result.isConfirmed) return;
   try {
     await api.delete(`/employees/${id}`);
     all.value = [];
     reload();
   } catch (e: any) {
     if (e.status === 403) {
-      toast.add({
-        severity: 'error',
-        summary: 'Cannot delete user with SuperAdmin role',
-        detail: '',
-      });
+      notify.error('Cannot delete user with SuperAdmin role');
     } else {
-      toast.add({ severity: 'error', summary: 'Failed to delete', detail: '' });
+      notify.error('Failed to delete');
     }
   }
 }

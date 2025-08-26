@@ -26,10 +26,10 @@ import { useAuthStore } from '@/stores/auth';
 import api from '@/services/api';
 import Textinput from '@/components/ui/Textinput/index.vue';
 import Button from '@/components/ui/Button/index.vue';
-import { useToast } from '@/plugins/toast';
+import { useNotify } from '@/plugins/notify';
 
 const auth = useAuthStore();
-const toast = useToast();
+const notify = useNotify();
 const initial = {
   name: auth.user?.name || '',
   email: auth.user?.email || '',
@@ -56,6 +56,6 @@ async function save() {
   initial.email = form.email = data.email;
   form.password = '';
   form.password_confirmation = '';
-  toast.add({ severity: 'success', summary: 'Profile saved', detail: '' });
+  notify.success('Profile saved');
 }
 </script>

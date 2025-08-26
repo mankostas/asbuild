@@ -144,14 +144,13 @@ import Calendar from 'primevue/calendar';
 import MultiSelect from 'primevue/multiselect';
 import Skeleton from 'primevue/skeleton';
 import Message from 'primevue/message';
-import { useToast } from '@/plugins/toast';
-import { useConfirm } from 'primevue/useconfirm';
+import { useNotify } from '@/plugins/notify';
+import Swal from 'sweetalert2';
 import { useI18n } from 'vue-i18n';
 import { filterAppointments, Appointment } from '@/utils/appointmentFilters';
 
 const { t } = useI18n();
-const toast = useToast();
-const confirm = useConfirm();
+const notify = useNotify();
 
 const store = useAppointmentsStore();
 const { appointments } = storeToRefs(store);
@@ -219,10 +218,10 @@ async function create() {
       status: form.value.status,
     });
     await store.fetch();
-    toast.add({ severity: 'success', detail: t('appointments.messages.created') });
+    notify.success(t('appointments.messages.created'));
     showCreate.value = false;
   } catch (e) {
-    toast.add({ severity: 'error', detail: t('appointments.messages.error') });
+    notify.error(t('appointments.messages.error'));
   }
 }
 
@@ -239,25 +238,27 @@ async function update() {
       status: form.value.status,
     });
     await store.fetch();
-    toast.add({ severity: 'success', detail: t('appointments.messages.updated') });
+    notify.success(t('appointments.messages.updated'));
     showEdit.value = false;
   } catch (e) {
-    toast.add({ severity: 'error', detail: t('appointments.messages.error') });
+    notify.error(t('appointments.messages.error'));
   }
 }
 
-function confirmDelete(a: any) {
-  confirm.require({
-    message: t('appointments.messages.deleteConfirm'),
-    accept: async () => {
-      try {
-        await api.delete(`/appointments/${a.id}`);
-        await store.fetch();
-        toast.add({ severity: 'success', detail: t('appointments.messages.deleted') });
-      } catch (e) {
-        toast.add({ severity: 'error', detail: t('appointments.messages.error') });
-      }
-    },
+async function confirmDelete(a: any) {
+  const res = await Swal.fire({
+    title: t('appointments.messages.deleteConfirm'),
+    icon: 'warning',
+    showCancelButton: true,
   });
+  if (res.isConfirmed) {
+    try {
+      await api.delete(`/appointments/${a.id}`);
+      await store.fetch();
+      notify.success(t('appointments.messages.deleted'));
+    } catch (e) {
+      notify.error(t('appointments.messages.error'));
+    }
+  }
 }
 </script>

@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import toast from '@/plugins/toast';
+import notify from '@/plugins/notify';
 import { useAuthStore } from '@/stores/auth';
 
 export interface ApiError {
@@ -83,7 +83,7 @@ api.interceptors.response.use(
     }
 
     if (status && status >= 500) {
-      toast.show('An unexpected server error occurred.');
+      notify.error('An unexpected server error occurred.');
     }
     const apiError: ApiError = {
       message: error.message,

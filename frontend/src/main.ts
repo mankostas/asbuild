@@ -6,7 +6,7 @@ import "simplebar-vue/dist/simplebar.min.css";
 import VueGoodTablePlugin from "vue-good-table-next";
 import "vue-good-table-next/dist/vue-good-table-next.css";
 import VueSweetalert2 from "vue-sweetalert2";
-import Toast from "vue-toastification";
+import { notifyPlugin } from "./plugins/notify";
 import "vue-toastification/dist/index.css";
 import VueApexCharts from "vue3-apexcharts";
 import VueClickAway from "vue3-click-away";
@@ -28,7 +28,7 @@ const app = createApp(App)
   .use(i18n)
   .use(router)
   .use(VueSweetalert2)
-  .use(Toast, {
+  .use(notifyPlugin, {
     toastClassName: "dashcode-toast",
     bodyClassName: "dashcode-toast-body",
   })
