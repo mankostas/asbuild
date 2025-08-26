@@ -27,6 +27,7 @@
     "settings": "Ρυθμίσεις"
   },
   "routes": {
+    "dashboard": "Πίνακας ελέγχου",
     "appointments": "Ραντεβού",
     "appointmentDetail": "Λεπτομέρειες Ραντεβού",
     "manuals": "Εγχειρίδια",

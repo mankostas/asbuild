@@ -27,6 +27,7 @@
     "settings": "Settings"
   },
   "routes": {
+    "dashboard": "Dashboard",
     "appointments": "Appointments",
     "appointmentDetail": "Appointment Detail",
     "manuals": "Manuals",
