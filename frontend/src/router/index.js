@@ -210,7 +210,7 @@ export const routes = [
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.reports',
-      title: 'Reports',
+      title: 'Reports - KPIs',
       layout: 'app',
     },
   },

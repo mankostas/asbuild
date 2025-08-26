@@ -124,8 +124,14 @@ async function fetchKpis() {
     const { data } = await api.get<KpiResponse>('/reports/kpis');
     kpiCards.value = [
       { label: 'Completed', value: data.completed },
-      { label: 'On-time %', value: data.on_time_percentage },
-      { label: 'Avg duration (m)', value: data.avg_duration_minutes },
+      {
+        label: 'On-time %',
+        value: data.on_time_percentage.toFixed(2) + '%',
+      },
+      {
+        label: 'Avg duration (m)',
+        value: data.avg_duration_minutes.toFixed(2),
+      },
       { label: 'Failed uploads', value: data.failed_uploads },
     ];
     chartSeries.value = [
