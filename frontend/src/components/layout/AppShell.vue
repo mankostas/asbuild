@@ -9,11 +9,14 @@
         <template #start>
           <Button
             class="mr-2 md:hidden"
-            icon="pi pi-bars"
             aria-label="Menu"
             @click="sidebarOpen = true"
             text
-          />
+          >
+            <template #icon>
+              <Icon icon="heroicons-outline:bars-3" class="w-5 h-5" />
+            </template>
+          </Button>
           <div class="flex items-center gap-2">
             <img
               v-if="branding.logo"
@@ -36,20 +39,29 @@
           <Button @click="toggleDensity" :label="t('actions.toggleDensity')" text />
           <Bell />
           <Button
-            icon="pi pi-search"
             aria-label="Command"
             @click="open(paletteActions.value)"
             text
-          />
-          <Avatar
-            icon="pi pi-user"
-            class="cursor-pointer"
-            @click="profileMenu?.toggle($event)"
-          />
+          >
+            <template #icon>
+              <Icon icon="heroicons-outline:magnifying-glass" class="w-5 h-5" />
+            </template>
+          </Button>
+          <Avatar class="cursor-pointer" @click="profileMenu?.toggle($event)">
+            <template #icon>
+              <Icon icon="heroicons-outline:user" class="w-5 h-5" />
+            </template>
+          </Avatar>
           <TieredMenu ref="profileMenu" :model="profileItems" popup />
         </template>
       </Menubar>
-      <Breadcrumb :home="home" :model="breadcrumbs" class="px-4 py-2" />
+      <Breadcrumb :home="home" :model="breadcrumbs" class="px-4 py-2">
+        <template #home>
+          <RouterLink :to="home.to" class="p-breadcrumb-home">
+            <Icon icon="heroicons-outline:home" class="w-5 h-5" />
+          </RouterLink>
+        </template>
+      </Breadcrumb>
     </header>
     <Sidebar v-model:visible="sidebarOpen">
       <nav class="w-56 p-2 space-y-1">
@@ -65,7 +77,7 @@
           ]"
           @click="sidebarOpen = false"
         >
-          <i :class="item.icon"></i>
+          <Icon :icon="item.icon" class="w-5 h-5" />
           <span>{{ item.label }}</span>
         </RouterLink>
       </nav>
@@ -94,6 +106,7 @@ import { useBrandingStore } from '@/stores/branding';
 import { useAuthStore } from '@/stores/auth';
 import CommandPalette from './CommandPalette.vue';
 import { useCommandPalette } from '@/composables/useCommandPalette';
+import Icon from '@/components/ui/Icon';
 
 const theme = ref<'light' | 'dark'>('light');
 const density = ref<'compact' | ''>('');
@@ -126,20 +139,20 @@ const isAdmin = computed(() =>
 
 const menuItems = computed(() => {
   const items = [
-    { label: t('routes.appointments'), icon: 'pi pi-calendar', to: '/appointments' },
+    { label: t('routes.appointments'), icon: 'heroicons-outline:calendar', to: '/appointments' },
   ];
   if (isAdmin.value) {
-    items.push({ label: t('routes.manuals'), icon: 'pi pi-book', to: '/manuals' });
+    items.push({ label: t('routes.manuals'), icon: 'heroicons-outline:book-open', to: '/manuals' });
   }
   items.push(
-    { label: t('routes.reports'), icon: 'pi pi-chart-bar', to: '/reports' },
-    { label: t('routes.settings'), icon: 'pi pi-cog', to: '/settings' },
+    { label: t('routes.reports'), icon: 'heroicons-outline:chart-bar', to: '/reports' },
+    { label: t('routes.settings'), icon: 'heroicons-outline:cog-6-tooth', to: '/settings' },
   );
   if (isAdmin.value) {
-    items.push({ label: t('routes.employees'), icon: 'pi pi-users', to: '/employees' });
+    items.push({ label: t('routes.employees'), icon: 'heroicons-outline:users', to: '/employees' });
   }
   if (auth.user?.roles?.some((r: any) => r.name === 'SuperAdmin')) {
-    items.push({ label: t('routes.tenants'), icon: 'pi pi-building', to: '/tenants' });
+    items.push({ label: t('routes.tenants'), icon: 'heroicons-outline:building-office', to: '/tenants' });
   }
   return items;
 });
@@ -155,7 +168,7 @@ const breadcrumbs = computed(() =>
     .filter((r) => r.meta?.breadcrumb)
     .map((r) => ({ label: t(r.meta.breadcrumb as string), to: r.path })),
 );
-const home = { icon: 'pi pi-home', to: '/' };
+const home = { to: '/' };
 
 function toggleTheme() {
   theme.value = theme.value === 'dark' ? 'light' : 'dark';
