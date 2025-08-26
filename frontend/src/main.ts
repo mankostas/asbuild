@@ -1,28 +1,46 @@
-import { createApp } from 'vue';
-import router from './router';
-import stores from './stores';
-import App from './App.vue';
-import i18n from './i18n';
-import PrimeVue from 'primevue/config';
-import Aura from '@primevue/themes/aura';
-import ToastService from 'primevue/toastservice';
-import ConfirmationService from 'primevue/confirmationservice';
-import ConfirmDialog from 'primevue/confirmdialog';
-import VueGoodTablePlugin from 'vue-good-table-next';
-import 'vue-good-table-next/dist/vue-good-table-next.css';
-import 'primeicons/primeicons.css';
-import './assets/main.scss';
+import "animate.css";
+import "flatpickr/dist/flatpickr.css";
+import "sweetalert2/dist/sweetalert2.min.css";
+import { createApp } from "vue";
+import "simplebar-vue/dist/simplebar.min.css";
+import VueGoodTablePlugin from "vue-good-table-next";
+import "vue-good-table-next/dist/vue-good-table-next.css";
+import VueSweetalert2 from "vue-sweetalert2";
+import Toast from "vue-toastification";
+import "vue-toastification/dist/index.css";
+import VueApexCharts from "vue3-apexcharts";
+import VueClickAway from "vue3-click-away";
+import PerfectScrollbar from "vue3-perfect-scrollbar";
+import "vue3-perfect-scrollbar/dist/vue3-perfect-scrollbar.css";
+import VueFlatPickr from "vue-flatpickr-component";
+import App from "./App.vue";
+import "./assets/scss/auth.scss";
+import "./assets/scss/tailwind.scss";
+import router from "./router";
+import stores from "./stores";
+import i18n from "./i18n";
+import VCalendar from "v-calendar";
+import "v-calendar/dist/style.css";
+import { VueQueryPlugin } from "@tanstack/vue-query";
 
-createApp(App)
+const app = createApp(App)
   .use(stores)
   .use(i18n)
   .use(router)
-  .use(PrimeVue, { theme: { preset: Aura } })
-  .use(ToastService)
-  .use(ConfirmationService)
+  .use(VueSweetalert2)
+  .use(Toast, {
+    toastClassName: "dashcode-toast",
+    bodyClassName: "dashcode-toast-body",
+  })
+  .use(VueClickAway)
+  .use(VueFlatPickr)
   .use(VueGoodTablePlugin)
-  .component('ConfirmDialog', ConfirmDialog)
-  .mount('#app');
+  .use(VueApexCharts)
+  .use(PerfectScrollbar)
+  .use(VCalendar);
+
+app.use(VueQueryPlugin);
+app.mount('#app');
 
 if (import.meta.env.VITE_SENTRY_DSN) {
   const script = document.createElement('script');
