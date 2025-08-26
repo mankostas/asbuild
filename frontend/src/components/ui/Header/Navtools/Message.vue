@@ -91,7 +91,7 @@
 import Dropdown from "@/components/Dropdown";
 import Icon from "@/components/Icon";
 import { MenuItem } from "@headlessui/vue";
-import { message } from "../../../constant/data";
+import { message } from "@/constant/data";
 export default {
   components: {
     Icon,

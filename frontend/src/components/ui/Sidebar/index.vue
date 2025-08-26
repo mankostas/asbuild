@@ -149,7 +149,7 @@
 <script>
 // import { Icon } from "@iconify/vue";
 import { defineComponent } from "vue";
-import { menuItems } from "../../constant/data";
+import { menuItems } from "@/constant/data";
 import Navmenu from "./Navmenu";
 import { gsap } from "gsap";
 import simplebar from "simplebar-vue";
