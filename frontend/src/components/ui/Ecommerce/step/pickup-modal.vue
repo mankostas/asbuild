@@ -77,10 +77,10 @@
 </template>
 
 <script setup>
-import Icon from "@/components/Icon";
-import InputGroup from "@/components/InputGroup";
-import Radio from "@/components/Radio";
-import Modal from "@/components/Modal";
+import Icon from "@/components/ui/Icon";
+import InputGroup from "@/components/ui/InputGroup";
+import Radio from "@/components/ui/Radio";
+import Modal from "@/components/ui/Modal";
 
 import { defineProps, ref } from "vue";
 const props = defineProps({

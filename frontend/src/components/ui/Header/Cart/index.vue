@@ -74,8 +74,8 @@
   </Transition>
 </template>
 <script setup>
-import Button from "@/components/Button";
-import Icon from "@/components/Icon";
+import Button from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
 import { useThemeSettingsStore } from "@/store/themeSettings";
 import CartItem from "./cart-item.vue";
 import { cartStore } from "@/store/cart";

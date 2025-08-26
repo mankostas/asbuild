@@ -93,10 +93,10 @@ const options = ref([
   { value: "option3", label: "Option 3" },
 ]);
 
-import Modal from "@/components/Modal";
-import Textarea from "@/components/Textarea";
-import InputGroup from "@/components/InputGroup";
-import Select from "@/components/Select";
+import Modal from "@/components/ui/Modal";
+import Textarea from "@/components/ui/Textarea";
+import InputGroup from "@/components/ui/InputGroup";
+import Select from "@/components/ui/Select";
 import { defineProps, ref } from "vue";
 const props = defineProps({
   activeModal: Boolean,

@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 import { ref } from "vue";
 import { cartStore } from "@/store/cart";
 

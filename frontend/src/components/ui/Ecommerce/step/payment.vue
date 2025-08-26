@@ -150,9 +150,9 @@
 <script setup>
 import { payments } from "@/constant/data";
 
-import Checkbox from "@/components/Checkbox";
-import InputGroup from "@/components/InputGroup";
-import Button from "@/components/Button";
+import Checkbox from "@/components/ui/Checkbox";
+import InputGroup from "@/components/ui/InputGroup";
+import Button from "@/components/ui/Button";
 import { ref } from "vue";
 import { cartStore } from "@/store/cart";
 

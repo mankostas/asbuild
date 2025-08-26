@@ -50,7 +50,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 
 const activeIndex = ref(0);

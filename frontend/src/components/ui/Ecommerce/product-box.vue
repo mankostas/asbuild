@@ -101,11 +101,11 @@
 </template>
 
 <script setup>
-import Card from "@/components/Card";
-import Icon from "@/components/Icon";
-import Button from "@/components/Button";
-import Badge from "@/components/Badge";
-import CounterButton from "@/components/Ecommerce/counter-button.vue";
+import Card from "@/components/ui/Card";
+import Icon from "@/components/ui/Icon";
+import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import CounterButton from "@/components/ui/Ecommerce/counter-button.vue";
 import { cartStore } from "@/store/cart";
 
 const cart = cartStore();

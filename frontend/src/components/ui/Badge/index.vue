@@ -11,7 +11,7 @@
   </span>
 </template>
 <script>
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 export default {
   components: {
     Icon,

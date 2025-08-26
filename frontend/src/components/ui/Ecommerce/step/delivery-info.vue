@@ -74,7 +74,7 @@
 </template>
 
 <script setup>
-import Radio from "@/components/Radio";
+import Radio from "@/components/ui/Radio";
 import { ref } from "vue";
 import PickupModal from "./pickup-modal.vue";
 import { cartStore } from "@/store/cart";

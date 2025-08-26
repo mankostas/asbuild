@@ -73,8 +73,8 @@
 </template>
 
 <script setup>
-import Icon from "@/components/Icon";
-import Radio from "@/components/Radio";
+import Icon from "@/components/ui/Icon";
+import Radio from "@/components/ui/Radio";
 import { ref } from "vue";
 import NoteModal from "./note-modal.vue";
 
