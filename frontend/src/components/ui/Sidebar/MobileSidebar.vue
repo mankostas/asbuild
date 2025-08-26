@@ -58,7 +58,7 @@
 <script>
 import { Icon } from "@iconify/vue";
 import { defineComponent } from "vue";
-import { menuItems } from "../../constant/data";
+import { menuItems } from "@/constant/data";
 import Navmenu from "./Navmenu";
 import { useThemeSettingsStore } from "@/store/themeSettings";
 const themeSettingsStore = useThemeSettingsStore();
