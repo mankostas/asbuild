@@ -1,36 +1,31 @@
 <template>
   <div>
-    <div role="tablist" class="flex border-b">
+    <div
+      role="tablist"
+      class="lg:space-x-8 md:space-x-4 space-x-0 rtl:space-x-reverse flex"
+    >
       <button
         v-for="t in tabs"
         :key="t.id"
         role="tab"
         :aria-selected="modelValue === t.id"
         @click="update(t.id)"
-        class="-mb-px border-b-2 px-3 py-2 text-sm focus-ring"
-        :class="
-          modelValue === t.id
-            ? 'border-primary text-primary'
-            : 'border-transparent text-foreground/70 hover:text-foreground'
-        "
+        class="text-sm font-medium mb-7 capitalize bg-white dark:bg-slate-800 ring-0 focus:ring-0 focus:outline-none px-2 transition duration-150 before:transition-all before:duration-150 relative before:absolute before:left-1/2 before:bottom-[-6px] before:h-[1.5px] before:bg-primary-500 before:-translate-x-1/2"
+        :class="modelValue === t.id ? 'text-primary-500 before:w-full' : 'text-slate-500 before:w-0 dark:text-slate-300'"
       >
         {{ t.label }}
       </button>
     </div>
-    <div class="p-4">
+    <div class="text-slate-600 dark:text-slate-400 text-sm font-normal">
       <slot :active="modelValue" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
-  modelValue: string;
-  tabs: { id: string; label: string }[];
-}>();
-const emit = defineEmits(['update:modelValue']);
-
+const props = defineProps<{ modelValue: string; tabs: { id: string; label: string }[] }>()
+const emit = defineEmits(['update:modelValue'])
 function update(id: string) {
-  emit('update:modelValue', id);
+  emit('update:modelValue', id)
 }
 </script>

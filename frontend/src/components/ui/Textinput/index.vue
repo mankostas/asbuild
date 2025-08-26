@@ -97,7 +97,7 @@
   </div>
 </template>
 <script>
-import Icon from "@/components/ui/Icon";
+import Icon from "@/components/Icon";
 import Cleave from "vue-cleave-component";
 export default {
   components: { Icon, Cleave },

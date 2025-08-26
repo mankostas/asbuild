@@ -33,8 +33,8 @@
 </template>
 
 <script setup>
-import CounterButton from "@/components/ui/Ecommerce/counter-button.vue";
-import Icon from "@/components/ui/Icon";
+import CounterButton from "@/components/Ecommerce/counter-button.vue";
+import Icon from "@/components/Icon";
 import { cartStore } from "@/store/cart";
 
 const cart = cartStore();
