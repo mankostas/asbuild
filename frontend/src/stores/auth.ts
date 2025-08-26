@@ -23,15 +23,11 @@ export const useAuthStore = defineStore('auth', {
     user: null as any,
     accessToken: initialAccess as string | null,
     refreshToken: initialRefresh as string | null,
-    impersonator: null as {
-      accessToken: string;
-      refreshToken: string;
-      user: any;
-    } | null,
+    impersonatedTenant: localStorage.getItem('impersonatingTenant') || '',
   }),
   getters: {
     isAuthenticated: (state) => !!state.accessToken,
-    isImpersonating: (state) => !!state.impersonator,
+    isImpersonating: (state) => !!state.impersonatedTenant,
   },
   actions: {
     async login(payload: LoginPayload) {
@@ -57,7 +53,8 @@ export const useAuthStore = defineStore('auth', {
       this.user = null;
       clearTokens();
       delete api.defaults.headers.common['Authorization'];
-      this.impersonator = null;
+      this.impersonatedTenant = '';
+      localStorage.removeItem('impersonatingTenant');
     },
     async refresh() {
       if (!this.refreshToken) return;
@@ -76,12 +73,7 @@ export const useAuthStore = defineStore('auth', {
     async resetPassword(payload: Record<string, any>) {
       await api.post('/auth/password/reset', payload);
     },
-    async impersonate(tenantId: string) {
-      this.impersonator = {
-        accessToken: this.accessToken || '',
-        refreshToken: this.refreshToken || '',
-        user: this.user,
-      };
+    async impersonate(tenantId: string, tenantName: string) {
       const { data } = await api.post(`/tenants/${tenantId}/impersonate`);
       this.accessToken = data.access_token;
       this.refreshToken = data.refresh_token;
@@ -89,16 +81,8 @@ export const useAuthStore = defineStore('auth', {
       setTokens(data.access_token, data.refresh_token);
       api.defaults.headers.common['Authorization'] =
         `Bearer ${data.access_token}`;
-    },
-    stopImpersonation() {
-      if (!this.impersonator) return;
-      this.accessToken = this.impersonator.accessToken;
-      this.refreshToken = this.impersonator.refreshToken;
-      this.user = this.impersonator.user;
-      setTokens(this.accessToken, this.refreshToken);
-      api.defaults.headers.common['Authorization'] =
-        `Bearer ${this.accessToken}`;
-      this.impersonator = null;
+      this.impersonatedTenant = tenantName;
+      localStorage.setItem('impersonatingTenant', tenantName);
     },
   },
 });

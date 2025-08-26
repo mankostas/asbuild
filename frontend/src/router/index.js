@@ -252,8 +252,8 @@ export const routes = [
   },
   {
     path: '/tenants',
-    name: 'tenants',
-    component: () => import('@/views/TenantList.vue'),
+    name: 'tenants.list',
+    component: () => import('@/views/tenants/TenantsList.vue'),
     meta: {
       requiresAuth: true,
       admin: true,
