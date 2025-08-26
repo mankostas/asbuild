@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import toast from '@/plugins/toast';
+import { useAuthStore } from '@/stores/auth';
 
 export interface ApiError {
   message: string;
@@ -50,6 +51,9 @@ api.interceptors.response.use(
     const config = error.config as AxiosRequestConfig & {
       __retryCount?: number;
     };
+    const status = error.response?.status;
+
+    // Handle network errors with simple retries.
     if (!error.response) {
       config.__retryCount = config.__retryCount || 0;
       if (config.__retryCount < MAX_RETRIES) {
@@ -59,12 +63,20 @@ api.interceptors.response.use(
         return api(config);
       }
     }
-    if (error.response && error.response.status >= 500) {
+
+    // When the API responds with 401, clear auth state and redirect to login.
+    if (status === 401) {
+      const auth = useAuthStore();
+      await auth.logout();
+      window.location.href = '/auth/login';
+    }
+
+    if (status && status >= 500) {
       toast.show('An unexpected server error occurred.');
     }
     const apiError: ApiError = {
       message: error.message,
-      status: error.response?.status,
+      status,
     };
     return Promise.reject(apiError);
   },
