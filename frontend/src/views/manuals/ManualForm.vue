@@ -1,50 +1,94 @@
 <template>
-  <div>
-    <h2 class="text-xl font-bold mb-4">{{ isEdit ? 'Edit Manual' : 'Upload Manual' }}</h2>
-    <form class="grid gap-4 max-w-xl" @submit.prevent="onSubmit">
-      <div>
-        <label class="block mb-1">File<span v-if="!isEdit" class="text-red-600">*</span></label>
-        <input type="file" @change="onFile" />
+  <TransitionRoot appear :show="true" as="template">
+    <Dialog as="div" class="relative z-50" @close="emit('close')">
+      <TransitionChild
+        as="template"
+        enter="duration-300 ease-out"
+        enter-from="opacity-0"
+        enter-to="opacity-100"
+        leave="duration-200 ease-in"
+        leave-from="opacity-100"
+        leave-to="opacity-0"
+      >
+        <div class="fixed inset-0 bg-slate-900/60" />
+      </TransitionChild>
+
+      <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+          <TransitionChild
+            as="template"
+            enter="duration-300 ease-out"
+            enter-from="opacity-0 scale-95"
+            enter-to="opacity-100 scale-100"
+            leave="duration-200 ease-in"
+            leave-from="opacity-100 scale-100"
+            leave-to="opacity-0 scale-95"
+          >
+            <DialogPanel class="w-full max-w-lg rounded-md bg-white dark:bg-slate-800 p-6">
+              <h2 class="text-lg font-bold mb-4">
+                {{ isEdit ? 'Edit Manual' : 'Upload Manual' }}
+              </h2>
+              <form class="grid gap-4" @submit.prevent="onSubmit">
+                <div>
+                  <div
+                    v-bind="getRootProps()"
+                    class="border-dashed border-2 rounded-md p-6 text-center cursor-pointer"
+                  >
+                    <input v-bind="getInputProps()" class="hidden" />
+                    <p v-if="!file">Drop file here or click to upload</p>
+                    <p v-else>{{ file.name }}</p>
+                  </div>
+                </div>
+                <div>
+                  <label class="block mb-1">Category</label>
+                  <input v-model="category" class="border p-2 w-full" />
+                </div>
+                <div>
+                  <label class="block mb-1">Tags (comma separated)</label>
+                  <input v-model="tags" class="border p-2 w-full" />
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                  <button type="button" class="btn btn-outline-secondary" @click="emit('close')">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </form>
+            </DialogPanel>
+          </TransitionChild>
+        </div>
       </div>
-      <div>
-        <label class="block mb-1">Category</label>
-        <input v-model="category" class="border p-2 w-full" />
-      </div>
-      <div>
-        <label class="block mb-1">Tags (comma separated)</label>
-        <input v-model="tags" class="border p-2 w-full" />
-      </div>
-      <div>
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
-      </div>
-    </form>
-  </div>
+    </Dialog>
+  </TransitionRoot>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import {
+  TransitionRoot,
+  TransitionChild,
+  Dialog,
+  DialogPanel,
+} from '@headlessui/vue';
+import { useDropzone } from 'vue3-dropzone';
 import api from '@/services/api';
 
-const route = useRoute();
-const router = useRouter();
+const props = defineProps<{ manualId?: string | null }>();
+const emit = defineEmits(['saved', 'close']);
 
 const file = ref<File | null>(null);
 const category = ref('');
 const tags = ref('');
 
-const isEdit = computed(() => route.name === 'manuals.edit');
+const isEdit = computed(() => !!props.manualId);
 
-function onFile(e: Event) {
-  const target = e.target as HTMLInputElement;
-  if (target.files && target.files[0]) {
-    file.value = target.files[0];
-  }
+function onDrop(accepted: File[]) {
+  file.value = accepted[0] || null;
 }
 
+const { getRootProps, getInputProps } = useDropzone({ onDrop, multiple: false });
+
 onMounted(async () => {
-  if (isEdit.value) {
-    const { data } = await api.get(`/manuals/${route.params.id}`);
+  if (isEdit.value && props.manualId) {
+    const { data } = await api.get(`/manuals/${props.manualId}`);
     category.value = data.category || '';
     tags.value = (data.tags || []).join(', ');
   }
@@ -56,15 +100,15 @@ async function onSubmit() {
     .map((t) => t.trim())
     .filter((t) => t);
 
-  if (isEdit.value) {
-    await api.patch(`/manuals/${route.params.id}`, {
+  if (isEdit.value && props.manualId) {
+    await api.patch(`/manuals/${props.manualId}`, {
       category: category.value || null,
       tags: tagsArray,
     });
     if (file.value) {
       const form = new FormData();
       form.append('file', file.value);
-      await api.post(`/manuals/${route.params.id}/replace`, form);
+      await api.post(`/manuals/${props.manualId}/replace`, form);
     }
   } else {
     if (!file.value) return;
@@ -75,7 +119,6 @@ async function onSubmit() {
     await api.post('/manuals', form);
   }
 
-  router.push({ name: 'manuals.list' });
+  emit('saved');
 }
 </script>
-
