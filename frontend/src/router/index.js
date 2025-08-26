@@ -29,6 +29,18 @@ export const routes = [
     },
   },
   {
+    path: '/appointments/calendar',
+    name: 'appointments.calendar',
+    component: () => import('@/views/appointments/Calendar.vue'),
+    meta: {
+      requiresAuth: true,
+      breadcrumb: 'routes.appointments',
+      title: 'Appointments Calendar',
+      layout: 'app',
+      groupParent: 'appointments.list',
+    },
+  },
+  {
     path: '/appointments/:id',
     name: 'appointments.details',
     component: () => import('@/views/appointments/AppointmentDetails.vue'),
