@@ -36,7 +36,9 @@
     "gdpr": "GDPR",
     "notifications": "Notifications",
     "employees": "Employees",
-    "tenants": "Tenants"
+    "tenants": "Tenants",
+    "profile": "Profile",
+    "branding": "Branding"
   },
   "appointments": {
     "new": "New Appointment",

@@ -36,7 +36,9 @@
     "gdpr": "GDPR",
     "notifications": "Ειδοποιήσεις",
     "employees": "Υπάλληλοι",
-    "tenants": "Μισθωτές"
+    "tenants": "Μισθωτές",
+    "profile": "Προφίλ",
+    "branding": "Branding"
   },
   "appointments": {
     "new": "Νέο Ραντεβού",
