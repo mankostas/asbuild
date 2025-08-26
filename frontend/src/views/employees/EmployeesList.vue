@@ -7,63 +7,94 @@
         :to="{ name: 'employees.create' }"
       >Invite Employee</RouterLink>
     </div>
-    <table class="min-w-full border">
-      <thead>
-        <tr class="bg-gray-100 text-left">
-          <th class="p-2 border">Name</th>
-          <th class="p-2 border">Email</th>
-          <th class="p-2 border">Roles</th>
-          <th class="p-2 border">Phone</th>
-          <th class="p-2 border">Address</th>
-          <th class="p-2 border w-32">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="e in employees" :key="e.id" class="border-t">
-          <td class="p-2 border">{{ e.name }}</td>
-          <td class="p-2 border">{{ e.email }}</td>
-          <td class="p-2 border">{{ formatRoles(e.roles) }}</td>
-          <td class="p-2 border">{{ e.phone }}</td>
-          <td class="p-2 border">{{ e.address }}</td>
-          <td class="p-2 border flex gap-2">
-            <RouterLink
-              class="text-blue-600"
-              :to="{ name: 'employees.edit', params: { id: e.id } }"
-            >Edit</RouterLink>
-            <button class="text-red-600" @click="remove(e.id)">Delete</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <DashcodeServerTable
+      :key="tableKey"
+      :columns="columns"
+      :fetcher="fetchEmployees"
+    >
+      <template #actions="{ row }">
+        <div class="flex gap-2">
+          <RouterLink
+            class="text-blue-600"
+            :to="{ name: 'employees.edit', params: { id: row.id } }"
+          >Edit</RouterLink>
+          <button class="text-red-600" @click="remove(row.id)">Delete</button>
+        </div>
+      </template>
+    </DashcodeServerTable>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useToast } from '@/plugins/toast';
-import api from '@/services/api';
+import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
+import api from '@/services/api';
+import { useToast } from '@/plugins/toast';
 
-const employees = ref<any[]>([]);
 const toast = useToast();
+const tableKey = ref(0);
+const all = ref<any[]>([]);
+
+const columns = [
+  { label: 'Name', field: 'name', sortable: true },
+  { label: 'Email', field: 'email', sortable: true },
+  { label: 'Roles', field: 'roles', sortable: false },
+  { label: 'Phone', field: 'phone', sortable: true },
+  { label: 'Address', field: 'address', sortable: false },
+];
 
 function formatRoles(roles: any[]) {
   return roles
-    .filter((r) => r.name !== 'SuperAdmin')
-    .map((r) => r.name)
+    .filter((r: any) => r.name !== 'SuperAdmin')
+    .map((r: any) => r.name)
     .join(', ');
 }
 
-async function load() {
-  const { data } = await api.get('/employees');
-  employees.value = data;
+async function fetchEmployees({ page, perPage, sort, search }: any) {
+  if (!all.value.length) {
+    const { data } = await api.get('/employees');
+    all.value = data;
+  }
+  let rows = all.value.slice();
+  if (search) {
+    const q = String(search).toLowerCase();
+    rows = rows.filter((r) =>
+      Object.values(r).some((v) => String(v ?? '').toLowerCase().includes(q)),
+    );
+  }
+  if (sort && sort.field) {
+    rows.sort((a: any, b: any) => {
+      const fa = a[sort.field] ?? '';
+      const fb = b[sort.field] ?? '';
+      if (fa < fb) return sort.type === 'asc' ? -1 : 1;
+      if (fa > fb) return sort.type === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+  const total = rows.length;
+  const start = (page - 1) * perPage;
+  const paged = rows.slice(start, start + perPage).map((r: any) => ({
+    id: r.id,
+    name: r.name,
+    email: r.email,
+    roles: formatRoles(r.roles),
+    phone: r.phone,
+    address: r.address,
+  }));
+  return { rows: paged, total };
+}
+
+function reload() {
+  tableKey.value++;
 }
 
 async function remove(id: number) {
   if (!confirm('Delete employee?')) return;
   try {
     await api.delete(`/employees/${id}`);
-    await load();
+    all.value = [];
+    reload();
   } catch (e: any) {
     if (e.status === 403) {
       toast.add({
@@ -76,7 +107,5 @@ async function remove(id: number) {
     }
   }
 }
-
-onMounted(load);
 </script>
 
