@@ -77,7 +77,9 @@ api.interceptors.response.use(
         } catch (e) {}
       }
       await auth.logout(true);
-      window.location.href = '/auth/login';
+      if (window.location.pathname !== '/auth/login') {
+        window.location.href = '/auth/login';
+      }
     }
 
     if (status && status >= 500) {
