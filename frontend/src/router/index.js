@@ -172,14 +172,40 @@ export const routes = [
   },
   {
     path: '/employees',
-    name: 'employees',
-    component: () => import('@/views/EmployeeList.vue'),
+    name: 'employees.list',
+    component: () => import('@/views/employees/EmployeesList.vue'),
     meta: {
       requiresAuth: true,
       admin: true,
       breadcrumb: 'routes.employees',
       title: 'Employees',
       layout: 'app',
+    },
+  },
+  {
+    path: '/employees/create',
+    name: 'employees.create',
+    component: () => import('@/views/employees/EmployeeForm.vue'),
+    meta: {
+      requiresAuth: true,
+      admin: true,
+      breadcrumb: 'routes.employeeCreate',
+      title: 'Invite Employee',
+      layout: 'app',
+      groupParent: 'employees.list',
+    },
+  },
+  {
+    path: '/employees/:id/edit',
+    name: 'employees.edit',
+    component: () => import('@/views/employees/EmployeeForm.vue'),
+    meta: {
+      requiresAuth: true,
+      admin: true,
+      breadcrumb: 'routes.employeeEdit',
+      title: 'Edit Employee',
+      layout: 'app',
+      groupParent: 'employees.list',
     },
   },
   {
