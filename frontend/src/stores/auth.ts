@@ -44,10 +44,12 @@ export const useAuthStore = defineStore('auth', {
       const { data } = await api.get('/me');
       this.user = data;
     },
-    async logout() {
-      try {
-        await api.post('/auth/logout');
-      } catch (e) {}
+    async logout(skipServer = false) {
+      if (!skipServer) {
+        try {
+          await api.post('/auth/logout');
+        } catch (e) {}
+      }
       this.accessToken = '';
       this.refreshToken = '';
       this.user = null;
