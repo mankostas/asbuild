@@ -1,106 +1,122 @@
 <template>
   <div>
     <h2 class="text-xl font-bold mb-4">Manuals</h2>
-    <DashcodeServerTable
-      :key="tableKey"
-      :columns="columns"
-      :fetcher="fetchManuals"
-    >
-      <template #search="{ search }">
-        <div class="flex gap-2">
-          <input
-            v-model="search.value"
-            placeholder="Search"
-            class="border p-2 flex-1"
-          />
-          <button
-            class="bg-blue-600 text-white px-4 py-2 rounded"
-            @click="create"
-          >
-            Upload Manual
-          </button>
-        </div>
-      </template>
-      <template #actions="{ row }">
-        <div class="space-x-2">
-          <button class="text-blue-600" @click="download(row)">Download</button>
-          <button class="text-green-600" @click="edit(row)">Edit</button>
-        </div>
-      </template>
-    </DashcodeServerTable>
+    <div class="flex flex-wrap items-center gap-2 mb-4">
+      <input
+        v-model="search"
+        placeholder="Search"
+        type="text"
+        class="border p-2 flex-1"
+        @input="onSearch"
+      />
+      <select v-model="category" class="border p-2">
+        <option value="">All</option>
+        <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+      </select>
+      <label class="flex items-center gap-1 text-sm">
+        Favorites
+        <input v-model="showFavorites" type="checkbox" class="form-switch" />
+      </label>
+      <label class="flex items-center gap-1 text-sm">
+        Offline
+        <input v-model="showOffline" type="checkbox" class="form-switch" />
+      </label>
+      <button class="btn btn-primary ml-auto" @click="openCreate">
+        Upload Manual
+      </button>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ManualCard
+        v-for="m in filteredManuals"
+        :key="m.id"
+        :manual="m"
+        :favorite="store.favorites.includes(m.id)"
+        :offline="store.offline.includes(m.id)"
+        @open="open"
+        @toggle-favorite="store.toggleFavorite"
+        @offline="toggleOffline"
+      />
+    </div>
+    <ManualForm
+      v-if="showForm"
+      :manual-id="editId"
+      @close="closeForm"
+      @saved="onSaved"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
-import api from '@/services/api';
+import { useManualsStore } from '@/stores/manuals';
+import ManualCard from '@/components/manuals/ManualCard.vue';
+import ManualForm from './ManualForm.vue';
 
 const router = useRouter();
-const all = ref<any[]>([]);
-const tableKey = ref(0);
+const store = useManualsStore();
 
-const columns = [
-  { label: 'File', field: 'file', sortable: true },
-  { label: 'Category', field: 'category', sortable: true },
-  { label: 'Tags', field: 'tags', sortable: false },
-];
+const search = ref('');
+const category = ref('');
+const showFavorites = ref(false);
+const showOffline = ref(false);
+const showForm = ref(false);
+const editId = ref<string | null>(null);
 
-async function fetchManuals({ page, perPage, sort, search }: any) {
-  if (!all.value.length) {
-    const { data } = await api.get('/manuals');
-    all.value = data;
-  }
-  let rows = all.value.slice();
-  if (search) {
-    const q = String(search).toLowerCase();
-    rows = rows.filter((r) =>
-      [r.file?.filename, r.category, ...(r.tags || [])].some((v) =>
+onMounted(async () => {
+  await store.fetch();
+  await store.loadOfflineList();
+});
+
+const categories = computed(() => [
+  ...new Set(store.manuals.map((m) => m.category).filter(Boolean)),
+]);
+
+const filteredManuals = computed(() => {
+  let arr = store.manuals;
+  if (category.value) arr = arr.filter((m) => m.category === category.value);
+  if (showFavorites.value)
+    arr = arr.filter((m) => store.favorites.includes(m.id));
+  if (showOffline.value)
+    arr = arr.filter((m) => store.offline.includes(m.id));
+  if (search.value) {
+    const q = search.value.toLowerCase();
+    arr = arr.filter((m) =>
+      [m.file?.filename, m.category, ...(m.tags || [])].some((v) =>
         String(v ?? '').toLowerCase().includes(q),
       ),
     );
   }
-  if (sort && sort.field) {
-    rows.sort((a: any, b: any) => {
-      const fa = a[sort.field] ?? '';
-      const fb = b[sort.field] ?? '';
-      if (fa < fb) return sort.type === 'asc' ? -1 : 1;
-      if (fa > fb) return sort.type === 'asc' ? 1 : -1;
-      return 0;
-    });
+  return arr;
+});
+
+function onSearch() {
+  store.fetch(search.value);
+}
+
+function open(id: number) {
+  router.push(`/manuals/${id}`);
+}
+
+async function toggleOffline(manual: any) {
+  if (store.offline.includes(manual.id)) {
+    await store.removeOffline(manual.id);
+  } else {
+    await store.keepOffline(manual);
   }
-  const total = rows.length;
-  const start = (page - 1) * perPage;
-  const paged = rows.slice(start, start + perPage).map((r: any) => ({
-    id: r.id,
-    file: r.file?.filename,
-    category: r.category,
-    tags: (r.tags || []).join(', '),
-  }));
-  return { rows: paged, total };
 }
 
-function reload() {
-  tableKey.value++;
+function openCreate() {
+  editId.value = null;
+  showForm.value = true;
 }
 
-function create() {
-  router.push({ name: 'manuals.create' });
+function closeForm() {
+  showForm.value = false;
 }
 
-function edit(m: any) {
-  router.push({ name: 'manuals.edit', params: { id: m.id } });
-}
-
-async function download(m: any) {
-  const { data } = await api.get(`/manuals/${m.id}/download`, { responseType: 'blob' });
-  const url = window.URL.createObjectURL(data);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = m.file?.filename || 'manual';
-  a.click();
-  window.URL.revokeObjectURL(url);
+async function onSaved() {
+  showForm.value = false;
+  await store.fetch(search.value);
 }
 </script>
-
