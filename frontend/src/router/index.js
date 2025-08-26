@@ -154,7 +154,8 @@ export const routes = [
   {
     path: '/notifications/preferences',
     name: 'notifications.prefs',
-    component: () => import('@/views/notifications/NotificationPreferences.vue'),
+    component: () =>
+      import('@/views/notifications/NotificationPreferences.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.notifications',
@@ -201,10 +202,11 @@ export const routes = [
       layout: 'app',
     },
   },
+  { path: '/reports', redirect: '/reports/kpis' },
   {
-    path: '/reports',
-    name: 'reports',
-    component: () => import('@/views/ReportsDashboard.vue'),
+    path: '/reports/kpis',
+    name: 'reports.kpis',
+    component: () => import('@/views/reports/Reports.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.reports',
@@ -317,8 +319,8 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
-      return next('/auth/login');
-    }
+    return next('/auth/login');
+  }
 
   if (to.meta.admin) {
     const roles = auth.user?.roles?.map((r) => r.name) || [];
