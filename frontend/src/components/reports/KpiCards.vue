@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import Card from '@/components/ui/Card.vue';
+import Card from '@/components/ui/Card/index.vue';
 
 interface Kpi {
   label: string;
