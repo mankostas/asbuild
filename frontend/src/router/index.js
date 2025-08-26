@@ -31,7 +31,7 @@ export const routes = [
   {
     path: '/appointments/:id',
     name: 'appointments.details',
-    component: () => import('@/views/AppointmentDetail.vue'),
+    component: () => import('@/views/appointments/AppointmentDetails.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.appointmentDetail',
