@@ -1,4 +1,5 @@
 <template>
+  <Toast />
   <component :is="layoutComponent" />
 </template>
 
@@ -6,6 +7,7 @@
 import { computed, defineComponent, h } from 'vue';
 import { useRoute, RouterView } from 'vue-router';
 import AppLayout from './Layout/AppLayout.vue';
+import Toast from '@/components/ui/Toast.vue';
 
 const route = useRoute();
 
