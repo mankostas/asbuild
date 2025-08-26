@@ -6,19 +6,14 @@
     <Icon icon="mdi:palette-outline" class="font-bold" />
   </span>
 </template>
-<script>
+<script setup>
 import Icon from "@/components/Icon";
 import { useThemeSettingsStore } from "@/store/themeSettings";
+
 const themeSettingsStore = useThemeSettingsStore();
-export default {
-  components: {
-    Icon,
-  },
-  methods: {
-    toggleMonochrome() {
-      themeSettingsStore.toggleMonochrome();
-    },
-  },
-};
+
+function toggleMonochrome() {
+  themeSettingsStore.toggleMonochrome();
+}
 </script>
 <style lang=""></style>
