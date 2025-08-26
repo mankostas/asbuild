@@ -1,69 +1,70 @@
 <template>
   <div v-if="appointment">
-    <Card class="mb-4">
-      <template #title>
-        Appointment {{ appointment.id }}
-      </template>
-      <template #content>
-        <div class="mb-2 flex items-center gap-2">
-          <span class="font-semibold">{{ appointment.type?.name || '—' }}</span>
-          <span
-            class="px-2 py-1 rounded-full text-xs font-semibold"
-            :class="statusClasses[appointment.status]"
-          >
-            {{ appointment.status.replace(/_/g, ' ') }}
-          </span>
-        </div>
-        <ul class="text-sm mb-2">
-          <li>Scheduled: {{ format(appointment.scheduled_at) || '—' }}</li>
-          <li>Started: {{ format(appointment.started_at) || '—' }}</li>
-          <li>Completed: {{ format(appointment.completed_at) || '—' }}</li>
-          <li>SLA End: {{ format(appointment.sla_end_at) || '—' }}</li>
-          <li>SLA: {{ slaStatus }}</li>
-        </ul>
-        <div class="flex gap-2 mt-2">
-          <button
-            v-for="a in changeActions"
-            :key="a.value"
-            class="text-blue-600"
-            @click="updateStatus(a.value)"
-          >
-            Mark {{ a.label }}
-          </button>
-        </div>
-      </template>
+    <Card class="mb-4" :title="`Appointment ${appointment.id}`">
+      <div class="mb-2 flex items-center gap-2">
+        <span class="font-semibold">{{ appointment.type?.name || '—' }}</span>
+        <span
+          class="px-2 py-1 rounded-full text-xs font-semibold"
+          :class="statusClasses[appointment.status]"
+        >
+          {{ appointment.status.replace(/_/g, ' ') }}
+        </span>
+      </div>
+      <ul class="text-sm mb-2">
+        <li>Scheduled: {{ format(appointment.scheduled_at) || '—' }}</li>
+        <li>Started: {{ format(appointment.started_at) || '—' }}</li>
+        <li>Completed: {{ format(appointment.completed_at) || '—' }}</li>
+        <li>SLA End: {{ format(appointment.sla_end_at) || '—' }}</li>
+        <li>SLA: {{ slaStatus }}</li>
+      </ul>
+      <div class="flex flex-wrap gap-2 mt-2">
+        <Button
+          v-for="a in changeActions"
+          :key="a.value"
+          :text="`Mark ${a.label}`"
+          btnClass="btn-outline-primary btn-sm"
+          @click="updateStatus(a.value)"
+        />
+      </div>
     </Card>
 
-    <TabView>
-      <TabPanel header="Details">
-        <div class="text-sm">
-          <div>Kau Notes: {{ appointment.kau_notes || '—' }}</div>
-        </div>
-      </TabPanel>
-      <TabPanel header="Photos">
-        <div class="flex flex-wrap gap-4">
-          <template v-for="photo in appointment.photos" :key="photo.id">
-            <img
-              v-if="hasThumb(photo.file)"
-              :src="photo.file.variants.thumb"
-              class="w-24 h-24 object-cover rounded"
-            />
-            <div
-              v-else
-              class="flex items-center gap-2 px-2 py-1 border rounded text-sm text-gray-600"
-            >
-              <span>{{ photo.file?.filename }}</span>
-              <button disabled class="text-gray-400 cursor-not-allowed">Open</button>
+    <Tabs v-model="activeTab" :tabs="tabs">
+      <template #default="{ active }">
+        <div v-if="active === 'details'">
+          <Card>
+            <div class="text-sm">
+              <div>Kau Notes: {{ appointment.kau_notes || '—' }}</div>
             </div>
-            <!-- TODO: needs signed URL endpoint -->
-          </template>
+          </Card>
         </div>
-      </TabPanel>
-      <TabPanel header="Comments">
-        <CommentsThread :comments="appointment.comments" class="mb-4" />
-        <CommentEditor :appointment-id="appointment.id" @added="onCommentAdded" />
-      </TabPanel>
-    </TabView>
+        <div v-else-if="active === 'photos'">
+          <Card>
+            <div class="flex flex-wrap gap-4">
+              <template v-for="photo in appointment.photos" :key="photo.id">
+                <img
+                  v-if="hasThumb(photo.file)"
+                  :src="photo.file.variants.thumb"
+                  class="w-24 h-24 object-cover rounded"
+                />
+                <div
+                  v-else
+                  class="flex items-center gap-2 px-2 py-1 border rounded text-sm text-gray-600"
+                >
+                  <span>{{ photo.file?.filename }}</span>
+                  <Button text="Open" btnClass="btn-dark" :isDisabled="true" />
+                </div>
+              </template>
+            </div>
+          </Card>
+        </div>
+        <div v-else-if="active === 'comments'">
+          <Card>
+            <CommentsThread :comments="appointment.comments" class="mb-4" />
+            <CommentEditor :appointment-id="appointment.id" @added="onCommentAdded" />
+          </Card>
+        </div>
+      </template>
+    </Tabs>
   </div>
 </template>
 
@@ -71,10 +72,10 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/services/api';
-import Card from 'primevue/card';
-import TabView from 'primevue/tabview';
-import TabPanel from 'primevue/tabpanel';
-import { useToast } from '@/plugins/toast';
+import Card from '@/components/ui/Card/index.vue';
+import Tabs from '@/components/ui/Tabs.vue';
+import Button from '@/components/ui/Button/index.vue';
+import { useToast } from 'vue-toastification';
 import CommentsThread from '@/components/comments/CommentsThread.vue';
 import CommentEditor from '@/components/comments/CommentEditor.vue';
 
@@ -91,6 +92,13 @@ const statusClasses: Record<string, string> = {
   rejected: 'bg-red-100 text-red-800',
   redo: 'bg-purple-100 text-purple-800',
 };
+
+const tabs = [
+  { id: 'details', label: 'Details' },
+  { id: 'photos', label: 'Photos' },
+  { id: 'comments', label: 'Comments' },
+];
+const activeTab = ref('details');
 
 function format(date?: string) {
   return date ? new Date(date).toLocaleString() : '';
@@ -129,9 +137,10 @@ async function updateStatus(status: string) {
   try {
     await api.patch(`/appointments/${appointment.value.id}`, { status });
     appointment.value.status = status;
+    toast.success('Status updated');
   } catch (e: any) {
     if (e.status === 422) {
-      toast.add({ severity: 'error', summary: 'Invalid status transition', detail: '' });
+      toast.error('Invalid status transition');
     }
   }
 }

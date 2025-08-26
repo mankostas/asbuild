@@ -1,43 +1,57 @@
 <template>
   <div>
     <h2 class="text-xl font-bold mb-4">{{ isEdit ? 'Edit' : 'Create' }} Appointment</h2>
-    <form @submit.prevent="onSubmit" class="max-w-lg">
-      <div class="mb-4">
-        <label class="block font-medium mb-1" for="type">Type<span class="text-red-600">*</span></label>
-        <select id="type" v-model="typeId" class="border rounded p-2 w-full" @change="onTypeChange">
-          <option value="">Select type</option>
-          <option v-for="t in types" :key="t.id" :value="t.id">{{ t.name }}</option>
-        </select>
-      </div>
-      <div class="mb-4">
-        <label class="block font-medium mb-1" for="scheduled">Scheduled At</label>
-        <input id="scheduled" type="datetime-local" v-model="scheduledAt" class="border rounded p-2 w-full" />
-      </div>
-      <div class="mb-4">
-        <label class="block font-medium mb-1" for="sla_start">SLA Start</label>
-        <input id="sla_start" type="datetime-local" v-model="slaStartAt" class="border rounded p-2 w-full" />
-      </div>
-      <div class="mb-4">
-        <label class="block font-medium mb-1" for="sla_end">SLA End</label>
-        <input id="sla_end" type="datetime-local" v-model="slaEndAt" class="border rounded p-2 w-full" />
-      </div>
-      <div class="mb-4" v-if="isEdit">
-        <label class="block font-medium mb-1" for="status">Status</label>
-        <select id="status" v-model="status" class="border rounded p-2 w-full">
-          <option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
-        </select>
-      </div>
+    <form @submit.prevent="submitForm" class="max-w-lg space-y-4">
+      <VueSelect label="Type" :error="typeError">
+        <vSelect
+          v-model="typeId"
+          :options="types"
+          label="name"
+          :reduce="(t: any) => t.id"
+          placeholder="Select type"
+          @option:selected="onTypeChange"
+        />
+      </VueSelect>
+
+      <FromGroup label="Scheduled At">
+        <flat-pickr v-model="scheduledAt" :config="dateConfig" class="form-control" />
+      </FromGroup>
+
+      <FromGroup label="SLA Start">
+        <flat-pickr v-model="slaStartAt" :config="dateConfig" class="form-control" />
+      </FromGroup>
+
+      <FromGroup label="SLA End">
+        <flat-pickr v-model="slaEndAt" :config="dateConfig" class="form-control" />
+      </FromGroup>
+
+      <VueSelect v-if="isEdit" label="Status">
+        <vSelect v-model="status" :options="statusOptions" placeholder="Select status" />
+      </VueSelect>
+
       <JsonSchemaForm
         v-if="currentSchema"
         :key="typeId"
         v-model="formData"
         :schema="currentSchema"
       />
-      <div v-if="serverError" class="text-red-600 text-sm mt-2">{{ serverError }}</div>
-      <div class="mt-4">
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded" :disabled="!canSubmit">Submit</button>
+
+      <div class="pt-2">
+        <Button
+          type="submit"
+          text="Submit"
+          btnClass="btn-dark"
+          :isDisabled="!meta.valid || !canSubmit"
+        />
       </div>
     </form>
+
+    <Modal :activeModal="showError" title="Error" @close="showError = false">
+      <p>{{ serverError }}</p>
+      <template #footer>
+        <Button text="Close" btnClass="btn-dark" @click="showError = false" />
+      </template>
+    </Modal>
   </div>
 </template>
 
@@ -46,21 +60,37 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '@/services/api';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
+import Button from '@/components/ui/Button/index.vue';
+import VueSelect from '@/components/ui/Select/VueSelect.vue';
+import FromGroup from '@/components/ui/FromGroup/index.vue';
+import Modal from '@/components/ui/Modal/index.vue';
+import { useField, useForm } from 'vee-validate';
+import * as yup from 'yup';
+import vSelect from 'vue-select';
+import { useToast } from 'vue-toastification';
 
+const toast = useToast();
 const router = useRouter();
 const route = useRoute();
 
 const types = ref<any[]>([]);
-const typeId = ref<string | number>('');
 const formData = ref<any>({});
 const scheduledAt = ref('');
 const slaStartAt = ref('');
 const slaEndAt = ref('');
 const status = ref('');
 const serverError = ref('');
+const showError = ref(false);
 const originalStatus = ref('');
 
 const statusOptions = ['draft', 'assigned', 'in_progress', 'completed', 'rejected', 'redo'];
+
+const schema = yup.object({
+  typeId: yup.mixed().required('Type is required'),
+});
+
+const { handleSubmit, meta } = useForm({ validationSchema: schema });
+const { value: typeId, errorMessage: typeError } = useField<string | number>('typeId');
 
 const isEdit = computed(() => route.name === 'appointments.edit');
 
@@ -99,15 +129,23 @@ const canSubmit = computed(() => {
   });
 });
 
+const dateConfig = {
+  enableTime: true,
+  dateFormat: 'Y-m-d H:i',
+  altInput: true,
+  altFormat: 'F j, Y H:i',
+  time_24hr: true,
+};
+
 function toInput(v?: string) {
-  return v ? v.substring(0, 16) : '';
+  return v ? new Date(v).toISOString().slice(0, 16).replace('T', ' ') : '';
 }
 
 function toIso(v: string) {
   return v ? new Date(v).toISOString() : undefined;
 }
 
-async function onSubmit() {
+const submitForm = handleSubmit(async () => {
   serverError.value = '';
   const payload: any = {
     appointment_type_id: typeId.value,
@@ -122,13 +160,17 @@ async function onSubmit() {
         payload.status = status.value;
       }
       await api.patch(`/appointments/${route.params.id}`, payload);
+      toast.success('Appointment updated');
       router.push({ name: 'appointments.details', params: { id: route.params.id } });
     } else {
       const res = await api.post('/appointments', payload);
+      toast.success('Appointment created');
       router.push({ name: 'appointments.details', params: { id: res.data.id } });
     }
   } catch (e: any) {
     serverError.value = e.message || 'Failed to save';
+    toast.error(serverError.value);
+    showError.value = true;
   }
-}
+});
 </script>
