@@ -10,12 +10,11 @@
           :placeholder="t('appointments.filters.global')"
           class="mr-2"
         />
-        <Button
-          v-if="isAdmin"
-          :label="t('appointments.new')"
-          icon="pi pi-plus"
-          @click="openNew"
-        />
+        <Button v-if="isAdmin" :label="t('appointments.new')" @click="openNew">
+          <template #icon>
+            <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
+          </template>
+        </Button>
       </template>
     </Toolbar>
     <DataTable
@@ -70,16 +69,16 @@
       <Column v-if="isAdmin" :header="t('actions.actions')">
         <template #body="slotProps">
           <div class="flex gap-2">
-            <Button
-              icon="pi pi-pencil"
-              class="p-button-rounded p-button-text"
-              @click="openEdit(slotProps.data)"
-            />
-            <Button
-              icon="pi pi-trash"
-              class="p-button-rounded p-button-text"
-              @click="confirmDelete(slotProps.data)"
-            />
+            <Button class="p-button-rounded p-button-text" @click="openEdit(slotProps.data)">
+              <template #icon>
+                <Icon icon="heroicons-outline:pencil" class="w-5 h-5" />
+              </template>
+            </Button>
+            <Button class="p-button-rounded p-button-text" @click="confirmDelete(slotProps.data)">
+              <template #icon>
+                <Icon icon="heroicons-outline:trash" class="w-5 h-5" />
+              </template>
+            </Button>
           </div>
         </template>
       </Column>
@@ -88,7 +87,11 @@
     <Dialog v-model:visible="showCreate" :header="t('appointments.new')" modal>
       <div class="flex flex-col gap-3">
         <InputText v-model="form.title" :placeholder="t('appointments.form.title')" />
-        <Calendar v-model="form.scheduled_at" show-icon date-format="yy-mm-dd" />
+        <Calendar v-model="form.scheduled_at" show-icon date-format="yy-mm-dd">
+          <template #icon>
+            <Icon icon="heroicons-outline:calendar" class="w-5 h-5" />
+          </template>
+        </Calendar>
         <Dropdown
           v-model="form.status"
           :options="statusOptions"
@@ -108,7 +111,11 @@
     <Dialog v-model:visible="showEdit" :header="t('appointments.edit')" modal>
       <div class="flex flex-col gap-3">
         <InputText v-model="form.title" :placeholder="t('appointments.form.title')" />
-        <Calendar v-model="form.scheduled_at" show-icon date-format="yy-mm-dd" />
+        <Calendar v-model="form.scheduled_at" show-icon date-format="yy-mm-dd">
+          <template #icon>
+            <Icon icon="heroicons-outline:calendar" class="w-5 h-5" />
+          </template>
+        </Calendar>
         <Dropdown
           v-model="form.status"
           :options="statusOptions"
@@ -148,6 +155,7 @@ import { useNotify } from '@/plugins/notify';
 import Swal from 'sweetalert2';
 import { useI18n } from 'vue-i18n';
 import { filterAppointments, Appointment } from '@/utils/appointmentFilters';
+import Icon from '@/components/ui/Icon';
 
 const { t } = useI18n();
 const notify = useNotify();

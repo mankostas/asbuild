@@ -1,5 +1,8 @@
 <template>
-  <Button icon="pi pi-bell" class="p-overlay-badge" text to="/notifications">
+  <Button class="p-overlay-badge" text to="/notifications">
+    <template #icon>
+      <Icon icon="heroicons-outline:bell" class="w-5 h-5" />
+    </template>
     <Badge v-if="unreadCount" :value="unreadCount" />
   </Button>
 </template>
@@ -11,6 +14,7 @@ import { storeToRefs } from 'pinia';
 import Button from 'primevue/button';
 import Badge from 'primevue/badge';
 import { useNotificationStore } from '@/stores/notifications';
+import Icon from '@/components/ui/Icon';
 
 const store = useNotificationStore();
 const { unreadCount } = storeToRefs(store);
