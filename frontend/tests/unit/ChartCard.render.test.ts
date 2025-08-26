@@ -5,9 +5,8 @@ import ChartCard from '@/components/reports/ChartCard.vue';
 import { createI18n } from 'vue-i18n';
 import en from '@/i18n/en.json';
 
-vi.mock('vue-chartjs', () => ({
-  Bar: { name: 'Bar', template: '<div />' },
-  Line: { name: 'Line', template: '<div />' },
+vi.mock('vue3-apexcharts', () => ({
+  default: { name: 'apexchart', template: '<div />' },
 }));
 
 const i18n = createI18n({ locale: 'en', messages: { en } });
@@ -20,6 +19,9 @@ describe('ChartCard', () => {
       series: [],
     });
     app.use(i18n);
+    app.config.globalProperties.$store = {
+      themeSettingsStore: { skin: '', isDark: false },
+    } as any;
     const div = document.createElement('div');
     app.mount(div);
     expect(div.querySelector('.animate-pulse')).toBeTruthy();
@@ -28,8 +30,11 @@ describe('ChartCard', () => {
     const series = [{ label: 'A', data: [{ x: '1', y: 1 }] }];
     const app = createApp(ChartCard, { title: 'Test', type: 'bar', series });
     app.use(i18n);
+    app.config.globalProperties.$store = {
+      themeSettingsStore: { skin: '', isDark: false },
+    } as any;
     const div = document.createElement('div');
     app.mount(div);
-    expect(div.querySelector('div')).toBeTruthy();
+    expect(div.querySelector('.animate-pulse')).toBeFalsy();
   });
 });

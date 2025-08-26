@@ -4,11 +4,12 @@
     <div v-if="!hasData" class="flex h-56 items-center justify-center">
       <Skeleton class="h-full w-full" />
     </div>
-    <component
+    <apexchart
       v-else
-      :is="chartComponent"
-      :data="chartData"
+      :type="type"
+      height="256"
       :options="chartOptions"
+      :series="apexSeries"
       class="h-64"
     />
   </Card>
@@ -16,31 +17,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Bar, Line } from 'vue-chartjs';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  TimeScale,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import VueApexCharts from 'vue3-apexcharts';
 import Card from '@/components/ui/Card/index.vue';
 import Skeleton from '@/components/ui/Skeleton.vue';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  TimeScale,
-  Tooltip,
-  Legend,
-);
+const apexchart = VueApexCharts;
 
 interface Datum {
   x: string | number | Date;
@@ -53,34 +34,26 @@ interface Series {
 
 const props = defineProps<{
   title: string;
-  type: 'bar' | 'line';
+  type: 'bar' | 'line' | 'pie';
   series: Series[];
   yLabel?: string;
 }>();
 
 const hasData = computed(() => props.series.some((s) => s.data.length));
 
-const chartComponent = computed(() => (props.type === 'bar' ? Bar : Line));
-
-const chartData = computed(() => ({
-  datasets: props.series.map((s) => ({
-    label: s.label,
-    data: s.data,
-    parsing: { xAxisKey: 'x', yAxisKey: 'y' },
-    borderWidth: 2,
+const apexSeries = computed(() =>
+  props.series.map((s) => ({
+    name: s.label,
+    data: s.data.map((d) => ({ x: d.x, y: d.y })),
   })),
-}));
+);
 
 const chartOptions = computed(() => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { display: true } },
-  scales: {
-    x: { type: inferTime(props.series) ? 'time' : 'category' },
-    y: {
-      title: props.yLabel ? { display: true, text: props.yLabel } : undefined,
-    },
-  },
+  chart: { toolbar: { show: false } },
+  xaxis: { type: inferTime(props.series) ? 'datetime' : 'category' },
+  yaxis: props.yLabel ? { title: { text: props.yLabel } } : {},
+  dataLabels: { enabled: false },
+  stroke: { curve: 'smooth' },
 }));
 
 function inferTime(s: Series[]): boolean {

@@ -3,10 +3,15 @@
     <Card
       v-for="k in kpis"
       :key="k.label"
-      class="flex flex-col gap-1 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent"
+      bodyClass="p-6 flex flex-col gap-1"
     >
-      <span class="text-sm font-medium text-foreground/70">{{ k.label }}</span>
-      <span class="text-3xl font-bold tracking-tight">{{ k.value }}</span>
+      <span class="text-sm font-medium text-slate-600 dark:text-slate-300"
+        >{{ k.label }}</span
+      >
+      <span
+        class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white"
+        >{{ k.value }}</span
+      >
     </Card>
   </div>
 </template>
