@@ -1,6 +1,37 @@
 <template>
   <div class="mx-auto max-w-7xl space-y-8 p-6">
-    <h2 class="text-3xl font-bold tracking-tight">Reports</h2>
+    <div
+      class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
+    >
+      <h2 class="text-3xl font-bold tracking-tight">Reports</h2>
+      <div class="flex flex-wrap items-end gap-2">
+        <Dropdown>
+          <template #default>
+            <Button variant="outline">{{ rangeLabel }}</Button>
+          </template>
+          <template #menus>
+            <div>
+              <div
+                v-for="o in rangeOptions"
+                :key="o.value"
+                class="px-4 py-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-600"
+                @click="selectRange(o.value)"
+              >
+                {{ o.label }}
+              </div>
+            </div>
+          </template>
+        </Dropdown>
+        <flat-pickr
+          v-if="range === 'custom'"
+          v-model="dateRange"
+          :config="{ mode: 'range' }"
+          class="form-control w-56"
+        />
+        <Button @click="applyRange">Apply</Button>
+        <Button variant="secondary" @click="exportCsv">Export CSV</Button>
+      </div>
+    </div>
 
     <Tabs v-model="activeTab" :tabs="tabs">
       <template #default="{ active }">
@@ -28,7 +59,6 @@
             <div v-if="chartSeries.length" class="mt-6">
               <ChartCard title="Trend" type="line" :series="chartSeries" />
             </div>
-            <Button variant="secondary" @click="exportCsv">Export CSV</Button>
           </div>
         </div>
 
@@ -70,14 +100,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import api from '@/services/api';
 import Tabs from '@/components/ui/Tabs.vue';
 import Button from '@/components/ui/Button/index.vue';
 import Card from '@/components/ui/Card/index.vue';
 import Skeleton from '@/components/ui/Skeleton.vue';
+import Dropdown from '@/components/ui/Dropdown/index.vue';
 import KpiCards from '@/components/reports/KpiCards.vue';
 import ChartCard from '@/components/reports/ChartCard.vue';
+import FlatPickr from 'vue-flatpickr-component';
+import 'flatpickr/dist/flatpickr.css';
 
 interface KpiResponse {
   completed: number;
@@ -112,6 +145,43 @@ const tabs = [
 
 const activeTab = ref('kpis');
 
+const range = ref('today');
+const dateRange = ref<Date[] | null>(null);
+const rangeOptions = [
+  { value: 'today', label: 'Today' },
+  { value: '7', label: 'Last 7 days' },
+  { value: '30', label: 'Last 30 days' },
+  { value: 'custom', label: 'Custom' },
+];
+const rangeLabel = computed(
+  () => rangeOptions.find((o) => o.value === range.value)?.label || '',
+);
+
+function selectRange(val: string) {
+  range.value = val;
+}
+
+function formatDate(d: Date) {
+  return d.toISOString().split('T')[0];
+}
+
+function params() {
+  if (
+    range.value === 'custom' &&
+    Array.isArray(dateRange.value) &&
+    dateRange.value.length === 2
+  ) {
+    const [from, to] = dateRange.value as Date[];
+    return { from: formatDate(from), to: formatDate(to) };
+  }
+  return { range: range.value };
+}
+
+function applyRange() {
+  fetchKpis();
+  fetchMaterials();
+}
+
 const kpisLoading = ref(false);
 const kpisError = ref(false);
 const kpiCards = ref<KpiCard[]>([]);
@@ -121,7 +191,9 @@ async function fetchKpis() {
   kpisLoading.value = true;
   kpisError.value = false;
   try {
-    const { data } = await api.get<KpiResponse>('/reports/kpis');
+    const { data } = await api.get<KpiResponse>('/reports/kpis', {
+      params: params(),
+    });
     kpiCards.value = [
       { label: 'Completed', value: data.completed },
       {
@@ -162,7 +234,9 @@ async function fetchMaterials() {
   materialsLoading.value = true;
   materialsError.value = false;
   try {
-    const { data } = await api.get('/reports/materials');
+    const { data } = await api.get('/reports/materials', {
+      params: params(),
+    });
     materials.value = data.map((m: any) => ({
       label: m.category || 'Uncategorized',
       count: m.count,
@@ -175,7 +249,10 @@ async function fetchMaterials() {
 }
 
 async function exportCsv() {
-  const response = await api.get('/reports/export', { responseType: 'blob' });
+  const response = await api.get('/reports/export', {
+    params: params(),
+    responseType: 'blob',
+  });
   const url = window.URL.createObjectURL(new Blob([response.data]));
   const link = document.createElement('a');
   link.href = url;
