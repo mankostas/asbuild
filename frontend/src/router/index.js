@@ -121,9 +121,9 @@ export const routes = [
     },
   },
   {
-    path: '/login',
-    component: () => import('@/views/Auth/LoginView.vue'),
-    meta: { title: 'Login', layout: 'default', hide: true },
+    path: '/auth/login',
+    component: () => import('@/views/auth/Login.vue'),
+    meta: { layout: 'default', title: 'Sign in', hide: true },
   },
   {
     path: '/:pathMatch(.*)*',
@@ -172,8 +172,8 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return next('/login');
-  }
+      return next('/auth/login');
+    }
 
   if (to.meta.admin) {
     const roles = auth.user?.roles?.map((r) => r.name) || [];
@@ -186,7 +186,7 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  if (to.path === '/login' && auth.isAuthenticated) {
+  if (to.path === '/auth/login' && auth.isAuthenticated) {
     return next('/');
   }
 
