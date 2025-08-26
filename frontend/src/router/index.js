@@ -41,6 +41,30 @@ export const routes = [
     },
   },
   {
+    path: '/appointments/create',
+    name: 'appointments.create',
+    component: () => import('@/views/appointments/AppointmentForm.vue'),
+    meta: {
+      requiresAuth: true,
+      breadcrumb: 'routes.appointmentCreate',
+      title: 'Create Appointment',
+      layout: 'app',
+      groupParent: 'appointments.list',
+    },
+  },
+  {
+    path: '/appointments/:id/edit',
+    name: 'appointments.edit',
+    component: () => import('@/views/appointments/AppointmentForm.vue'),
+    meta: {
+      requiresAuth: true,
+      breadcrumb: 'routes.appointmentEdit',
+      title: 'Edit Appointment',
+      layout: 'app',
+      groupParent: 'appointments.list',
+    },
+  },
+  {
     path: '/manuals',
     name: 'manuals',
     component: () => import('@/views/ManualList.vue'),
