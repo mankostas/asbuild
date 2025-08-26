@@ -9,7 +9,11 @@
       <input type="date" v-model="startDate" class="border rounded p-2" />
       <input type="date" v-model="endDate" class="border rounded p-2" />
     </div>
-    <ServerDataTable :key="tableKey" :columns="columns" :fetcher="fetchAppointments">
+    <DashcodeServerTable
+      :key="tableKey"
+      :columns="columns"
+      :fetcher="fetchAppointments"
+    >
       <template #actions="{ row }">
         <div class="flex gap-2">
           <button class="text-blue-600" @click="view(row.id)">View</button>
@@ -23,14 +27,14 @@
           </button>
         </div>
       </template>
-    </ServerDataTable>
+    </DashcodeServerTable>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import ServerDataTable from '@/components/datatable/ServerDataTable.vue';
+import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
 import api from '@/services/api';
 import { useToast } from '@/plugins/toast';
 
