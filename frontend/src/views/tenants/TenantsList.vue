@@ -7,19 +7,39 @@
       :fetcher="fetchTenants"
     >
       <template #actions="{ row }">
-        <button class="text-blue-600" @click="impersonate(row)">Impersonate</button>
+        <div class="flex gap-2">
+          <Button
+            btnClass="btn-outline-primary btn-sm"
+            text="View"
+            @click="view(row.id)"
+          />
+          <Button
+            btnClass="btn-outline-secondary btn-sm"
+            text="Impersonate"
+            @click="impersonate(row)"
+          />
+          <Button
+            btnClass="btn-outline-danger btn-sm"
+            text="Delete"
+            @click="remove(row.id)"
+          />
+        </div>
       </template>
     </DashcodeServerTable>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, inject } from 'vue';
+import { useRouter } from 'vue-router';
 import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
+import Button from '@/components/ui/Button/index.vue';
 import api from '@/services/api';
 import { useAuthStore } from '@/stores/auth';
 
 const auth = useAuthStore();
+const router = useRouter();
+const swal = inject('$swal');
 const tableKey = ref(0);
 const all = ref<any[]>([]);
 
@@ -63,6 +83,23 @@ function reload() {
 
 async function impersonate(t: any) {
   await auth.impersonate(t.id, t.name);
+}
+
+function view(id: number) {
+  router.push(`/tenants/${id}`);
+}
+
+async function remove(id: number) {
+  const result = await swal?.fire({
+    title: 'Delete tenant?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, delete',
+  });
+  if (!result?.isConfirmed) return;
+  await api.delete(`/tenants/${id}`);
+  all.value = [];
+  reload();
 }
 </script>
 

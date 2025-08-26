@@ -2,10 +2,11 @@
   <div>
     <h2 class="text-xl font-bold mb-4">Employees</h2>
     <div class="mb-4">
-      <RouterLink
-        class="bg-blue-600 text-white px-4 py-2 rounded"
-        :to="{ name: 'employees.create' }"
-      >Invite Employee</RouterLink>
+      <Button
+        btnClass="btn-primary"
+        text="Invite Employee"
+        link="/employees/create"
+      />
     </div>
     <DashcodeServerTable
       :key="tableKey"
@@ -14,11 +15,16 @@
     >
       <template #actions="{ row }">
         <div class="flex gap-2">
-          <RouterLink
-            class="text-blue-600"
-            :to="{ name: 'employees.edit', params: { id: row.id } }"
-          >Edit</RouterLink>
-          <button class="text-red-600" @click="remove(row.id)">Delete</button>
+          <Button
+            :link="`/employees/${row.id}/edit`"
+            btnClass="btn-outline-primary btn-sm"
+            text="Edit"
+          />
+          <Button
+            btnClass="btn-outline-danger btn-sm"
+            text="Delete"
+            @click="remove(row.id)"
+          />
         </div>
       </template>
     </DashcodeServerTable>
@@ -26,9 +32,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { ref, inject } from 'vue';
 import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
+import Button from '@/components/ui/Button/index.vue';
 import api from '@/services/api';
 import { useToast } from '@/plugins/toast';
 
@@ -89,8 +95,16 @@ function reload() {
   tableKey.value++;
 }
 
+const swal = inject('$swal');
+
 async function remove(id: number) {
-  if (!confirm('Delete employee?')) return;
+  const result = await swal?.fire({
+    title: 'Delete employee?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, delete',
+  });
+  if (!result?.isConfirmed) return;
   try {
     await api.delete(`/employees/${id}`);
     all.value = [];
