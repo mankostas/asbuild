@@ -2,31 +2,18 @@
   <div>
     <h2 class="text-xl font-bold mb-4">{{ isEdit ? 'Edit' : 'Invite' }} Employee</h2>
     <form @submit.prevent="submit" class="grid gap-4 max-w-lg">
-      <div>
-        <label class="block mb-1">Name</label>
-        <input v-model="form.name" class="border p-2 w-full" />
-      </div>
-      <div>
-        <label class="block mb-1">Email</label>
-        <input v-model="form.email" type="email" class="border p-2 w-full" />
-      </div>
-      <div>
-        <label class="block mb-1">Phone</label>
-        <input v-model="form.phone" class="border p-2 w-full" />
-      </div>
-      <div>
-        <label class="block mb-1">Address</label>
-        <input v-model="form.address" class="border p-2 w-full" />
-      </div>
-      <div>
-        <label class="block mb-1">Roles</label>
-        <select v-model="form.roles" multiple class="border p-2 w-full">
-          <option v-for="r in roleOptions" :key="r" :value="r">{{ r }}</option>
-        </select>
-      </div>
-      <button class="bg-blue-600 text-white px-4 py-2 rounded">
-        {{ isEdit ? 'Save' : 'Invite' }}
-      </button>
+      <Textinput label="Name" v-model="form.name" />
+      <Textinput label="Email" type="email" v-model="form.email" />
+      <Textinput label="Phone" v-model="form.phone" />
+      <Textinput label="Address" v-model="form.address" />
+      <VueSelect label="Roles">
+        <vSelect v-model="form.roles" :options="roleOptions" multiple />
+      </VueSelect>
+      <Button
+        type="submit"
+        :text="isEdit ? 'Save' : 'Invite'"
+        btnClass="btn-dark"
+      />
     </form>
   </div>
 </template>
@@ -35,6 +22,10 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '@/services/api';
+import Textinput from '@/components/ui/Textinput/index.vue';
+import VueSelect from '@/components/ui/Select/VueSelect.vue';
+import Button from '@/components/ui/Button/index.vue';
+import vSelect from 'vue-select';
 
 const route = useRoute();
 const router = useRouter();

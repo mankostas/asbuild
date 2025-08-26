@@ -1,32 +1,24 @@
 <template>
-  <form @submit.prevent="submit" class="border p-4 mt-4">
-    <div class="mb-2">
-      <label class="block">Name</label>
-      <input v-model="form.name" class="border p-2 w-full" />
-    </div>
-    <div class="mb-2">
-      <label class="block">Storage Quota (MB)</label>
-      <input v-model.number="form.quota_storage_mb" type="number" class="border p-2 w-full" />
-    </div>
-    <div class="mb-2">
-      <label class="block">Phone</label>
-      <input v-model="form.phone" class="border p-2 w-full" />
-    </div>
-    <div class="mb-2">
-      <label class="block">Address</label>
-      <input v-model="form.address" class="border p-2 w-full" />
-    </div>
-    <div class="mb-2">
-      <label class="block">Features (JSON)</label>
-      <textarea v-model="form.features" class="border p-2 w-full"></textarea>
-    </div>
-    <button class="bg-blue-600 text-white px-4 py-2">Save</button>
+  <form @submit.prevent="submit" class="space-y-4">
+    <Textinput label="Name" v-model="form.name" />
+    <Textinput
+      label="Storage Quota (MB)"
+      type="number"
+      v-model.number="form.quota_storage_mb"
+    />
+    <Textinput label="Phone" v-model="form.phone" />
+    <Textinput label="Address" v-model="form.address" />
+    <Textarea label="Features (JSON)" v-model="form.features" />
+    <Button type="submit" text="Save" btnClass="btn-dark" />
   </form>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import api from '@/services/api';
+import Textinput from '@/components/ui/Textinput/index.vue';
+import Textarea from '@/components/ui/Textarea/index.vue';
+import Button from '@/components/ui/Button/index.vue';
 
 const emit = defineEmits(['saved']);
 
