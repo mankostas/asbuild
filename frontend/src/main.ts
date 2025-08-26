@@ -43,7 +43,10 @@ app.use(VueQueryPlugin);
 app.config.globalProperties.$store = {};
 const themeSettingsStore = useThemeSettingsStore();
 app.config.globalProperties.$store.themeSettingsStore = themeSettingsStore;
-app.mount('#app');
+
+router.isReady().then(() => {
+  app.mount("#app");
+});
 
 if (import.meta.env.VITE_SENTRY_DSN) {
   const script = document.createElement('script');
