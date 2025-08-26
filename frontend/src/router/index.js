@@ -174,16 +174,16 @@ export const routes = [
     },
   },
   { path: '/settings', redirect: '/settings/profile' },
+  { path: '/settings/gdpr', redirect: '/gdpr' },
   {
-    path: '/settings/gdpr',
-    name: 'settings-gdpr',
-    component: () => import('@/views/Settings/GdprView.vue'),
+    path: '/gdpr',
+    name: 'gdpr.index',
+    component: () => import('@/views/gdpr/Gdpr.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.gdpr',
       title: 'GDPR',
       layout: 'app',
-      groupParent: 'settings',
     },
   },
   {
