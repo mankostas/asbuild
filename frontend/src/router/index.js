@@ -8,6 +8,7 @@ const APP_NAME = import.meta.env.VITE_APP_NAME || 'AsBuild';
 export const routes = [
   {
     path: '/',
+    name: 'dashboard',
     component: () => import('@/views/home/Dashboard.vue'),
     meta: {
       requiresAuth: true,
@@ -18,50 +19,53 @@ export const routes = [
   },
   {
     path: '/appointments',
+    name: 'appointments',
     component: () => import('@/views/AppointmentList.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.appointments',
       title: 'Appointments',
       layout: 'app',
-      groupParent: 'appointments',
     },
   },
   {
     path: '/appointments/:id',
+    name: 'appointment-detail',
     component: () => import('@/views/AppointmentDetail.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.appointmentDetail',
       title: 'Appointment Detail',
       layout: 'app',
-      groupParent: '/appointments',
+      groupParent: 'appointments',
     },
   },
   {
     path: '/manuals',
+    name: 'manuals',
     component: () => import('@/views/ManualList.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.manuals',
       title: 'Manuals',
       layout: 'app',
-      groupParent: 'manuals',
     },
   },
   {
     path: '/manuals/:id',
+    name: 'manual-detail',
     component: () => import('@/views/ManualDetail.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.manualDetail',
       title: 'Manual Detail',
       layout: 'app',
-      groupParent: '/manuals',
+      groupParent: 'manuals',
     },
   },
   {
     path: '/notifications',
+    name: 'notifications',
     component: () => import('@/views/NotificationCenter.vue'),
     meta: {
       requiresAuth: true,
@@ -72,28 +76,30 @@ export const routes = [
   },
   {
     path: '/settings',
+    name: 'settings',
     component: () => import('@/views/SettingsView.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.settings',
       title: 'Settings',
       layout: 'app',
-      groupParent: 'settings',
     },
   },
   {
     path: '/settings/gdpr',
+    name: 'settings-gdpr',
     component: () => import('@/views/Settings/GdprView.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.gdpr',
       title: 'GDPR',
       layout: 'app',
-      groupParent: '/settings',
+      groupParent: 'settings',
     },
   },
   {
     path: '/reports',
+    name: 'reports',
     component: () => import('@/views/ReportsDashboard.vue'),
     meta: {
       requiresAuth: true,
@@ -104,6 +110,7 @@ export const routes = [
   },
   {
     path: '/employees',
+    name: 'employees',
     component: () => import('@/views/EmployeeList.vue'),
     meta: {
       requiresAuth: true,
@@ -115,6 +122,7 @@ export const routes = [
   },
   {
     path: '/tenants',
+    name: 'tenants',
     component: () => import('@/views/TenantList.vue'),
     meta: {
       requiresAuth: true,
@@ -127,11 +135,13 @@ export const routes = [
   },
   {
     path: '/auth/login',
+    name: 'login',
     component: () => import('@/views/auth/Login.vue'),
     meta: { layout: 'default', title: 'Sign in', hide: true },
   },
   {
     path: '/:pathMatch(.*)*',
+    name: 'not-found',
     component: () => import('@/views/_errors/NotFound.vue'),
     meta: { title: 'Not Found', layout: 'default', hide: true },
   },
