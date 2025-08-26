@@ -67,9 +67,9 @@ import Modal from '@/components/ui/Modal/index.vue';
 import { useField, useForm } from 'vee-validate';
 import * as yup from 'yup';
 import vSelect from 'vue-select';
-import { useToast } from 'vue-toastification';
+import { useNotify } from '@/plugins/notify';
 
-const toast = useToast();
+const notify = useNotify();
 const router = useRouter();
 const route = useRoute();
 
@@ -160,16 +160,16 @@ const submitForm = handleSubmit(async () => {
         payload.status = status.value;
       }
       await api.patch(`/appointments/${route.params.id}`, payload);
-      toast.success('Appointment updated');
+      notify.success('Appointment updated');
       router.push({ name: 'appointments.details', params: { id: route.params.id } });
     } else {
       const res = await api.post('/appointments', payload);
-      toast.success('Appointment created');
+      notify.success('Appointment created');
       router.push({ name: 'appointments.details', params: { id: res.data.id } });
     }
   } catch (e: any) {
     serverError.value = e.message || 'Failed to save';
-    toast.error(serverError.value);
+    notify.error(serverError.value);
     showError.value = true;
   }
 });

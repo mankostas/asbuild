@@ -5,11 +5,10 @@ import { createI18n } from 'vue-i18n';
 import AppShell from '@/components/layout/AppShell.vue';
 import en from '@/i18n/en.json';
 import { createPinia } from 'pinia';
-import PrimeVue from 'primevue/config';
-import ToastService from 'primevue/toastservice';
-import ConfirmationService from 'primevue/confirmationservice';
-import ConfirmDialog from 'primevue/confirmdialog';
 import { createRouter, createWebHistory } from 'vue-router';
+import VueSweetalert2 from 'vue-sweetalert2';
+import { notifyPlugin } from '@/plugins/notify';
+import PrimeVue from 'primevue/config';
 
 vi.mock('@/stores/branding', () => ({
   useBrandingStore: () => ({ branding: {}, load: vi.fn() }),
@@ -50,9 +49,8 @@ describe('AppShell', () => {
     app.use(createPinia());
     app.use(i18n);
     app.use(PrimeVue);
-    app.use(ToastService);
-    app.use(ConfirmationService);
-    app.component('ConfirmDialog', ConfirmDialog);
+    app.use(VueSweetalert2);
+    app.use(notifyPlugin);
     const div = document.createElement('div');
     document.body.appendChild(div);
     app.mount(div);

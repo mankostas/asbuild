@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { useToast } from '@/plugins/toast';
+import { useNotify } from '@/plugins/notify';
 import api from '@/services/api';
 import Button from '@/components/ui/Button/index.vue';
 import Card from '@/components/ui/Card/index.vue';
@@ -54,7 +54,7 @@ interface Consent {
 
 const consents = ref<Consent[]>([]);
 const initial = ref<Consent[]>([]);
-const toast = useToast();
+const notify = useNotify();
 
 async function load() {
   const { data } = await api.get('/gdpr/consents');
@@ -70,7 +70,7 @@ async function saveConsents() {
   if (!dirty.value) return;
   await api.put('/gdpr/consents', consents.value);
   initial.value = JSON.parse(JSON.stringify(consents.value));
-  toast.add({ severity: 'success', summary: 'Consents saved', detail: '' });
+  notify.success('Consents saved');
 }
 
 async function exportData() {
@@ -87,7 +87,7 @@ async function exportData() {
 
 async function requestDelete() {
   await api.post('/gdpr/delete');
-  toast.add({ severity: 'info', summary: 'Deletion queued', detail: '' });
+  notify.info('Deletion queued');
 }
 
 onMounted(load);

@@ -60,6 +60,7 @@ import { useManualsStore } from '@/stores/manuals';
 import ManualCard from '@/components/manuals/ManualCard.vue';
 import api from '@/services/api';
 import { useAuthStore } from '@/stores/auth';
+import Swal from 'sweetalert2';
 
 const store = useManualsStore();
 const router = useRouter();
@@ -115,7 +116,12 @@ async function create() {
 }
 
 async function remove(id: number) {
-  if (confirm('Delete manual?')) {
+  const res = await Swal.fire({
+    title: 'Delete manual?',
+    icon: 'warning',
+    showCancelButton: true,
+  });
+  if (res.isConfirmed) {
     await api.delete(`/manuals/${id}`);
     await store.fetch();
   }

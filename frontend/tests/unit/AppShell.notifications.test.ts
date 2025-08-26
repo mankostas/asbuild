@@ -5,11 +5,11 @@ import { createI18n } from 'vue-i18n';
 import AppShell from '@/components/layout/AppShell.vue';
 import en from '@/i18n/en.json';
 import { createPinia } from 'pinia';
-import PrimeVue from 'primevue/config';
-import ToastService from 'primevue/toastservice';
-import ConfirmationService from 'primevue/confirmationservice';
-import ConfirmDialog from 'primevue/confirmdialog';
 import { createRouter, createWebHistory } from 'vue-router';
+import VueSweetalert2 from 'vue-sweetalert2';
+import { notifyPlugin, useNotify } from '@/plugins/notify';
+import Swal from 'sweetalert2';
+import PrimeVue from 'primevue/config';
 
 vi.mock('@/stores/branding', () => ({
   useBrandingStore: () => ({ branding: {}, load: vi.fn() }),
@@ -50,28 +50,22 @@ describe('AppShell notifications', () => {
     app.use(createPinia());
     app.use(i18n);
     app.use(PrimeVue);
-    app.use(ToastService);
-    app.use(ConfirmationService);
-    app.component('ConfirmDialog', ConfirmDialog);
+    app.use(VueSweetalert2);
+    app.use(notifyPlugin);
     const div = document.createElement('div');
     document.body.appendChild(div);
     app.mount(div);
     await router.isReady();
 
-    app.config.globalProperties.$toast.add({ severity: 'info', summary: 'test', detail: 'hello' });
+    const notify = useNotify();
+    notify.info('hello');
     await nextTick();
     await new Promise((r) => setTimeout(r, 0));
-    const toast = document.body.querySelector('.p-toast-message');
+    const toast = document.body.querySelector('.Vue-Toastification__toast');
     expect(toast).not.toBeNull();
 
-    app.config.globalProperties.$confirm.require({
-      message: 'Are you sure?',
-      header: 'Confirm',
-      accept: vi.fn(),
-    });
-    await nextTick();
-    await new Promise((r) => setTimeout(r, 0));
-    const dialog = document.body.querySelector('.p-confirm-dialog, .p-dialog');
+    await Swal.fire({ title: 'Are you sure?' });
+    const dialog = document.body.querySelector('.swal2-container');
     expect(dialog).not.toBeNull();
   });
 });

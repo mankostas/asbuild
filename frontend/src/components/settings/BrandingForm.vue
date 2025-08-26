@@ -34,10 +34,10 @@ import { useBrandingStore } from '@/stores/branding';
 import Textinput from '@/components/ui/Textinput/index.vue';
 import Button from '@/components/ui/Button/index.vue';
 import { useDropzone } from 'vue3-dropzone';
-import { useToast } from '@/plugins/toast';
+import { useNotify } from '@/plugins/notify';
 
 const store = useBrandingStore();
-const toast = useToast();
+const notify = useNotify();
 const initial = { ...store.branding } as Record<string, any>;
 const form = reactive({ ...initial });
 const logoFile = ref<File | null>(null);
@@ -64,6 +64,6 @@ async function save() {
   Object.assign(initial, store.branding);
   Object.assign(form, store.branding);
   logoFile.value = null;
-  toast.add({ severity: 'success', summary: 'Branding saved', detail: '' });
+  notify.success('Branding saved');
 }
 </script>
