@@ -1,5 +1,5 @@
 <template>
-  <router-link :to="{ name: 'home' }">
+  <router-link :to="{ name: 'dashboard' }">
     <img
       src="@/assets/images/logo/logo-c.svg"
       alt=""
