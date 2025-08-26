@@ -67,7 +67,7 @@ api.interceptors.response.use(
     // When the API responds with 401, clear auth state and redirect to login.
     if (status === 401) {
       const auth = useAuthStore();
-      await auth.logout();
+      await auth.logout(true);
       window.location.href = '/auth/login';
     }
 
