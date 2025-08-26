@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import Button from 'primevue/button';
@@ -107,6 +107,14 @@ const density = ref<'compact' | ''>('');
 const sidebarOpen = ref(false);
 const { t, locale } = useI18n();
 const route = useRoute();
+
+watch(
+  theme,
+  (value) => {
+    document.documentElement.classList.toggle('dark', value === 'dark');
+  },
+  { immediate: true },
+);
 
 const languages = [
   { label: 'Ελληνικά', value: 'el' },
