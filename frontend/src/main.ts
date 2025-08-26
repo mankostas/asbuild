@@ -11,8 +11,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import VueGoodTablePlugin from 'vue-good-table-next';
 import 'vue-good-table-next/dist/vue-good-table-next.css';
 import 'primeicons/primeicons.css';
-import './styles/tokens.css';
-import './assets/main.css';
+import './assets/main.scss';
 
 createApp(App)
   .use(stores)
