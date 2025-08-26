@@ -8,8 +8,13 @@ const APP_NAME = import.meta.env.VITE_APP_NAME || 'AsBuild';
 export const routes = [
   {
     path: '/',
-    redirect: '/appointments',
-    meta: { requiresAuth: true, layout: 'app', hide: true },
+    component: () => import('@/views/home/Dashboard.vue'),
+    meta: {
+      requiresAuth: true,
+      breadcrumb: 'routes.dashboard',
+      title: 'Dashboard',
+      layout: 'app',
+    },
   },
   {
     path: '/appointments',
