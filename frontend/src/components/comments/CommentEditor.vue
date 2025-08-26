@@ -1,32 +1,32 @@
 <template>
   <div class="flex flex-col gap-2">
-    <Textarea v-model="body" rows="3" placeholder="Add a comment" />
-    <MultiSelect
-      v-model="selectedMentions"
-      :options="employees"
-      option-label="name"
-      option-value="id"
-      placeholder="Mention users"
-      display="chip"
-      filter
-      class="w-full"
-    />
-    <InputText
+    <Textarea v-model="body" :rows="3" placeholder="Add a comment" />
+    <VueSelect class="w-full">
+      <vSelect
+        v-model="selectedMentions"
+        :options="employees"
+        label="name"
+        multiple
+        placeholder="Mention users"
+      />
+    </VueSelect>
+    <Textinput
       v-if="allowFiles"
       v-model="fileIds"
       placeholder="File IDs comma separated"
     />
-    <Button label="Comment" @click="submit" />
+    <Button text="Comment" @click="submit" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import api from '@/services/api';
-import Textarea from 'primevue/textarea';
-import MultiSelect from 'primevue/multiselect';
-import InputText from 'primevue/inputtext';
-import Button from 'primevue/button';
+import Textarea from '@/components/ui/Textarea/index.vue';
+import VueSelect from '@/components/ui/Select/VueSelect.vue';
+import Textinput from '@/components/ui/Textinput/index.vue';
+import Button from '@/components/ui/Button/index.vue';
+import vSelect from 'vue-select';
 
 const props = defineProps<{ appointmentId: number | string; allowFiles?: boolean }>();
 const emit = defineEmits<{ (e: 'added', comment: any): void }>();
