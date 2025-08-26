@@ -10,6 +10,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ConfirmDialog from 'primevue/confirmdialog';
 import 'primeicons/primeicons.css';
 import './styles/tokens.css';
+import './assets/main.css';
 
 createApp(AppShell)
   .use(stores)
