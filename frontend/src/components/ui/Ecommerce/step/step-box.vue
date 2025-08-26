@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 
 const props = defineProps({
   steps: Object,

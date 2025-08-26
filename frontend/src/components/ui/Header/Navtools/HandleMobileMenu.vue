@@ -7,7 +7,7 @@
   </div>
 </template>
 <script setup>
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 import { useThemeSettingsStore } from "@/store/themeSettings";
 
 const themeSettingsStore = useThemeSettingsStore()

@@ -85,8 +85,8 @@
   </Dropdown>
 </template>
 <script>
-import Dropdown from "@/components/Dropdown";
-import Icon from "@/components/Icon";
+import Dropdown from "@/components/ui/Dropdown";
+import Icon from "@/components/ui/Icon";
 import { MenuItem } from "@headlessui/vue";
 import { notifications } from "../../../constant/data";
 export default {

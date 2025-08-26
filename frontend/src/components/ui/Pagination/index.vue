@@ -102,8 +102,8 @@
 </template>
 
 <script>
-import Icon from "@/components/Icon";
-import Select from "@/components/Select";
+import Icon from "@/components/ui/Icon";
+import Select from "@/components/ui/Select";
 import { defineComponent } from "vue";
 export default defineComponent({
   name: "Pagination",

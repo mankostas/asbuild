@@ -35,6 +35,6 @@
   </div>
 </template>
 <script setup>
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 </script>
 <style lang=""></style>
