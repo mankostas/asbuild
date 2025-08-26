@@ -49,9 +49,9 @@ import { ref, onMounted } from 'vue';
 import api from '@/services/api';
 import KpiCards from '@/components/reports/KpiCards.vue';
 import ChartCard from '@/components/reports/ChartCard.vue';
-import Card from '@/components/ui/Card.vue';
+import Card from '@/components/ui/Card/index.vue';
 import Skeleton from '@/components/ui/Skeleton.vue';
-import Button from '@/components/ui/Button.vue';
+import Button from '@/components/ui/Button/index.vue';
 
 interface Kpi {
   label: string;

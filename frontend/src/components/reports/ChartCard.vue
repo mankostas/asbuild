@@ -28,7 +28,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import Card from '@/components/ui/Card.vue';
+import Card from '@/components/ui/Card/index.vue';
 import Skeleton from '@/components/ui/Skeleton.vue';
 
 ChartJS.register(

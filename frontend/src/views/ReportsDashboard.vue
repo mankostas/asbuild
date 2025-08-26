@@ -11,13 +11,13 @@
           <option value="30">Last 30 days</option>
           <option value="custom">Custom</option>
         </Select>
-        <Input
+        <Textinput
           v-if="range === 'custom'"
           type="date"
           v-model="from"
           class="w-40"
         />
-        <Input
+        <Textinput
           v-if="range === 'custom'"
           type="date"
           v-model="to"
@@ -38,9 +38,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import api from '@/services/api';
-import Button from '@/components/ui/Button.vue';
-import Input from '@/components/ui/Input.vue';
-import Select from '@/components/ui/Select.vue';
+import Button from '@/components/ui/Button/index.vue';
+import Textinput from '@/components/ui/Textinput/index.vue';
+import Select from '@/components/ui/Select/index.vue';
 import KpiCards from '@/components/reports/KpiCards.vue';
 import ChartCard from '@/components/reports/ChartCard.vue';
 
