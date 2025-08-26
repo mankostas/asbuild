@@ -46,10 +46,11 @@ describe('auth store', () => {
     mock.onPost('/auth/login').reply(200, {
       access_token: 'access',
       refresh_token: 'refresh',
-      user: { id: 1 },
     });
+    mock.onGet('/me').reply(200, { id: 1 });
 
     await auth.login({ email: 'a', password: 'b' });
+    await auth.fetchUser();
 
     expect(auth.accessToken).toBe('access');
     expect(auth.refreshToken).toBe('refresh');
@@ -63,7 +64,6 @@ describe('auth store', () => {
     mock.onPost('/auth/login').reply(200, {
       access_token: 'token',
       refresh_token: 'ref',
-      user: {},
     });
 
     await auth.login({ email: 'a', password: 'b' });

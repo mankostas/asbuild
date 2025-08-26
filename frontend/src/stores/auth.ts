@@ -39,11 +39,14 @@ export const useAuthStore = defineStore('auth', {
       if (data.access_token) {
         this.accessToken = data.access_token;
         this.refreshToken = data.refresh_token;
-        this.user = data.user;
         setTokens(data.access_token, data.refresh_token);
         api.defaults.headers.common['Authorization'] =
           `Bearer ${data.access_token}`;
       }
+    },
+    async fetchUser() {
+      const { data } = await api.get('/me');
+      this.user = data;
     },
     async logout() {
       try {
