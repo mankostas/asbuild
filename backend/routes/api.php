@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\UploadController;
@@ -27,6 +28,10 @@ Route::prefix('auth')->group(function () {
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('password/email', [AuthController::class, 'sendResetLinkEmail']);
     Route::post('password/reset', [AuthController::class, 'reset']);
+});
+
+Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
+    return $request->user()->load('roles');
 });
 
 Route::get('files/{file}/{variant?}', [FileController::class, 'download'])
