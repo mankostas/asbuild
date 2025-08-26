@@ -22,7 +22,7 @@ import i18n from "./i18n";
 import VCalendar from "v-calendar";
 import "v-calendar/dist/style.css";
 import { VueQueryPlugin } from "@tanstack/vue-query";
-
+import { useThemeSettingsStore } from "./stores/themeSettings";
 const app = createApp(App)
   .use(stores)
   .use(i18n)
@@ -40,6 +40,9 @@ const app = createApp(App)
   .use(VCalendar);
 
 app.use(VueQueryPlugin);
+app.config.globalProperties.$store = {};
+const themeSettingsStore = useThemeSettingsStore();
+app.config.globalProperties.$store.themeSettingsStore = themeSettingsStore;
 app.mount('#app');
 
 if (import.meta.env.VITE_SENTRY_DSN) {

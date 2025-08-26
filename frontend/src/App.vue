@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { computed, defineComponent, h } from 'vue';
 import { useRoute, RouterView } from 'vue-router';
-import AppLayout from './Layout/AppLayout.vue';
+import DashcodeLayout from './Layout/DashcodeLayout.vue';
 import Toast from '@/components/ui/Toast.vue';
 
 const route = useRoute();
@@ -19,7 +19,7 @@ const DefaultLayout = defineComponent({
 });
 
 const layouts: Record<string, any> = {
-  app: AppLayout,
+  app: DashcodeLayout,
   default: DefaultLayout,
 };
 
