@@ -38,7 +38,7 @@
           <Button
             icon="pi pi-search"
             aria-label="Command"
-            @click="open(paletteActions)"
+            @click="open(paletteActions.value)"
             text
           />
           <Avatar
@@ -123,14 +123,22 @@ onMounted(() => brandingStore.load());
 
 const auth = useAuthStore();
 
+const isAdmin = computed(() =>
+  auth.user?.roles?.some((r: any) => ['ClientAdmin', 'SuperAdmin'].includes(r.name)),
+);
+
 const menuItems = computed(() => {
   const items = [
     { label: t('routes.appointments'), icon: 'pi pi-calendar', to: '/appointments' },
-    { label: t('routes.manuals'), icon: 'pi pi-book', to: '/manuals' },
+  ];
+  if (isAdmin.value) {
+    items.push({ label: t('routes.manuals'), icon: 'pi pi-book', to: '/manuals' });
+  }
+  items.push(
     { label: t('routes.reports'), icon: 'pi pi-chart-bar', to: '/reports' },
     { label: t('routes.settings'), icon: 'pi pi-cog', to: '/settings' },
-  ];
-  if (auth.user?.roles?.some((r: any) => ['ClientAdmin', 'SuperAdmin'].includes(r.name))) {
+  );
+  if (isAdmin.value) {
     items.push({ label: t('routes.employees'), icon: 'pi pi-users', to: '/employees' });
   }
   if (auth.user?.roles?.some((r: any) => r.name === 'SuperAdmin')) {
@@ -160,10 +168,15 @@ function toggleDensity() {
 }
 
 const { isOpen, open, close } = useCommandPalette();
-const paletteActions = [
-  { id: 'appointments', label: 'Go to Appointments', to: '/appointments' },
-  { id: 'manuals', label: 'Go to Manuals', to: '/manuals' },
-  { id: 'reports', label: 'Go to Reports', to: '/reports' },
-  { id: 'settings', label: 'Go to Settings', to: '/settings' },
-];
+const paletteActions = computed(() => {
+  const actions = [
+    { id: 'appointments', label: 'Go to Appointments', to: '/appointments' },
+    { id: 'reports', label: 'Go to Reports', to: '/reports' },
+    { id: 'settings', label: 'Go to Settings', to: '/settings' },
+  ];
+  if (isAdmin.value) {
+    actions.splice(1, 0, { id: 'manuals', label: 'Go to Manuals', to: '/manuals' });
+  }
+  return actions;
+});
 </script>
