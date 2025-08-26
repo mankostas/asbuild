@@ -27,6 +27,7 @@ module.exports = {
         "vtd-primary": colors.sky,
         "vtd-secondary": colors.gray,
         primary: {
+          DEFAULT: "#4669fa",
           50: "#F6F8FF",
           100: "#EDF0FF",
           200: "#D1DAFE",
