@@ -189,7 +189,17 @@ export const routes = [
       groupParent: 'settings',
     },
   },
-  { path: '/settings', redirect: '/settings/profile' },
+  {
+    path: '/settings',
+    name: 'settings',
+    redirect: '/settings/profile',
+    meta: {
+      requiresAuth: true,
+      breadcrumb: 'routes.settings',
+      title: 'Settings',
+      layout: 'app',
+    },
+  },
   { path: '/settings/gdpr', redirect: '/gdpr' },
   {
     path: '/gdpr',
@@ -200,18 +210,32 @@ export const routes = [
       breadcrumb: 'routes.gdpr',
       title: 'GDPR',
       layout: 'app',
+      groupParent: 'settings',
     },
   },
-  { path: '/reports', redirect: '/reports/kpis' },
+  {
+    path: '/reports',
+    name: 'reports',
+    redirect: '/reports/kpis',
+    meta: {
+      requiresAuth: true,
+      admin: true,
+      breadcrumb: 'routes.reports',
+      title: 'Reports',
+      layout: 'app',
+    },
+  },
   {
     path: '/reports/kpis',
     name: 'reports.kpis',
     component: () => import('@/views/reports/Reports.vue'),
     meta: {
       requiresAuth: true,
+      admin: true,
       breadcrumb: 'routes.reports',
       title: 'Reports - KPIs',
       layout: 'app',
+      groupParent: 'reports',
     },
   },
   {

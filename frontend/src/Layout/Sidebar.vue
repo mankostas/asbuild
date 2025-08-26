@@ -5,7 +5,7 @@
     </div>
     <nav class="px-4">
       <ul>
-        <li v-for="item in menuItems" :key="item.title" class="mb-2">
+        <li v-for="item in items" :key="item.title" class="mb-2">
           <div>
             <button
               v-if="item.child"
@@ -18,7 +18,7 @@
             </button>
             <router-link
               v-else
-              :to="item.link"
+              :to="{ name: item.link }"
               class="block font-semibold text-gray-700 dark:text-gray-100"
               :class="{ 'text-primary-500': isActive(item.link) }"
             >
@@ -31,7 +31,7 @@
           >
             <li v-for="child in item.child" :key="child.childlink" class="py-1">
               <router-link
-                :to="child.childlink"
+                :to="{ name: child.childlink }"
                 class="block"
                 :class="{ 'text-primary-500 font-semibold': isActive(child.childlink) }"
               >
@@ -45,23 +45,39 @@
   </aside>
 </template>
 <script setup>
-import { reactive, onMounted } from 'vue'
+import { reactive, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { menuItems } from '@/constant/data'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
+const auth = useAuthStore()
+
 const open = reactive({})
 
-const isActive = (link) => route.path === link
+const canAdmin = computed(() =>
+  auth.user?.roles?.some((r) => ['ClientAdmin', 'SuperAdmin'].includes(r.name))
+)
+
+const items = computed(() =>
+  menuItems
+    .filter((item) => !item.admin || canAdmin.value)
+    .map((item) => ({
+      ...item,
+      child: item.child?.filter((c) => !c.admin || canAdmin.value),
+    }))
+)
+
+const isActive = (link) => route.name === link
 const isChildActive = (item) =>
-  item.child && item.child.some((c) => c.childlink === route.path)
+  item.child && item.child.some((c) => c.childlink === route.name)
 
 const toggle = (title) => {
   open[title] = !open[title]
 }
 
 onMounted(() => {
-  menuItems.forEach((item) => {
+  items.value.forEach((item) => {
     if (isChildActive(item)) {
       open[item.title] = true
     }

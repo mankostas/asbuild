@@ -6,9 +6,9 @@
       <div class="ml-auto flex items-center space-x-4">
         <nav :class="[show ? 'block' : 'hidden', 'md:block']">
           <ul class="flex space-x-4">
-            <li v-for="item in topMenu" :key="item.title">
+            <li v-for="item in items" :key="item.title">
               <router-link
-                :to="item.link"
+                :to="{ name: item.link }"
                 class="text-gray-700 dark:text-gray-100"
                 :class="{ 'font-semibold text-primary-500': isActive(item.link) }"
               >
@@ -49,7 +49,7 @@
               Profile
             </router-link>
             <router-link
-              v-if="isAdmin"
+              v-if="canAdmin"
               to="/settings/branding"
               class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-slate-600"
               @click="profileOpen = false"
@@ -95,11 +95,12 @@ const ui = useUiStore()
 const tenant = useTenantStore()
 const tenantId = ref(tenant.tenantId)
 const dev = import.meta.env.DEV
-const isAdmin = computed(() =>
+const canAdmin = computed(() =>
   auth.user?.roles?.some((r) => ['ClientAdmin', 'SuperAdmin'].includes(r.name))
 )
 watch(tenantId, (id) => tenant.setTenant(id))
-const isActive = (link) => route.path === link
+const items = computed(() => topMenu.filter((item) => !item.admin || canAdmin.value))
+const isActive = (link) => route.name === link
 
 const logout = async () => {
   await auth.logout()

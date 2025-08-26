@@ -28,7 +28,7 @@ const router = useRouter();
 function resolveParent(key: string) {
   if (!key) return undefined;
   const routes = router.getRoutes();
-  return routes.find((r) => r.path === key || r.path === `/${key}`);
+  return routes.find((r) => r.name === key);
 }
 
 const items = computed(() => {
