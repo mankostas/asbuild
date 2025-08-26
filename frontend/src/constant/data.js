@@ -7,7 +7,7 @@ export const menuItems = [
   {
     title: "Appointments",
     icon: "heroicons-outline:calendar",
-    link: "appointments",
+    link: "appointments.list",
   },
   {
     title: "Employees",
@@ -36,7 +36,7 @@ export const menuItems = [
 
 export const topMenu = [
   { title: "Dashboard", icon: "heroicons-outline:home", link: "dashboard" },
-  { title: "Appointments", icon: "heroicons-outline:calendar", link: "appointments" },
+  { title: "Appointments", icon: "heroicons-outline:calendar", link: "appointments.list" },
   { title: "Employees", icon: "heroicons-outline:users", link: "employees" },
   { title: "Reports", icon: "heroicons-outline:chart-bar", link: "reports" },
   { title: "Notifications", icon: "heroicons-outline:bell", link: "notifications" },

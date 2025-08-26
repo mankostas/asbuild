@@ -19,8 +19,8 @@ export const routes = [
   },
   {
     path: '/appointments',
-    name: 'appointments',
-    component: () => import('@/views/AppointmentList.vue'),
+    name: 'appointments.list',
+    component: () => import('@/views/appointments/AppointmentsList.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.appointments',
@@ -30,14 +30,14 @@ export const routes = [
   },
   {
     path: '/appointments/:id',
-    name: 'appointment-detail',
+    name: 'appointments.details',
     component: () => import('@/views/AppointmentDetail.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.appointmentDetail',
       title: 'Appointment Detail',
       layout: 'app',
-      groupParent: 'appointments',
+      groupParent: 'appointments.list',
     },
   },
   {
