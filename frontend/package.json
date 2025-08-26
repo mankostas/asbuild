@@ -26,9 +26,9 @@
     "primevue": "^4.3.7",
     "vue": "^3.5.20",
     "vue-chartjs": "5.3.1",
+    "vue-good-table-next": "^0.2.2",
     "vue-i18n": "9.14.0",
-    "vue-router": "4.3.0",
-    "vue-good-table-next": "^0.4.11"
+    "vue-router": "4.3.0"
   },
   "devDependencies": {
     "@playwright/test": "1.55.0",

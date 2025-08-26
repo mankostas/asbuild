@@ -8,7 +8,7 @@ import Aura from '@primevue/themes/aura';
 import ToastService from 'primevue/toastservice';
 import ConfirmationService from 'primevue/confirmationservice';
 import ConfirmDialog from 'primevue/confirmdialog';
-import { VueGoodTablePlugin } from 'vue-good-table-next';
+import VueGoodTablePlugin from 'vue-good-table-next';
 import 'vue-good-table-next/dist/style.css';
 import 'primeicons/primeicons.css';
 import './styles/tokens.css';
