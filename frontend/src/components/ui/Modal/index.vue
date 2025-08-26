@@ -68,7 +68,7 @@
 </template>
 
 <script>
-import Icon from '@/components/ui/Icon';
+import Icon from '@/components/Icon';
 
 import {
   TransitionRoot,
