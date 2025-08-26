@@ -296,6 +296,24 @@ export const routes = [
     meta: { layout: 'default', title: 'Sign in', hide: true },
   },
   {
+    path: '/auth/register',
+    name: 'register',
+    component: () => import('@/views/auth/dashcode/RegisterIndex.vue'),
+    meta: { layout: 'default', title: 'Register', hide: true },
+  },
+  {
+    path: '/auth/forgot-password',
+    name: 'forgot-password',
+    component: () => import('@/views/auth/dashcode/ForgotPassword.vue'),
+    meta: { layout: 'default', title: 'Forgot Password', hide: true },
+  },
+  {
+    path: '/auth/lock',
+    name: 'lock',
+    component: () => import('@/views/auth/dashcode/LockScreen.vue'),
+    meta: { layout: 'default', title: 'Lock Screen', hide: true },
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: () => import('@/views/_errors/NotFound.vue'),
