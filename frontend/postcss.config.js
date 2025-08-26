@@ -3,4 +3,6 @@ module.exports = {
     tailwindcss: {},
     autoprefixer: {},
   },
+  // Explicitly disable the `from` option to avoid warnings from plugins
+  from: undefined,
 };
