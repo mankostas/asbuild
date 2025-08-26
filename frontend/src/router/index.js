@@ -127,13 +127,25 @@ export const routes = [
   },
   {
     path: '/notifications',
-    name: 'notifications',
-    component: () => import('@/views/NotificationCenter.vue'),
+    name: 'notifications.inbox',
+    component: () => import('@/views/notifications/NotificationsInbox.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.notifications',
       title: 'Notifications',
       layout: 'app',
+    },
+  },
+  {
+    path: '/notifications/preferences',
+    name: 'notifications.prefs',
+    component: () => import('@/views/notifications/NotificationPreferences.vue'),
+    meta: {
+      requiresAuth: true,
+      breadcrumb: 'routes.notifications',
+      title: 'Notification Preferences',
+      layout: 'app',
+      groupParent: 'notifications.inbox',
     },
   },
   {
