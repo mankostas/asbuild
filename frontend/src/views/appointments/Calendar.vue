@@ -26,7 +26,6 @@ import { useRouter } from 'vue-router';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import '@fullcalendar/core/vdom';
 import Modal from '@/components/ui/Modal';
 import { useAppointmentsStore } from '@/stores/appointments';
 
