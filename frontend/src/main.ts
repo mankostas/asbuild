@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 import router from './router';
 import stores from './stores';
-import AppShell from './components/layout/AppShell.vue';
+import App from './App.vue';
 import i18n from './i18n';
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
@@ -12,7 +12,7 @@ import 'primeicons/primeicons.css';
 import './styles/tokens.css';
 import './assets/main.css';
 
-createApp(AppShell)
+createApp(App)
   .use(stores)
   .use(i18n)
   .use(router)
