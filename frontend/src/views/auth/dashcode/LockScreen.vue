@@ -57,7 +57,7 @@
             <div class="author-bio text-center mb-8">
               <div class="h-14 w-14 mx-auto rounded-full">
                 <img
-                  src="@/assets/images/all-img/user-big.png"
+                  src="@/assets/images/svg/rabit.svg"
                   alt=""
                   class="w-full h-full object-cover block"
                 />

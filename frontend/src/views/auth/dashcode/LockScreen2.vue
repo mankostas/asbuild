@@ -87,7 +87,7 @@
 import Lockscreen from "./common/lockscreen.vue";
 // Image Import
 import pageBg from "@/assets/images/all-img/login-bg.png"
-import userBg from "@/assets/images/all-img/user-big.png"
+import userBg from "@/assets/images/svg/rabit.svg"
 import logoWhite from "@/assets/images/logo/logo-white.svg"
 import logo from "@/assets/images/logo/logo.svg"
 
