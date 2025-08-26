@@ -9,7 +9,7 @@ import ToastService from 'primevue/toastservice';
 import ConfirmationService from 'primevue/confirmationservice';
 import ConfirmDialog from 'primevue/confirmdialog';
 import VueGoodTablePlugin from 'vue-good-table-next';
-import 'vue-good-table-next/dist/style.css';
+import 'vue-good-table-next/dist/vue-good-table-next.css';
 import 'primeicons/primeicons.css';
 import './styles/tokens.css';
 import './assets/main.css';
