@@ -1,24 +1,49 @@
 export const menuItems = [
   {
-    isHeadr: true,
-    title: "menu",
-  },
-  {
     title: "Dashboard",
     icon: "heroicons-outline:home",
-    isOpen: true,
+    link: "/",
+  },
+  {
+    title: "Appointments",
+    icon: "heroicons-outline:calendar",
     child: [
-      { childtitle: "Analytics Dashboard", childlink: "home" },
-      { childtitle: "Ecommerce Dashboard", childlink: "ecommerce" },
-      { childtitle: "Project Dashboard", childlink: "project" },
-      { childtitle: "CRM Dashboard", childlink: "crm" },
-      { childtitle: "Banking Dashboard", childlink: "banking" },
+      { childtitle: "Appointments", childlink: "/appointments" },
+      { childtitle: "Appointment Types", childlink: "/appointment-types" },
     ],
   },
   {
-    title: "changelog",
-    icon: "heroicons-outline:document-text",
-    link: "/docs/changelog",
-    badge: "1.0.0",
+    title: "Employees",
+    icon: "heroicons-outline:users",
+    link: "/employees",
   },
+  {
+    title: "Reports",
+    icon: "heroicons-outline:chart-bar",
+    link: "/reports",
+  },
+  {
+    title: "Notifications",
+    icon: "heroicons-outline:bell",
+    link: "/notifications",
+  },
+  {
+    title: "Settings",
+    icon: "heroicons-outline:cog",
+    child: [
+      { childtitle: "Settings", childlink: "/settings" },
+      { childtitle: "GDPR", childlink: "/settings/gdpr" },
+    ],
+  },
+];
+
+export const topMenu = [
+  { title: "Dashboard", icon: "heroicons-outline:home", link: "/" },
+  { title: "Appointments", icon: "heroicons-outline:calendar", link: "/appointments" },
+  { title: "Appointment Types", icon: "heroicons-outline:template", link: "/appointment-types" },
+  { title: "Employees", icon: "heroicons-outline:users", link: "/employees" },
+  { title: "Reports", icon: "heroicons-outline:chart-bar", link: "/reports" },
+  { title: "Notifications", icon: "heroicons-outline:bell", link: "/notifications" },
+  { title: "Settings", icon: "heroicons-outline:cog", link: "/settings" },
+  { title: "GDPR", icon: "heroicons-outline:shield-check", link: "/settings/gdpr" },
 ];
