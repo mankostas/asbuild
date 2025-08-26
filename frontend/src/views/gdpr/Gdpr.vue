@@ -2,41 +2,50 @@
   <div class="max-w-xl mx-auto space-y-8">
     <section>
       <h1 class="text-xl font-bold mb-4">Export Data</h1>
-      <button @click="exportData" class="bg-blue-500 text-white px-4 py-2 rounded">Export</button>
+      <Button btnClass="btn-dark" @click="exportData">Export</Button>
     </section>
     <section>
       <h1 class="text-xl font-bold mb-4">Consents</h1>
-      <div
-        v-for="c in consents"
-        :key="c.name"
-        class="flex items-center justify-between py-1"
+      <Card>
+        <table class="w-full border-collapse text-sm">
+          <thead>
+            <tr class="text-left">
+              <th class="p-4">Consent</th>
+              <th class="p-4">Granted</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="c in consents"
+              :key="c.name"
+              class="border-t border-slate-100 dark:border-slate-700"
+            >
+              <td class="p-4 capitalize">{{ c.name }}</td>
+              <td class="p-4"><Checkbox v-model="c.granted" /></td>
+            </tr>
+          </tbody>
+        </table>
+      </Card>
+      <Button btnClass="btn-dark" :isDisabled="!dirty" class="mt-4" @click="saveConsents"
+        >Save</Button
       >
-        <span class="capitalize">{{ c.name }}</span>
-        <input type="checkbox" v-model="c.granted" class="w-5 h-5" />
-      </div>
-      <button
-        @click="saveConsents"
-        class="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        Save
-      </button>
     </section>
     <section>
       <h1 class="text-xl font-bold mb-4 text-red-600">Delete Account</h1>
-      <button
-        @click="requestDelete"
-        class="bg-red-600 text-white px-4 py-2 rounded"
+      <Button btnClass="bg-red-600 text-white" @click="requestDelete"
+        >Request Deletion</Button
       >
-        Request Deletion
-      </button>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useToast } from '@/plugins/toast';
 import api from '@/services/api';
+import Button from '@/components/ui/Button/index.vue';
+import Card from '@/components/ui/Card/index.vue';
+import Checkbox from '@/components/ui/Checkbox/index.vue';
 
 interface Consent {
   name: string;
@@ -44,15 +53,23 @@ interface Consent {
 }
 
 const consents = ref<Consent[]>([]);
+const initial = ref<Consent[]>([]);
 const toast = useToast();
 
 async function load() {
   const { data } = await api.get('/gdpr/consents');
   consents.value = data;
+  initial.value = JSON.parse(JSON.stringify(data));
 }
 
+const dirty = computed(
+  () => JSON.stringify(consents.value) !== JSON.stringify(initial.value),
+);
+
 async function saveConsents() {
+  if (!dirty.value) return;
   await api.put('/gdpr/consents', consents.value);
+  initial.value = JSON.parse(JSON.stringify(consents.value));
   toast.add({ severity: 'success', summary: 'Consents saved', detail: '' });
 }
 
