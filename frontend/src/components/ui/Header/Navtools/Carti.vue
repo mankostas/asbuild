@@ -12,7 +12,7 @@
 </template>
 <script setup>
 import Icon from "@/components/Icon";
-import CartDrawer from "@/components/Header/Cart";
+import CartDrawer from "@/components/ui/Header/Cart";
 import { useThemeSettingsStore } from "@/store/themeSettings";
 import { cartStore } from "@/store/cart";
 const themeSettingsStore = useThemeSettingsStore();

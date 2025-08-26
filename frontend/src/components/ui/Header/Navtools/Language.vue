@@ -66,8 +66,8 @@
 </template>
 
 <script setup>
-import langImg1 from "@/assets/images/flags/usa.png"
-import langImg2 from "@/assets/images/flags/gn.png"
+import langImg1 from "@/assets/images/flags/usa.svg"
+import langImg2 from "@/assets/images/flags/gn.svg"
 import { ref } from "vue";
 import {
   Listbox,
