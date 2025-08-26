@@ -50,6 +50,7 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const config = error.config as AxiosRequestConfig & {
       __retryCount?: number;
+      _retry?: boolean;
     };
     const status = error.response?.status;
 
@@ -64,9 +65,17 @@ api.interceptors.response.use(
       }
     }
 
-    // When the API responds with 401, clear auth state and redirect to login.
-    if (status === 401) {
+    if (status === 401 && !config._retry) {
+      config._retry = true;
       const auth = useAuthStore();
+      if (auth.refreshToken) {
+        try {
+          await auth.refresh();
+          config.headers = config.headers || {};
+          config.headers['Authorization'] = `Bearer ${auth.accessToken}`;
+          return api(config);
+        } catch (e) {}
+      }
       await auth.logout(true);
       window.location.href = '/auth/login';
     }

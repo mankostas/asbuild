@@ -50,7 +50,6 @@ const submit = async () => {
   loading.value = true;
   try {
     await auth.login({ email: email.value, password: password.value });
-    await auth.fetchUser();
     router.push('/');
   } catch (e: any) {
     error.value = e.message || 'Invalid credentials';
