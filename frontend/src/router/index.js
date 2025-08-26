@@ -342,6 +342,12 @@ router.beforeEach(async (to, from, next) => {
     } catch (e) {}
   }
 
+  if (auth.isAuthenticated && !auth.user) {
+    try {
+      await auth.fetchUser();
+    } catch (e) {}
+  }
+
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return next('/auth/login');
   }
