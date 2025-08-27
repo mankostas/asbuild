@@ -1,6 +1,11 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import notify from '@/plugins/notify';
 
+let authGetter: (() => any) | null = null;
+export function registerAuthStore(getter: () => any) {
+  authGetter = getter;
+}
+
 export interface ApiError {
   message: string;
   status?: number;
@@ -64,10 +69,9 @@ api.interceptors.response.use(
       }
     }
 
-    if (status === 401 && !config._retry) {
+    if (status === 401 && !config._retry && authGetter) {
       config._retry = true;
-      const { useAuthStore } = await import('@/stores/auth');
-      const auth = useAuthStore();
+      const auth = authGetter();
       if (auth.refreshToken) {
         try {
           await auth.refresh();
