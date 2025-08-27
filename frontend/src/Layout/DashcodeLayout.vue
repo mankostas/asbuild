@@ -43,7 +43,7 @@
         >
           <Breadcrumbs v-if="!this.$route.meta.hide" />
           <router-view v-slot="{ Component }">
-            <transition name="router-animation" mode="out-in" appear>
+            <transition name="router-animation" mode="in-out" appear>
               <component :is="Component"></component>
             </transition>
           </router-view>
@@ -96,34 +96,16 @@ export default {
 };
 </script>
 <style lang="scss">
-.router-animation-enter-active {
-  animation: coming 0.2s;
-  animation-delay: 0.1s;
-  opacity: 0;
-}
+.router-animation-enter-active,
 .router-animation-leave-active {
-  animation: going 0.2s;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.router-animation-enter-from,
+.router-animation-leave-to {
+  opacity: 0;
+  transform: translate3d(0, 4%, 0) scale(0.93);
 }
 
-@keyframes going {
-  from {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  to {
-    transform: translate3d(0, 4%, 0) scale(0.93);
-    opacity: 0;
-  }
-}
-@keyframes coming {
-  from {
-    transform: translate3d(0, 4%, 0) scale(0.93);
-    opacity: 0;
-  }
-  to {
-    transform: translate3d(0, 0, 0) scale(1);
-    opacity: 1;
-  }
-}
 @keyframes slideLeftTransition {
   0% {
     opacity: 0;
