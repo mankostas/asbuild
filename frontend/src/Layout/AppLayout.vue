@@ -25,17 +25,13 @@
   import { Transition } from 'vue'
   </script>
 <style>
-/* Slide and fade transition for page navigation */
+/* Fade-only transition for page navigation */
 .page-enter-active,
 .page-leave-active {
-  transition: opacity 0.3s, transform 0.3s;
+  transition: opacity 0.3s ease;
 }
-.page-enter-from {
-  opacity: 0;
-  transform: translateX(20px);
-}
+.page-enter-from,
 .page-leave-to {
   opacity: 0;
-  transform: translateX(-20px);
 }
 </style>
