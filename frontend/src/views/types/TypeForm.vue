@@ -7,24 +7,49 @@
           <label class="block font-medium mb-1" for="name">Name<span class="text-red-600">*</span></label>
           <input id="name" v-model="name" class="border rounded p-2 w-full" />
         </div>
+
         <div class="mb-4">
-          <label class="block font-medium mb-1" for="summary">Fields Summary (JSON)</label>
-          <textarea
-            id="summary"
-            v-model="fieldsSummaryText"
-            class="border rounded p-2 w-full h-32 font-mono"
-          ></textarea>
-          <div v-if="fieldsSummaryError" class="text-red-600 text-sm mt-1">{{ fieldsSummaryError }}</div>
+          <h3 class="font-medium mb-2">Form Fields</h3>
+          <div class="flex gap-4">
+            <div class="w-1/3">
+              <h4 class="text-sm font-semibold mb-2">Add Field</h4>
+              <ul>
+                <li v-for="t in fieldTypes" :key="t.key">
+                  <button
+                    type="button"
+                    class="w-full mb-2 px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded"
+                    @click="addField(t)"
+                  >
+                    {{ t.label }}
+                  </button>
+                </li>
+              </ul>
+            </div>
+            <div class="flex-1">
+              <h4 class="text-sm font-semibold mb-2">Layout</h4>
+              <draggable v-model="fields" item-key="id" class="space-y-2" handle=".handle">
+                <template #item="{ element, index }">
+                  <div class="p-3 bg-white border rounded flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="cursor-move handle text-gray-400">≡</span>
+                      <input v-model="element.name" class="border rounded p-1 w-32" placeholder="name" />
+                      <input v-model="element.label" class="border rounded p-1 w-32" placeholder="label" />
+                      <select v-model="element.typeKey" class="border rounded p-1">
+                        <option v-for="t in fieldTypes" :key="t.key" :value="t.key">{{ t.label }}</option>
+                      </select>
+                      <label class="flex items-center gap-1 text-sm">
+                        <input type="checkbox" v-model="element.required" />
+                        required
+                      </label>
+                    </div>
+                    <button type="button" class="text-red-500" @click="removeField(index)">✕</button>
+                  </div>
+                </template>
+              </draggable>
+            </div>
+          </div>
         </div>
-        <div class="mb-4">
-          <label class="block font-medium mb-1" for="schema">Form Schema (JSON)</label>
-          <textarea
-            id="schema"
-            v-model="formSchemaText"
-            class="border rounded p-2 w-full h-64 font-mono"
-          ></textarea>
-          <div v-if="formSchemaError" class="text-red-600 text-sm mt-1">{{ formSchemaError }}</div>
-        </div>
+
         <div v-if="serverError" class="text-red-600 text-sm mb-2">{{ serverError }}</div>
         <button
           type="submit"
@@ -49,87 +74,120 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '@/services/api';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
+import draggable from 'vuedraggable';
+
+interface Field {
+  id: number;
+  name: string;
+  label: string;
+  typeKey: string;
+  required: boolean;
+}
 
 const route = useRoute();
 const router = useRouter();
 
 const name = ref('');
-const formSchemaText = ref('');
-const fieldsSummaryText = ref('');
-const formSchemaObj = ref<any | null>(null);
-const fieldsSummaryObj = ref<any | null>(null);
-const formSchemaError = ref('');
-const fieldsSummaryError = ref('');
-const serverError = ref('');
+const fields = ref<Field[]>([]);
 const previewModel = ref<any>({});
+const serverError = ref('');
+
+const fieldTypes = [
+  { key: 'text', label: 'Text', schema: { type: 'string' } },
+  { key: 'number', label: 'Number', schema: { type: 'number' } },
+  { key: 'date', label: 'Date', schema: { type: 'string', format: 'date' } },
+  { key: 'time', label: 'Time', schema: { type: 'string', format: 'time' } },
+  { key: 'boolean', label: 'Checkbox', schema: { type: 'boolean' } },
+];
 
 const isEdit = computed(() => route.name === 'types.edit');
 
-function parseSchema() {
-  formSchemaError.value = '';
-  try {
-    if (!formSchemaText.value.trim()) {
-      formSchemaObj.value = null;
-      return;
-    }
-    const obj = JSON.parse(formSchemaText.value);
-    if (obj.type !== 'object' || typeof obj.properties !== 'object') {
-      formSchemaError.value = 'Schema must be an object with properties';
-      formSchemaObj.value = null;
-    } else {
-      formSchemaObj.value = obj;
-    }
-  } catch (e) {
-    formSchemaError.value = 'Invalid JSON';
-    formSchemaObj.value = null;
-  }
+function addField(t: any) {
+  fields.value.push({
+    id: Date.now() + Math.random(),
+    name: `field${fields.value.length + 1}`,
+    label: t.label,
+    typeKey: t.key,
+    required: false,
+  });
 }
 
-function parseSummary() {
-  fieldsSummaryError.value = '';
-  try {
-    if (!fieldsSummaryText.value.trim()) {
-      fieldsSummaryObj.value = null;
-      return;
-    }
-    fieldsSummaryObj.value = JSON.parse(fieldsSummaryText.value);
-  } catch (e) {
-    fieldsSummaryError.value = 'Invalid JSON';
-    fieldsSummaryObj.value = null;
-  }
+function removeField(index: number) {
+  fields.value.splice(index, 1);
 }
 
-watch(formSchemaText, parseSchema);
-watch(fieldsSummaryText, parseSummary);
+const formSchemaObj = computed(() => {
+  const properties: Record<string, any> = {};
+  const required: string[] = [];
+  fields.value.forEach((f) => {
+    const def = fieldTypes.find((ft) => ft.key === f.typeKey);
+    if (!def) return;
+    properties[f.name] = { title: f.label, ...def.schema };
+    if (f.required) required.push(f.name);
+  });
+  const schema: any = { type: 'object', properties };
+  if (required.length) schema.required = required;
+  return schema;
+});
+
+const fieldsSummaryObj = computed(() =>
+  fields.value.map((f) => ({
+    name: f.name,
+    label: f.label,
+    type: f.typeKey,
+    required: f.required,
+  })),
+);
+
+watch(
+  fields,
+  () => {
+    previewModel.value = {};
+  },
+  { deep: true },
+);
 
 onMounted(async () => {
   if (isEdit.value) {
     const { data } = await api.get(`/appointment-types/${route.params.id}`);
     name.value = data.name;
-    formSchemaText.value = data.form_schema
-      ? JSON.stringify(data.form_schema, null, 2)
-      : '';
-    fieldsSummaryText.value = data.fields_summary
-      ? JSON.stringify(data.fields_summary, null, 2)
-      : '';
-    parseSchema();
-    parseSummary();
+    if (data.fields_summary) {
+      if (Array.isArray(data.fields_summary)) {
+        fields.value = data.fields_summary.map((f: any) => ({
+          id: Date.now() + Math.random(),
+          name: f.name || `field${fields.value.length + 1}`,
+          label: f.label || f.name || 'Field',
+          typeKey: f.type || 'text',
+          required: !!f.required,
+        }));
+      } else if (typeof data.fields_summary === 'object') {
+        fields.value = Object.keys(data.fields_summary).map((key) => {
+          const f = (data.fields_summary as any)[key];
+          return {
+            id: Date.now() + Math.random(),
+            name: key,
+            label: f.label || key,
+            typeKey: f.type || 'text',
+            required: !!f.required,
+          };
+        });
+      }
+    }
   }
 });
 
 const canSubmit = computed(() => {
-  return !!name.value && !formSchemaError.value && !fieldsSummaryError.value;
+  return !!name.value && fields.value.length > 0;
 });
 
 async function onSubmit() {
   serverError.value = '';
-  parseSchema();
-  parseSummary();
   if (!canSubmit.value) return;
-
-  const payload: any = { name: name.value };
-  if (formSchemaText.value.trim()) payload.form_schema = formSchemaText.value;
-  if (fieldsSummaryText.value.trim()) payload.fields_summary = fieldsSummaryText.value;
+  const payload: any = {
+    name: name.value,
+    form_schema: JSON.stringify(formSchemaObj.value),
+    fields_summary: JSON.stringify(fieldsSummaryObj.value),
+  };
   try {
     if (isEdit.value) {
       await api.patch(`/appointment-types/${route.params.id}`, payload);
