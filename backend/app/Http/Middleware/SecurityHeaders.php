@@ -30,6 +30,8 @@ class SecurityHeaders
             $response->headers->set('Access-Control-Allow-Origin', $origin);
         } elseif ($origin === '' && !empty($allowedOrigins)) {
             $response->headers->set('Access-Control-Allow-Origin', $allowedOrigins[0]);
+        } elseif (empty($allowedOrigins)) {
+            $response->headers->set('Access-Control-Allow-Origin', '*');
         }
         $response->headers->set('Access-Control-Allow-Credentials', 'true');
         $response->headers->set('Access-Control-Allow-Methods', implode(',', $cors['allowed_methods'] ?? ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']));
