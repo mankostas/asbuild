@@ -1,6 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import notify from '@/plugins/notify';
-import { useAuthStore } from '@/stores/auth';
 
 export interface ApiError {
   message: string;
@@ -67,6 +66,7 @@ api.interceptors.response.use(
 
     if (status === 401 && !config._retry) {
       config._retry = true;
+      const { useAuthStore } = await import('@/stores/auth');
       const auth = useAuthStore();
       if (auth.refreshToken) {
         try {
