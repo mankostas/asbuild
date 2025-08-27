@@ -12,6 +12,7 @@ export default defineConfig(({ command }) => ({
   base: '',
   envPrefix: ['VITE_', 'API_'],
   server: {
+    cors: { origin: '*' },
     watch: {
       // Use polling so `npm run dev` recompiles when files change
       usePolling: true,
@@ -19,6 +20,9 @@ export default defineConfig(({ command }) => ({
     // Disable Vite's HMR client in build/previews to avoid
     // unnecessary websocket connections in production builds.
     ...(command !== 'serve' ? { hmr: false } : {}),
+  },
+  preview: {
+    cors: { origin: '*' },
   },
   css: {
     preprocessorOptions: {
