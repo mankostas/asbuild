@@ -1,6 +1,8 @@
 <template>
   <div>
-    <h2 class="text-xl font-bold mb-4">{{ isEdit ? 'Edit' : 'Create' }} Appointment</h2>
+    <h2 class="text-xl font-bold mb-4">
+      {{ isEdit ? 'Edit' : 'Create' }} Appointment
+    </h2>
     <form @submit.prevent="submitForm" class="max-w-lg space-y-4">
       <VueSelect label="Type" :error="typeError">
         <vSelect
@@ -13,20 +15,12 @@
         />
       </VueSelect>
 
-      <FromGroup label="Scheduled At">
-        <flat-pickr v-model="scheduledAt" :config="dateConfig" class="form-control" />
-      </FromGroup>
-
-      <FromGroup label="SLA Start">
-        <flat-pickr v-model="slaStartAt" :config="dateConfig" class="form-control" />
-      </FromGroup>
-
-      <FromGroup label="SLA End">
-        <flat-pickr v-model="slaEndAt" :config="dateConfig" class="form-control" />
-      </FromGroup>
-
       <VueSelect v-if="isEdit" label="Status">
-        <vSelect v-model="status" :options="statusOptions" placeholder="Select status" />
+        <vSelect
+          v-model="status"
+          :options="statusOptions"
+          placeholder="Select status"
+        />
       </VueSelect>
 
       <JsonSchemaForm
@@ -62,7 +56,6 @@ import api from '@/services/api';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
 import Button from '@/components/ui/Button/index.vue';
 import VueSelect from '@/components/ui/Select/VueSelect.vue';
-import FromGroup from '@/components/ui/FromGroup/index.vue';
 import Modal from '@/components/ui/Modal/index.vue';
 import { useField, useForm } from 'vee-validate';
 import * as yup from 'yup';
@@ -83,14 +76,23 @@ const serverError = ref('');
 const showError = ref(false);
 const originalStatus = ref('');
 
-const statusOptions = ['draft', 'assigned', 'in_progress', 'completed', 'rejected', 'redo'];
+const statusOptions = [
+  'draft',
+  'assigned',
+  'in_progress',
+  'completed',
+  'rejected',
+  'redo',
+];
 
 const schema = yup.object({
   typeId: yup.mixed().required('Type is required'),
 });
 
 const { handleSubmit, meta } = useForm({ validationSchema: schema });
-const { value: typeId, errorMessage: typeError } = useField<string | number>('typeId');
+const { value: typeId, errorMessage: typeError } = useField<string | number>(
+  'typeId',
+);
 
 const isEdit = computed(() => route.name === 'appointments.edit');
 
@@ -102,9 +104,9 @@ onMounted(async () => {
     const appt = res.data;
     typeId.value = appt.type?.id || appt.appointment_type_id;
     formData.value = appt.form_data || {};
-    scheduledAt.value = toInput(appt.scheduled_at);
-    slaStartAt.value = toInput(appt.sla_start_at);
-    slaEndAt.value = toInput(appt.sla_end_at);
+    scheduledAt.value = appt.scheduled_at || '';
+    slaStartAt.value = appt.sla_start_at || '';
+    slaEndAt.value = appt.sla_end_at || '';
     status.value = appt.status;
     originalStatus.value = appt.status;
   }
@@ -112,6 +114,10 @@ onMounted(async () => {
 
 function onTypeChange() {
   formData.value = {};
+  const t = types.value.find((t) => t.id === typeId.value);
+  scheduledAt.value = t?.scheduled_at || '';
+  slaStartAt.value = t?.sla_start_at || '';
+  slaEndAt.value = t?.sla_end_at || '';
 }
 
 const currentSchema = computed(() => {
@@ -129,31 +135,15 @@ const canSubmit = computed(() => {
   });
 });
 
-const dateConfig = {
-  enableTime: true,
-  dateFormat: 'Y-m-d H:i',
-  altInput: true,
-  altFormat: 'F j, Y H:i',
-  time_24hr: true,
-};
-
-function toInput(v?: string) {
-  return v ? new Date(v).toISOString().slice(0, 16).replace('T', ' ') : '';
-}
-
-function toIso(v: string) {
-  return v ? new Date(v).toISOString() : undefined;
-}
-
 const submitForm = handleSubmit(async () => {
   serverError.value = '';
   const payload: any = {
     appointment_type_id: typeId.value,
     form_data: formData.value,
   };
-  if (scheduledAt.value) payload.scheduled_at = toIso(scheduledAt.value);
-  if (slaStartAt.value) payload.sla_start_at = toIso(slaStartAt.value);
-  if (slaEndAt.value) payload.sla_end_at = toIso(slaEndAt.value);
+  if (scheduledAt.value) payload.scheduled_at = scheduledAt.value;
+  if (slaStartAt.value) payload.sla_start_at = slaStartAt.value;
+  if (slaEndAt.value) payload.sla_end_at = slaEndAt.value;
   try {
     if (isEdit.value) {
       if (status.value && status.value !== originalStatus.value) {
@@ -161,11 +151,17 @@ const submitForm = handleSubmit(async () => {
       }
       await api.patch(`/appointments/${route.params.id}`, payload);
       notify.success('Appointment updated');
-      router.push({ name: 'appointments.details', params: { id: route.params.id } });
+      router.push({
+        name: 'appointments.details',
+        params: { id: route.params.id },
+      });
     } else {
       const res = await api.post('/appointments', payload);
       notify.success('Appointment created');
-      router.push({ name: 'appointments.details', params: { id: res.data.id } });
+      router.push({
+        name: 'appointments.details',
+        params: { id: res.data.id },
+      });
     }
   } catch (e: any) {
     serverError.value = e.message || 'Failed to save';
