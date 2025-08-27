@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import api from '@/services/api';
+import api, { registerAuthStore } from '@/services/api';
+import { useThemeSettingsStore } from './themeSettings';
 import {
   getAccessToken,
   getRefreshToken,
@@ -39,7 +40,6 @@ export const useAuthStore = defineStore('auth', {
         setTokens(data.access_token, data.refresh_token);
         api.defaults.headers.common['Authorization'] =
           `Bearer ${data.access_token}`;
-        const { useThemeSettingsStore } = await import('./themeSettings');
         await useThemeSettingsStore().load();
       }
     },
@@ -91,3 +91,5 @@ export const useAuthStore = defineStore('auth', {
     },
   },
 });
+
+registerAuthStore(() => useAuthStore());
