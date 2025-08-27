@@ -48,11 +48,16 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
       } catch (e) {}
     },
 
-    persist() {
+    persistLocal() {
       localStorage.setItem("themeSettings", JSON.stringify(this.$state));
+    },
+
+    async persistRemote() {
       const auth = useAuthStore();
       if (!auth.isAuthenticated) return;
-      api.put("/settings/theme", this.$state).catch(() => {});
+      try {
+        await api.put("/settings/theme", this.$state);
+      } catch (e) {}
     },
 
     setSidebarCollasp() {
