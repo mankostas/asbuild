@@ -62,30 +62,43 @@ class SettingsController extends Controller
     public function getFooter(Request $request)
     {
         $this->ensureSuperAdmin($request);
-        $footer = config('tenant.footer') ?? '';
-        return response()->json(['text' => $footer]);
+        $left = config('tenant.footer_left') ?? '';
+        $right = config('tenant.footer_right') ?? '';
+        return response()->json(['left' => $left, 'right' => $right]);
     }
 
     public function updateFooter(Request $request)
     {
         $this->ensureSuperAdmin($request);
         $data = $request->validate([
-            'text' => 'required|string',
+            'left' => 'required|string',
+            'right' => 'required|string',
         ]);
 
-        $tenantId = app('tenant_id');
-        DB::table('tenant_settings')->updateOrInsert(
-            ['tenant_id' => $tenantId, 'key' => 'footer'],
+        $tenantId = app()->has('tenant_id') ? app('tenant_id') : $request->user()->tenant_id;
+        DB::table('tenant_settings')->upsert([
             [
-                'value' => $data['text'],
+                'tenant_id' => $tenantId,
+                'key' => 'footer_left',
+                'value' => $data['left'],
                 'updated_at' => now(),
                 'created_at' => now(),
-            ]
-        );
+            ],
+            [
+                'tenant_id' => $tenantId,
+                'key' => 'footer_right',
+                'value' => $data['right'],
+                'updated_at' => now(),
+                'created_at' => now(),
+            ],
+        ], ['tenant_id', 'key'], ['value', 'updated_at']);
 
-        config(['tenant.footer' => $data['text']]);
+        config([
+            'tenant.footer_left' => $data['left'],
+            'tenant.footer_right' => $data['right'],
+        ]);
 
-        return response()->json(['text' => $data['text']]);
+        return response()->json(['left' => $data['left'], 'right' => $data['right']]);
     }
 
     public function getTheme(Request $request)

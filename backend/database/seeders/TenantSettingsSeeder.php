@@ -19,8 +19,15 @@ class TenantSettingsSeeder extends Seeder
             ],
             [
                 'tenant_id' => 1,
-                'key' => 'footer',
-                'value' => 'Default footer',
+                'key' => 'footer_left',
+                'value' => 'Default left footer',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'tenant_id' => 1,
+                'key' => 'footer_right',
+                'value' => 'Default right footer',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
