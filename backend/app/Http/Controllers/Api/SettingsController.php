@@ -97,7 +97,11 @@ class SettingsController extends Controller
     public function updateTheme(Request $request)
     {
         $user = $request->user();
-        $user->theme_settings = $request->all();
+        $data = $request->all();
+        if ($user->theme_settings === $data) {
+            return response()->json($user->theme_settings);
+        }
+        $user->theme_settings = $data;
         $user->save();
 
         return response()->json($user->theme_settings);
