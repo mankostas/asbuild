@@ -4,10 +4,6 @@
       :class="`app-header md:px-6 px-[15px] dark:bg-slate-800 shadow-base dark:shadow-base3 bg-white dark:border-b dark:border-slate-700 dark:border-opacity-60 ${
         this.$store.themeSettingsStore.navbarColor
       } ${
-        this.$store.themeSettingsStore.cWidth === 'boxed'
-          ? 'container mx-auto'
-          : 'container-fluid'
-      } ${
         this.$store.themeSettingsStore.menuLayout === 'horizontal' &&
         window.width > 1280
           ? 'py-1'

@@ -50,6 +50,7 @@ async function bootstrap() {
 
   // Apply any saved theme customizer settings on startup and persist future
   // changes so user preferences survive page reloads and new sessions.
+  document.documentElement.setAttribute("dir", "ltr");
   document.body.classList.remove(
     themeSettingsStore.theme === "dark" ? "light" : "dark"
   );

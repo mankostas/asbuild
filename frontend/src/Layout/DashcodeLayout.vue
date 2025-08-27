@@ -85,11 +85,11 @@ export default {
         this.$store.themeSettingsStore.menuLayout === "horizontal" ||
         this.$store.themeSettingsStore.sidebarHidden
       ) {
-        return "ms-0";
+        return "ml-0";
       } else if (this.$store.themeSettingsStore.sidebarCollasp) {
-        return "ms-[72px]";
+        return "ml-[72px]";
       } else {
-        return "ms-[248px]";
+        return "ml-[248px]";
       }
     },
   },
