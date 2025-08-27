@@ -2,11 +2,12 @@
 
 return [
     'cors' => [
-        // In production only allow requests from the configured frontend URL.
-        // During local development explicitly allow the local frontend to
-        // ensure credentialed requests work in browsers.
+        // In production only allow requests from the configured frontend URL(s).
+        // Multiple origins can be provided by separating them with commas in the
+        // FRONTEND_URL environment variable. During local development explicitly
+        // allow the local frontend to ensure credentialed requests work in browsers.
         'allowed_origins' => env('APP_ENV') === 'production'
-            ? array_filter([env('FRONTEND_URL')])
+            ? array_filter(array_map('trim', explode(',', env('FRONTEND_URL', ''))))
             : [env('FRONTEND_URL', 'http://localhost:5173')],
         'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         'allowed_headers' => ['Content-Type', 'Authorization', 'X-Requested-With'],

@@ -19,21 +19,12 @@ class SecurityHeaders
         }
 
         // Filter out any empty strings to avoid sending an empty header value.
-        // If no origins are configured, fall back to allowing all origins.
-        $allowedOrigins = array_filter($cors['allowed_origins'] ?? ['*']);
-        if (empty($allowedOrigins)) {
-            $allowedOrigins = ['*'];
-        }
-
+        $allowedOrigins = array_filter($cors['allowed_origins'] ?? []);
         $origin = $request->headers->get('Origin');
 
-        if (in_array('*', $allowedOrigins)) {
-            if ($origin) {
-                $response->headers->set('Access-Control-Allow-Origin', $origin);
-            }
-        } elseif ($origin && in_array($origin, $allowedOrigins)) {
+        if ($origin && in_array($origin, $allowedOrigins, true)) {
             $response->headers->set('Access-Control-Allow-Origin', $origin);
-        } elseif (!empty($allowedOrigins)) {
+        } elseif (!$origin && !empty($allowedOrigins)) {
             $response->headers->set('Access-Control-Allow-Origin', $allowedOrigins[0]);
         }
         $response->headers->set('Access-Control-Allow-Credentials', 'true');
