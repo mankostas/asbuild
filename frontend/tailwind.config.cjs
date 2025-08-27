@@ -7,7 +7,6 @@ module.exports = {
     "./src/**/*.{vue,js,ts,jsx,tsx}",
     "./node_modules/vue-tailwind-datepicker/**/*.js",
   ],
-  mode: "jit",
   darkMode: "class",
   theme: {
     container: {
