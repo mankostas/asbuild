@@ -3,7 +3,10 @@
     <div
       class="site-footer px-6 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 py-4"
     >
-      <div class="text-center text-sm">{{ store.text }}</div>
+      <div class="flex justify-between text-sm">
+        <span>{{ store.left }}</span>
+        <span>{{ store.right }}</span>
+      </div>
     </div>
   </footer>
 </template>

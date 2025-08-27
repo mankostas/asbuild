@@ -36,16 +36,18 @@ class FooterSettingsRoutesTest extends TestCase
 
     public function test_super_admin_can_update_and_get_footer(): void
     {
-        $payload = ['text' => 'New footer'];
+        $payload = ['left' => 'Left', 'right' => 'Right'];
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->putJson('/api/settings/footer', $payload)
             ->assertStatus(200)
-            ->assertJsonPath('text', 'New footer');
+            ->assertJsonPath('left', 'Left')
+            ->assertJsonPath('right', 'Right');
 
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->getJson('/api/settings/footer')
             ->assertStatus(200)
-            ->assertJsonPath('text', 'New footer');
+            ->assertJsonPath('left', 'Left')
+            ->assertJsonPath('right', 'Right');
     }
 
     public function test_client_admin_cannot_update_footer(): void
@@ -64,7 +66,7 @@ class FooterSettingsRoutesTest extends TestCase
         Sanctum::actingAs($user);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->putJson('/api/settings/footer', ['text' => 'Forbidden'])
+            ->putJson('/api/settings/footer', ['left' => 'Nope', 'right' => 'Nope'])
             ->assertStatus(403);
     }
 }
