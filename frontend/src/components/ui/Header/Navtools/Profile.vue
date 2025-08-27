@@ -119,9 +119,9 @@ const ProfileMenu = [
   {
     label: 'Logout',
     icon: 'heroicons-outline:login',
-    link: () => {
-      router.push('/');
-      localStorage.removeItem('activeUser');
+    link: async () => {
+      await authStore.logout();
+      router.push('/auth/login');
     },
   },
 ];
