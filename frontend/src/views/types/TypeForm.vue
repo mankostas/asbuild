@@ -27,13 +27,10 @@
             </div>
             <div class="flex-1">
               <h4 class="text-sm font-semibold mb-2">Layout</h4>
-              <draggable v-model="fields" item-key="id" class="grid grid-cols-2 gap-2" handle=".handle">
+              <draggable v-model="fields" item-key="id" class="flex flex-col gap-2" handle=".handle">
                 <template #item="{ element, index }">
                   <div
-                    :class="[
-                      'p-3 bg-white border rounded flex items-center justify-between',
-                      element.cols === 2 ? 'col-span-2' : 'col-span-1',
-                    ]"
+                    class="p-3 bg-white border rounded flex items-center justify-between"
                   >
                     <div class="flex items-center gap-2">
                       <span class="cursor-move handle text-gray-400">≡</span>
