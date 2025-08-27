@@ -26,6 +26,9 @@ const tabs = computed(() => {
   ) {
     t.push({ id: '/settings/branding', label: 'Branding' });
   }
+  if (auth.user?.roles?.some((r: any) => r.name === 'SuperAdmin')) {
+    t.push({ id: '/settings/footer', label: 'Footer' });
+  }
   return t;
 });
 

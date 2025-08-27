@@ -46,6 +46,7 @@ export const menuItems = [
     child: [
       { childtitle: "Profile", childlink: "settings.profile" },
       { childtitle: "Branding", childlink: "settings.branding", admin: true },
+      { childtitle: "Footer", childlink: "settings.footer", admin: true },
       { childtitle: "GDPR", childlink: "gdpr.index" },
       { childtitle: "Tenants", childlink: "tenants.list", admin: true },
     ],
@@ -88,6 +89,12 @@ export const topMenu = [
     title: "Branding",
     icon: "heroicons-outline:sparkles",
     link: "settings.branding",
+    admin: true,
+  },
+  {
+    title: "Footer",
+    icon: "heroicons-outline:document-text",
+    link: "settings.footer",
     admin: true,
   },
   { title: "GDPR", icon: "heroicons-outline:shield-check", link: "gdpr.index" },
