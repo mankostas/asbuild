@@ -1,7 +1,7 @@
 import "animate.css";
 import "flatpickr/dist/flatpickr.css";
 import "sweetalert2/dist/sweetalert2.min.css";
-import { createApp, watch } from "vue";
+import { createApp } from "vue";
 import "simplebar-vue/dist/simplebar.min.css";
 import VueGoodTablePlugin from "vue-good-table-next";
 import "vue-good-table-next/dist/vue-good-table-next.css";
@@ -63,6 +63,8 @@ async function bootstrap() {
     themeSettingsStore.persistLocal();
   });
 
+router.isReady().then(() => {
+=======
   watch(
     () => themeSettingsStore.isOpenSettings,
     (open) => {
@@ -72,7 +74,7 @@ async function bootstrap() {
     }
   );
 
-  await router.isReady();
+
   app.mount("#app");
 }
 

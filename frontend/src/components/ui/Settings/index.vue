@@ -16,7 +16,7 @@
         >Settings</span
       ></span
     >
-    <Transition name="lefttranslate">
+    <Transition name="lefttranslate" @after-leave="persistSettings">
       <div
         v-show="this.$store.themeSettingsStore.isOpenSettings"
         class="setting-wrapper fixed ltr:right-0 rtl:left-0 top-0 md:w-[400px] w-[300px] bg-white dark:bg-slate-800 h-screen z-[9999] px-6 md:pb-6 pb-[100px] shadow-base2 dark:shadow-base3 border border-gray-5002 dark:border-slate-700"
@@ -99,6 +99,11 @@ export default {
   },
   data() {
     return {};
+  },
+  methods: {
+    persistSettings() {
+      this.$store.themeSettingsStore.persistRemote();
+    },
   },
 };
 </script>
