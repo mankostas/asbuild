@@ -10,6 +10,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\SecurityHeaders::class,
         \App\Http\Middleware\RequestId::class,
         \App\Http\Middleware\ETag::class,
+        \App\Http\Middleware\LogRequests::class,
     ];
 
     protected $middlewareAliases = [
