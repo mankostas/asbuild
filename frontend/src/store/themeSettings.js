@@ -1,28 +1,36 @@
 import { defineStore } from "pinia";
 
+// Default state for the theme customizer.  When the store initializes we merge
+// any persisted settings from localStorage so that user choices persist across
+// refreshes and future logins.
+const defaultState = {
+  sidebarCollaspe: false,
+  sidebarHidden: false,
+  mobielSidebar: false,
+  semidark: false,
+  monochrome: false,
+  semiDarkTheme: "semi-light",
+  isDark: false,
+  skin: "default",
+  theme: "light",
+  isOpenSettings: false,
+  cWidth: "full",
+  menuLayout: "vertical",
+  navbarType: "sticky",
+  isMouseHovered: false,
+  footerType: "static",
+  direction: false,
+  cartOpener: false,
+  chartColors: {
+    title: "red",
+  },
+};
+
 export const useThemeSettingsStore = defineStore("themeSettings", {
-  state: () => ({
-    sidebarCollaspe: false,
-    sidebarHidden: false,
-    mobielSidebar: false,
-    semidark: false,
-    monochrome: false,
-    semiDarkTheme: "semi-light",
-    isDark: false,
-    skin: "default",
-    theme: "light",
-    isOpenSettings: false,
-    cWidth: "full",
-    menuLayout: "vertical",
-    navbarType: "sticky",
-    isMouseHovered: false,
-    footerType: "static",
-    direction: false,
-    cartOpener: false,
-    chartColors: {
-      title: "red",
-    },
-  }),
+  state: () => {
+    const saved = localStorage.getItem("themeSettings");
+    return saved ? { ...defaultState, ...JSON.parse(saved) } : { ...defaultState };
+  },
   actions: {
     setSidebarCollasp() {
       this.sidebarCollasp = !this.sidebarCollasp;
