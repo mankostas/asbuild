@@ -98,12 +98,13 @@ export default {
 <style lang="scss">
 .router-animation-enter-active,
 .router-animation-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  /* Use only a fade effect without zooming */
+  transition: opacity 0.2s ease;
 }
 .router-animation-enter-from,
 .router-animation-leave-to {
+  /* Start and end states for fading */
   opacity: 0;
-  transform: translate3d(0, 4%, 0) scale(0.93);
 }
 
 @keyframes slideLeftTransition {
