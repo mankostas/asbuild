@@ -1,8 +1,7 @@
 <template>
-  <div>
-    <h2 class="text-xl font-bold mb-4">Tenants</h2>
-    <DashcodeServerTable
-      :key="tableKey"
+    <div>
+      <DashcodeServerTable
+        :key="tableKey"
       :columns="columns"
       :fetcher="fetchTenants"
     >

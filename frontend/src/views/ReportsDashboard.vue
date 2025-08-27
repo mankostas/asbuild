@@ -1,9 +1,6 @@
 <template>
   <div class="mx-auto max-w-7xl space-y-8 p-6">
-    <div
-      class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
-    >
-      <h2 class="text-3xl font-bold tracking-tight">Reports</h2>
+    <div class="flex justify-end mb-4">
       <div class="flex flex-wrap items-end gap-2">
         <Select v-model="range" class="w-40">
           <option value="today">Today</option>

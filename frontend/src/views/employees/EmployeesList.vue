@@ -1,7 +1,6 @@
 <template>
-  <div>
-    <h2 class="text-xl font-bold mb-4">Employees</h2>
-    <div class="mb-4">
+    <div>
+      <div class="mb-4">
       <Button
         btnClass="btn-primary"
         text="Invite Employee"

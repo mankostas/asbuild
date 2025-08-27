@@ -1,15 +1,14 @@
 <template>
-  <div>
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-xl font-bold">Appointments</h2>
-      <RouterLink
-        class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-        :to="{ name: 'appointments.create' }"
-      >
-        <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
-        New
-      </RouterLink>
-    </div>
+    <div>
+      <div class="flex items-center justify-end mb-4">
+        <RouterLink
+          class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
+          :to="{ name: 'appointments.create' }"
+        >
+          <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
+          New
+        </RouterLink>
+      </div>
     <div class="flex gap-4 mb-4">
       <select v-model="statusFilter" class="border rounded p-2">
         <option value="">All Statuses</option>

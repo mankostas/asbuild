@@ -1,9 +1,5 @@
 <template>
   <div class="space-y-8">
-    <h2 class="text-3xl font-bold tracking-tight">
-      {{ t('routes.dashboard') }}
-    </h2>
-
     <!-- Loading state -->
     <div v-if="loading" class="space-y-6">
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

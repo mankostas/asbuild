@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h2 class="text-xl font-bold mb-4">{{ isEdit ? 'Edit' : 'Invite' }} Employee</h2>
     <form @submit.prevent="submit" class="grid gap-4 max-w-lg">
       <Textinput label="Name" v-model="form.name" />
       <Textinput label="Email" type="email" v-model="form.email" />

@@ -1,9 +1,6 @@
 <template>
-  <div>
-    <h2 class="text-xl font-bold mb-4">
-      {{ isEdit ? 'Edit' : 'Create' }} Appointment
-    </h2>
-    <form @submit.prevent="submitForm" class="max-w-lg space-y-4">
+    <div>
+      <form @submit.prevent="submitForm" class="max-w-lg space-y-4">
       <VueSelect label="Type" :error="typeError">
         <vSelect
           v-model="typeId"

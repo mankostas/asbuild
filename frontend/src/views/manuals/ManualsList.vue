@@ -1,7 +1,6 @@
 <template>
-  <div>
-    <h2 class="text-xl font-bold mb-4">Manuals</h2>
-    <div class="flex flex-wrap items-center gap-2 mb-4">
+    <div>
+      <div class="flex flex-wrap items-center gap-2 mb-4">
       <input
         v-model="search"
         placeholder="Search"
