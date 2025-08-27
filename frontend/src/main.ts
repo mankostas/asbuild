@@ -42,6 +42,7 @@ const app = createApp(App)
 app.use(VueQueryPlugin);
 app.config.globalProperties.$store = {};
 const themeSettingsStore = useThemeSettingsStore();
+await themeSettingsStore.load();
 app.config.globalProperties.$store.themeSettingsStore = themeSettingsStore;
 
 // Apply any saved theme customizer settings on startup and persist future
@@ -55,8 +56,8 @@ if (themeSettingsStore.monochrome) {
   document.documentElement.classList.add("grayscale");
 }
 
-themeSettingsStore.$subscribe((_, state) => {
-  localStorage.setItem("themeSettings", JSON.stringify(state));
+themeSettingsStore.$subscribe(() => {
+  themeSettingsStore.persist();
 });
 
 router.isReady().then(() => {

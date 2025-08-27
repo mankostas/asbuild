@@ -39,6 +39,8 @@ export const useAuthStore = defineStore('auth', {
         setTokens(data.access_token, data.refresh_token);
         api.defaults.headers.common['Authorization'] =
           `Bearer ${data.access_token}`;
+        const { useThemeSettingsStore } = await import('./themeSettings');
+        await useThemeSettingsStore().load();
       }
     },
     async fetchUser() {
