@@ -3,7 +3,7 @@
     v-if="items.length"
     class="relative"
     @mouseenter="open = true"
-    @mouseleave="open = false"
+    @mouseleave="handleMouseLeave"
   >
     <span
       class="lg:h-[32px] lg:w-[32px] lg:bg-slate-100 lg:dark:bg-slate-900 dark:text-white cursor-pointer rounded-full text-[20px] flex items-center justify-center"
@@ -50,6 +50,15 @@ const items = computed(() =>
 const go = (name: string) => {
   open.value = false;
   router.push({ name });
+};
+
+const handleMouseLeave = (e: MouseEvent) => {
+  const current = e.currentTarget as HTMLElement;
+  const related = e.relatedTarget as Node | null;
+  if (related && current.contains(related)) {
+    return;
+  }
+  open.value = false;
 };
 </script>
 
