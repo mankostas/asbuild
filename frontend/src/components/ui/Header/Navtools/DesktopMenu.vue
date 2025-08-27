@@ -11,7 +11,7 @@
           : ''
       "
     >
-      <router-link :to="item.link" v-if="!item.child && !item.megamenu">
+      <router-link :to="{ name: item.link }" v-if="!item.child && !item.megamenu">
         <div class="flex flex-1 items-center space-x-[6px] rtl:space-x-reverse">
           <span class="icon-box" v-if="item.icon">
             <Icon :icon="item.icon" />
@@ -38,7 +38,7 @@
           :key="index"
           :class="childitem.submenu ? 'menu-item-has-children' : ''"
         >
-          <router-link :to="childitem.childlink" v-if="!childitem.submenu">
+          <router-link :to="{ name: childitem.childlink }" v-if="!childitem.submenu">
             <div class="flex space-x-2 items-start rtl:space-x-reverse">
               <Icon :icon="childitem.childicon" class="leading-[1] text-base" />
               <span class="leading-[1]">{{ childitem.childtitle }}</span>
@@ -54,7 +54,7 @@
               v-for="(subitem, subindex) in childitem.submenu"
               :key="subindex"
             >
-              <router-link :to="subitem.subMenuLink">
+              <router-link :to="{ name: subitem.subMenuLink }">
                 {{ subitem.submenutitle }}</router-link
               >
             </li>
@@ -75,7 +75,7 @@
             </div>
             <router-link
               v-for="(ms_item, ms_i) in m_item.singleMegamenu"
-              :to="ms_item.m_childlink"
+              :to="{ name: ms_item.m_childlink }"
               :key="ms_i"
               class="flex items-center space-x-2 text-[15px] leading-6 rtl:space-x-reverse"
               v-slot="{ isActive }"
