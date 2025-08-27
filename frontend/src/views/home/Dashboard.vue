@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto max-w-7xl space-y-8 p-6">
+  <div class="space-y-8">
     <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2>
 
     <!-- Loading state -->
