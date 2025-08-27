@@ -96,34 +96,17 @@ export default {
 };
 </script>
 <style lang="scss">
-.router-animation-enter-active {
-  animation: coming 0.2s;
-  animation-delay: 0.1s;
+.router-animation-enter-active,
+.router-animation-leave-active {
+  /* Use only a fade effect without zooming */
+  transition: opacity 0.2s ease;
+}
+.router-animation-enter-from,
+.router-animation-leave-to {
+  /* Start and end states for fading */
   opacity: 0;
 }
-.router-animation-leave-active {
-  animation: going 0.2s;
-}
 
-@keyframes going {
-  from {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  to {
-    transform: translate3d(0, 4%, 0) scale(0.93);
-    opacity: 0;
-  }
-}
-@keyframes coming {
-  from {
-    transform: translate3d(0, 4%, 0) scale(0.93);
-    opacity: 0;
-  }
-  to {
-    transform: translate3d(0, 0, 0) scale(1);
-    opacity: 1;
-  }
-}
 @keyframes slideLeftTransition {
   0% {
     opacity: 0;
