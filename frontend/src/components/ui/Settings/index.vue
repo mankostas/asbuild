@@ -6,18 +6,18 @@
         this.$store.themeSettingsStore.isOpenSettings =
           !this.$store.themeSettingsStore.isOpenSettings
       "
-      class="fixed md:-end-8 end-0 top-1/2 z-[888] translate-y-1/2 bg-slate-800 text-slate-50 dark:bg-slate-700 dark:text-slate-300 cursor-pointer transform rotate-90 flex items-center text-sm font-medium px-2 py-2 shadow-deep rounded-b"
+      class="fixed md:right-[-32px] right-0 top-1/2 z-[888] translate-y-1/2 bg-slate-800 text-slate-50 dark:bg-slate-700 dark:text-slate-300 cursor-pointer transform rotate-90 flex items-center text-sm font-medium px-2 py-2 shadow-deep rounded-b"
     >
       <Icon
         icon="heroicons:cog-6-tooth"
         class="text-slate-50 text-lg animate-spin"
       />
-      <span class="hidden md:inline-block ms-2">Settings</span>
+      <span class="hidden md:inline-block ml-2">Settings</span>
     </span>
     <Transition name="lefttranslate" @after-leave="persistSettings">
       <div
         v-show="this.$store.themeSettingsStore.isOpenSettings"
-        class="setting-wrapper fixed end-0 top-0 md:w-[400px] w-[300px] bg-white dark:bg-slate-800 h-screen z-[9999] px-6 md:pb-6 pb-[100px] shadow-base2 dark:shadow-base3 border border-gray-5002 dark:border-slate-700"
+        class="setting-wrapper fixed right-0 top-0 md:w-[400px] w-[300px] bg-white dark:bg-slate-800 h-screen z-[9999] px-6 md:pb-6 pb-[100px] shadow-base2 dark:shadow-base3 border border-gray-5002 dark:border-slate-700"
       >
         <header
           class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 -mx-6 px-6 py-[15px] mb-6"
