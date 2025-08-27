@@ -18,13 +18,17 @@ class SecurityHeaders
             $response = $next($request);
         }
 
-        // Filter out any empty strings to avoid sending an empty header value.
-        $allowedOrigins = array_filter($cors['allowed_origins'] ?? []);
-        $origin = $request->headers->get('Origin');
+        // Filter out any empty strings to avoid sending an empty header value and
+        // normalise origins to ignore trailing slashes.
+        $allowedOrigins = array_map(
+            static fn (string $o): string => rtrim($o, '/'),
+            array_filter($cors['allowed_origins'] ?? [])
+        );
+        $origin = rtrim((string) $request->headers->get('Origin'), '/');
 
-        if ($origin && in_array($origin, $allowedOrigins, true)) {
+        if ($origin !== '' && in_array($origin, $allowedOrigins, true)) {
             $response->headers->set('Access-Control-Allow-Origin', $origin);
-        } elseif (!$origin && !empty($allowedOrigins)) {
+        } elseif ($origin === '' && !empty($allowedOrigins)) {
             $response->headers->set('Access-Control-Allow-Origin', $allowedOrigins[0]);
         }
         $response->headers->set('Access-Control-Allow-Credentials', 'true');
