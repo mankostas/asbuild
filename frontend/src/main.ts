@@ -1,7 +1,7 @@
 import "animate.css";
 import "flatpickr/dist/flatpickr.css";
 import "sweetalert2/dist/sweetalert2.min.css";
-import { createApp, watch } from "vue";
+import { createApp } from "vue";
 import "simplebar-vue/dist/simplebar.min.css";
 import VueGoodTablePlugin from "vue-good-table-next";
 import "vue-good-table-next/dist/vue-good-table-next.css";
@@ -59,15 +59,6 @@ if (themeSettingsStore.monochrome) {
 themeSettingsStore.$subscribe(() => {
   themeSettingsStore.persistLocal();
 });
-
-watch(
-  () => themeSettingsStore.isOpenSettings,
-  (open) => {
-    if (!open) {
-      themeSettingsStore.persistRemote();
-    }
-  }
-);
 
 router.isReady().then(() => {
   app.mount("#app");
