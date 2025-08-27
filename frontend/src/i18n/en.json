@@ -9,7 +9,8 @@
     "edit": "Edit",
     "delete": "Delete",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "retry": "Retry"
   },
   "messages": {
     "helloToast": "Hello from toast"
@@ -75,6 +76,16 @@
       "draft": "Draft",
       "scheduled": "Scheduled",
       "completed": "Completed"
+    }
+  },
+  "dashboard": {
+    "messages": {
+      "loadFailed": "Failed to load dashboard data.",
+      "noChartData": "No chart data",
+      "noData": "No dashboard data"
+    },
+    "chart": {
+      "trend": "Trend"
     }
   }
 }
