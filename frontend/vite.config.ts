@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
+import sass from 'sass-embedded';
 
 export default defineConfig(({ command }) => ({
   plugins: [vue()],
@@ -24,6 +25,12 @@ export default defineConfig(({ command }) => ({
       '@': path.resolve(__dirname, 'src'),
     },
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.vue'],
+  },
+  css: {
+    preprocessorOptions: {
+      scss: { implementation: sass, api: 'modern' },
+      sass: { implementation: sass, api: 'modern' },
+    },
   },
   build: {
     outDir: '../public',
