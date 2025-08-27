@@ -6,7 +6,7 @@
         <main class="flex-1 p-4">
           <Breadcrumbs />
           <div class="relative">
-            <Transition name="fade" mode="out-in">
+            <Transition name="page" mode="out-in">
               <router-view />
             </Transition>
           </div>
@@ -25,13 +25,17 @@
   import { Transition } from 'vue'
   </script>
 <style>
-/* Simple fade transition for page navigation */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
+/* Slide and fade transition for page navigation */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.3s, transform 0.3s;
 }
-.fade-enter-from,
-.fade-leave-to {
+.page-enter-from {
   opacity: 0;
+  transform: translateX(20px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
 }
 </style>
