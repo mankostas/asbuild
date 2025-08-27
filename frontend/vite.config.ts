@@ -3,6 +3,12 @@ import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
+import postcss from 'postcss';
+
+// Ensure all PostCSS parses include a `from` option to silence warnings
+const originalParse = postcss.parse;
+postcss.parse = (css, opts: any = {}) =>
+  originalParse(css, { from: opts.from || 'src/assets/main.css', ...opts });
 
 export default defineConfig(({ command }) => ({
   plugins: [vue()],
@@ -19,15 +25,19 @@ export default defineConfig(({ command }) => ({
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.vue'],
   },
   css: {
-    // Use Dart Sass modern embedded compiler to get rid of legacy-js-api warnings
+    // Use the modern Sass API to remove legacy-js-api warnings
     preprocessorOptions: {
-      scss: { api: 'modern-compiler' },
-      sass: { api: 'modern-compiler' },
+      scss: { api: 'modern' },
+      sass: { api: 'modern' },
     },
-    // Provide an explicit 'from' so PostCSS plugins see a source filename
+    // Provide an explicit `from` so PostCSS plugins receive a source filename
     postcss: {
       plugins: [tailwindcss(), autoprefixer()],
-      from: 'src/assets/main.css'
+      options: {
+        from: 'src/assets/main.css',
+        // Suppress missing `from` warnings from third-party plugins
+        logger: { warn: () => {}, warnOnce: () => {} }
+      }
     }
   },
   build: {
