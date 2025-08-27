@@ -11,5 +11,6 @@ class SecurityHeadersTest extends TestCase
         $response->assertStatus(204);
         $response->assertHeader('Access-Control-Allow-Origin', config('security.cors.allowed_origins')[0]);
         $response->assertHeader('Access-Control-Allow-Credentials', 'true');
+        $response->assertHeader('Access-Control-Allow-Headers', implode(',', config('security.cors.allowed_headers')));
     }
 }

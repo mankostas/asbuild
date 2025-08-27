@@ -16,7 +16,7 @@ return [
             )
         ),
         'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        'allowed_headers' => ['Content-Type', 'Authorization', 'X-Requested-With'],
+        'allowed_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Tenant-Id'],
     ],
     'csp' => "default-src 'self'; frame-ancestors 'none'; object-src 'none';",
     'max_upload_size' => 5120, // 5 MB
