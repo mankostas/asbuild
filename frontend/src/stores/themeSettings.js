@@ -6,7 +6,10 @@ import { useAuthStore } from "./auth";
 // localStorage with these defaults when the store is first created so that user
 // preferences survive refreshes and future logins.
 const defaultState = {
-  sidebarCollaspe: false,
+  // Whether the sidebar is collapsed.  Previous versions misspelled this key
+  // as `sidebarCollaspe`, so we migrate that value below when initializing
+  // the store to preserve user preferences.
+  sidebarCollasp: false,
   sidebarHidden: false,
   mobielSidebar: false,
   semidark: false,
@@ -31,8 +34,19 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
   state: () => {
     const saved = localStorage.getItem("themeSettings");
     const parsed = saved ? JSON.parse(saved) : {};
-    const { skin, monochrome, direction, ...clean } = parsed;
-    return { ...defaultState, ...clean };
+    const {
+      skin,
+      monochrome,
+      direction,
+      sidebarCollaspe, // legacy key
+      ...clean
+    } = parsed;
+    return {
+      ...defaultState,
+      ...clean,
+      sidebarCollasp:
+        clean.sidebarCollasp ?? sidebarCollaspe ?? defaultState.sidebarCollasp,
+    };
   },
   actions: {
     async load() {
