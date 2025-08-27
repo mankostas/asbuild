@@ -375,7 +375,16 @@ router.beforeEach(async (to, from, next) => {
   if (auth.isAuthenticated && !auth.user) {
     try {
       await auth.fetchUser();
-    } catch (e) {}
+    } catch (e) {
+      // If fetching the user fails (e.g. expired/invalid token), ensure the
+      // client state is cleared and redirect to the login page for any
+      // guarded route. This prevents the app from remaining on a protected
+      // page when the session is no longer valid.
+      await auth.logout(true);
+      if (to.meta.requiresAuth) {
+        return next('/auth/login');
+      }
+    }
   }
 
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
