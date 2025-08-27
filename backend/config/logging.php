@@ -9,7 +9,9 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['stderr'],
+            'channels' => env('API_MODE', 'production') === 'development'
+                ? ['stderr']
+                : ['single'],
             'ignore_exceptions' => false,
         ],
 
@@ -20,6 +22,12 @@ return [
                 'stream' => 'php://stderr',
             ],
             'formatter' => JsonFormatter::class,
+        ],
+
+        'single' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
         ],
     ],
 ];
