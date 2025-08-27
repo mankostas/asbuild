@@ -17,6 +17,13 @@ class SettingsController extends Controller
         }
     }
 
+    protected function ensureSuperAdmin(Request $request): void
+    {
+        if (! $request->user()->hasRole('SuperAdmin')) {
+            abort(403);
+        }
+    }
+
     public function getBranding(Request $request)
     {
         $this->ensureAdmin($request);
@@ -50,6 +57,35 @@ class SettingsController extends Controller
         config(['tenant.branding' => json_encode($branding)]);
 
         return response()->json($branding);
+    }
+
+    public function getFooter(Request $request)
+    {
+        $this->ensureSuperAdmin($request);
+        $footer = config('tenant.footer') ?? '';
+        return response()->json(['text' => $footer]);
+    }
+
+    public function updateFooter(Request $request)
+    {
+        $this->ensureSuperAdmin($request);
+        $data = $request->validate([
+            'text' => 'required|string',
+        ]);
+
+        $tenantId = app('tenant_id');
+        DB::table('tenant_settings')->updateOrInsert(
+            ['tenant_id' => $tenantId, 'key' => 'footer'],
+            [
+                'value' => $data['text'],
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]
+        );
+
+        config(['tenant.footer' => $data['text']]);
+
+        return response()->json(['text' => $data['text']]);
     }
 
     public function updateProfile(Request $request)

@@ -68,6 +68,8 @@ Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
     Route::get('settings/branding', [SettingsController::class, 'getBranding']);
     Route::put('settings/branding', [SettingsController::class, 'updateBranding']);
     Route::put('settings/profile', [SettingsController::class, 'updateProfile']);
+    Route::get('settings/footer', [SettingsController::class, 'getFooter']);
+    Route::put('settings/footer', [SettingsController::class, 'updateFooter']);
 
     Route::prefix('gdpr')->group(function () {
         Route::get('export', [GdprController::class, 'export']);
