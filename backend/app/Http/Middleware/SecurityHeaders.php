@@ -26,14 +26,15 @@ class SecurityHeaders
         );
         $origin = rtrim((string) $request->headers->get('Origin'), '/');
 
-        if ($origin !== '' && in_array($origin, $allowedOrigins, true)) {
-            $response->headers->set('Access-Control-Allow-Origin', $origin);
-        } elseif ($origin === '' && !empty($allowedOrigins)) {
+        if ($origin !== '') {
+            if (empty($allowedOrigins) || in_array($origin, $allowedOrigins, true)) {
+                $response->headers->set('Access-Control-Allow-Origin', $origin);
+                $response->headers->set('Access-Control-Allow-Credentials', 'true');
+            }
+        } elseif (!empty($allowedOrigins)) {
             $response->headers->set('Access-Control-Allow-Origin', $allowedOrigins[0]);
-        } elseif (empty($allowedOrigins)) {
-            $response->headers->set('Access-Control-Allow-Origin', '*');
+            $response->headers->set('Access-Control-Allow-Credentials', 'true');
         }
-        $response->headers->set('Access-Control-Allow-Credentials', 'true');
         $response->headers->set('Access-Control-Allow-Methods', implode(',', $cors['allowed_methods'] ?? ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']));
         $response->headers->set('Access-Control-Allow-Headers', implode(',', $cors['allowed_headers'] ?? ['Content-Type', 'Authorization', 'X-Requested-With']));
 
