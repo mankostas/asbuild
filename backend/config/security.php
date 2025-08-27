@@ -6,7 +6,7 @@ return [
         // During local development explicitly allow the local frontend to
         // ensure credentialed requests work in browsers.
         'allowed_origins' => env('APP_ENV') === 'production'
-            ? [env('FRONTEND_URL', '')]
+            ? array_filter([env('FRONTEND_URL')])
             : [env('FRONTEND_URL', 'http://localhost:5173')],
         'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         'allowed_headers' => ['Content-Type', 'Authorization', 'X-Requested-With'],

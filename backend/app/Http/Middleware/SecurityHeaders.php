@@ -18,7 +18,13 @@ class SecurityHeaders
             $response = $next($request);
         }
 
-        $allowedOrigins = $cors['allowed_origins'] ?? ['*'];
+        // Filter out any empty strings to avoid sending an empty header value.
+        // If no origins are configured, fall back to allowing all origins.
+        $allowedOrigins = array_filter($cors['allowed_origins'] ?? ['*']);
+        if (empty($allowedOrigins)) {
+            $allowedOrigins = ['*'];
+        }
+
         $origin = $request->headers->get('Origin');
 
         if (in_array('*', $allowedOrigins)) {

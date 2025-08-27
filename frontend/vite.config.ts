@@ -7,7 +7,7 @@ import path from 'path';
 // events are unreliable (e.g. Docker or network mounts).
 process.env.SASS_SILENCE_DEPRECATIONS = 'legacy-js-api';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [vue()],
   base: '',
   envPrefix: ['VITE_', 'API_'],
@@ -16,6 +16,9 @@ export default defineConfig({
       // Use polling so `npm run dev` recompiles when files change
       usePolling: true,
     },
+    // Disable Vite's HMR client in build/previews to avoid
+    // unnecessary websocket connections in production builds.
+    ...(command !== 'serve' ? { hmr: false } : {}),
   },
   css: {
     preprocessorOptions: {
@@ -44,4 +47,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));
