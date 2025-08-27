@@ -43,9 +43,9 @@
         >
           <Breadcrumbs v-if="!this.$route.meta.hide" />
           <router-view v-slot="{ Component }">
-            <transition name="router-animation" mode="out-in" appear>
-              <component :is="Component"></component>
-            </transition>
+            <Transition name="fade" mode="out-in">
+              <component :is="Component" />
+            </Transition>
           </router-view>
         </div>
       </div>
@@ -96,14 +96,12 @@ export default {
 };
 </script>
 <style lang="scss">
-.router-animation-enter-active,
-.router-animation-leave-active {
-  /* Use only a fade effect without zooming */
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.2s ease;
 }
-.router-animation-enter-from,
-.router-animation-leave-to {
-  /* Start and end states for fading */
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 
