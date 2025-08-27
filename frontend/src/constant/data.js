@@ -99,6 +99,33 @@ export const topMenu = [
   },
 ];
 
+// Quick access options for creating new resources
+export const addNewOptions = [
+  {
+    label: 'Appointment',
+    icon: 'heroicons-outline:calendar',
+    link: 'appointments.create',
+  },
+  {
+    label: 'Type',
+    icon: 'heroicons-outline:tag',
+    link: 'types.create',
+    admin: true,
+  },
+  {
+    label: 'Manual',
+    icon: 'heroicons-outline:book-open',
+    link: 'manuals.create',
+    admin: true,
+  },
+  {
+    label: 'Employee',
+    icon: 'heroicons-outline:users',
+    link: 'employees.create',
+    admin: true,
+  },
+];
+
 export const notifications = [
   {
     title: "Your order is placed",
