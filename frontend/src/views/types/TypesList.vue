@@ -1,15 +1,14 @@
 <template>
-  <div>
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-xl font-bold">Appointment Types</h2>
-      <RouterLink
-        class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-        :to="{ name: 'types.create' }"
+    <div>
+      <div class="flex items-center justify-end mb-4">
+        <RouterLink
+          class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
+          :to="{ name: 'types.create' }"
         >
-        <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
-        Add Type
-      </RouterLink>
-    </div>
+          <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
+          Add Type
+        </RouterLink>
+      </div>
     <DashcodeServerTable
       :key="tableKey"
       :columns="columns"

@@ -1,7 +1,6 @@
 <template>
-  <div>
-    <h2 class="text-xl font-bold mb-4">{{ isEdit ? 'Edit' : 'Create' }} Type</h2>
-    <form @submit.prevent="onSubmit" class="grid grid-cols-2 gap-8">
+    <div>
+      <form @submit.prevent="onSubmit" class="grid grid-cols-2 gap-8">
       <div>
         <div class="mb-4">
           <label class="block font-medium mb-1" for="name">Name<span class="text-red-600">*</span></label>

@@ -1,15 +1,14 @@
 <template>
   <div v-if="manual">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold">{{ manual.file?.filename }}</h2>
-      <button
-        class="text-yellow-500 text-xl"
-        :aria-pressed="isFavorite"
-        @click="store.toggleFavorite(manual.id)"
-      >
-        {{ isFavorite ? '★' : '☆' }}
-      </button>
-    </div>
+      <div class="flex justify-end items-center mb-4">
+        <button
+          class="text-yellow-500 text-xl"
+          :aria-pressed="isFavorite"
+          @click="store.toggleFavorite(manual.id)"
+        >
+          {{ isFavorite ? '★' : '☆' }}
+        </button>
+      </div>
     <div class="text-sm text-gray-500 mb-4">
       Last updated: {{ new Date(manual.updated_at).toLocaleString() }}
     </div>
