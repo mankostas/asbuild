@@ -66,14 +66,34 @@ const initials = computed(() => {
   return (first + last).toUpperCase();
 });
 
+// Items currently visible in the profile dropdown
 const ProfileMenu = [
   {
     label: 'Profile',
     icon: 'heroicons-outline:user',
     link: () => {
-      router.push('profile');
+      router.push({ name: 'settings.profile' });
     },
   },
+  {
+    label: 'Settings',
+    icon: 'heroicons-outline:cog',
+    link: () => {
+      router.push({ name: 'settings' });
+    },
+  },
+  {
+    label: 'Logout',
+    icon: 'heroicons-outline:login',
+    link: async () => {
+      await authStore.logout();
+      router.push('/auth/login');
+    },
+  },
+];
+
+// Previously available items kept for potential future use
+const ProfileMenuStack = [
   {
     label: 'Chat',
     icon: 'heroicons-outline:chat',
@@ -96,13 +116,6 @@ const ProfileMenu = [
     },
   },
   {
-    label: 'Settings',
-    icon: 'heroicons-outline:cog',
-    link: () => {
-      router.push('settings');
-    },
-  },
-  {
     label: 'Price',
     icon: 'heroicons-outline:credit-card',
     link: () => {
@@ -114,14 +127,6 @@ const ProfileMenu = [
     icon: 'heroicons-outline:information-circle',
     link: () => {
       router.push('faq');
-    },
-  },
-  {
-    label: 'Logout',
-    icon: 'heroicons-outline:login',
-    link: async () => {
-      await authStore.logout();
-      router.push('/auth/login');
     },
   },
 ];

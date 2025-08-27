@@ -57,6 +57,7 @@
         <div
           class="nav-tools flex items-center lg:space-x-5 space-x-3 rtl:space-x-reverse"
         >
+          <AddNew />
           <SwitchDark />
           <Message v-if="window.width > 768" />
           <Notification v-if="window.width > 768" />
@@ -79,6 +80,7 @@ import Logo from "./Navtools/Logo.vue";
 import MobileLogo from "./Navtools/MobileLogo.vue";
 import window from "@/mixins/window";
 import HandleMobileMenu from "./Navtools/HandleMobileMenu.vue";
+import AddNew from "./Navtools/AddNew.vue";
 
 export default {
   mixins: [window],
@@ -93,6 +95,7 @@ export default {
     Logo,
     MobileLogo,
     HandleMobileMenu,
+    AddNew,
   },
 
   methods: {
