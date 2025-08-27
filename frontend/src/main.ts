@@ -55,9 +55,6 @@ async function bootstrap() {
   );
   document.body.classList.add(themeSettingsStore.theme);
   document.body.classList.toggle("semi-dark", themeSettingsStore.semidark);
-  if (themeSettingsStore.monochrome) {
-    document.documentElement.classList.add("grayscale");
-  }
 
   themeSettingsStore.$subscribe(() => {
     themeSettingsStore.persistLocal();

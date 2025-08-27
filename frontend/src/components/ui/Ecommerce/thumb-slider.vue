@@ -24,7 +24,7 @@
     </SwiperSlide>
   </Swiper>
 
-  <div :class="['flex mt-6 space-x-3', isRtl ? 'space-x-reverse' : '']">
+  <div class="flex mt-6 space-x-3">
     <Swiper
       @swiper="setThumbsSwiper"
       :loop="true"
@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Navigation, Thumbs } from "swiper/core";
 import "swiper/css";
@@ -65,7 +65,6 @@ import pinkBlazer from "@/assets/images/e-commerce/product-card/pink-blazer.png"
 import redTshirt from "@/assets/images/e-commerce/product-card/red-t-shirt.png";
 import yellowFrok from "@/assets/images/e-commerce/product-card/yellow-frok.png";
 import yellowJumper from "@/assets/images/e-commerce/product-card/yellow-jumper.png";
-import { useThemeSettingsStore } from "@/store/themeSettings";
 
 const images = [
   blackJumper,
@@ -84,14 +83,6 @@ const thumbsSwiper = ref(null);
 const setThumbsSwiper = (swiper) => {
   thumbsSwiper.value = swiper;
 };
-
-const themeSettings = useThemeSettingsStore();
-
-const isRtl = ref(false);
-
-watch(themeSettings, (newThemeSettings) => {
-  isRtl.value = newThemeSettings.direction;
-});
 
 const modules = [Navigation, Thumbs];
 

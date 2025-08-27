@@ -1,10 +1,6 @@
 <template>
   <div
-    :class="`mobile-sidebar bg-white dark:bg-slate-800  ${
-      this.$store.themeSettingsStore.theme === 'bordered'
-        ? 'border border-gray-5002'
-        : 'shadow-base'
-    }   `"
+    class="mobile-sidebar bg-white dark:bg-slate-800 shadow-base"
   >
     <div class="logo-segment flex justify-between items-center px-4 py-6">
         <router-link :to="{ name: 'dashboard' }">

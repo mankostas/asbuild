@@ -1,17 +1,13 @@
 <template>
   <div :class="this.$store.themeSettingsStore.semidark ? 'dark' : ''">
     <div
-      :class="`sidebar-wrapper bg-white dark:bg-slate-800    ${
-        this.$store.themeSettingsStore.skin === 'bordered'
-          ? 'border-r border-gray-5002 dark:border-slate-700'
-          : 'shadow-base'
-      }   ${
+      :class="`sidebar-wrapper bg-white dark:bg-slate-800 shadow-base ${
         this.$store.themeSettingsStore.sidebarCollasp
           ? this.closeClass
           : this.openClass
       }
       ${this.$store.themeSettingsStore.isMouseHovered ? 'sidebar-hovered' : ''}
-      
+
       `"
       @mouseenter="this.$store.themeSettingsStore.isMouseHovered = true"
       @mouseleave="this.$store.themeSettingsStore.isMouseHovered = false"
@@ -21,13 +17,9 @@
           this.$store.themeSettingsStore.sidebarCollasp
             ? this.closeClass
             : this.openClass
-        } ${
-          this.$store.themeSettingsStore.skin === 'bordered'
-            ? ' border-b border-r border-gray-5002 dark:border-slate-700'
-            : ' border-none'
         }
         ${this.$store.themeSettingsStore.isMouseHovered ? 'logo-hovered' : ''}
-        
+
         `"
       >
         <router-link

@@ -20,7 +20,7 @@ describe('ChartCard', () => {
     });
     app.use(i18n);
     app.config.globalProperties.$store = {
-      themeSettingsStore: { skin: '', isDark: false },
+      themeSettingsStore: { isDark: false },
     } as any;
     const div = document.createElement('div');
     app.mount(div);
@@ -31,7 +31,7 @@ describe('ChartCard', () => {
     const app = createApp(ChartCard, { title: 'Test', type: 'bar', series });
     app.use(i18n);
     app.config.globalProperties.$store = {
-      themeSettingsStore: { skin: '', isDark: false },
+      themeSettingsStore: { isDark: false },
     } as any;
     const div = document.createElement('div');
     app.mount(div);

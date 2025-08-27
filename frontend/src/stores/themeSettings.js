@@ -10,10 +10,8 @@ const defaultState = {
   sidebarHidden: false,
   mobielSidebar: false,
   semidark: false,
-  monochrome: false,
   semiDarkTheme: "semi-light",
   isDark: false,
-  skin: "default",
   theme: "light",
   isOpenSettings: false,
   cWidth: "full",
@@ -21,7 +19,6 @@ const defaultState = {
   navbarType: "sticky",
   isMouseHovered: false,
   footerType: "static",
-  direction: false,
   cartOpener: false,
   chartColors: {
     title: "red",
@@ -34,9 +31,8 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
   state: () => {
     const saved = localStorage.getItem("themeSettings");
     const parsed = saved ? JSON.parse(saved) : {};
-    const monochrome =
-      parsed.monochrome ?? localStorage.getItem("monochrome") !== null;
-    return { ...defaultState, ...parsed, monochrome };
+    const { skin, monochrome, direction, ...clean } = parsed;
+    return { ...defaultState, ...clean };
   },
   actions: {
     async load() {
@@ -45,6 +41,7 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
       try {
         const { data } = await api.get("/settings/theme");
         Object.assign(this.$state, data);
+        this._serverSnapshot = JSON.stringify(this.$state);
       } catch (e) {}
     },
 
@@ -56,7 +53,10 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
       const auth = useAuthStore();
       if (!auth.isAuthenticated) return;
       try {
+        const snapshot = JSON.stringify(this.$state);
+        if (this._serverSnapshot === snapshot) return;
         await api.put("/settings/theme", this.$state);
+        this._serverSnapshot = snapshot;
       } catch (e) {}
     },
 
@@ -70,11 +70,6 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
       this.theme = this.theme === "dark" ? "light" : "dark";
       document.body.classList.add(this.theme);
       localStorage.setItem("theme", this.theme);
-    },
-
-    toggleMonochrome() {
-      this.monochrome = !this.monochrome;
-      document.documentElement.classList.toggle("grayscale", this.monochrome);
     },
 
     toggleSettings() {

@@ -13,8 +13,9 @@ import { useThemeSettingsStore } from "@/store/themeSettings";
 
 const themeSettingsStore = useThemeSettingsStore();
 
-function toogleDark() {
+async function toogleDark() {
   themeSettingsStore.toogleDark();
+  await themeSettingsStore.persistRemote();
 }
 </script>
 <style lang=""></style>

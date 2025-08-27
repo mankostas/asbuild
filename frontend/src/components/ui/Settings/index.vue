@@ -43,12 +43,10 @@
         </header>
         <perfect-scrollbar class="h-[calc(100%-100px)] -mx-6 px-6">
           <div class="space-y-4">
-            <Skin />
             <Theme />
             <hr class="-mx-6 border-slate-200 dark:border-slate-700" />
             <Semidark />
-            <Monochrome />
-            <div><Rlt /></div>
+            <!-- Monochrome, RTL and Skin settings removed -->
             <hr class="-mx-6 border-slate-200 dark:border-slate-700" />
             <Width />
             <div class="xl:block hidden">
@@ -76,26 +74,20 @@ import Icon from "../Icon";
 import Footer from "./Tools/Footer";
 import MenuLayout from "./Tools/MenuLayout";
 import Navbar from "./Tools/Navbar";
-import Skin from "./Tools/Skin";
 import Width from "./Tools/Width";
 import window from "@/mixins/window";
 import Theme from "./Tools/Theme";
 import Semidark from "./Tools/Semidark";
-import Monochrome from "./Tools/Monochrome";
-import Rlt from "./Tools/Rtl.vue";
 export default {
   mixins: [window],
   components: {
     Icon,
     Width,
-    Skin,
     MenuLayout,
     Navbar,
     Theme,
     Footer,
     Semidark,
-    Monochrome,
-    Rlt,
   },
   data() {
     return {};

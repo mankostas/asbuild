@@ -1,12 +1,6 @@
 <template>
   <div
- :class="
-      cn('card rounded-md bg-white dark:bg-slate-800', props.class, {
-        ' border border-gray-5002 dark:border-slate-700':
-          themeSettingsStore.skin === 'bordered',
-        'shadow-base': themeSettingsStore.skin !== 'bordered',
-      })
-    "
+    :class="cn('card rounded-md bg-white dark:bg-slate-800 shadow-base', props.class)"
     v-if="!overlay"
   >
     <div :class="cn('card-body flex flex-col', bodyClass)">
@@ -83,15 +77,6 @@
 </template>
 <script setup>
 import { cn } from "@/lib/utils";
-import { useThemeSettingsStore } from "@/stores/themeSettings";
-import { createPinia, getActivePinia, setActivePinia } from "pinia";
-
-const pinia = getActivePinia() || createPinia();
-if (!getActivePinia()) {
-  setActivePinia(pinia);
-}
-const themeSettingsStore = useThemeSettingsStore(pinia);
-
 const props = defineProps({
   class: {
     type: String,

@@ -1,10 +1,13 @@
 <template>
   <header :class="navbarTypeClass()">
     <div
-      :class="`app-header md:px-6 px-[15px]  dark:bg-slate-800 shadow-base dark:shadow-base3 bg-white ${borderSwicthClass()} ${
+      :class="`app-header md:px-6 px-[15px] dark:bg-slate-800 shadow-base dark:shadow-base3 bg-white dark:border-b dark:border-slate-700 dark:border-opacity-60 ${
         this.$store.themeSettingsStore.navbarColor
-      }
-      ${
+      } ${
+        this.$store.themeSettingsStore.cWidth === 'boxed'
+          ? 'container mx-auto'
+          : 'container-fluid'
+      } ${
         this.$store.themeSettingsStore.menuLayout === 'horizontal' &&
         window.width > 1280
           ? 'py-1'
@@ -25,14 +28,7 @@
             "
             @click="this.$store.themeSettingsStore.sidebarCollasp = false"
           >
-            <Icon
-              icon="akar-icons:arrow-right"
-              v-if="!this.$store.themeSettingsStore.direction"
-            />
-            <Icon
-              icon="akar-icons:arrow-left"
-              v-if="this.$store.themeSettingsStore.direction"
-            />
+            <Icon icon="akar-icons:arrow-right" />
           </button>
           <MobileLogo v-if="window.width < 1280" />
           <handle-mobile-menu
@@ -113,21 +109,7 @@ export default {
           return "sticky top-0";
       }
     },
-    borderSwicthClass() {
-      if (
-        this.$store.themeSettingsStore.skin === "bordered" &&
-        this.$store.themeSettingsStore.navbarType !== "floating"
-      ) {
-        return "border-b border-gray-5002 dark:border-slate-700";
-      } else if (
-        this.$store.themeSettingsStore.skin === "bordered" &&
-        this.$store.themeSettingsStore.navbarType === "floating"
-      ) {
-        return "border border-gray-5002 dark:border-slate-700";
-      } else {
-        return "dark:border-b dark:border-slate-700 dark:border-opacity-60";
-      }
-    },
+    // skin options removed
   },
 };
 </script>
