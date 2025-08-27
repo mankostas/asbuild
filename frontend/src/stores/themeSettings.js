@@ -1,4 +1,6 @@
 import { defineStore } from "pinia";
+import api from "@/services/api";
+import { useAuthStore } from "./auth";
 
 // Default state for the theme customizer.  We merge any persisted values from
 // localStorage with these defaults when the store is first created so that user
@@ -37,6 +39,22 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
     return { ...defaultState, ...parsed, monochrome };
   },
   actions: {
+    async load() {
+      const auth = useAuthStore();
+      if (!auth.isAuthenticated) return;
+      try {
+        const { data } = await api.get("/settings/theme");
+        Object.assign(this.$state, data);
+      } catch (e) {}
+    },
+
+    persist() {
+      localStorage.setItem("themeSettings", JSON.stringify(this.$state));
+      const auth = useAuthStore();
+      if (!auth.isAuthenticated) return;
+      api.put("/settings/theme", this.$state).catch(() => {});
+    },
+
     setSidebarCollasp() {
       this.sidebarCollasp = !this.sidebarCollasp;
     },

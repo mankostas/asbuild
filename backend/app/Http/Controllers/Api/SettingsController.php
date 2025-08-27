@@ -88,6 +88,20 @@ class SettingsController extends Controller
         return response()->json(['text' => $data['text']]);
     }
 
+    public function getTheme(Request $request)
+    {
+        return response()->json($request->user()->theme_settings ?? []);
+    }
+
+    public function updateTheme(Request $request)
+    {
+        $user = $request->user();
+        $user->theme_settings = $request->all();
+        $user->save();
+
+        return response()->json($user->theme_settings);
+    }
+
     public function updateProfile(Request $request)
     {
         $data = $request->validate([

@@ -27,6 +27,10 @@ class User extends Authenticatable
 
     protected $with = ['roles'];
 
+    protected $casts = [
+        'theme_settings' => 'array',
+    ];
+
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class)->withTimestamps()->withPivot('tenant_id');
