@@ -8,6 +8,9 @@
         <div v-else-if="active === 'branding'">
           <BrandingForm />
         </div>
+        <div v-else-if="active === 'footer'">
+          <FooterForm />
+        </div>
         <div v-else-if="active === 'notifications'" class="space-y-4">
           <div
             v-for="pref in prefs"
@@ -40,6 +43,7 @@ import { ref, onMounted, computed } from 'vue';
 import api from '@/services/api';
 import ProfileForm from '@/components/settings/ProfileForm.vue';
 import BrandingForm from '@/components/settings/BrandingForm.vue';
+import FooterForm from '@/components/settings/FooterForm.vue';
 import Tabs from '@/components/ui/Tabs.vue';
 import Button from '@/components/ui/Button/index.vue';
 import Switch from '@/components/ui/Switch/index.vue';
@@ -55,6 +59,7 @@ interface Pref {
 const tabs = [
   { id: 'profile', label: 'Profile' },
   { id: 'branding', label: 'Branding' },
+  { id: 'footer', label: 'Footer' },
   { id: 'notifications', label: 'Notifications' },
   { id: 'gdpr', label: 'GDPR' },
 ];
