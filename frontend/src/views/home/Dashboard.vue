@@ -1,6 +1,8 @@
 <template>
   <div class="space-y-8">
-    <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2>
+    <h2 class="text-3xl font-bold tracking-tight">
+      {{ t('routes.dashboard') }}
+    </h2>
 
     <!-- Loading state -->
     <div v-if="loading" class="space-y-6">
@@ -21,9 +23,9 @@
       class="flex flex-col items-center justify-center gap-4 py-10"
     >
       <p class="text-center text-sm text-foreground/70">
-        Failed to load dashboard data.
+        {{ t('dashboard.messages.loadFailed') }}
       </p>
-      <Button @click="fetchData">Retry</Button>
+      <Button @click="fetchData">{{ t('actions.retry') }}</Button>
     </div>
 
     <!-- Loaded state -->
@@ -34,11 +36,15 @@
           <ChartCard :title="chartTitle" :type="chartType" :series="chartSeries" />
         </div>
         <Card v-else class="mt-6 flex h-64 items-center justify-center">
-          <p class="text-sm text-foreground/70">No chart data</p>
+          <p class="text-sm text-foreground/70">
+            {{ t('dashboard.messages.noChartData') }}
+          </p>
         </Card>
       </div>
       <div v-else class="flex h-64 items-center justify-center">
-        <p class="text-sm text-foreground/70">No dashboard data</p>
+        <p class="text-sm text-foreground/70">
+          {{ t('dashboard.messages.noData') }}
+        </p>
       </div>
     </template>
   </div>
@@ -46,6 +52,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import KpiCards from '@/components/reports/KpiCards.vue';
 import ChartCard from '@/components/reports/ChartCard.vue';
@@ -66,10 +73,12 @@ interface Series {
   data: Datum[];
 }
 
+const { t } = useI18n();
+
 const kpis = ref<Kpi[]>([]);
 const chartSeries = ref<Series[]>([]);
 const chartType = ref<'line' | 'bar'>('line');
-const chartTitle = ref('Trend');
+const chartTitle = ref(t('dashboard.chart.trend'));
 const loading = ref(false);
 const error = ref(false);
 
@@ -81,7 +90,7 @@ async function fetchData() {
     kpis.value = data.kpis || [];
     chartSeries.value = data.chart?.series || [];
     chartType.value = data.chart?.type || 'line';
-    chartTitle.value = data.chart?.title || 'Trend';
+    chartTitle.value = data.chart?.title || t('dashboard.chart.trend');
   } catch (e) {
     error.value = true;
   } finally {
