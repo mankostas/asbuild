@@ -27,5 +27,4 @@ return Application::configure(
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
-    })->create()
-    ->usePublicPath(dirname(__DIR__, 2).'/public');
+    })->create();
