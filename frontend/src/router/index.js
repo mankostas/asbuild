@@ -203,6 +203,20 @@ export const routes = [
     },
   },
   {
+    path: '/settings/footer',
+    name: 'settings.footer',
+    component: () => import('@/views/settings/Footer.vue'),
+    meta: {
+      requiresAuth: true,
+      admin: true,
+      super: true,
+      breadcrumb: 'routes.footer',
+      title: 'Footer',
+      layout: 'app',
+      groupParent: 'settings',
+    },
+  },
+  {
     path: '/settings',
     name: 'settings',
     redirect: '/settings/profile',
