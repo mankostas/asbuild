@@ -31,7 +31,10 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
   // fall back to the defaults above.
   state: () => {
     const saved = localStorage.getItem("themeSettings");
-    return saved ? { ...defaultState, ...JSON.parse(saved) } : { ...defaultState };
+    const parsed = saved ? JSON.parse(saved) : {};
+    const monochrome =
+      parsed.monochrome ?? localStorage.getItem("monochrome") !== null;
+    return { ...defaultState, ...parsed, monochrome };
   },
   actions: {
     setSidebarCollasp() {
@@ -47,16 +50,8 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
     },
 
     toggleMonochrome() {
-      const isMonochrome = localStorage.getItem("monochrome") !== null;
-      // this.monochrome = !this.monochrome;
-      if (isMonochrome) {
-        localStorage.removeItem("monochrome");
-        document.getElementsByTagName("html")[0].classList.remove("grayscale");
-        return;
-      }
-      localStorage.setItem("monochrome", true);
-      document.getElementsByTagName("html")[0].classList.add("grayscale");
-      return;
+      this.monochrome = !this.monochrome;
+      document.documentElement.classList.toggle("grayscale", this.monochrome);
     },
 
     toggleSettings() {

@@ -32,7 +32,6 @@
 export default {
   data() {
     return {
-      theme: this.$store.themeSettingsStore.theme,
       thems: [
         {
           value: "light",
@@ -46,7 +45,15 @@ export default {
     };
   },
 
-  mounted() {
+  computed: {
+    theme: {
+      get() {
+        return this.$store.themeSettingsStore.theme;
+      },
+      set(value) {
+        this.$store.themeSettingsStore.theme = value;
+      },
+    },
   },
 
   watch: {
@@ -54,25 +61,19 @@ export default {
       handler() {
         switch (this.theme) {
           case "light":
-            this.$store.themeSettingsStore.theme = this.theme;
             document.body.classList.remove("dark");
-            document.body.classList.add(this.theme);
+            document.body.classList.add("light");
             this.$store.themeSettingsStore.isDark = false;
             localStorage.setItem("theme", this.theme);
             break;
           case "dark":
-            this.$store.themeSettingsStore.theme = this.theme;
-
             // set body class by theme name
             document.body.classList.remove("light");
-            document.body.classList.add(this.theme);
+            document.body.classList.add("dark");
             this.$store.themeSettingsStore.isDark = true;
             localStorage.setItem("theme", this.theme);
-
             break;
           default:
-            this.$store.themeSettingsStore.theme = this.theme;
-
             // set body class by theme name
             document.body.classList.remove("dark");
             document.body.classList.add(this.theme);
