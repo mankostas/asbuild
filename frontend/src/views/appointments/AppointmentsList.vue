@@ -1,6 +1,15 @@
 <template>
   <div>
-    <h2 class="text-xl font-bold mb-4">Appointments</h2>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold">Appointments</h2>
+      <RouterLink
+        class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
+        :to="{ name: 'appointments.create' }"
+      >
+        <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
+        New
+      </RouterLink>
+    </div>
     <div class="flex gap-4 mb-4">
       <select v-model="statusFilter" class="border rounded p-2">
         <option value="">All Statuses</option>
@@ -16,14 +25,23 @@
     >
       <template #actions="{ row }">
         <div class="flex gap-2">
-          <button class="text-blue-600" @click="view(row.id)">View</button>
+          <button class="text-blue-600" title="View" @click="view(row.id)">
+            <Icon icon="heroicons-outline:eye" class="w-5 h-5" />
+          </button>
+          <button class="text-blue-600" title="Edit" @click="edit(row.id)">
+            <Icon icon="heroicons-outline:pencil-square" class="w-5 h-5" />
+          </button>
+          <button class="text-red-600" title="Delete" @click="remove(row.id)">
+            <Icon icon="heroicons-outline:trash" class="w-5 h-5" />
+          </button>
           <button
             v-for="a in changeActions"
             :key="a.value"
             class="text-blue-600"
+            :title="`Mark ${a.label}`"
             @click="updateStatus(row, a.value)"
           >
-            Mark {{ a.label }}
+            <Icon :icon="a.icon" class="w-5 h-5" />
           </button>
         </div>
       </template>
@@ -37,6 +55,8 @@ import { useRouter } from 'vue-router';
 import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
 import api from '@/services/api';
 import { useNotify } from '@/plugins/notify';
+import Icon from '@/components/ui/Icon';
+import Swal from 'sweetalert2';
 
 const router = useRouter();
 const notify = useNotify();
@@ -130,6 +150,23 @@ function view(id: number) {
   router.push({ name: 'appointments.details', params: { id } });
 }
 
+function edit(id: number) {
+  router.push({ name: 'appointments.edit', params: { id } });
+}
+
+async function remove(id: number) {
+  const res = await Swal.fire({
+    title: 'Delete appointment?',
+    icon: 'warning',
+    showCancelButton: true,
+  });
+  if (res.isConfirmed) {
+    await api.delete(`/appointments/${id}`);
+    all.value = all.value.filter((r) => r.id !== id);
+    reload();
+  }
+}
+
 async function updateStatus(row: any, status: string) {
   try {
     await api.patch(`/appointments/${row.id}`, { status });
@@ -144,10 +181,10 @@ async function updateStatus(row: any, status: string) {
 }
 
 const changeActions = [
-  { label: 'In Progress', value: 'in_progress' },
-  { label: 'Completed', value: 'completed' },
-  { label: 'Rejected', value: 'rejected' },
-  { label: 'Redo', value: 'redo' },
+  { label: 'In Progress', value: 'in_progress', icon: 'heroicons-outline:play' },
+  { label: 'Completed', value: 'completed', icon: 'heroicons-outline:check' },
+  { label: 'Rejected', value: 'rejected', icon: 'heroicons-outline:x-mark' },
+  { label: 'Redo', value: 'redo', icon: 'heroicons-outline:arrow-path' },
 ];
 </script>
 
