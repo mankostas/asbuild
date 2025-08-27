@@ -27,12 +27,12 @@
     "@tanstack/vue-query": "^4.35.7",
     "animate.css": "^4.1.1",
     "apexcharts": "^3.35.5",
-    "axios": "1.6.8",
+    "axios": "1.11.0",
     "chart.js": "4.4.1",
     "clsx": "^2.1.1",
     "gsap": "^3.12.5",
     "idb": "7.1.1",
-    "pdfjs-dist": "3.11.174",
+    "pdfjs-dist": "4.2.67",
     "pinia": "2.1.7",
     "simplebar-vue": "^2.3.3",
     "tailwind-merge": "^3.3.1",
@@ -43,7 +43,7 @@
     "vue-cleave-component": "^3.0.2",
     "vue-flatpickr-component": "^9",
     "vue-good-table-next": "^0.2.2",
-    "vue-i18n": "9.14.0",
+    "vue-i18n": "11.1.10",
     "vue-router": "4.3.0",
     "vue-select": "^4.0.0-beta.5",
     "vue-sweetalert2": "^5.0.5",
@@ -74,6 +74,6 @@
     "tailwindcss": "^3.4.17",
     "typescript": "5.3.3",
     "vite": "^5.1.0",
-    "vitest": "1.5.0"
+    "vitest": "3.0.5"
   }
 }
