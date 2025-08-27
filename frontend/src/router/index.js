@@ -8,6 +8,7 @@ const APP_NAME = import.meta.env.VITE_APP_NAME || 'AsBuild';
 export const routes = [
   {
     path: '/',
+    alias: '/dashboard',
     name: 'dashboard',
     component: () => import('@/views/home/Dashboard.vue'),
     meta: {
@@ -407,6 +408,13 @@ router.beforeEach(async (to, from, next) => {
   }
 
   next();
+});
+
+router.afterEach(() => {
+  const appLoading = document.getElementById('loading-bg');
+  if (appLoading) {
+    appLoading.style.display = 'none';
+  }
 });
 
 export default router;
