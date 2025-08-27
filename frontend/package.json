@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env SASS_SILENCE_DEPRECATIONS=legacy-js-api vite",
-    "build": "cross-env SASS_SILENCE_DEPRECATIONS=legacy-js-api vite build",
-    "preview": "cross-env SASS_SILENCE_DEPRECATIONS=legacy-js-api vite preview",
-    "test": "cross-env SASS_SILENCE_DEPRECATIONS=legacy-js-api vitest run tests/unit tests/*.test.ts && cross-env SASS_SILENCE_DEPRECATIONS=legacy-js-api playwright test tests/e2e",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run tests/unit tests/*.test.ts && playwright test tests/e2e",
     "lint": "eslint src --ext .ts,.vue",
     "format": "prettier --write ."
   },
@@ -64,7 +64,6 @@
     "@vitejs/plugin-vue": "5.0.4",
     "autoprefixer": "10.4.16",
     "axios-mock-adapter": "1.21.2",
-    "cross-env": "^7.0.3",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-vue": "9.23.0",
