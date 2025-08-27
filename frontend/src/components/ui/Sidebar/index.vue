@@ -190,7 +190,7 @@ export default defineComponent({
 </script>
 <style lang="scss">
 .sidebar-wrapper {
-  @apply fixed ltr:left-0 rtl:right-0 top-0   h-screen   z-[999];
+  @apply fixed start-0 top-0 h-screen z-[999];
   transition: width 0.2s cubic-bezier(0.39, 0.575, 0.565, 1);
   will-change: width;
 }
