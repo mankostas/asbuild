@@ -23,8 +23,18 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         Route::fallback(function () {
-            $index = public_path('index.html');
-            return file_exists($index) ? response()->file($index) : abort(404);
+            $candidates = [
+                public_path('index.html'),
+                base_path('frontend/index.html'),
+            ];
+
+            foreach ($candidates as $index) {
+                if (file_exists($index)) {
+                    return response()->file($index);
+                }
+            }
+
+            abort(404);
         });
     }
 }
