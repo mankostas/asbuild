@@ -1,6 +1,6 @@
 <template>
-  <div v-if="schema && schema.properties">
-    <div v-for="(prop, name) in schema.properties" :key="name" class="mb-4">
+  <div v-if="schema && schema.properties" class="grid grid-cols-2 gap-4">
+    <div v-for="(prop, name) in schema.properties" :key="name" :class="['mb-4', colSpanClass(prop)]">
       <label :for="name" class="block font-medium mb-1">
         {{ name }}<span v-if="isRequired(name)" class="text-red-600">*</span>
       </label>
@@ -111,6 +111,10 @@ function fieldType(prop: any) {
   if (prop.type === 'string' && prop.format === 'date') return 'date';
   if (prop.type === 'string' && prop.format === 'time') return 'time';
   return 'text';
+}
+
+function colSpanClass(prop: any) {
+  return prop['x-cols'] === 1 ? 'col-span-1' : 'col-span-2';
 }
 
 function validateField(name: string) {

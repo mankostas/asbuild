@@ -27,9 +27,14 @@
             </div>
             <div class="flex-1">
               <h4 class="text-sm font-semibold mb-2">Layout</h4>
-              <draggable v-model="fields" item-key="id" class="space-y-2" handle=".handle">
+              <draggable v-model="fields" item-key="id" class="grid grid-cols-2 gap-2" handle=".handle">
                 <template #item="{ element, index }">
-                  <div class="p-3 bg-white border rounded flex items-center justify-between">
+                  <div
+                    :class="[
+                      'p-3 bg-white border rounded flex items-center justify-between',
+                      element.cols === 2 ? 'col-span-2' : 'col-span-1',
+                    ]"
+                  >
                     <div class="flex items-center gap-2">
                       <span class="cursor-move handle text-gray-400">≡</span>
                       <input v-model="element.name" class="border rounded p-1 w-32" placeholder="name" />
@@ -41,6 +46,10 @@
                         <input type="checkbox" v-model="element.required" />
                         required
                       </label>
+                      <select v-model.number="element.cols" class="border rounded p-1 w-24">
+                        <option :value="2">Full</option>
+                        <option :value="1">Half</option>
+                      </select>
                     </div>
                     <button type="button" class="text-red-500" @click="removeField(index)">✕</button>
                   </div>
@@ -82,6 +91,7 @@ interface Field {
   label: string;
   typeKey: string;
   required: boolean;
+  cols: number;
 }
 
 const route = useRoute();
@@ -109,6 +119,7 @@ function addField(t: any) {
     label: t.label,
     typeKey: t.key,
     required: false,
+    cols: 2,
   });
 }
 
@@ -122,7 +133,7 @@ const formSchemaObj = computed(() => {
   fields.value.forEach((f) => {
     const def = fieldTypes.find((ft) => ft.key === f.typeKey);
     if (!def) return;
-    properties[f.name] = { title: f.label, ...def.schema };
+    properties[f.name] = { title: f.label, ...def.schema, 'x-cols': f.cols };
     if (f.required) required.push(f.name);
   });
   const schema: any = { type: 'object', properties };
@@ -136,6 +147,7 @@ const fieldsSummaryObj = computed(() =>
     label: f.label,
     type: f.typeKey,
     required: f.required,
+    cols: f.cols,
   })),
 );
 
@@ -152,28 +164,30 @@ onMounted(async () => {
     const { data } = await api.get(`/appointment-types/${route.params.id}`);
     name.value = data.name;
     if (data.fields_summary) {
-      if (Array.isArray(data.fields_summary)) {
-        fields.value = data.fields_summary.map((f: any) => ({
-          id: Date.now() + Math.random(),
-          name: f.name || `field${fields.value.length + 1}`,
-          label: f.label || f.name || 'Field',
-          typeKey: f.type || 'text',
-          required: !!f.required,
-        }));
-      } else if (typeof data.fields_summary === 'object') {
-        fields.value = Object.keys(data.fields_summary).map((key) => {
-          const f = (data.fields_summary as any)[key];
-          return {
+        if (Array.isArray(data.fields_summary)) {
+          fields.value = data.fields_summary.map((f: any) => ({
             id: Date.now() + Math.random(),
-            name: key,
-            label: f.label || key,
+            name: f.name || `field${fields.value.length + 1}`,
+            label: f.label || f.name || 'Field',
             typeKey: f.type || 'text',
             required: !!f.required,
-          };
-        });
+            cols: f.cols || 2,
+          }));
+        } else if (typeof data.fields_summary === 'object') {
+          fields.value = Object.keys(data.fields_summary).map((key) => {
+            const f = (data.fields_summary as any)[key];
+            return {
+              id: Date.now() + Math.random(),
+              name: key,
+              label: f.label || key,
+              typeKey: f.type || 'text',
+              required: !!f.required,
+              cols: f.cols || 2,
+            };
+          });
+        }
       }
     }
-  }
 });
 
 const canSubmit = computed(() => {
