@@ -23,27 +23,27 @@
 </template>
 <script>
 export default {
-  data() {
-    return {
-      semidark: this.$store.themeSettingsStore.semidark,
-    };
-  },
-  mounted() {
+  computed: {
+    semidark: {
+      get() {
+        return this.$store.themeSettingsStore.semidark;
+      },
+      set(value) {
+        this.$store.themeSettingsStore.semidark = value;
+      },
+    },
   },
   watch: {
     semidark: {
-      handler() {
-        if (this.semidark) {
-          this.$store.themeSettingsStore.semidark = this.semidark;
+      handler(value) {
+        if (value) {
           document.body.classList.remove("semi-light");
           document.body.classList.add("semi-dark");
-          localStorage.setItem("semiDark", this.semidark);
         } else {
-          this.$store.themeSettingsStore.semidark = this.semidark;
           document.body.classList.remove("semi-dark");
           document.body.classList.add("semi-light");
-          localStorage.setItem("semiDark", this.semidark);
         }
+        localStorage.setItem("semiDark", value);
       },
       immediate: true,
     },

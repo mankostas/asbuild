@@ -51,7 +51,7 @@ document.body.classList.remove(
 );
 document.body.classList.add(themeSettingsStore.theme);
 document.body.classList.toggle("semi-dark", themeSettingsStore.semidark);
-if (localStorage.getItem("monochrome")) {
+if (themeSettingsStore.monochrome) {
   document.documentElement.classList.add("grayscale");
 }
 
