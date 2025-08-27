@@ -57,10 +57,7 @@
         <div
           class="nav-tools flex items-center lg:space-x-5 space-x-3 rtl:space-x-reverse"
         >
-          <LanguageVue />
           <SwitchDark />
-          <MonochromeMode />
-          <Carti />
           <Message v-if="window.width > 768" />
           <Notification v-if="window.width > 768" />
           <Profile v-if="window.width > 768" />
@@ -71,16 +68,13 @@
   </header>
 </template>
 <script>
-import Carti from "./Navtools/Carti.vue";
 import Profile from "./Navtools/Profile.vue";
 import Notification from "./Navtools/Notification.vue";
 import Message from "./Navtools/Message.vue";
 import SwitchDark from "./Navtools/SwitchDark.vue";
-import MonochromeMode from "./Navtools/MonochromeMode.vue";
 import Mainnav from "./horizental-nav.vue";
 import Icon from "../Icon";
 import SearchModal from "./Navtools/SearchModal.vue";
-import LanguageVue from "./Navtools/Language.vue";
 import Logo from "./Navtools/Logo.vue";
 import MobileLogo from "./Navtools/MobileLogo.vue";
 import window from "@/mixins/window";
@@ -89,15 +83,12 @@ import HandleMobileMenu from "./Navtools/HandleMobileMenu.vue";
 export default {
   mixins: [window],
   components: {
-    Carti,
     Profile,
     Notification,
     Message,
     SwitchDark,
-    MonochromeMode,
     Mainnav,
     Icon,
-    LanguageVue,
     SearchModal,
     Logo,
     MobileLogo,
