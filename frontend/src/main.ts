@@ -23,6 +23,7 @@ import VCalendar from "v-calendar";
 import "v-calendar/dist/style.css";
 import { VueQueryPlugin } from "@tanstack/vue-query";
 import { useThemeSettingsStore } from "./stores/themeSettings";
+
 const app = createApp(App)
   .use(stores)
   .use(i18n)
@@ -40,38 +41,42 @@ const app = createApp(App)
   .use(VCalendar);
 
 app.use(VueQueryPlugin);
-app.config.globalProperties.$store = {};
-const themeSettingsStore = useThemeSettingsStore();
-await themeSettingsStore.load();
-app.config.globalProperties.$store.themeSettingsStore = themeSettingsStore;
 
-// Apply any saved theme customizer settings on startup and persist future
-// changes so user preferences survive page reloads and new sessions.
-document.body.classList.remove(
-  themeSettingsStore.theme === "dark" ? "light" : "dark"
-);
-document.body.classList.add(themeSettingsStore.theme);
-document.body.classList.toggle("semi-dark", themeSettingsStore.semidark);
-if (themeSettingsStore.monochrome) {
-  document.documentElement.classList.add("grayscale");
+async function bootstrap() {
+  app.config.globalProperties.$store = {};
+  const themeSettingsStore = useThemeSettingsStore();
+  await themeSettingsStore.load();
+  app.config.globalProperties.$store.themeSettingsStore = themeSettingsStore;
+
+  // Apply any saved theme customizer settings on startup and persist future
+  // changes so user preferences survive page reloads and new sessions.
+  document.body.classList.remove(
+    themeSettingsStore.theme === "dark" ? "light" : "dark"
+  );
+  document.body.classList.add(themeSettingsStore.theme);
+  document.body.classList.toggle("semi-dark", themeSettingsStore.semidark);
+  if (themeSettingsStore.monochrome) {
+    document.documentElement.classList.add("grayscale");
+  }
+
+  themeSettingsStore.$subscribe(() => {
+    themeSettingsStore.persistLocal();
+  });
+
+  watch(
+    () => themeSettingsStore.isOpenSettings,
+    (open) => {
+      if (!open) {
+        themeSettingsStore.persistRemote();
+      }
+    }
+  );
+
+  await router.isReady();
+  app.mount("#app");
 }
 
-themeSettingsStore.$subscribe(() => {
-  themeSettingsStore.persistLocal();
-});
-
-watch(
-  () => themeSettingsStore.isOpenSettings,
-  (open) => {
-    if (!open) {
-      themeSettingsStore.persistRemote();
-    }
-  }
-);
-
-router.isReady().then(() => {
-  app.mount("#app");
-});
+bootstrap();
 
 if (import.meta.env.VITE_SENTRY_DSN) {
   const script = document.createElement('script');
