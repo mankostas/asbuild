@@ -44,6 +44,21 @@ app.config.globalProperties.$store = {};
 const themeSettingsStore = useThemeSettingsStore();
 app.config.globalProperties.$store.themeSettingsStore = themeSettingsStore;
 
+// Apply any saved theme customizer settings on startup and persist future
+// changes so user preferences survive page reloads and new sessions.
+document.body.classList.remove(
+  themeSettingsStore.theme === "dark" ? "light" : "dark"
+);
+document.body.classList.add(themeSettingsStore.theme);
+document.body.classList.toggle("semi-dark", themeSettingsStore.semidark);
+if (localStorage.getItem("monochrome")) {
+  document.documentElement.classList.add("grayscale");
+}
+
+themeSettingsStore.$subscribe((_, state) => {
+  localStorage.setItem("themeSettings", JSON.stringify(state));
+});
+
 router.isReady().then(() => {
   app.mount("#app");
 });
