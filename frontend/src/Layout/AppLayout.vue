@@ -6,7 +6,7 @@
         <main class="flex-1 p-4">
           <Breadcrumbs />
           <div class="relative">
-            <Transition name="page" mode="out-in">
+            <Transition name="fade" mode="out-in">
               <router-view />
             </Transition>
           </div>
@@ -26,12 +26,12 @@
   </script>
 <style>
 /* Fade-only transition for page navigation */
-.page-enter-active,
-.page-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.3s ease;
 }
-.page-enter-from,
-.page-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 </style>
