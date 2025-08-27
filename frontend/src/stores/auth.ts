@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import api, { registerAuthStore } from '@/services/api';
 import { useThemeSettingsStore } from './themeSettings';
+import { useTenantStore } from '@/store/tenant';
 import {
   getAccessToken,
   getRefreshToken,
@@ -37,6 +38,7 @@ export const useAuthStore = defineStore('auth', {
         this.accessToken = data.access_token;
         this.refreshToken = data.refresh_token;
         this.user = data.user;
+        useTenantStore().setTenant(data.user?.tenant_id || '');
         setTokens(data.access_token, data.refresh_token);
         api.defaults.headers.common['Authorization'] =
           `Bearer ${data.access_token}`;
@@ -46,6 +48,7 @@ export const useAuthStore = defineStore('auth', {
     async fetchUser() {
       const { data } = await api.get('/me');
       this.user = data;
+      useTenantStore().setTenant(data?.tenant_id || '');
     },
     async logout(skipServer = false) {
       if (!skipServer) {
@@ -60,6 +63,7 @@ export const useAuthStore = defineStore('auth', {
       delete api.defaults.headers.common['Authorization'];
       this.impersonatedTenant = '';
       localStorage.removeItem('impersonatingTenant');
+      useTenantStore().setTenant('');
     },
     async refresh() {
       if (!this.refreshToken) return;
@@ -83,6 +87,7 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = data.access_token;
       this.refreshToken = data.refresh_token;
       this.user = data.user;
+      useTenantStore().setTenant(data.user?.tenant_id || '');
       setTokens(data.access_token, data.refresh_token);
       api.defaults.headers.common['Authorization'] =
         `Bearer ${data.access_token}`;
