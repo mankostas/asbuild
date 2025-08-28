@@ -29,6 +29,7 @@ class RoleUpsertRequest extends FormRequest
             ],
             'abilities' => ['array'],
             'abilities.*' => ['string'],
+            'level' => ['integer', 'min:0'],
             'tenant_id' => ['nullable', 'exists:tenants,id'],
         ];
     }
@@ -39,6 +40,7 @@ class RoleUpsertRequest extends FormRequest
             'name' => 'name',
             'slug' => 'slug',
             'abilities' => 'abilities',
+            'level' => 'level',
             'tenant_id' => 'tenant',
         ];
     }
