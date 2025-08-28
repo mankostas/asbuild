@@ -61,7 +61,7 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
   actions: {
     async load() {
       const auth = useAuthStore();
-      if (!auth.isAuthenticated) return;
+      if (!auth.isAuthenticated || !auth.can("themes.view")) return;
       try {
         const { data } = await api.get("/settings/theme");
         Object.assign(this.$state, data);
@@ -77,7 +77,7 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
 
     async persistRemote() {
       const auth = useAuthStore();
-      if (!auth.isAuthenticated) return;
+      if (!auth.isAuthenticated || !auth.can("themes.manage")) return;
       try {
         const snapshot = JSON.stringify(this.$state);
         if (this._serverSnapshot === snapshot) return;

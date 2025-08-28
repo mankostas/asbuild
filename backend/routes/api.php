@@ -172,8 +172,10 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::put('settings/profile', [SettingsController::class, 'updateProfile']);
     Route::get('settings/footer', [SettingsController::class, 'getFooter']);
     Route::put('settings/footer', [SettingsController::class, 'updateFooter']);
-    Route::get('settings/theme', [SettingsController::class, 'getTheme']);
-    Route::put('settings/theme', [SettingsController::class, 'updateTheme']);
+    Route::get('settings/theme', [SettingsController::class, 'getTheme'])
+        ->middleware(Ability::class . ':themes.view');
+    Route::put('settings/theme', [SettingsController::class, 'updateTheme'])
+        ->middleware(Ability::class . ':themes.manage');
 
     Route::prefix('gdpr')->group(function () {
         Route::get('export', [GdprController::class, 'export']);
