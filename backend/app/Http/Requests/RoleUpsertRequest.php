@@ -20,6 +20,10 @@ class RoleUpsertRequest extends FormRequest
             ? $this->input('tenant_id')
             : $this->user()->tenant_id;
 
+        $allowedAbilities = $this->user() && $this->user()->hasRole('SuperAdmin')
+            ? config('abilities')
+            : (Tenant::find($tenantId)?->allowedAbilities() ?? []);
+
         return [
             'name' => ['required', 'string', 'max:100'],
             'slug' => [
@@ -29,25 +33,10 @@ class RoleUpsertRequest extends FormRequest
                 Rule::unique('roles')->where(fn ($q) => $q->where('tenant_id', $tenantId))->ignore($roleId),
             ],
             'abilities' => ['array'],
-            'abilities.*' => ['string', Rule::in(config('abilities'))],
+            'abilities.*' => ['string', Rule::in($allowedAbilities)],
             'level' => ['integer', 'min:0'],
             'tenant_id' => ['nullable', 'exists:tenants,id'],
         ];
-    }
-
-    public function withValidator($validator): void
-    {
-        $validator->after(function ($v) {
-            if (! $this->user()->isSuperAdmin()) {
-                $tenant = Tenant::find($this->user()->tenant_id);
-                $allowed = $tenant ? $tenant->allowedAbilities() : [];
-                $submitted = $this->input('abilities', []);
-
-                if (array_diff($submitted, $allowed)) {
-                    $v->errors()->add('abilities', 'One or more abilities are not allowed for this tenant.');
-                }
-            }
-        });
     }
 
     public function attributes(): array
@@ -70,6 +59,7 @@ class RoleUpsertRequest extends FormRequest
             'array' => 'The :attribute must be an array.',
             'exists' => 'The selected :attribute is invalid.',
             'unique' => 'The :attribute has already been taken.',
+            'abilities.*.in' => 'One or more abilities are not allowed for this tenant.',
         ];
     }
 }
