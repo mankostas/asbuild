@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -121,9 +122,12 @@ class AuthController extends Controller
     {
         $user = $request->user()->load('roles');
 
+        $tenant = Tenant::current() ?? Tenant::find($user->tenant_id);
+
         return response()->json([
             'user' => $user,
             'abilities' => $this->abilitiesFor($user),
+            'features' => $tenant?->features ?? [],
         ]);
     }
 
