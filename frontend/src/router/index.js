@@ -498,7 +498,13 @@ router.beforeEach(async (to, from, next) => {
   if (!auth.isAuthenticated && auth.refreshToken) {
     try {
       await auth.refresh();
-    } catch (e) {}
+    } catch (e) {
+      // If refreshing the token fails (e.g. expired refresh token),
+      // ensure any stale authentication state is cleared so the
+      // navigation guards can redirect the user to the login page
+      // without getting stuck in a refresh loop.
+      await auth.logout(true);
+    }
   }
 
   if (auth.isAuthenticated && !auth.user) {

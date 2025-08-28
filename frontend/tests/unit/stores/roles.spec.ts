@@ -19,11 +19,19 @@ describe('roles store', () => {
   });
 
   it('fetches roles with params', async () => {
-    (api.get as any).mockResolvedValue({ data: [{ id: 1 }] });
+    (api.get as any).mockResolvedValue({ data: { data: [{ id: 1 }] } });
     const store = useRolesStore();
     await store.fetch({ scope: 'tenant', tenant_id: '1' });
     expect(api.get).toHaveBeenCalledWith('/roles', {
-      params: { scope: 'tenant', tenant_id: '1' },
+      params: {
+        scope: 'tenant',
+        tenant_id: '1',
+        page: 1,
+        per_page: 20,
+        search: '',
+        sort: '',
+        dir: 'asc',
+      },
     });
     expect(store.roles).toEqual([{ id: 1 }]);
   });
