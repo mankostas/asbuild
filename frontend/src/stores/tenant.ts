@@ -21,14 +21,16 @@ export const useTenantStore = defineStore('tenant', {
       this.tenants = data.data;
       return data.meta;
     },
-    setTenant(id: string) {
-      this.currentTenantId = id;
-      if (id) {
-        localStorage.setItem(TENANT_ID_KEY, id);
+    setTenant(id: string | number) {
+      const normalized = id ? String(id) : '';
+      const changed = this.currentTenantId !== normalized;
+      this.currentTenantId = normalized;
+      if (normalized) {
+        localStorage.setItem(TENANT_ID_KEY, normalized);
       } else {
         localStorage.removeItem(TENANT_ID_KEY);
       }
-      if (typeof window !== 'undefined') {
+      if (changed && typeof window !== 'undefined') {
         window.location.reload();
       }
     },
