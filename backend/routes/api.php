@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\StatusController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\LookupController;
+use App\Http\Controllers\Api\CalendarController;
 use App\Http\Middleware\EnsureTenantScope;
 use App\Http\Middleware\Ability;
 
@@ -118,4 +119,5 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     });
 
     Route::get('lookups/assignees', [LookupController::class, 'assignees']);
+    Route::get('calendar/events', [CalendarController::class, 'events']);
 });
