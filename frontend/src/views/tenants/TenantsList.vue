@@ -43,8 +43,12 @@ const columns = [
 
 async function fetchTenants({ page, perPage, sort, search }: any) {
   if (!all.value.length) {
+    // The tenants API responds with an object containing
+    // `{ data: Tenant[], meta: PaginationMeta }`. We only need the
+    // array of tenants for client-side pagination, so extract the
+    // `data` property explicitly before assigning to `all`.
     const { data } = await api.get('/tenants');
-    all.value = data;
+    all.value = data.data;
   }
   let rows = all.value.slice();
   if (search) {
