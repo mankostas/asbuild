@@ -15,7 +15,7 @@
       :fetcher="fetchRoles"
     >
       <template #actions="{ row }">
-        <div class="flex gap-2">
+        <div v-if="row.name !== 'SuperAdmin'" class="flex gap-2">
           <button class="text-blue-600" title="Edit" @click="edit(row.id)">
             <Icon icon="heroicons-outline:pencil-square" class="w-5 h-5" />
           </button>
@@ -50,7 +50,7 @@ const columns = [
 async function fetchRoles({ page, perPage, sort, search }: any) {
   if (!all.value.length) {
     const { data } = await api.get('/roles');
-    all.value = data.filter((r: any) => r.name !== 'SuperAdmin');
+    all.value = data;
   }
   let rows = all.value.slice();
   if (search) {
