@@ -59,5 +59,15 @@ return [
             'employees.manage',
         ],
     ],
+    'tenants' => [
+        'label' => 'Tenants',
+        'abilities' => [
+            'tenants.view',
+            'tenants.create',
+            'tenants.update',
+            'tenants.delete',
+            'tenants.manage',
+        ],
+    ],
     // Additional features can be listed here as needed, e.g. 'reports', 'billing', 'employees', …
 ];

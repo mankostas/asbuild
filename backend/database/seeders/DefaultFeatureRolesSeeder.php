@@ -22,6 +22,7 @@ class DefaultFeatureRolesSeeder extends Seeder
                 case 'teams':
                 case 'statuses':
                 case 'employees':
+                case 'tenants':
                     $uc = ucfirst($feature);
                     // viewer role
                     $roles[] = [
