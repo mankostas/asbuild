@@ -31,6 +31,11 @@ class RoleController extends Controller
     public function index(Request $request)
     {
         $this->ensureAdmin($request);
+
+        if ($request->user()->hasRole('SuperAdmin') && ! app()->bound('tenant_id')) {
+            return Role::all();
+        }
+
         $tenantId = $this->getTenantId($request);
         return Role::where('tenant_id', $tenantId)->get();
     }
