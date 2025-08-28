@@ -30,17 +30,29 @@ class LookupController extends Controller
         $results = collect();
 
         if ($type === 'all' || $type === 'teams') {
-            $teams = Team::where('tenant_id', $tenantId)->get()
-                ->map(fn ($team) => ['id' => $team->id, 'label' => $team->name, 'kind' => 'team']);
+            $teams = Team::where('tenant_id', $tenantId)
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn ($team) => [
+                    'id' => $team->id,
+                    'label' => $team->name,
+                    'kind' => 'team',
+                ]);
             $results = $results->merge($teams);
         }
 
         if ($type === 'all' || $type === 'employees') {
-            $employees = User::where('tenant_id', $tenantId)->get()
-                ->map(fn ($user) => ['id' => $user->id, 'label' => $user->name, 'kind' => 'employee']);
+            $employees = User::where('tenant_id', $tenantId)
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn ($user) => [
+                    'id' => $user->id,
+                    'label' => $user->name,
+                    'kind' => 'employee',
+                ]);
             $results = $results->merge($employees);
         }
 
-        return $results->values();
+        return $results->sortBy('label')->values();
     }
 }
