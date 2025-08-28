@@ -20,6 +20,10 @@ return Application::configure(
             \App\Http\Middleware\ETag::class,
         ]);
 
+        $middleware->append([
+            \App\Http\Middleware\LogRequests::class,
+        ]);
+
         $middleware->alias([
             'tenant' => \App\Http\Middleware\ResolveTenant::class,
             'signed.url' => \App\Http\Middleware\SignedUrl::class,
