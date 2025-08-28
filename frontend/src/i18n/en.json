@@ -1,5 +1,7 @@
 {
-  "app": { "title": "Asbuild" },
+  "app": {
+    "title": "Asbuild"
+  },
   "actions": {
     "toggleTheme": "Toggle Theme",
     "toggleDensity": "Toggle Density",
@@ -56,7 +58,10 @@
     "statusEdit": "Edit Status",
     "roles": "Roles",
     "roleCreate": "Create Role",
-    "roleEdit": "Edit Role"
+    "roleEdit": "Edit Role",
+    "tenantDetail": "Tenant Detail",
+    "tenantCreate": "Create Tenant",
+    "tenantEdit": "Edit Tenant"
   },
   "appointments": {
     "new": "New Appointment",

@@ -1,5 +1,8 @@
 <template>
     <div>
+      <div class="mb-4">
+        <Button btnClass="btn-primary" text="Add Tenant" link="/tenants/create" />
+      </div>
       <DashcodeServerTable
         :key="tableKey"
       :columns="columns"
@@ -7,21 +10,10 @@
     >
       <template #actions="{ row }">
         <div class="flex gap-2">
-          <Button
-            btnClass="btn-outline-primary btn-sm"
-            text="View"
-            @click="view(row.id)"
-          />
-          <Button
-            btnClass="btn-outline-secondary btn-sm"
-            text="Impersonate"
-            @click="impersonate(row)"
-          />
-          <Button
-            btnClass="btn-outline-danger btn-sm"
-            text="Delete"
-            @click="remove(row.id)"
-          />
+          <Button btnClass="btn-outline-primary btn-sm" text="View" @click="view(row.id)" />
+          <Button :link="`/tenants/${row.id}/edit`" btnClass="btn-outline-primary btn-sm" text="Edit" />
+          <Button btnClass="btn-outline-secondary btn-sm" text="Impersonate" @click="impersonate(row)" />
+          <Button btnClass="btn-outline-danger btn-sm" text="Delete" @click="remove(row.id)" />
         </div>
       </template>
     </DashcodeServerTable>
