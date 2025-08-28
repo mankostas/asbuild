@@ -20,7 +20,11 @@ class StatusRoutesTest extends TestCase
     {
         parent::setUp();
         $tenant = Tenant::create(['name' => 'Test Tenant']);
-        $role = Role::create(['name' => 'ClientAdmin', 'tenant_id' => $tenant->id]);
+        $role = Role::create([
+            'name' => 'ClientAdmin',
+            'tenant_id' => $tenant->id,
+            'abilities' => ['statuses.manage'],
+        ]);
         $user = User::create([
             'name' => 'Test User',
             'email' => 'user@example.com',
@@ -44,7 +48,7 @@ class StatusRoutesTest extends TestCase
         $statusId = $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->postJson('/api/statuses', $payload)
             ->assertStatus(201)
-            ->json('id');
+            ->json('data.id');
 
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->getJson("/api/statuses/{$statusId}")
@@ -54,7 +58,7 @@ class StatusRoutesTest extends TestCase
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->putJson("/api/statuses/{$statusId}", $update)
             ->assertStatus(200)
-            ->assertJsonPath('name', 'Closed');
+            ->assertJsonPath('data.name', 'Closed');
 
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->deleteJson("/api/statuses/{$statusId}")

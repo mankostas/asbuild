@@ -65,7 +65,7 @@ class AppointmentRoutesTest extends TestCase
         $appointmentId = $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->postJson('/api/appointments', $payload)
             ->assertStatus(201)
-            ->json('id');
+            ->json('data.id');
 
         // show
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
@@ -80,7 +80,7 @@ class AppointmentRoutesTest extends TestCase
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->putJson("/api/appointments/{$appointmentId}", $update)
             ->assertStatus(200)
-            ->assertJsonPath('kau_notes', 'Updated');
+            ->assertJsonPath('data.kau_notes', 'Updated');
 
         // destroy
         $this->withHeader('X-Tenant-ID', $this->tenant->id)

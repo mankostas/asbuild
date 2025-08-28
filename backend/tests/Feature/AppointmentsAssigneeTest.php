@@ -60,7 +60,7 @@ class AppointmentsAssigneeTest extends TestCase
         $id = $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/appointments', $payload)
             ->assertStatus(201)
-            ->json('id');
+            ->json('data.id');
 
         $appointment = Appointment::find($id);
         $this->assertEquals(User::class, $appointment->assignee_type);

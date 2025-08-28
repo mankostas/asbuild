@@ -62,4 +62,14 @@ class User extends Authenticatable
             })
             ->exists();
     }
+
+    public function roleLevel(?int $tenantId = null): int
+    {
+        $tenantId = $tenantId ?? $this->tenant_id;
+
+        $roles = $this->rolesForTenant($tenantId)
+            ->merge($this->roles()->wherePivotNull('tenant_id')->get());
+
+        return $roles->min('level') ?? PHP_INT_MAX;
+    }
 }

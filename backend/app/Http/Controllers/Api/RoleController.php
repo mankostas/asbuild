@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use App\Http\Requests\RoleUpsertRequest;
 use App\Http\Resources\RoleResource;
 use App\Support\ListQuery;
@@ -16,7 +17,7 @@ class RoleController extends Controller
 
     protected function ensureAdmin(Request $request): void
     {
-        if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
+        if (! Gate::allows('roles.manage')) {
             abort(403);
         }
     }
@@ -30,9 +31,10 @@ class RoleController extends Controller
 
         if (! $request->user()->isSuperAdmin()) {
             $tenantId = $request->user()->tenant_id;
+            $userLevel = $request->user()->roleLevel($tenantId);
             $base = Role::where(function ($query) use ($tenantId) {
                 $query->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
-            });
+            })->where('level', '>=', $userLevel);
             $result = $this->listQuery($base, $request, ['name'], ['name']);
             return RoleResource::collection($result['data'])->additional([
                 'meta' => $result['meta'],
@@ -80,7 +82,14 @@ class RoleController extends Controller
         if ($request->user()->hasRole('SuperAdmin')) {
             $data['tenant_id'] = $data['tenant_id'] ?? null;
         } else {
-            $data['tenant_id'] = $request->user()->tenant_id;
+            $tenantId = $request->user()->tenant_id;
+            $userLevel = $request->user()->roleLevel($tenantId);
+            $level = $data['level'] ?? $userLevel;
+            if ($level < $userLevel) {
+                abort(403);
+            }
+            $data['tenant_id'] = $tenantId;
+            $data['level'] = $level;
         }
 
         if ($data['name'] === 'SuperAdmin' || $data['slug'] === 'super_admin') {
@@ -95,8 +104,13 @@ class RoleController extends Controller
     {
         $this->ensureAdmin($request);
 
-        if (! $request->user()->hasRole('SuperAdmin') && $role->tenant_id !== $request->user()->tenant_id) {
-            abort(404);
+        if (! $request->user()->hasRole('SuperAdmin')) {
+            if ($role->tenant_id !== $request->user()->tenant_id) {
+                abort(404);
+            }
+            if ($role->level < $request->user()->roleLevel($request->user()->tenant_id)) {
+                abort(403);
+            }
         }
 
         return new RoleResource($role);
@@ -106,8 +120,14 @@ class RoleController extends Controller
     {
         $this->ensureAdmin($request);
 
-        if (! $request->user()->hasRole('SuperAdmin') && $role->tenant_id !== $request->user()->tenant_id) {
-            abort(404);
+        if (! $request->user()->hasRole('SuperAdmin')) {
+            if ($role->tenant_id !== $request->user()->tenant_id) {
+                abort(404);
+            }
+            $userLevel = $request->user()->roleLevel($request->user()->tenant_id);
+            if ($role->level < $userLevel) {
+                abort(403);
+            }
         }
 
         if ($role->name === 'SuperAdmin' || $role->slug === 'super_admin') {
@@ -120,6 +140,12 @@ class RoleController extends Controller
             $data['tenant_id'] = $data['tenant_id'] ?? $role->tenant_id;
         } else {
             $data['tenant_id'] = $request->user()->tenant_id;
+            $userLevel = $request->user()->roleLevel($request->user()->tenant_id);
+            $level = $data['level'] ?? $role->level;
+            if ($level < $userLevel) {
+                abort(403);
+            }
+            $data['level'] = $level;
         }
 
         if (($data['name'] ?? $role->name) === 'SuperAdmin' || ($data['slug'] ?? $role->slug) === 'super_admin') {
@@ -135,8 +161,13 @@ class RoleController extends Controller
     {
         $this->ensureAdmin($request);
 
-        if (! $request->user()->hasRole('SuperAdmin') && $role->tenant_id !== $request->user()->tenant_id) {
-            abort(404);
+        if (! $request->user()->hasRole('SuperAdmin')) {
+            if ($role->tenant_id !== $request->user()->tenant_id) {
+                abort(404);
+            }
+            if ($role->level < $request->user()->roleLevel($request->user()->tenant_id)) {
+                abort(403);
+            }
         }
 
         if ($role->name === 'SuperAdmin' || $role->slug === 'super_admin') {
@@ -156,6 +187,10 @@ class RoleController extends Controller
             'user_id' => ['required', 'exists:users,id'],
             'tenant_id' => ['nullable', 'exists:tenants,id'],
         ]);
+
+        if (! $request->user()->hasRole('SuperAdmin') && $role->level < $request->user()->roleLevel($request->user()->tenant_id)) {
+            abort(403);
+        }
 
         if ($role->tenant_id !== null) {
             $data['tenant_id'] = $role->tenant_id;
