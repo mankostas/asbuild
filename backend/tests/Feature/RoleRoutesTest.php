@@ -20,7 +20,12 @@ class RoleRoutesTest extends TestCase
     {
         parent::setUp();
         $tenant = Tenant::create(['name' => 'Test Tenant']);
-        $role = Role::create(['name' => 'ClientAdmin', 'slug' => 'client_admin', 'tenant_id' => $tenant->id]);
+        $role = Role::create([
+            'name' => 'ClientAdmin',
+            'slug' => 'client_admin',
+            'tenant_id' => $tenant->id,
+            'abilities' => ['roles.manage'],
+        ]);
         $user = User::create([
             'name' => 'Test User',
             'email' => 'user@example.com',

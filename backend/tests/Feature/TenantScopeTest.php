@@ -36,7 +36,12 @@ class TenantScopeTest extends TestCase
     {
         $tenant1 = Tenant::create(['name' => 'One']);
         $tenant2 = Tenant::create(['name' => 'Two']);
-        $role = Role::create(['name' => 'ClientAdmin', 'slug' => 'client_admin', 'tenant_id' => $tenant1->id]);
+        $role = Role::create([
+            'name' => 'ClientAdmin',
+            'slug' => 'client_admin',
+            'tenant_id' => $tenant1->id,
+            'abilities' => ['roles.manage'],
+        ]);
         $user = User::create([
             'name' => 'User',
             'email' => 'user@example.com',

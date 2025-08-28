@@ -23,7 +23,7 @@ class Ability
 
         $abilities = $roles->pluck('abilities')->flatten()->filter()->unique()->all();
 
-        if ($abilities && ! in_array($code, $abilities)) {
+        if (! in_array('*', $abilities) && ! in_array($code, $abilities)) {
             return response()->json(['message' => 'forbidden'], 403);
         }
 

@@ -20,7 +20,11 @@ class AppointmentTypeRoutesTest extends TestCase
     {
         parent::setUp();
         $tenant = Tenant::create(['name' => 'Test Tenant']);
-        $role = Role::create(['name' => 'ClientAdmin', 'tenant_id' => $tenant->id]);
+        $role = Role::create([
+            'name' => 'ClientAdmin',
+            'tenant_id' => $tenant->id,
+            'abilities' => ['types.manage'],
+        ]);
         $user = User::create([
             'name' => 'Test User',
             'email' => 'user@example.com',
@@ -54,7 +58,7 @@ class AppointmentTypeRoutesTest extends TestCase
         $typeId = $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->postJson('/api/appointment-types', $payload)
             ->assertStatus(201)
-            ->json('id');
+            ->json('data.id');
 
         // show
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
@@ -63,12 +67,17 @@ class AppointmentTypeRoutesTest extends TestCase
 
         // update without name
         $update = [
+            'name' => 'Type A',
             'fields_summary' => json_encode(['note' => 'text']),
+            'statuses' => json_encode([
+                'draft' => ['assigned'],
+                'assigned' => ['in_progress'],
+            ]),
         ];
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->putJson("/api/appointment-types/{$typeId}", $update)
             ->assertStatus(200)
-            ->assertJsonPath('fields_summary.note', 'text');
+            ->assertJsonPath('data.fields_summary.note', 'text');
 
         // destroy
         $this->withHeader('X-Tenant-ID', $this->tenant->id)

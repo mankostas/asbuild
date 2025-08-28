@@ -17,7 +17,12 @@ class RolesTest extends TestCase
     public function test_role_assignment_persists(): void
     {
         $tenant = Tenant::create(['name' => 'Tenant']);
-        $adminRole = Role::create(['name' => 'ClientAdmin', 'slug' => 'client_admin', 'tenant_id' => $tenant->id]);
+        $adminRole = Role::create([
+            'name' => 'ClientAdmin',
+            'slug' => 'client_admin',
+            'tenant_id' => $tenant->id,
+            'abilities' => ['roles.manage'],
+        ]);
         $role = Role::create(['name' => 'Tester', 'slug' => 'tester', 'tenant_id' => $tenant->id]);
 
         $admin = User::create([

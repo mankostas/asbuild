@@ -18,9 +18,11 @@
 import { onMounted, ref } from 'vue';
 import { useTenantStore } from '@/stores/tenant';
 import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 
 const tenantStore = useTenantStore();
 const authStore = useAuthStore();
+const router = useRouter();
 const selected = ref(tenantStore.currentTenantId);
 
 onMounted(async () => {
@@ -35,6 +37,7 @@ async function onChange() {
   );
   if (tenant) {
     await authStore.impersonate(tenant.id, tenant.name);
+    router.replace({ name: 'dashboard' });
   }
 }
 </script>
