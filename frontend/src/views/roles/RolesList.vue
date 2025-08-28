@@ -1,6 +1,16 @@
 <template>
   <div>
-    <div class="flex items-center justify-end mb-4">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <select
+          v-model="scope"
+          class="border rounded p-2"
+        >
+          <option value="tenant">Tenant</option>
+          <option v-if="auth.isSuperAdmin" value="global">Global</option>
+          <option v-if="auth.isSuperAdmin" value="all">All</option>
+        </select>
+      </div>
       <RouterLink
         class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
         :to="{ name: 'roles.create' }"
@@ -22,25 +32,42 @@
           <button class="text-red-600" title="Delete" @click="remove(row.id)">
             <Icon icon="heroicons-outline:trash" class="w-5 h-5" />
           </button>
+          <button class="text-green-600" title="Assign" @click="openAssign(row.id)">
+            <Icon icon="heroicons-outline:user-plus" class="w-5 h-5" />
+          </button>
         </div>
       </template>
     </DashcodeServerTable>
+    <AssignRoleModal
+      v-if="assignRoleId"
+      :role-id="assignRoleId"
+      @close="assignRoleId = null"
+      @assigned="reload"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
-import api from '@/services/api';
 import Swal from 'sweetalert2';
 import Icon from '@/components/ui/Icon';
 import { useNotify } from '@/plugins/notify';
+import { useRolesStore } from '@/stores/roles';
+import { useAuthStore } from '@/stores/auth';
+import { useTenantStore } from '@/stores/tenant';
+import AssignRoleModal from './AssignRoleModal.vue';
 
 const router = useRouter();
 const notify = useNotify();
+const rolesStore = useRolesStore();
+const auth = useAuthStore();
+const tenantStore = useTenantStore();
+
 const tableKey = ref(0);
-const all = ref<any[]>([]);
+const scope = ref(auth.isSuperAdmin ? 'all' : 'tenant');
+const assignRoleId = ref<number | null>(null);
 
 const columns = [
   { label: 'ID', field: 'id', sortable: true },
@@ -50,11 +77,8 @@ const columns = [
 ];
 
 async function fetchRoles({ page, perPage, sort, search }: any) {
-  if (!all.value.length) {
-    const { data } = await api.get('/roles');
-    all.value = data;
-  }
-  let rows = all.value.slice();
+  await rolesStore.fetch({ scope: scope.value, tenantId: tenantStore.currentTenantId });
+  let rows = rolesStore.roles.slice();
   if (search) {
     const q = String(search).toLowerCase();
     rows = rows.filter((r) => r.name.toLowerCase().includes(q));
@@ -90,11 +114,22 @@ async function remove(id: number) {
   });
   if (!res.isConfirmed) return;
   try {
-    await api.delete(`/roles/${id}`);
-    all.value = [];
+    await rolesStore.remove(id);
     reload();
   } catch (e: any) {
     notify.error('Failed to delete');
   }
 }
+
+function openAssign(id: number) {
+  assignRoleId.value = id;
+}
+
+watch(scope, reload);
+watch(
+  () => tenantStore.currentTenantId,
+  () => {
+    if (scope.value !== 'global') reload();
+  },
+);
 </script>
