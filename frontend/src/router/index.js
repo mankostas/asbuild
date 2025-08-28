@@ -32,7 +32,7 @@ export const routes = [
   {
     path: '/appointments/calendar',
     name: 'appointments.calendar',
-    component: () => import('@/views/appointments/Calendar.vue'),
+    component: () => import('@/views/appointments/CalendarView.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.appointments',
