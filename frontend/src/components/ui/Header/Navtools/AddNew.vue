@@ -36,14 +36,11 @@ import { useAuthStore } from '@/stores/auth';
 const router = useRouter();
 const auth = useAuthStore();
 
-const roles = computed(() => auth.user?.roles?.map((r: any) => r.name) || []);
-
 const items = computed(() =>
   addNewOptions.filter((i) => {
-    if (!i.admin) return true;
-    return roles.value.some((r) =>
-      ['ClientAdmin', 'SuperAdmin'].includes(r)
-    );
+    if (i.admin && !auth.isSuperAdmin) return false;
+    const req = i.requiredAbilities || [];
+    return auth.hasAny(req);
   })
 );
 
