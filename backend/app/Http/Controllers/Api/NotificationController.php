@@ -6,16 +6,23 @@ use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use App\Models\UserNotificationPreference;
 use Illuminate\Http\Request;
+use App\Http\Resources\NotificationResource;
 
 class NotificationController extends Controller
 {
     public function index(Request $request)
     {
-        return response()->json(
-            Notification::where('user_id', $request->user()->id)
-                ->orderByDesc('created_at')
-                ->get()
-        );
+        $notifications = Notification::where('user_id', $request->user()->id)
+            ->orderByDesc('created_at')
+            ->paginate($request->query('per_page', 15));
+
+        return NotificationResource::collection($notifications->items())->additional([
+            'meta' => [
+                'page' => $notifications->currentPage(),
+                'per_page' => $notifications->perPage(),
+                'total' => $notifications->total(),
+            ],
+        ]);
     }
 
     public function markAsRead(Request $request, Notification $notification)

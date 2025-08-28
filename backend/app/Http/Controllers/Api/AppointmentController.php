@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\AppointmentType;
 use App\Services\FormSchemaService;
+use App\Http\Resources\AppointmentResource;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -19,8 +20,15 @@ class AppointmentController extends Controller
     {
         $appointments = Appointment::where('tenant_id', $request->user()->tenant_id)
             ->with('type')
-            ->get();
-        return response()->json($appointments);
+            ->paginate($request->query('per_page', 15));
+
+        return AppointmentResource::collection($appointments->items())->additional([
+            'meta' => [
+                'page' => $appointments->currentPage(),
+                'per_page' => $appointments->perPage(),
+                'total' => $appointments->total(),
+            ],
+        ]);
     }
 
     public function store(Request $request)
@@ -51,13 +59,15 @@ class AppointmentController extends Controller
 
         $appointment = Appointment::create($data);
 
-        return response()->json($appointment, 201);
+        return (new AppointmentResource($appointment))
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show(Appointment $appointment)
     {
         $this->authorize('view', $appointment);
-        return response()->json($appointment->load('photos', 'comments', 'type'));
+        return new AppointmentResource($appointment->load('photos', 'comments', 'type'));
     }
 
     public function update(Request $request, Appointment $appointment)
@@ -119,7 +129,7 @@ class AppointmentController extends Controller
         $appointment->fill($data);
         $appointment->save();
 
-        return response()->json($appointment);
+        return new AppointmentResource($appointment->load('photos', 'comments', 'type'));
     }
 
     public function destroy(Appointment $appointment)

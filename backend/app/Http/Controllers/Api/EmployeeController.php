@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use App\Http\Resources\EmployeeResource;
 
 class EmployeeController extends Controller
 {
@@ -39,7 +40,17 @@ class EmployeeController extends Controller
 
         $tenantId = $this->getTenantId($request);
 
-        return User::where('tenant_id', $tenantId)->with('roles')->get();
+        $employees = User::where('tenant_id', $tenantId)
+            ->with('roles')
+            ->paginate($request->query('per_page', 15));
+
+        return EmployeeResource::collection($employees->items())->additional([
+            'meta' => [
+                'page' => $employees->currentPage(),
+                'per_page' => $employees->perPage(),
+                'total' => $employees->total(),
+            ],
+        ]);
     }
 
     public function store(Request $request)
@@ -84,7 +95,9 @@ class EmployeeController extends Controller
             $m->to($user->email)->subject('Invitation');
         });
 
-        return response()->json($user->load('roles'), 201);
+        return (new EmployeeResource($user->load('roles')))
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show(Request $request, User $employee)
@@ -96,7 +109,7 @@ class EmployeeController extends Controller
             abort(404);
         }
 
-        return $employee->load('roles');
+        return new EmployeeResource($employee->load('roles'));
     }
 
     public function update(Request $request, User $employee)
@@ -141,7 +154,7 @@ class EmployeeController extends Controller
             $employee->roles()->sync($roleData);
         }
 
-        return $employee->load('roles');
+        return new EmployeeResource($employee->load('roles'));
     }
 
     public function destroy(Request $request, User $employee)

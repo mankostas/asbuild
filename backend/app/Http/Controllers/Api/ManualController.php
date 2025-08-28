@@ -7,6 +7,7 @@ use App\Models\Manual;
 use App\Services\FileStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use App\Http\Resources\ManualResource;
 
 class ManualController extends Controller
 {
@@ -21,9 +22,11 @@ class ManualController extends Controller
     {
         $tenantId = $request->user()->tenant_id;
         $search = $request->query('q', '');
-        $cacheKey = "manuals:{$tenantId}:{$search}";
+        $perPage = $request->query('per_page', 15);
+        $page = $request->query('page', 1);
+        $cacheKey = "manuals:{$tenantId}:{$search}:{$page}:{$perPage}";
 
-        $manuals = Cache::remember($cacheKey, 60, function () use ($request) {
+        $manuals = Cache::remember($cacheKey, 60, function () use ($request, $perPage) {
             return Manual::where('tenant_id', $request->user()->tenant_id)
                 ->with('file')
                 ->when($request->query('q'), function ($query, $q) {
@@ -32,11 +35,16 @@ class ManualController extends Controller
                             ->orWhereJsonContains('tags', $q);
                     });
                 })
-                ->get()
-                ->toArray();
+                ->paginate($perPage);
         });
 
-        return response()->json($manuals);
+        return ManualResource::collection($manuals->items())->additional([
+            'meta' => [
+                'page' => $manuals->currentPage(),
+                'per_page' => $manuals->perPage(),
+                'total' => $manuals->total(),
+            ],
+        ]);
     }
 
     public function store(Request $request, FileStorageService $storage)
@@ -60,7 +68,9 @@ class ManualController extends Controller
             'tags' => $data['tags'] ?? [],
         ]);
 
-        return response()->json($manual->load('file'), 201);
+        return (new ManualResource($manual->load('file')))
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show(Manual $manual)
@@ -69,10 +79,10 @@ class ManualController extends Controller
 
         $cacheKey = "manual:{$manual->id}";
         $data = Cache::remember($cacheKey, 60, function () use ($manual) {
-            return $manual->load('file')->toArray();
+            return $manual->load('file');
         });
 
-        return response()->json($data);
+        return new ManualResource($data);
     }
 
     public function update(Request $request, Manual $manual)
@@ -89,7 +99,7 @@ class ManualController extends Controller
         $manual->fill($data);
         $manual->save();
 
-        return response()->json($manual);
+        return new ManualResource($manual);
     }
 
     public function destroy(Request $request, Manual $manual)
@@ -114,7 +124,7 @@ class ManualController extends Controller
         $manual->updated_at = now();
         $manual->save();
 
-        return response()->json($manual->load('file'));
+        return new ManualResource($manual->load('file'));
     }
 
     public function download(Manual $manual, FileStorageService $storage)
