@@ -59,6 +59,13 @@ return [
             'employees.manage',
         ],
     ],
+    'themes' => [
+        'label' => 'Theme Customizer',
+        'abilities' => [
+            'themes.view',
+            'themes.manage',
+        ],
+    ],
     'tenants' => [
         'label' => 'Tenants',
         'abilities' => [

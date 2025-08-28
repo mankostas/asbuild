@@ -50,5 +50,9 @@ return [
     'employees.update',
     'employees.delete',
     'employees.manage',
+
+    // Theme Customizer
+    'themes.view',
+    'themes.manage',
 ];
 
