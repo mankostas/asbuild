@@ -48,7 +48,6 @@ export const menuItems = [
     icon: "heroicons-outline:users",
     link: "employees.list",
     requiredAbilities: ["employees.view", "employees.manage"],
-    admin: true,
   },
   {
     title: "Reports",
@@ -118,7 +117,6 @@ export const topMenu = [
     icon: "heroicons-outline:users",
     link: "employees.list",
     requiredAbilities: ["employees.view", "employees.manage"],
-    admin: true,
   },
   {
     title: "Reports",
@@ -180,7 +178,6 @@ export const addNewOptions = [
     icon: 'heroicons-outline:users',
     link: 'employees.create',
     requiredAbilities: ['employees.manage'],
-    admin: true,
   },
   {
     label: 'Status',

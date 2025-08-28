@@ -17,13 +17,6 @@ class EmployeeController extends Controller
 {
     use ListQuery;
 
-    protected function ensureAdmin(Request $request): void
-    {
-        if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
-            abort(403);
-        }
-    }
-
     protected function getTenantId(Request $request): int
     {
         if ($request->user()->hasRole('SuperAdmin')) {
@@ -39,8 +32,6 @@ class EmployeeController extends Controller
 
     public function index(Request $request)
     {
-        $this->ensureAdmin($request);
-
         $tenantId = $this->getTenantId($request);
 
         $base = User::where('tenant_id', $tenantId)
@@ -54,8 +45,6 @@ class EmployeeController extends Controller
 
     public function store(Request $request)
     {
-        $this->ensureAdmin($request);
-
         $data = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email',
@@ -97,8 +86,6 @@ class EmployeeController extends Controller
 
     public function show(Request $request, User $employee)
     {
-        $this->ensureAdmin($request);
-
         $tenantId = $this->getTenantId($request);
         if ($employee->tenant_id !== $tenantId) {
             abort(404);
@@ -109,8 +96,6 @@ class EmployeeController extends Controller
 
     public function update(Request $request, User $employee)
     {
-        $this->ensureAdmin($request);
-
         $tenantId = $this->getTenantId($request);
         if ($employee->tenant_id !== $tenantId) {
             abort(404);
@@ -154,8 +139,6 @@ class EmployeeController extends Controller
 
     public function destroy(Request $request, User $employee)
     {
-        $this->ensureAdmin($request);
-
         $tenantId = $this->getTenantId($request);
         if ($employee->tenant_id !== $tenantId) {
             abort(404);
