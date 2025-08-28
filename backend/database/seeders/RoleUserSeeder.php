@@ -9,12 +9,18 @@ class RoleUserSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('role_user')->insert([
-            'role_id' => 1,
-            'user_id' => 1,
-            'tenant_id' => 1,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $roleId = DB::table('roles')
+            ->whereNull('tenant_id')
+            ->where('slug', 'super_admin')
+            ->value('id');
+
+        $userId = DB::table('users')
+            ->where('email', 'anastasiou.ks@gmail.com')
+            ->value('id');
+
+        DB::table('role_user')->updateOrInsert(
+            ['role_id' => $roleId, 'user_id' => $userId, 'tenant_id' => 1],
+            ['created_at' => now(), 'updated_at' => now()]
+        );
     }
 }
