@@ -9,6 +9,7 @@ use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Support\ListQuery;
 
@@ -42,27 +43,31 @@ class TenantController extends Controller
             'user_name' => 'required|string',
             'user_email' => 'required|email',
         ]);
-        $tenant = Tenant::create([
-            'name' => $data['name'],
-            'quota_storage_mb' => $data['quota_storage_mb'] ?? null,
-            'features' => $data['features'] ?? ['appointments'],
-            'phone' => $data['phone'] ?? null,
-            'address' => $data['address'] ?? null,
-        ]);
+        $tenant = DB::transaction(function () use ($data) {
+            $tenant = Tenant::create([
+                'name' => $data['name'],
+                'quota_storage_mb' => $data['quota_storage_mb'] ?? null,
+                'features' => $data['features'] ?? ['appointments'],
+                'phone' => $data['phone'] ?? null,
+                'address' => $data['address'] ?? null,
+            ]);
 
-        $user = User::create([
-            'name' => $data['user_name'],
-            'email' => $data['user_email'],
-            'tenant_id' => $tenant->id,
-            'password' => Hash::make(Str::random(config('security.password.min_length'))),
-        ]);
+            $user = User::create([
+                'name' => $data['user_name'],
+                'email' => $data['user_email'],
+                'tenant_id' => $tenant->id,
+                'password' => Hash::make(Str::random(config('security.password.min_length'))),
+            ]);
 
-        $roleId = $tenant->roles()->where('slug', 'tenant')->value('id');
-        if ($roleId) {
-            $user->roles()->attach($roleId, ['tenant_id' => $tenant->id]);
-        }
+            $roleId = $tenant->roles()->where('slug', 'tenant')->value('id');
+            if ($roleId) {
+                $user->roles()->attach($roleId, ['tenant_id' => $tenant->id]);
+            }
 
-        Password::sendResetLink(['email' => $user->email]);
+            Password::sendResetLink(['email' => $user->email]);
+
+            return $tenant;
+        });
 
         return response()->json($tenant->load('roles'), 201);
     }
