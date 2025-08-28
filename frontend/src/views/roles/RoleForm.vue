@@ -79,16 +79,17 @@ const isEdit = computed(() => route.name === 'roles.edit');
 
 async function loadRole() {
   const { data } = await api.get(`/roles/${route.params.id}`);
-  if (data.name === 'SuperAdmin') {
+  const role = data.data || data; // handle resource-wrapped and plain responses
+  if (role.name === 'SuperAdmin') {
     notify.error('Cannot modify SuperAdmin role');
     router.push({ name: 'roles.list' });
     return;
   }
-  name.value = data.name;
-  slug.value = data.slug || '';
-  abilities.value = data.abilities || [];
-  tenantId.value = data.tenant_id || '';
-  level.value = data.level ?? 0;
+  name.value = role.name;
+  slug.value = role.slug || '';
+  abilities.value = role.abilities || [];
+  tenantId.value = role.tenant_id || '';
+  level.value = role.level ?? 0;
 }
 
 onMounted(async () => {
