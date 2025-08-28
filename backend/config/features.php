@@ -8,6 +8,7 @@ return [
     'types',
     'teams',
     'employees',
+    'themes',
     'tenants',
 ];
 
