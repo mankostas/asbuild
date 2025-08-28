@@ -18,13 +18,12 @@
         <li>Assignee: {{ appointment.assignee?.label || '—' }}</li>
         <li>SLA: {{ slaStatus }}</li>
       </ul>
-      <div class="flex flex-wrap gap-2 mt-2">
-        <Button
-          v-for="s in changeActions"
-          :key="s"
-          :text="`Mark ${s.replace(/_/g, ' ')}`"
-          btnClass="btn-outline-primary btn-sm"
-          @click="updateStatus(s)"
+      <div class="mt-2">
+        <StatusChanger
+          v-if="currentStatusId"
+          :appointment-id="appointment.id"
+          :status-id="currentStatusId"
+          @updated="onStatusChanged"
         />
       </div>
     </Card>
@@ -76,14 +75,16 @@ import api from '@/services/api';
 import Card from '@/components/ui/Card/index.vue';
 import Tabs from '@/components/ui/Tabs.vue';
 import Button from '@/components/ui/Button/index.vue';
-import { useNotify } from '@/plugins/notify';
 import CommentsThread from '@/components/comments/CommentsThread.vue';
 import CommentEditor from '@/components/comments/CommentEditor.vue';
+import StatusChanger from './StatusChanger.vue';
+import { useStatusesStore } from '@/stores/statuses';
 
 const route = useRoute();
-const notify = useNotify();
 
 const appointment = ref<any>(null);
+const statusesStore = useStatusesStore();
+const statuses = ref<any[]>([]);
 
 const statusClasses: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-800',
@@ -125,6 +126,8 @@ function hasThumb(file: any) {
 async function load() {
   const { data } = await api.get(`/appointments/${route.params.id}`);
   appointment.value = data;
+  const res = await statusesStore.fetch('all');
+  statuses.value = res.data;
 }
 
 onMounted(load);
@@ -133,22 +136,16 @@ function onCommentAdded(c: any) {
   appointment.value.comments.push(c);
 }
 
-async function updateStatus(status: string) {
-  if (!appointment.value) return;
-  try {
-    await api.patch(`/appointments/${appointment.value.id}`, { status });
-    appointment.value.status = status;
-    notify.success('Status updated');
-  } catch (e: any) {
-    if (e.status === 422) {
-      notify.error('Invalid status transition');
-    }
+const currentStatusId = computed(() => {
+  const current = appointment.value?.status;
+  const found = statuses.value.find((s: any) => s.name === current);
+  return found?.id;
+});
+
+function onStatusChanged(id: number) {
+  const found = statuses.value.find((s: any) => s.id === id);
+  if (found && appointment.value) {
+    appointment.value.status = found.name;
   }
 }
-
-const changeActions = computed(() => {
-  const map = appointment.value?.type?.statuses || {};
-  const current = appointment.value?.status;
-  return map[current] || [];
-});
 </script>
