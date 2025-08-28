@@ -43,5 +43,15 @@ class LookupRoutesTest extends TestCase
 
         $this->assertContains('roles.manage', $abilities);
     }
+
+    public function test_features_lookup_returns_list(): void
+    {
+        $features = $this->withHeader('X-Tenant-ID', $this->tenant->id)
+            ->getJson('/api/lookups/features')
+            ->assertStatus(200)
+            ->json();
+
+        $this->assertContains('appointments', $features);
+    }
 }
 
