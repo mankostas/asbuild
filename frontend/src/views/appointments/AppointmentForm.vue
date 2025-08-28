@@ -20,7 +20,7 @@
         />
       </VueSelect>
 
-      <AssigneePicker v-if="assigneeField" v-model="assignee" />
+      <AssigneePicker v-if="assigneeField && can('appointments.assign')" v-model="assignee" />
 
       <JsonSchemaForm
         v-if="currentSchemaNoAssignee"
@@ -62,6 +62,7 @@ import vSelect from 'vue-select';
 import { useNotify } from '@/plugins/notify';
 import AssigneePicker from '@/components/appointments/AssigneePicker.vue';
 import { toISO } from '@/utils/datetime';
+import { can } from '@/stores/auth';
 
 const notify = useNotify();
 const router = useRouter();

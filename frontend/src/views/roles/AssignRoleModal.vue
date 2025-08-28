@@ -1,5 +1,5 @@
 <template>
-  <TransitionRoot appear :show="true" as="template">
+  <TransitionRoot appear :show="true" as="template" v-if="can('roles.manage')">
     <Dialog as="div" class="relative z-50" @close="emit('close')">
       <TransitionChild
         as="template"
@@ -67,7 +67,7 @@ import {
 } from '@headlessui/vue';
 import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import vSelect from 'vue-select';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
 import { useRolesStore } from '@/stores/roles';
 import api from '@/services/api';

@@ -116,4 +116,28 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'password_reset']);
     }
+
+    public function me(Request $request)
+    {
+        $user = $request->user()->load('roles');
+
+        return response()->json([
+            'user' => $user,
+            'abilities' => $this->abilitiesFor($user),
+        ]);
+    }
+
+    protected function abilitiesFor(User $user): array
+    {
+        if ($user->isSuperAdmin()) {
+            return ['*'];
+        }
+
+        $tenantId = app()->bound('tenant_id') ? (int) app('tenant_id') : $user->tenant_id;
+
+        $roles = $user->rolesForTenant($tenantId)
+            ->merge($user->roles()->wherePivotNull('tenant_id')->get());
+
+        return $roles->pluck('abilities')->flatten()->filter()->unique()->values()->all();
+    }
 }
