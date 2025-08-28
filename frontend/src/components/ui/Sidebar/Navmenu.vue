@@ -1,7 +1,7 @@
 <template>
   <ul>
     <li
-      v-for="(item, i) in items"
+      v-for="(item, i) in visibleItems"
       :key="i"
       :class="`
       ${item.child ? 'item-has-children' : ''}
@@ -109,17 +109,13 @@
   </ul>
 </template>
 <script>
+import { computed } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 import Icon from "../Icon";
 export default {
   components: {
     Icon,
-  },
-
-  data() {
-    return {
-      activeSubmenu: null,
-    };
   },
 
   props: {
@@ -137,6 +133,24 @@ export default {
     },
     items: { type: Array, required: true },
     childrenLinks: { type: Array, default: null },
+  },
+
+  setup(props) {
+    const auth = useAuthStore();
+    const visibleItems = computed(() =>
+      props.items.filter((it) => {
+        if (it.admin && !auth.isSuperAdmin) return false;
+        const req = it.requiredAbilities || [];
+        return auth.hasAny(req);
+      }),
+    );
+    return { visibleItems };
+  },
+
+  data() {
+    return {
+      activeSubmenu: null,
+    };
   },
 
   methods: {
@@ -191,7 +205,7 @@ export default {
         this.$store.themeSettingsStore.mobielSidebar = false;
       }
 
-      this.items.map((item) => {
+      this.visibleItems.map((item) => {
         if (item.link === this.$route.name) {
           this.activeSubmenu = null;
         }
@@ -201,7 +215,7 @@ export default {
 
   created() {
     const router = useRouter();
-    this.items.map((item, i) => {
+    this.visibleItems.map((item, i) => {
       item.child?.map((ci) => {
         if (ci.childlink === router.currentRoute.value.name) {
           this.activeSubmenu = i;
