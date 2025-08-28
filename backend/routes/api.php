@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\LookupController;
 use App\Http\Controllers\Api\CalendarController;
 use App\Http\Middleware\EnsureTenantScope;
 use App\Http\Middleware\Ability;
+use Illuminate\Http\Request;
 
 Route::middleware(['api','tenant'])->get('/health', function () {
     return response()->json(['status' => 'ok', 'tenant' => config('tenant.branding')]);
@@ -34,6 +35,15 @@ Route::prefix('auth')->group(function () {
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('password/email', [AuthController::class, 'sendResetLinkEmail']);
     Route::post('password/reset', [AuthController::class, 'reset']);
+    Route::get('password/reset/{token}', function (Request $request, string $token) {
+        $frontendUrl = explode(',', env('FRONTEND_URL', 'http://localhost:5173'))[0];
+        $frontendUrl = rtrim($frontendUrl, '/');
+        $query = http_build_query([
+            'token' => $token,
+            'email' => $request->email,
+        ]);
+        return redirect("{$frontendUrl}/reset-password?{$query}");
+    })->name('password.reset');
 });
 
 Route::middleware('auth:sanctum')->get('/me', [AuthController::class, 'me']);
