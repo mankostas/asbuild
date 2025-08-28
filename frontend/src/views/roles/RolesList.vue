@@ -45,6 +45,7 @@ const all = ref<any[]>([]);
 const columns = [
   { label: 'ID', field: 'id', sortable: true },
   { label: 'Name', field: 'name', sortable: true },
+  // Show the role hierarchy level in the table
   { label: 'Level', field: 'level', sortable: true },
 ];
 

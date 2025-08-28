@@ -13,7 +13,8 @@ class RoleSeeder extends Seeder
             'id' => 1,
             'tenant_id' => 1,
             'name' => 'SuperAdmin',
-            'level' => 100,
+            // SuperAdmin is the root role; use level 0 so other roles can build from it
+            'level' => 0,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

@@ -8,6 +8,8 @@
       <div>
         <label class="block font-medium mb-1" for="level">Level<span class="text-red-600">*</span></label>
         <input id="level" type="number" v-model.number="level" class="border rounded p-2 w-full" />
+        <!-- Show the suggested next level when creating a new role -->
+        <p v-if="!isEdit" class="text-xs text-gray-500 mt-1">Next level: {{ nextLevel }}</p>
       </div>
       <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
       <button
@@ -31,6 +33,7 @@ const notify = useNotify();
 
 const name = ref('');
 const level = ref(0);
+const nextLevel = ref<number | null>(null);
 const serverError = ref('');
 
 const isEdit = computed(() => route.name === 'roles.edit');
@@ -45,6 +48,11 @@ onMounted(async () => {
     }
     name.value = data.name;
     level.value = data.level;
+  } else {
+    const { data } = await api.get('/roles');
+    const maxLevel = data.length ? Math.max(...data.map((r: any) => r.level ?? 0)) : -1;
+    nextLevel.value = maxLevel + 1;
+    level.value = nextLevel.value;
   }
 });
 
