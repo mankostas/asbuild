@@ -49,6 +49,7 @@
         <div
           class="nav-tools flex items-center lg:space-x-5 space-x-3 rtl:space-x-reverse"
         >
+          <TenantSwitcher v-if="authStore.isSuperAdmin" />
           <AddNew />
           <SwitchDark />
           <Message v-if="window.width > 768" />
@@ -73,6 +74,8 @@ import MobileLogo from "./Navtools/MobileLogo.vue";
 import window from "@/mixins/window";
 import HandleMobileMenu from "./Navtools/HandleMobileMenu.vue";
 import AddNew from "./Navtools/AddNew.vue";
+import TenantSwitcher from "@/components/admin/TenantSwitcher.vue";
+import { useAuthStore } from "@/stores/auth";
 
 export default {
   mixins: [window],
@@ -88,6 +91,12 @@ export default {
     MobileLogo,
     HandleMobileMenu,
     AddNew,
+    TenantSwitcher,
+  },
+
+  setup() {
+    const authStore = useAuthStore();
+    return { authStore };
   },
 
   methods: {

@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import notify from '@/plugins/notify';
 import { TENANT_HEADER } from '@/config/app';
-import { useTenantStore } from '@/store/tenant';
+import { useTenantStore } from '@/stores/tenant';
 
 let authGetter: (() => any) | null = null;
 export function registerAuthStore(getter: () => any) {
@@ -48,9 +48,9 @@ api.interceptors.request.use(async (config) => {
     await api.get('/sanctum/csrf-cookie', { baseURL: '/' });
   }
   const tenant = useTenantStore();
-  if (tenant.tenantId) {
+  if (tenant.currentTenantId) {
     config.headers = config.headers || {};
-    config.headers[TENANT_HEADER] = tenant.tenantId;
+    config.headers[TENANT_HEADER] = tenant.currentTenantId;
   }
   return config;
 });
