@@ -17,6 +17,8 @@ use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Api\GdprController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\StatusController;
+use App\Http\Controllers\Api\TeamController;
+use App\Http\Controllers\Api\LookupController;
 use App\Http\Middleware\EnsureTenantScope;
 use App\Http\Middleware\Ability;
 
@@ -58,6 +60,7 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::apiResource('appointment-types', AppointmentTypeController::class)->only(['index', 'show']);
     Route::apiResource('roles', RoleController::class)->only(['index', 'show']);
     Route::apiResource('statuses', StatusController::class)->only(['index', 'show']);
+    Route::apiResource('teams', TeamController::class)->only(['index', 'show']);
 
     Route::post('appointment-types', [AppointmentTypeController::class, 'store'])->middleware(Ability::class . ':types.manage')->name('appointment-types.store');
     Route::match(['put', 'patch'], 'appointment-types/{appointment_type}', [AppointmentTypeController::class, 'update'])->middleware(Ability::class . ':types.manage')->name('appointment-types.update');
@@ -67,6 +70,11 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::match(['put', 'patch'], 'roles/{role}', [RoleController::class, 'update'])->middleware(Ability::class . ':roles.manage')->name('roles.update');
     Route::delete('roles/{role}', [RoleController::class, 'destroy'])->middleware(Ability::class . ':roles.manage')->name('roles.destroy');
     Route::post('roles/{role}/assign', [RoleController::class, 'assign'])->middleware(Ability::class . ':roles.manage')->name('roles.assign');
+
+    Route::post('teams', [TeamController::class, 'store'])->middleware(Ability::class . ':teams.manage')->name('teams.store');
+    Route::match(['put', 'patch'], 'teams/{team}', [TeamController::class, 'update'])->middleware(Ability::class . ':teams.manage')->name('teams.update');
+    Route::delete('teams/{team}', [TeamController::class, 'destroy'])->middleware(Ability::class . ':teams.manage')->name('teams.destroy');
+    Route::post('teams/{team}/employees', [TeamController::class, 'syncEmployees'])->middleware(Ability::class . ':teams.manage');
 
     Route::post('statuses', [StatusController::class, 'store'])->middleware(Ability::class . ':statuses.manage')->name('statuses.store');
     Route::match(['put', 'patch'], 'statuses/{status}', [StatusController::class, 'update'])->middleware(Ability::class . ':statuses.manage')->name('statuses.update');
@@ -106,4 +114,6 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         Route::get('materials', [ReportController::class, 'materials']);
         Route::get('export', [ReportController::class, 'export']);
     });
+
+    Route::get('lookups/assignees', [LookupController::class, 'assignees']);
 });
