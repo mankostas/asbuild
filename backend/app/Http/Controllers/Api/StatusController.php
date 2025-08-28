@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\StatusResource;
 use App\Services\StatusFlowService;
 use App\Support\ListQuery;
+use App\Http\Requests\StatusUpsertRequest;
 
 class StatusController extends Controller
 {
@@ -43,13 +44,10 @@ class StatusController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StatusUpsertRequest $request)
     {
         $this->ensureAdmin($request);
-        $data = $request->validate([
-            'name' => 'required|string',
-            'tenant_id' => 'sometimes|integer',
-        ]);
+        $data = $request->validated();
 
         if ($request->user()->hasRole('SuperAdmin')) {
             $data['tenant_id'] = $data['tenant_id'] ?? null;
@@ -66,16 +64,13 @@ class StatusController extends Controller
         return new StatusResource($status);
     }
 
-    public function update(Request $request, Status $status)
+    public function update(StatusUpsertRequest $request, Status $status)
     {
         $this->ensureAdmin($request);
         if (! $request->user()->hasRole('SuperAdmin') && $status->tenant_id !== $request->user()->tenant_id) {
             abort(403);
         }
-        $data = $request->validate([
-            'name' => 'required|string',
-            'tenant_id' => 'sometimes|integer',
-        ]);
+        $data = $request->validated();
 
         if ($request->user()->hasRole('SuperAdmin')) {
             if (array_key_exists('tenant_id', $data)) {

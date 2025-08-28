@@ -1,8 +1,8 @@
 <template>
   <div>
     <form @submit.prevent="submit" class="grid gap-4 max-w-lg">
-      <Textinput label="Name" v-model="form.name" />
-      <Textinput label="Description" v-model="form.description" />
+      <Textinput label="Name" v-model="form.name" :error="errors.name" />
+      <Textinput label="Description" v-model="form.description" :error="errors.description" />
       <VueSelect label="Employees">
         <vSelect
           v-model="selectedEmployees"
@@ -24,12 +24,13 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import api from '@/services/api';
+import api, { extractFormErrors } from '@/services/api';
 import Textinput from '@/components/ui/Textinput/index.vue';
 import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import Button from '@/components/ui/Button/index.vue';
 import vSelect from 'vue-select';
 import { useTeamsStore } from '@/stores/teams';
+import { useForm } from 'vee-validate';
 
 const route = useRoute();
 const router = useRouter();
@@ -60,22 +61,28 @@ async function loadTeam() {
   }
 }
 
-async function submit() {
+const { handleSubmit, setErrors, errors } = useForm();
+
+const submit = handleSubmit(async () => {
   const payload = {
     name: form.value.name,
     description: form.value.description,
   };
   let teamId: number;
-  if (isEdit.value) {
-    const updated = await teamsStore.update(Number(route.params.id), payload);
-    teamId = updated.id;
-  } else {
-    const created = await teamsStore.create(payload);
-    teamId = created.id;
+  try {
+    if (isEdit.value) {
+      const updated = await teamsStore.update(Number(route.params.id), payload);
+      teamId = updated.id;
+    } else {
+      const created = await teamsStore.create(payload);
+      teamId = created.id;
+    }
+    await teamsStore.syncEmployees(teamId, selectedEmployees.value);
+    router.push({ name: 'teams.list' });
+  } catch (e: any) {
+    setErrors(extractFormErrors(e));
   }
-  await teamsStore.syncEmployees(teamId, selectedEmployees.value);
-  router.push({ name: 'teams.list' });
-}
+});
 
 onMounted(async () => {
   await loadEmployees();

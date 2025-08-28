@@ -8,8 +8,8 @@ use App\Models\AppointmentType;
 use App\Services\FormSchemaService;
 use App\Http\Resources\AppointmentResource;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use App\Http\Requests\AppointmentUpsertRequest;
 use App\Support\ListQuery;
 
 class AppointmentController extends Controller
@@ -30,21 +30,11 @@ class AppointmentController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(AppointmentUpsertRequest $request)
     {
         $this->authorize('create', Appointment::class);
 
-        $data = $request->validate([
-            'scheduled_at' => 'nullable|date',
-            'sla_start_at' => 'nullable|date',
-            'sla_end_at' => 'nullable|date',
-            'kau_notes' => 'nullable|string',
-            'appointment_type_id' => 'nullable|exists:appointment_types,id',
-            'form_data' => 'nullable|array',
-            'assignee' => 'nullable|array',
-            'assignee.kind' => 'required_with:assignee|in:team,employee',
-            'assignee.id' => 'required_with:assignee|integer',
-        ]);
+        $data = $request->validated();
 
         $data['tenant_id'] = $request->user()->tenant_id;
 
@@ -70,34 +60,11 @@ class AppointmentController extends Controller
         return new AppointmentResource($appointment->load('photos', 'comments', 'type', 'assignee'));
     }
 
-    public function update(Request $request, Appointment $appointment)
+    public function update(AppointmentUpsertRequest $request, Appointment $appointment)
     {
         $this->authorize('update', $appointment);
 
-        $typeId = $request->input('appointment_type_id', $appointment->appointment_type_id);
-        $type = $typeId ? AppointmentType::find($typeId) : null;
-        $allowedStatuses = collect($type->statuses ?? Appointment::$transitions)
-            ->flatMap(function ($next, $current) {
-                return array_merge([$current], $next);
-            })
-            ->unique()
-            ->all();
-
-        $data = $request->validate([
-            'scheduled_at' => 'nullable|date',
-            'sla_start_at' => 'nullable|date',
-            'sla_end_at' => 'nullable|date',
-            'kau_notes' => 'nullable|string',
-            'appointment_type_id' => 'nullable|exists:appointment_types,id',
-            'form_data' => 'nullable|array',
-            'assignee' => 'nullable|array',
-            'assignee.kind' => 'required_with:assignee|in:team,employee',
-            'assignee.id' => 'required_with:assignee|integer',
-            'status' => [
-                'nullable',
-                Rule::in($allowedStatuses),
-            ],
-        ]);
+        $data = $request->validated();
 
         if (isset($data['status']) && $data['status'] !== $appointment->status) {
             $newStatus = $data['status'];
@@ -116,12 +83,8 @@ class AppointmentController extends Controller
             }
         }
 
-        $type = null;
-        if (isset($data['appointment_type_id'])) {
-            $type = AppointmentType::find($data['appointment_type_id']);
-        } else {
-            $type = $appointment->type;
-        }
+        $typeId = $data['appointment_type_id'] ?? $appointment->appointment_type_id;
+        $type = $typeId ? AppointmentType::find($typeId) : $appointment->type;
         $this->validateAgainstSchema($type, $data['form_data'] ?? $appointment->form_data ?? []);
         $this->formSchemaService->mapAssignee($type->form_schema ?? [], $data);
 
