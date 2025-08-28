@@ -22,15 +22,6 @@
         />
         <div v-if="errors.level" class="text-red-600 text-sm">{{ errors.level }}</div>
       </div>
-      <VueSelect label="Abilities" :error="errors.abilities">
-        <vSelect
-          v-model="abilities"
-          :options="abilityOptions"
-          multiple
-          label="label"
-          :reduce="(a: any) => a.value"
-        />
-      </VueSelect>
       <div v-if="auth.isSuperAdmin">
         <VueSelect label="Tenant" :error="errors.tenant_id">
           <vSelect
@@ -41,6 +32,19 @@
           />
         </VueSelect>
       </div>
+      <VueSelect
+        v-if="!auth.isSuperAdmin || tenantId !== null"
+        label="Abilities"
+        :error="errors.abilities"
+      >
+        <vSelect
+          v-model="abilities"
+          :options="abilityOptions"
+          multiple
+          label="label"
+          :reduce="(a: any) => a.value"
+        />
+      </VueSelect>
       <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
       <button
         type="submit"
@@ -76,7 +80,9 @@ const slug = ref('');
 const abilities = ref<string[]>([]);
 const abilityOptions = ref<{ label: string; value: string }[]>([]);
 const level = ref<number>(0);
-const tenantId = ref<string>(auth.isSuperAdmin ? '' : tenantStore.currentTenantId);
+const tenantId = ref<string | null>(
+  auth.isSuperAdmin ? null : tenantStore.currentTenantId,
+);
 const serverError = ref('');
 
 const tenantOptions = computed(() => [
@@ -105,9 +111,11 @@ onMounted(async () => {
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
   }
-  await loadAbilityOptions();
   if (isEdit.value) {
     await loadRole();
+  }
+  if (!auth.isSuperAdmin || tenantId.value !== null) {
+    await loadAbilityOptions();
   }
 });
 
@@ -127,7 +135,11 @@ async function loadAbilityOptions() {
   }
 }
 
-watch(tenantId, loadAbilityOptions);
+watch(tenantId, (val) => {
+  if (val !== null) {
+    loadAbilityOptions();
+  }
+});
 
 watch(
   () => route.params.id,
