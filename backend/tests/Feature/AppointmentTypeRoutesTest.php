@@ -46,6 +46,10 @@ class AppointmentTypeRoutesTest extends TestCase
             'name' => 'Type A',
             'form_schema' => json_encode(['type' => 'object', 'properties' => ['note' => ['type' => 'string']], 'required' => ['note']]),
             'fields_summary' => json_encode(['note' => 'string']),
+            'statuses' => json_encode([
+                'draft' => ['assigned'],
+                'assigned' => ['in_progress'],
+            ]),
         ];
         $typeId = $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->postJson('/api/appointment-types', $payload)

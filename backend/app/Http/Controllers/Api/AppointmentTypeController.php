@@ -55,10 +55,11 @@ class AppointmentTypeController extends Controller
             'name' => ($nameRequired ? 'required' : 'sometimes') . '|string|max:255',
             'form_schema' => 'nullable|json',
             'fields_summary' => 'nullable|json',
+            'statuses' => ($nameRequired ? 'required' : 'sometimes') . '|json',
         ];
         $validated = $request->validate($rules);
 
-        foreach (['form_schema', 'fields_summary'] as $field) {
+        foreach (['form_schema', 'fields_summary', 'statuses'] as $field) {
             if (isset($validated[$field])) {
                 $validated[$field] = json_decode($validated[$field], true);
             }
