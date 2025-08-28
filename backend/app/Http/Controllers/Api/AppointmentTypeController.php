@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AppointmentType;
+use App\Services\FormSchemaService;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 
 class AppointmentTypeController extends Controller
 {
+    public function __construct(private FormSchemaService $formSchemaService)
+    {
+    }
+
     protected function ensureAdmin(Request $request): void
     {
         if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
@@ -16,15 +20,36 @@ class AppointmentTypeController extends Controller
         }
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(AppointmentType::all());
+        $scope = $request->query('scope', $request->user()->hasRole('SuperAdmin') ? 'all' : 'tenant');
+        $query = AppointmentType::query();
+
+        if ($scope === 'tenant') {
+            $tenantId = $request->query('tenant_id', $request->user()->tenant_id);
+            $query->where('tenant_id', $tenantId);
+        } elseif ($scope === 'global') {
+            $query->whereNull('tenant_id');
+        } else {
+            if ($request->has('tenant_id')) {
+                $query->where('tenant_id', $request->query('tenant_id'));
+            }
+        }
+
+        return response()->json($query->get());
     }
 
     public function store(Request $request)
     {
         $this->ensureAdmin($request);
         $data = $this->validateSchema($request);
+
+        if ($request->user()->hasRole('SuperAdmin')) {
+            $data['tenant_id'] = $data['tenant_id'] ?? null;
+        } else {
+            $data['tenant_id'] = $request->user()->tenant_id;
+        }
+
         $type = AppointmentType::create($data);
         return response()->json($type, 201);
     }
@@ -37,7 +62,20 @@ class AppointmentTypeController extends Controller
     public function update(Request $request, AppointmentType $appointmentType)
     {
         $this->ensureAdmin($request);
+        if (! $request->user()->hasRole('SuperAdmin') && $appointmentType->tenant_id !== $request->user()->tenant_id) {
+            abort(403);
+        }
+
         $data = $this->validateSchema($request, false);
+
+        if ($request->user()->hasRole('SuperAdmin')) {
+            if (array_key_exists('tenant_id', $data)) {
+                $data['tenant_id'] = $data['tenant_id'];
+            }
+        } else {
+            $data['tenant_id'] = $request->user()->tenant_id;
+        }
+
         $appointmentType->update($data);
         return response()->json($appointmentType);
     }
@@ -45,8 +83,30 @@ class AppointmentTypeController extends Controller
     public function destroy(Request $request, AppointmentType $appointmentType)
     {
         $this->ensureAdmin($request);
+        if (! $request->user()->hasRole('SuperAdmin') && $appointmentType->tenant_id !== $request->user()->tenant_id) {
+            abort(403);
+        }
         $appointmentType->delete();
         return response()->json(['message' => 'deleted']);
+    }
+
+    public function copyToTenant(Request $request, AppointmentType $appointmentType)
+    {
+        $this->ensureAdmin($request);
+
+        $tenantId = $request->user()->hasRole('SuperAdmin')
+            ? $request->input('tenant_id')
+            : $request->user()->tenant_id;
+
+        if (! $tenantId) {
+            abort(400, 'tenant_id required');
+        }
+
+        $copy = $appointmentType->replicate();
+        $copy->tenant_id = $tenantId;
+        $copy->save();
+
+        return response()->json($copy, 201);
     }
 
     protected function validateSchema(Request $request, bool $nameRequired = true): array
@@ -56,6 +116,7 @@ class AppointmentTypeController extends Controller
             'form_schema' => 'nullable|json',
             'fields_summary' => 'nullable|json',
             'statuses' => ($nameRequired ? 'required' : 'sometimes') . '|json',
+            'tenant_id' => 'sometimes|integer',
         ];
         $validated = $request->validate($rules);
 
@@ -66,21 +127,7 @@ class AppointmentTypeController extends Controller
         }
 
         if (isset($validated['form_schema'])) {
-            $schema = $validated['form_schema'];
-            if (($schema['type'] ?? null) !== 'object' || ! is_array($schema['properties'] ?? null)) {
-                throw ValidationException::withMessages([
-                    'form_schema' => 'Schema must be an object with properties',
-                ]);
-            }
-            if (isset($schema['required'])) {
-                foreach ($schema['required'] as $field) {
-                    if (! array_key_exists($field, $schema['properties'])) {
-                        throw ValidationException::withMessages([
-                            'form_schema' => "Required field {$field} missing from properties",
-                        ]);
-                    }
-                }
-            }
+            $this->formSchemaService->validate($validated['form_schema']);
         }
 
         return $validated;
