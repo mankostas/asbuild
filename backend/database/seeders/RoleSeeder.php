@@ -16,7 +16,8 @@ class RoleSeeder extends Seeder
             'slug' => 'super_admin',
             // SuperAdmin is the root role; use level 0 so other roles can build from it
             'level' => 0,
-            'abilities' => json_encode([]),
+            // Grant full system access via wildcard ability
+            'abilities' => json_encode(['*']),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
