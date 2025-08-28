@@ -37,7 +37,16 @@ describe('tenant store', () => {
     const store = useTenantStore();
     await store.loadTenants();
     expect(localStorage.getItem(TENANT_ID_KEY)).toBeNull();
-    expect((window.location.reload as any)).toHaveBeenCalled();
+    // A page reload is no longer triggered automatically when the tenant
+    // changes; the store simply updates its state. Verify only the state
+    // and storage are cleared.
     expect(store.currentTenantId).toBe('');
+  });
+
+  it('indicates when the tenant id changes', async () => {
+    const { useTenantStore } = await import('@/stores/tenant');
+    const store = useTenantStore();
+    expect(store.setTenant('123')).toBe(true);
+    expect(store.setTenant('123')).toBe(false);
   });
 });

@@ -38,9 +38,10 @@ export const useTenantStore = defineStore('tenant', {
       } else {
         localStorage.removeItem(TENANT_ID_KEY);
       }
-      if (changed && typeof window !== 'undefined') {
-        window.location.reload();
-      }
+      // The store no longer forces a hard page reload. Callers that need a
+      // full refresh (such as impersonation) can check the return value and
+      // decide whether to reload themselves.
+      return changed;
     },
   },
 });
