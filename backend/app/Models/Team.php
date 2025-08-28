@@ -5,17 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\User as Employee;
 
-class Role extends Model
+class Team extends Model
 {
     protected $fillable = [
         'tenant_id',
         'name',
-        'level',
-    ];
-
-    protected $casts = [
-        'abilities' => 'array',
+        'description',
     ];
 
     public function tenant(): BelongsTo
@@ -23,8 +20,8 @@ class Role extends Model
         return $this->belongsTo(Tenant::class);
     }
 
-    public function users(): BelongsToMany
+    public function employees(): BelongsToMany
     {
-        return $this->belongsToMany(User::class)->withTimestamps()->withPivot('tenant_id');
+        return $this->belongsToMany(Employee::class, 'team_employee');
     }
 }

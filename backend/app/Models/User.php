@@ -33,7 +33,20 @@ class User extends Authenticatable
 
     public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(Role::class)->withTimestamps()->withPivot('tenant_id');
+        return $this->belongsToMany(Role::class)->withPivot('tenant_id')->withTimestamps();
+    }
+
+    public function rolesForTenant(int $tenantId)
+    {
+        return $this->roles()->wherePivot('tenant_id', $tenantId)->get();
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->roles()
+            ->whereNull('roles.tenant_id')
+            ->where('slug', 'super_admin')
+            ->exists();
     }
 
     public function hasRole(string $role): bool
@@ -41,4 +54,3 @@ class User extends Authenticatable
         return $this->roles->contains('name', $role);
     }
 }
-
