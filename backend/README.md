@@ -11,3 +11,14 @@ Run the tenant bootstrap seeder to populate a sample tenant with roles, a team, 
 ```bash
 php artisan migrate:fresh --seed --seeder=TenantBootstrapSeeder
 ```
+
+## Development
+
+Use the bundled composer script to run the backend with detailed request logs:
+
+```bash
+composer run dev
+```
+
+This runs `php artisan serve --log`, which prints each request instead of the
+default dot output so you can see complete log lines during development.
