@@ -57,5 +57,11 @@ return [
 
     // Branding
     'branding.manage',
+
+    // GDPR
+    'gdpr.view',
+    'gdpr.manage',
+    'gdpr.export',
+    'gdpr.delete',
 ];
 

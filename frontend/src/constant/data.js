@@ -81,7 +81,11 @@ export const menuItems = [
         childlink: "settings.footer",
         requiredAbilities: ["branding.manage"],
       },
-      { childtitle: "GDPR", childlink: "gdpr.index" },
+      {
+        childtitle: "GDPR",
+        childlink: "gdpr.index",
+        requiredAbilities: ["gdpr.view", "gdpr.manage"],
+      },
     ],
   },
 ];
@@ -157,7 +161,12 @@ export const topMenu = [
     admin: true,
     requiredAbilities: ["branding.manage"],
   },
-  { title: "GDPR", icon: "heroicons-outline:shield-check", link: "gdpr.index" },
+  {
+    title: "GDPR",
+    icon: "heroicons-outline:shield-check",
+    link: "gdpr.index",
+    requiredAbilities: ["gdpr.view", "gdpr.manage"],
+  },
   {
     title: "Tenants",
     icon: "heroicons-outline:building-office",

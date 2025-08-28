@@ -82,5 +82,14 @@ return [
             'branding.manage',
         ],
     ],
+    'gdpr' => [
+        'label' => 'GDPR',
+        'abilities' => [
+            'gdpr.view',
+            'gdpr.manage',
+            'gdpr.export',
+            'gdpr.delete',
+        ],
+    ],
     // Additional features can be listed here as needed, e.g. 'reports', 'billing', 'employees', …
 ];

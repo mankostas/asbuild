@@ -66,6 +66,20 @@ class DefaultFeatureRolesSeeder extends Seeder
                         'level' => 2,
                     ];
                     break;
+                case 'gdpr':
+                    $roles[] = [
+                        'slug' => 'gdpr_viewer',
+                        'name' => 'GDPR Viewer',
+                        'abilities' => ['gdpr.view'],
+                        'level' => 3,
+                    ];
+                    $roles[] = [
+                        'slug' => 'gdpr_manager',
+                        'name' => 'GDPR Manager',
+                        'abilities' => ['gdpr.view', 'gdpr.manage', 'gdpr.export', 'gdpr.delete'],
+                        'level' => 2,
+                    ];
+                    break;
                 case 'roles':
                     $roles[] = [
                         'slug' => 'roles_manager',

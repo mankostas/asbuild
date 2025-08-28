@@ -49,6 +49,7 @@ import Button from '@/components/ui/Button/index.vue';
 import Switch from '@/components/ui/Switch/index.vue';
 import { RouterLink } from 'vue-router';
 import { useNotify } from '@/plugins/notify';
+import { useAuthStore } from '@/stores/auth';
 
 interface Pref {
   category: string;
@@ -56,13 +57,20 @@ interface Pref {
   email: boolean;
 }
 
-const tabs = [
-  { id: 'profile', label: 'Profile' },
-  { id: 'branding', label: 'Branding' },
-  { id: 'footer', label: 'Footer' },
-  { id: 'notifications', label: 'Notifications' },
-  { id: 'gdpr', label: 'GDPR' },
-];
+const auth = useAuthStore();
+
+const tabs = computed(() => {
+  const t = [
+    { id: 'profile', label: 'Profile' },
+    { id: 'branding', label: 'Branding' },
+    { id: 'footer', label: 'Footer' },
+    { id: 'notifications', label: 'Notifications' },
+  ];
+  if (auth.hasAny(['gdpr.view', 'gdpr.manage'])) {
+    t.push({ id: 'gdpr', label: 'GDPR' });
+  }
+  return t;
+});
 
 const active = ref('profile');
 const prefs = ref<Pref[]>([]);

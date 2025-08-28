@@ -178,10 +178,14 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':themes.manage');
 
     Route::prefix('gdpr')->group(function () {
-        Route::get('export', [GdprController::class, 'export']);
-        Route::get('consents', [GdprController::class, 'consents']);
-        Route::put('consents', [GdprController::class, 'updateConsents']);
-        Route::post('delete', [GdprController::class, 'requestDelete']);
+        Route::get('export', [GdprController::class, 'export'])
+            ->middleware(Ability::class . ':gdpr.export');
+        Route::get('consents', [GdprController::class, 'consents'])
+            ->middleware(Ability::class . ':gdpr.view');
+        Route::put('consents', [GdprController::class, 'updateConsents'])
+            ->middleware(Ability::class . ':gdpr.manage');
+        Route::post('delete', [GdprController::class, 'requestDelete'])
+            ->middleware(Ability::class . ':gdpr.delete');
     });
 
     Route::prefix('reports')->group(function () {
