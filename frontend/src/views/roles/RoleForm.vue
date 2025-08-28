@@ -23,7 +23,13 @@
         <div v-if="errors.level" class="text-red-600 text-sm">{{ errors.level }}</div>
       </div>
       <VueSelect label="Abilities" :error="errors.abilities">
-        <vSelect v-model="abilities" :options="abilityOptions" multiple />
+        <vSelect
+          v-model="abilities"
+          :options="abilityOptions"
+          multiple
+          label="label"
+          :reduce="(a: any) => a.value"
+        />
       </VueSelect>
       <div v-if="auth.isSuperAdmin">
         <VueSelect label="Tenant" :error="errors.tenant_id">
@@ -67,7 +73,7 @@ const rolesStore = useRolesStore();
 const name = ref('');
 const slug = ref('');
 const abilities = ref<string[]>([]);
-const abilityOptions = ref<string[]>([]);
+const abilityOptions = ref<{ label: string; value: string }[]>([]);
 const level = ref<number>(0);
 const tenantId = ref<string>(auth.isSuperAdmin ? '' : tenantStore.currentTenantId);
 const serverError = ref('');
@@ -95,19 +101,29 @@ async function loadRole() {
 }
 
 onMounted(async () => {
-  try {
-    const { data: abilityData } = await api.get('/lookups/abilities');
-    abilityOptions.value = abilityData;
-  } catch (e) {
-    abilityOptions.value = [];
-  }
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
   }
+  await loadAbilityOptions();
   if (isEdit.value) {
     await loadRole();
   }
 });
+
+async function loadAbilityOptions() {
+  try {
+    const params = tenantId.value ? { forTenant: 1 } : undefined;
+    const { data } = await api.get('/lookups/abilities', { params });
+    abilityOptions.value = (data || []).map((a: string) => ({
+      label: a,
+      value: a,
+    }));
+  } catch (e) {
+    abilityOptions.value = [];
+  }
+}
+
+watch(tenantId, loadAbilityOptions);
 
 watch(
   () => route.params.id,
