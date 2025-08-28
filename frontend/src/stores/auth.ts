@@ -27,6 +27,7 @@ export const useAuthStore = defineStore('auth', {
     refreshToken: initialRefresh as string | null,
     impersonatedTenant: localStorage.getItem('impersonatingTenant') || '',
     abilities: [] as string[],
+    features: [] as string[],
   }),
   getters: {
     isAuthenticated: (state) => !!state.accessToken,
@@ -60,6 +61,7 @@ export const useAuthStore = defineStore('auth', {
       const { data } = await api.get('/me');
       this.user = data.user;
       this.abilities = data.abilities || [];
+      this.features = data.features || [];
       useTenantStore().setTenant(data.user?.tenant_id || '');
     },
     async logout(skipServer = false) {
