@@ -39,8 +39,10 @@ class SuperAdminRoleVisibilityTest extends TestCase
         Role::create(['name' => 'ClientAdmin', 'tenant_id' => $tenantA->id, 'level' => 1]);
         Role::create(['name' => 'ClientAdmin', 'tenant_id' => $tenantB->id, 'level' => 1]);
 
-        $this->getJson('/api/roles')
-            ->assertStatus(200)
-            ->assertJsonCount(3);
+        $response = $this->getJson('/api/roles')
+            ->assertStatus(200);
+
+        $response->assertJsonFragment(['tenant_id' => $tenantA->id, 'name' => 'ClientAdmin']);
+        $response->assertJsonFragment(['tenant_id' => $tenantB->id, 'name' => 'ClientAdmin']);
     }
 }

@@ -36,6 +36,22 @@ describe('roles store', () => {
     expect(store.roles).toEqual([{ id: 1 }]);
   });
 
+  it('omits tenant_id when scope is all', async () => {
+    (api.get as any).mockResolvedValue({ data: { data: [] } });
+    const store = useRolesStore();
+    await store.fetch({ scope: 'all', tenant_id: '1' });
+    expect(api.get).toHaveBeenCalledWith('/roles', {
+      params: {
+        scope: 'all',
+        page: 1,
+        per_page: 20,
+        search: '',
+        sort: '',
+        dir: 'asc',
+      },
+    });
+  });
+
   it('assigns role to user', async () => {
     (api.post as any).mockResolvedValue({});
     const store = useRolesStore();

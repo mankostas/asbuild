@@ -19,7 +19,15 @@ export const useRolesStore = defineStore('roles', {
   }),
   actions: {
     async fetch(params: ListParams = {}) {
-      const { data } = await api.get('/roles', { params: withListParams(params) });
+      const qp = withListParams(params);
+      // When requesting all roles as a super admin we should not
+      // send the tenant_id parameter. Providing it would instruct
+      // the backend to limit the results to that tenant, preventing
+      // cross-tenant visibility.
+      if (qp.scope === 'all') {
+        delete qp.tenant_id;
+      }
+      const { data } = await api.get('/roles', { params: qp });
       this.roles = data.data as Role[];
       return data.meta;
     },
