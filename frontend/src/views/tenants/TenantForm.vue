@@ -11,7 +11,12 @@
       <Textinput label="Phone" v-model="form.phone" />
       <Textinput label="Address" v-model="form.address" />
       <VueSelect label="Features" :error="errors.features">
-        <vSelect v-model="form.features" :options="featureOptions" multiple />
+        <vSelect
+          v-model="form.features"
+          :options="featureOptions"
+          multiple
+          :reduce="(f: any) => f.value"
+        />
       </VueSelect>
       <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
       <Button type="submit" text="Save" btnClass="btn-dark" />
@@ -43,15 +48,18 @@ const form = ref({
   features: [] as string[],
 });
 
-const featureOptions = ref<string[]>([]);
+const featureOptions = ref<{ label: string; value: string }[]>([]);
 
 const serverError = ref('');
 const { handleSubmit, setErrors, errors } = useForm();
 
 onMounted(async () => {
   try {
-    const { data: featureData } = await api.get('/lookups/features');
-    featureOptions.value = featureData;
+    const { data: features } = await api.get('/lookups/features');
+    featureOptions.value = features.map((f: any) => ({
+      label: f.label,
+      value: f.slug,
+    }));
   } catch (e) {
     featureOptions.value = [];
   }
@@ -69,6 +77,9 @@ onMounted(async () => {
 
 const onSubmit = handleSubmit(async () => {
   serverError.value = '';
+  if (!isEdit.value && form.value.features.length === 0) {
+    form.value.features = ['appointments'];
+  }
   const payload: any = {
     name: form.value.name,
     quota_storage_mb: form.value.quota_storage_mb,
