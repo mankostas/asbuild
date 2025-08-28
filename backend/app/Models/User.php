@@ -44,8 +44,10 @@ class User extends Authenticatable
     public function isSuperAdmin(): bool
     {
         return $this->roles()
-            ->whereNull('roles.tenant_id')
-            ->where('slug', 'super_admin')
+            ->where(function ($q) {
+                $q->where('slug', 'super_admin')
+                    ->orWhere('name', 'SuperAdmin');
+            })
             ->exists();
     }
 
