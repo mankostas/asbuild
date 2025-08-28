@@ -60,4 +60,9 @@ class LookupController extends Controller
     {
         return collect(config('abilities'))->values();
     }
+
+    public function features()
+    {
+        return collect(config('features'))->values();
+    }
 }
