@@ -59,8 +59,9 @@ class LookupController extends Controller
 
     public function abilities(Request $request)
     {
-        if ($request->boolean('forTenant') && ! $request->user()->hasRole('SuperAdmin')) {
-            $tenant = $request->user()->tenant ?? Tenant::find($request->user()->tenant_id);
+        if ($request->boolean('forTenant')) {
+            $tenantId = $this->getTenantId($request);
+            $tenant = Tenant::find($tenantId);
 
             return $tenant?->allowedAbilities() ?? [];
         }
