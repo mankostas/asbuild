@@ -1,5 +1,5 @@
 <template>
-  <div v-if="can('teams.manage')">
+  <div v-if="canAccess">
     <form @submit.prevent="submit" class="grid gap-4 max-w-lg">
       <Textinput label="Name" v-model="form.name" :error="errors.name" />
       <Textinput label="Description" v-model="form.description" :error="errors.description" />
@@ -38,6 +38,11 @@ const router = useRouter();
 const teamsStore = useTeamsStore();
 
 const isEdit = computed(() => route.name === 'teams.edit');
+const canAccess = computed(() =>
+  isEdit.value
+    ? can('teams.update') || can('teams.manage')
+    : can('teams.create') || can('teams.manage'),
+);
 
 const form = ref({
   name: '',

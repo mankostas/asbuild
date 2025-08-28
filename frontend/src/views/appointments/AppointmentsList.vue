@@ -2,6 +2,7 @@
     <div>
       <div class="flex items-center justify-end mb-4">
         <RouterLink
+          v-if="can('appointments.create') || can('appointments.manage')"
           class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
           :to="{ name: 'appointments.create' }"
         >
@@ -27,21 +28,33 @@
           <button class="text-blue-600" title="View" @click="view(row.id)">
             <Icon icon="heroicons-outline:eye" class="w-5 h-5" />
           </button>
-          <button class="text-blue-600" title="Edit" @click="edit(row.id)">
+          <button
+            v-if="can('appointments.update') || can('appointments.manage')"
+            class="text-blue-600"
+            title="Edit"
+            @click="edit(row.id)"
+          >
             <Icon icon="heroicons-outline:pencil-square" class="w-5 h-5" />
           </button>
-          <button class="text-red-600" title="Delete" @click="remove(row.id)">
+          <button
+            v-if="can('appointments.delete') || can('appointments.manage')"
+            class="text-red-600"
+            title="Delete"
+            @click="remove(row.id)"
+          >
             <Icon icon="heroicons-outline:trash" class="w-5 h-5" />
           </button>
-          <button
-            v-for="s in getChangeActions(row)"
-            :key="s"
-            class="text-blue-600"
-            :title="`Mark ${s.replace(/_/g, ' ')}`"
-            @click="updateStatus(row, s)"
-          >
-            <Icon :icon="statusIcons[s] || 'heroicons-outline:arrow-right'" class="w-5 h-5" />
-          </button>
+          <template v-if="can('appointments.update') || can('appointments.manage')">
+            <button
+              v-for="s in getChangeActions(row)"
+              :key="s"
+              class="text-blue-600"
+              :title="`Mark ${s.replace(/_/g, ' ')}`"
+              @click="updateStatus(row, s)"
+            >
+              <Icon :icon="statusIcons[s] || 'heroicons-outline:arrow-right'" class="w-5 h-5" />
+            </button>
+          </template>
         </div>
       </template>
     </DashcodeServerTable>
@@ -57,6 +70,7 @@ import { useNotify } from '@/plugins/notify';
 import Icon from '@/components/ui/Icon';
 import Swal from 'sweetalert2';
 import { parseISO, formatDisplay } from '@/utils/datetime';
+import { can } from '@/stores/auth';
 
 const router = useRouter();
 const notify = useNotify();

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="canAccess">
       <form @submit.prevent="submitForm" class="max-w-lg space-y-4">
       <VueSelect label="Type" :error="appointmentTypeError">
         <vSelect
@@ -91,6 +91,11 @@ const { value: appointmentTypeId, errorMessage: appointmentTypeError } = useFiel
 >('appointment_type_id');
 
 const isEdit = computed(() => route.name === 'appointments.edit');
+const canAccess = computed(() =>
+  isEdit.value
+    ? can('appointments.update') || can('appointments.manage')
+    : can('appointments.create') || can('appointments.manage'),
+);
 
 onMounted(async () => {
   const [typesRes, statusesRes] = await Promise.all([

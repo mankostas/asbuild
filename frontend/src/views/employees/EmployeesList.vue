@@ -2,6 +2,7 @@
     <div>
       <div class="mb-4">
       <Button
+        v-if="can('employees.create') || can('employees.manage')"
         btnClass="btn-primary"
         text="Invite Employee"
         link="/employees/create"
@@ -12,14 +13,19 @@
       :columns="columns"
       :fetcher="fetchEmployees"
     >
-      <template #actions="{ row }">
+      <template
+        v-if="can('employees.update') || can('employees.delete') || can('employees.manage')"
+        #actions="{ row }"
+      >
         <div class="flex gap-2">
           <Button
+            v-if="can('employees.update') || can('employees.manage')"
             :link="`/employees/${row.id}/edit`"
             btnClass="btn-outline-primary btn-sm"
             text="Edit"
           />
           <Button
+            v-if="can('employees.delete') || can('employees.manage')"
             btnClass="btn-outline-danger btn-sm"
             text="Delete"
             @click="remove(row.id)"
@@ -37,6 +43,7 @@ import Button from '@/components/ui/Button/index.vue';
 import api from '@/services/api';
 import { useNotify } from '@/plugins/notify';
 import Swal from 'sweetalert2';
+import { can } from '@/stores/auth';
 
 const notify = useNotify();
 const tableKey = ref(0);

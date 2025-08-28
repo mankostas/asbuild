@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="canAccess">
     <form @submit.prevent="submit" class="grid gap-4 max-w-lg">
       <Textinput label="Name" v-model="form.name" />
       <Textinput label="Email" type="email" v-model="form.email" />
@@ -25,11 +25,17 @@ import Textinput from '@/components/ui/Textinput/index.vue';
 import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import Button from '@/components/ui/Button/index.vue';
 import vSelect from 'vue-select';
+import { can } from '@/stores/auth';
 
 const route = useRoute();
 const router = useRouter();
 
 const isEdit = computed(() => route.name === 'employees.edit');
+const canAccess = computed(() =>
+  isEdit.value
+    ? can('employees.update') || can('employees.manage')
+    : can('employees.create') || can('employees.manage'),
+);
 
 const roleOptions = ref<string[]>([]);
 const form = ref({
