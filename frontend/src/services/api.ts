@@ -49,7 +49,7 @@ api.interceptors.request.use(async (config) => {
   }
   const tenant = useTenantStore();
   config.headers = config.headers || {};
-  if (tenant.currentTenantId) {
+  if (tenant.currentTenantId && !config.headers[TENANT_HEADER]) {
     config.headers[TENANT_HEADER] = tenant.currentTenantId;
   }
   if (authGetter) {
