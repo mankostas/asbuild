@@ -44,20 +44,36 @@ class RoleRoutesTest extends TestCase
         $roleId = $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->postJson('/api/roles', $payload)
             ->assertStatus(201)
+            ->assertJsonStructure([
+                'data' => ['id', 'name', 'slug', 'abilities', 'tenant_id', 'level'],
+            ])
             ->assertJsonPath('data.level', 1)
+            ->assertJsonPath('data.tenant_id', $this->tenant->id)
+            ->assertJsonMissingPath('data.created_at')
+            ->assertJsonMissingPath('data.updated_at')
             ->json('data.id');
 
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->getJson("/api/roles/{$roleId}")
-            ->assertStatus(200);
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => ['id', 'name', 'slug', 'abilities', 'tenant_id', 'level'],
+            ])
+            ->assertJsonMissingPath('data.created_at')
+            ->assertJsonMissingPath('data.updated_at');
 
         $update = ['name' => 'Updated', 'slug' => 'updated', 'level' => 2];
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->putJson("/api/roles/{$roleId}", $update)
             ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => ['id', 'name', 'slug', 'abilities', 'tenant_id', 'level'],
+            ])
             ->assertJsonPath('data.name', 'Updated')
             ->assertJsonPath('data.slug', 'updated')
-            ->assertJsonPath('data.level', 2);
+            ->assertJsonPath('data.level', 2)
+            ->assertJsonMissingPath('data.created_at')
+            ->assertJsonMissingPath('data.updated_at');
 
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->deleteJson("/api/roles/{$roleId}")
