@@ -276,7 +276,7 @@ export const routes = [
     component: () => import('@/views/settings/Branding.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['branding.manage'],
       breadcrumb: 'routes.branding',
       title: 'Branding',
       layout: 'app',
@@ -289,8 +289,7 @@ export const routes = [
     component: () => import('@/views/settings/Footer.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
-      super: true,
+      requiredAbilities: ['branding.manage'],
       breadcrumb: 'routes.footer',
       title: 'Footer',
       layout: 'app',

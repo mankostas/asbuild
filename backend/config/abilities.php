@@ -54,5 +54,8 @@ return [
     // Theme Customizer
     'themes.view',
     'themes.manage',
+
+    // Branding
+    'branding.manage',
 ];
 

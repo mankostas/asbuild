@@ -76,5 +76,11 @@ return [
             'tenants.manage',
         ],
     ],
+    'branding' => [
+        'label' => 'Branding & Footer',
+        'abilities' => [
+            'branding.manage',
+        ],
+    ],
     // Additional features can be listed here as needed, e.g. 'reports', 'billing', 'employees', …
 ];

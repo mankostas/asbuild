@@ -1477,7 +1477,7 @@
       "response": []
     },
     {
-      "name": "api/settings/branding",
+      "name": "api/branding",
       "request": {
         "method": "GET",
         "header": [
@@ -1487,13 +1487,12 @@
           }
         ],
         "url": {
-          "raw": "{{base_url}}/api/settings/branding",
+          "raw": "{{base_url}}/api/branding",
           "host": [
             "{{base_url}}"
           ],
           "path": [
             "api",
-            "settings",
             "branding"
           ]
         }
@@ -1501,7 +1500,7 @@
       "response": []
     },
     {
-      "name": "api/settings/branding",
+      "name": "api/branding",
       "request": {
         "method": "PUT",
         "header": [
@@ -1515,13 +1514,12 @@
           "raw": "{\n  \"color\": \"#000000\"\n}"
         },
         "url": {
-          "raw": "{{base_url}}/api/settings/branding",
+          "raw": "{{base_url}}/api/branding",
           "host": [
             "{{base_url}}"
           ],
           "path": [
             "api",
-            "settings",
             "branding"
           ]
         }
