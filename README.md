@@ -12,7 +12,7 @@ Foundation for a Laravel 11 backend and Vue 3 single-page application.
    - Enable the `imagick` extension
 3. Environment:
    - Copy `backend/.env.example` to `backend/.env` and adjust `APP_URL` and database credentials.
-   - Set `API_MODE=development` to stream logs to the console when running `php artisan serve`; use `production` to write logs to `storage/logs/laravel.log`.
+   - Logs are written to `storage/logs/laravel.log` and are also streamed to the console when running `php artisan serve`.
    - Install dependencies and generate an app key:
      ```bash
      cd backend && composer install && php artisan key:generate
