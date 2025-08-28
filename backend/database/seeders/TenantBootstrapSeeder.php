@@ -29,7 +29,7 @@ class TenantBootstrapSeeder extends Seeder
             [
                 'name' => 'Acme Vet',
                 'quota_storage_mb' => 0,
-                'features' => json_encode([]),
+                'features' => json_encode(['appointments']),
                 'phone' => '555-123-4567',
                 'address' => '1 Pet Street',
                 'created_at' => now(),
@@ -39,7 +39,7 @@ class TenantBootstrapSeeder extends Seeder
         $tenantId = DB::table('tenants')->where('id', 1)->value('id');
 
         // Tenant roles
-        $tenantAbilities = config('abilities');
+        $tenantAbilities = \App\Models\Tenant::find($tenantId)->allowedAbilities();
         DB::table('roles')->updateOrInsert(
             ['tenant_id' => $tenantId, 'slug' => 'tenant'],
             [
@@ -52,8 +52,14 @@ class TenantBootstrapSeeder extends Seeder
             ]
         );
 
-        $managerAbilities = ['appointments.manage', 'teams.manage', 'statuses.manage'];
-        $agentAbilities = ['appointments.view', 'appointments.update'];
+        $managerAbilities = array_intersect(
+            ['appointments.manage', 'teams.manage', 'statuses.manage', 'types.manage'],
+            $tenantAbilities
+        );
+        $agentAbilities = array_intersect(
+            ['appointments.view', 'appointments.update'],
+            $tenantAbilities
+        );
 
         DB::table('roles')->updateOrInsert(
             ['tenant_id' => $tenantId, 'slug' => 'manager'],
