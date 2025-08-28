@@ -28,10 +28,12 @@ import Button from '@/components/ui/Button/index.vue';
 import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import vSelect from 'vue-select';
 import { useForm } from 'vee-validate';
+import { useTenantStore } from '@/stores/tenant';
 
 const route = useRoute();
 const router = useRouter();
 const isEdit = computed(() => route.name === 'tenants.edit');
+const tenantStore = useTenantStore();
 
 const form = ref({
   name: '',
@@ -80,6 +82,7 @@ const onSubmit = handleSubmit(async () => {
     } else {
       await api.post('/tenants', payload);
     }
+    await tenantStore.loadTenants();
     router.push({ name: 'tenants.list' });
   } catch (e: any) {
     const errs = extractFormErrors(e);

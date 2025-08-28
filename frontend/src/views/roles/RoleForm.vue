@@ -52,6 +52,7 @@ import api, { extractFormErrors } from '@/services/api';
 import { useNotify } from '@/plugins/notify';
 import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
+import { useRolesStore } from '@/stores/roles';
 import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import vSelect from 'vue-select';
 import { useForm } from 'vee-validate';
@@ -61,6 +62,7 @@ const router = useRouter();
 const notify = useNotify();
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
+const rolesStore = useRolesStore();
 
 const name = ref('');
 const slug = ref('');
@@ -99,7 +101,7 @@ onMounted(async () => {
   } catch (e) {
     abilityOptions.value = [];
   }
-  if (auth.isSuperAdmin && !tenantStore.tenants.length) {
+  if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
   }
   if (isEdit.value) {
@@ -145,6 +147,7 @@ const onSubmit = handleSubmit(async () => {
     } else {
       await api.post('/roles', payload);
     }
+    await rolesStore.fetch();
     router.push({ name: 'roles.list' });
   } catch (e: any) {
     const errs = extractFormErrors(e);

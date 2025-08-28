@@ -139,9 +139,7 @@ async function remove(id: number) {
 async function copy(id: number) {
   let tenantId: string | number | undefined;
   if (auth.isSuperAdmin) {
-    if (!tenantStore.tenants.length) {
-      await tenantStore.loadTenants();
-    }
+    await tenantStore.loadTenants();
     const inputOptions = tenantStore.tenants.reduce(
       (acc: any, t: any) => ({ ...acc, [t.id]: t.name }),
       {},

@@ -217,7 +217,7 @@ watch(
 onMounted(async () => {
   const { data: statusData } = await api.get('/statuses');
   allStatuses.value = statusData;
-  if (auth.isSuperAdmin && !tenantStore.tenants.length) {
+  if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
   }
   if (isEdit.value) {
