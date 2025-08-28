@@ -61,6 +61,10 @@
           :disabled="readonly"
           @change="validateField(name)"
         />
+        <AssigneePicker
+          v-else-if="fieldType(prop) === 'assignee'"
+          v-model="form[name]"
+        />
       </template>
       <div v-if="errors[name]" class="text-red-600 text-sm mt-1">{{ errors[name] }}</div>
     </div>
@@ -69,6 +73,7 @@
 
 <script setup lang="ts">
 import { reactive, watch, onMounted } from 'vue';
+import AssigneePicker from '@/components/appointments/AssigneePicker.vue';
 
 interface Schema {
   properties: Record<string, any>;
@@ -106,6 +111,7 @@ function isRequired(name: string) {
 
 function fieldType(prop: any) {
   if (prop.enum) return 'enum';
+  if (prop['x-control'] === 'assignee') return 'assignee';
   if (prop.type === 'number' || prop.type === 'integer') return 'number';
   if (prop.type === 'boolean') return 'boolean';
   if (prop.type === 'string' && prop.format === 'date') return 'date';

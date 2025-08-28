@@ -1,6 +1,15 @@
 <template>
-    <div>
-      <div class="flex items-center justify-end mb-4">
+  <div>
+      <div class="flex items-center justify-between mb-4">
+        <select
+          v-model="scope"
+          @change="changeScope"
+          class="border rounded px-2 py-1"
+        >
+          <option v-for="opt in scopeOptions" :key="opt.value" :value="opt.value">
+            {{ opt.label }}
+          </option>
+        </select>
         <RouterLink
           class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
           :to="{ name: 'types.create' }"
@@ -22,6 +31,14 @@
           <button class="text-red-600" title="Delete" @click="remove(row.id)">
             <Icon icon="heroicons-outline:trash" class="w-5 h-5" />
           </button>
+          <button
+            v-if="auth.isSuperAdmin || !row.tenant_id"
+            class="text-green-600"
+            title="Copy to Tenant"
+            @click="copy(row.id)"
+          >
+            <Icon icon="heroicons-outline:document-duplicate" class="w-5 h-5" />
+          </button>
         </div>
       </template>
     </DashcodeServerTable>
@@ -29,16 +46,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
-import api from '@/services/api';
 import Swal from 'sweetalert2';
 import Icon from '@/components/ui/Icon';
+import api from '@/services/api';
+import { useAuthStore } from '@/stores/auth';
+import { useTenantStore } from '@/stores/tenant';
+import { useTypesStore } from '@/stores/types';
 
 const router = useRouter();
 const tableKey = ref(0);
 const all = ref<any[]>([]);
+const scope = ref<'tenant' | 'global' | 'all'>("tenant");
+const auth = useAuthStore();
+const tenantStore = useTenantStore();
+const typesStore = useTypesStore();
+
+if (auth.isSuperAdmin) {
+  scope.value = 'all';
+}
+
+const scopeOptions = computed(() => {
+  const opts = [
+    { value: 'tenant', label: 'Tenant' },
+    { value: 'all', label: 'All' },
+  ];
+  if (auth.isSuperAdmin) {
+    opts.splice(1, 0, { value: 'global', label: 'Global' });
+  }
+  return opts;
+});
 
 const columns = [
   { label: 'ID', field: 'id', sortable: true },
@@ -47,8 +86,8 @@ const columns = [
 
 async function fetchTypes({ page, perPage, sort, search }: any) {
   if (!all.value.length) {
-    const { data } = await api.get('/appointment-types');
-    all.value = data;
+    const tenantId = auth.isSuperAdmin ? tenantStore.currentTenantId : undefined;
+    all.value = await typesStore.fetch(scope.value, tenantId);
   }
   let rows = all.value.slice();
   if (search) {
@@ -74,6 +113,11 @@ function reload() {
   tableKey.value++;
 }
 
+function changeScope() {
+  all.value = [];
+  reload();
+}
+
 function edit(id: number) {
   router.push({ name: 'types.edit', params: { id } });
 }
@@ -89,5 +133,29 @@ async function remove(id: number) {
     all.value = [];
     reload();
   }
+}
+
+async function copy(id: number) {
+  let tenantId: string | number | undefined;
+  if (auth.isSuperAdmin) {
+    if (!tenantStore.tenants.length) {
+      await tenantStore.loadTenants();
+    }
+    const inputOptions = tenantStore.tenants.reduce(
+      (acc: any, t: any) => ({ ...acc, [t.id]: t.name }),
+      {},
+    );
+    const res = await Swal.fire({
+      title: 'Copy to tenant',
+      input: 'select',
+      inputOptions,
+      showCancelButton: true,
+    });
+    if (!res.isConfirmed || !res.value) return;
+    tenantId = res.value;
+  }
+  await typesStore.copyToTenant(id, tenantId);
+  all.value = [];
+  reload();
 }
 </script>
