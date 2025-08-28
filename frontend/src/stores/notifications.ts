@@ -1,13 +1,8 @@
 import { defineStore } from 'pinia';
 import api from '@/services/api';
+import type { components } from '@/types/api';
 
-interface Notification {
-  id: number;
-  message: string;
-  link?: string | null;
-  created_at: string;
-  read_at?: string | null;
-}
+type Notification = components['schemas']['Notification'];
 
 export const useNotificationStore = defineStore('notifications', {
   state: () => ({
@@ -26,7 +21,7 @@ export const useNotificationStore = defineStore('notifications', {
     },
     async fetchUnreadCount() {
       const { data } = await api.get('/notifications');
-      this.unreadCount = data.filter((n: any) => !n.read_at).length;
+      this.unreadCount = (data as Notification[]).filter((n: Notification) => !n.read_at).length;
     },
     async markRead(id: number) {
       await api.post(`/notifications/${id}/read`);

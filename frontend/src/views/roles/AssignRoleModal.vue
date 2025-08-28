@@ -96,10 +96,9 @@ async function searchUsers(search: string) {
 
 async function onSubmit() {
   if (!userId.value) return;
-  await rolesStore.assignUser({
-    roleId: props.roleId,
-    userId: userId.value,
-    tenantId: auth.isSuperAdmin ? tenantId.value || undefined : tenantStore.currentTenantId,
+  await rolesStore.assignUser(props.roleId, {
+    user_id: userId.value,
+    tenant_id: auth.isSuperAdmin ? tenantId.value || undefined : tenantStore.currentTenantId,
   });
   emit('assigned');
   emit('close');
