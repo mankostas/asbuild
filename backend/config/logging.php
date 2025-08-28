@@ -9,9 +9,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => env('API_MODE', 'production') === 'development'
-                ? ['stderr']
-                : ['single'],
+            'channels' => ['single', 'stderr'],
             'ignore_exceptions' => false,
         ],
 
@@ -22,6 +20,7 @@ return [
                 'stream' => 'php://stderr',
             ],
             'formatter' => JsonFormatter::class,
+            'level' => env('LOG_LEVEL', 'debug'),
         ],
 
         'single' => [
