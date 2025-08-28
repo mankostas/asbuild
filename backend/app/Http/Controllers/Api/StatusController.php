@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Status;
 use Illuminate\Http\Request;
+use App\Http\Resources\StatusResource;
 
 class StatusController extends Controller
 {
@@ -31,7 +32,15 @@ class StatusController extends Controller
             }
         }
 
-        return $query->get();
+        $statuses = $query->paginate($request->query('per_page', 15));
+
+        return StatusResource::collection($statuses->items())->additional([
+            'meta' => [
+                'page' => $statuses->currentPage(),
+                'per_page' => $statuses->perPage(),
+                'total' => $statuses->total(),
+            ],
+        ]);
     }
 
     public function store(Request $request)
@@ -49,12 +58,12 @@ class StatusController extends Controller
         }
 
         $status = Status::create($data);
-        return response()->json($status, 201);
+        return (new StatusResource($status))->response()->setStatusCode(201);
     }
 
     public function show(Status $status)
     {
-        return $status;
+        return new StatusResource($status);
     }
 
     public function update(Request $request, Status $status)
@@ -77,7 +86,7 @@ class StatusController extends Controller
         }
 
         $status->update($data);
-        return $status;
+        return new StatusResource($status);
     }
 
     public function destroy(Request $request, Status $status)
@@ -106,7 +115,9 @@ class StatusController extends Controller
         $copy->tenant_id = $tenantId;
         $copy->save();
 
-        return response()->json($copy, 201);
+        return (new StatusResource($copy))
+            ->response()
+            ->setStatusCode(201);
     }
 }
 

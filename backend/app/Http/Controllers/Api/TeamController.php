@@ -7,6 +7,7 @@ use App\Http\Requests\TeamUpsertRequest;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Resources\TeamResource;
 
 class TeamController extends Controller
 {
@@ -33,7 +34,17 @@ class TeamController extends Controller
     public function index(Request $request)
     {
         $tenantId = $this->getTenantId($request);
-        return Team::where('tenant_id', $tenantId)->with('employees')->get();
+        $teams = Team::where('tenant_id', $tenantId)
+            ->with('employees')
+            ->paginate($request->query('per_page', 15));
+
+        return TeamResource::collection($teams->items())->additional([
+            'meta' => [
+                'page' => $teams->currentPage(),
+                'per_page' => $teams->perPage(),
+                'total' => $teams->total(),
+            ],
+        ]);
     }
 
     public function store(TeamUpsertRequest $request)
@@ -46,7 +57,9 @@ class TeamController extends Controller
 
         $team = Team::create($data);
 
-        return response()->json($team->load('employees'), 201);
+        return (new TeamResource($team->load('employees')))
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show(Request $request, Team $team)
@@ -56,7 +69,7 @@ class TeamController extends Controller
             abort(404);
         }
 
-        return $team->load('employees');
+        return new TeamResource($team->load('employees'));
     }
 
     public function update(TeamUpsertRequest $request, Team $team)
@@ -72,7 +85,7 @@ class TeamController extends Controller
         $data['tenant_id'] = $team->tenant_id;
         $team->update($data);
 
-        return $team->load('employees');
+        return new TeamResource($team->load('employees'));
     }
 
     public function destroy(Request $request, Team $team)
@@ -110,6 +123,6 @@ class TeamController extends Controller
 
         $team->employees()->sync($employeeIds);
 
-        return $team->load('employees');
+        return new TeamResource($team->load('employees'));
     }
 }

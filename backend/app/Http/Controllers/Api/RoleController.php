@@ -7,6 +7,7 @@ use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\RoleUpsertRequest;
+use App\Http\Resources\RoleResource;
 
 class RoleController extends Controller
 {
@@ -26,7 +27,16 @@ class RoleController extends Controller
 
         if (! $request->user()->hasRole('SuperAdmin')) {
             $tenantId = $request->user()->tenant_id;
-            return Role::where('tenant_id', $tenantId)->get();
+            $roles = Role::where('tenant_id', $tenantId)
+                ->paginate($request->query('per_page', 15));
+
+            return RoleResource::collection($roles->items())->additional([
+                'meta' => [
+                    'page' => $roles->currentPage(),
+                    'per_page' => $roles->perPage(),
+                    'total' => $roles->total(),
+                ],
+            ]);
         }
 
         $scope = $scope ?? ($tenantId ? 'tenant' : 'all');
@@ -54,7 +64,15 @@ class RoleController extends Controller
                 break;
         }
 
-        return $query->get();
+        $roles = $query->paginate($request->query('per_page', 15));
+
+        return RoleResource::collection($roles->items())->additional([
+            'meta' => [
+                'page' => $roles->currentPage(),
+                'per_page' => $roles->perPage(),
+                'total' => $roles->total(),
+            ],
+        ]);
     }
 
     public function store(RoleUpsertRequest $request)
@@ -74,7 +92,7 @@ class RoleController extends Controller
         }
 
         $role = Role::create($data);
-        return response()->json($role, 201);
+        return (new RoleResource($role))->response()->setStatusCode(201);
     }
 
     public function show(Request $request, Role $role)
@@ -85,7 +103,7 @@ class RoleController extends Controller
             abort(404);
         }
 
-        return $role;
+        return new RoleResource($role);
     }
 
     public function update(RoleUpsertRequest $request, Role $role)
@@ -114,7 +132,7 @@ class RoleController extends Controller
 
         $role->update($data);
 
-        return $role;
+        return new RoleResource($role);
     }
 
     public function destroy(Request $request, Role $role)

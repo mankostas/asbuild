@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AppointmentType;
 use App\Services\FormSchemaService;
 use Illuminate\Http\Request;
+use App\Http\Resources\AppointmentTypeResource;
 
 class AppointmentTypeController extends Controller
 {
@@ -36,7 +37,15 @@ class AppointmentTypeController extends Controller
             }
         }
 
-        return response()->json($query->get());
+        $types = $query->paginate($request->query('per_page', 15));
+
+        return AppointmentTypeResource::collection($types->items())->additional([
+            'meta' => [
+                'page' => $types->currentPage(),
+                'per_page' => $types->perPage(),
+                'total' => $types->total(),
+            ],
+        ]);
     }
 
     public function store(Request $request)
@@ -51,12 +60,12 @@ class AppointmentTypeController extends Controller
         }
 
         $type = AppointmentType::create($data);
-        return response()->json($type, 201);
+        return (new AppointmentTypeResource($type))->response()->setStatusCode(201);
     }
 
     public function show(AppointmentType $appointmentType)
     {
-        return response()->json($appointmentType);
+        return new AppointmentTypeResource($appointmentType);
     }
 
     public function update(Request $request, AppointmentType $appointmentType)
@@ -77,7 +86,7 @@ class AppointmentTypeController extends Controller
         }
 
         $appointmentType->update($data);
-        return response()->json($appointmentType);
+        return new AppointmentTypeResource($appointmentType);
     }
 
     public function destroy(Request $request, AppointmentType $appointmentType)
@@ -106,7 +115,9 @@ class AppointmentTypeController extends Controller
         $copy->tenant_id = $tenantId;
         $copy->save();
 
-        return response()->json($copy, 201);
+        return (new AppointmentTypeResource($copy))
+            ->response()
+            ->setStatusCode(201);
     }
 
     protected function validateSchema(Request $request, bool $nameRequired = true): array
