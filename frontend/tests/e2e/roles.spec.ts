@@ -11,3 +11,11 @@ test.skip('creates a role and assigns it to a user', async ({ page }) => {
   await page.getByRole('option', { name: /John Doe/ }).click();
   await page.getByRole('button', { name: 'Assign' }).click();
 });
+
+test.skip('role form shows only allowed abilities', async ({ page }) => {
+  await page.goto('/roles');
+  await page.getByRole('button', { name: 'Create' }).click();
+  await page.getByRole('combobox', { name: 'Abilities' }).click();
+  await expect(page.getByRole('option', { name: 'types.manage' })).not.toBeVisible();
+});
+

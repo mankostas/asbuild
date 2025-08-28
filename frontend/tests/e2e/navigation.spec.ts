@@ -12,3 +12,10 @@ test.skip('sidebar keyboard navigation', async ({ page }) => {
   await page.keyboard.press('Escape');
   await expect(page.getByRole('menuitem', { name: 'Appointments' })).not.toBeVisible();
 });
+
+test.skip('non-admin sidebar hides unauthorized items', async ({ page }) => {
+  await page.goto('/');
+  // In a real scenario, user would be authenticated with limited abilities.
+  await expect(page.getByRole('link', { name: 'Appointment Types' })).not.toBeVisible();
+});
+
