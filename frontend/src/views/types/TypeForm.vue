@@ -55,6 +55,40 @@
           </div>
         </div>
 
+        <div class="mb-4">
+          <h3 class="font-medium mb-2">Statuses</h3>
+          <div class="flex gap-4">
+            <div class="w-1/3">
+              <h4 class="text-sm font-semibold mb-2">Available</h4>
+              <ul>
+                <li v-for="s in availableStatuses" :key="s.id">
+                  <button
+                    type="button"
+                    class="w-full mb-2 px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded"
+                    @click="addStatus(s)"
+                  >
+                    {{ s.name }}
+                  </button>
+                </li>
+              </ul>
+            </div>
+            <div class="flex-1">
+              <h4 class="text-sm font-semibold mb-2">Order</h4>
+              <draggable v-model="selectedStatuses" item-key="id" class="flex flex-col gap-2" handle=".handle">
+                <template #item="{ element, index }">
+                  <div class="p-3 bg-white border rounded flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="cursor-move handle text-gray-400">≡</span>
+                      <span>{{ element.name }}</span>
+                    </div>
+                    <button type="button" class="text-red-500" @click="removeStatus(index)">✕</button>
+                  </div>
+                </template>
+              </draggable>
+            </div>
+          </div>
+        </div>
+
         <div v-if="serverError" class="text-red-600 text-sm mb-2">{{ serverError }}</div>
         <button
           type="submit"
@@ -97,6 +131,8 @@ const name = ref('');
 const fields = ref<Field[]>([]);
 const previewModel = ref<any>({});
 const serverError = ref('');
+const allStatuses = ref<any[]>([]);
+const selectedStatuses = ref<any[]>([]);
 
 const fieldTypes = [
   { key: 'text', label: 'Text', schema: { type: 'string' } },
@@ -107,6 +143,12 @@ const fieldTypes = [
 ];
 
 const isEdit = computed(() => route.name === 'types.edit');
+
+const availableStatuses = computed(() =>
+  allStatuses.value.filter(
+    (s) => !selectedStatuses.value.find((sel) => sel.id === s.id),
+  ),
+);
 
 function addField(t: any) {
   fields.value.push({
@@ -156,34 +198,42 @@ watch(
 );
 
 onMounted(async () => {
+  const { data: statusData } = await api.get('/statuses');
+  allStatuses.value = statusData;
   if (isEdit.value) {
     const { data } = await api.get(`/appointment-types/${route.params.id}`);
     name.value = data.name;
     if (data.fields_summary) {
-        if (Array.isArray(data.fields_summary)) {
-          fields.value = data.fields_summary.map((f: any) => ({
+      if (Array.isArray(data.fields_summary)) {
+        fields.value = data.fields_summary.map((f: any) => ({
+          id: Date.now() + Math.random(),
+          name: f.name || `field${fields.value.length + 1}`,
+          label: f.label || f.name || 'Field',
+          typeKey: f.type || 'text',
+          required: !!f.required,
+          cols: f.cols || 2,
+        }));
+      } else if (typeof data.fields_summary === 'object') {
+        fields.value = Object.keys(data.fields_summary).map((key) => {
+          const f = (data.fields_summary as any)[key];
+          return {
             id: Date.now() + Math.random(),
-            name: f.name || `field${fields.value.length + 1}`,
-            label: f.label || f.name || 'Field',
+            name: key,
+            label: f.label || key,
             typeKey: f.type || 'text',
             required: !!f.required,
             cols: f.cols || 2,
-          }));
-        } else if (typeof data.fields_summary === 'object') {
-          fields.value = Object.keys(data.fields_summary).map((key) => {
-            const f = (data.fields_summary as any)[key];
-            return {
-              id: Date.now() + Math.random(),
-              name: key,
-              label: f.label || key,
-              typeKey: f.type || 'text',
-              required: !!f.required,
-              cols: f.cols || 2,
-            };
-          });
-        }
+          };
+        });
       }
     }
+    if (data.statuses) {
+      const order = parseStatusOrder(data.statuses);
+      selectedStatuses.value = order
+        .map((n: string) => allStatuses.value.find((s: any) => s.name === n))
+        .filter(Boolean);
+    }
+  }
 });
 
 const canSubmit = computed(() => {
@@ -198,6 +248,9 @@ async function onSubmit() {
     form_schema: JSON.stringify(formSchemaObj.value),
     fields_summary: JSON.stringify(fieldsSummaryObj.value),
   };
+  if (selectedStatuses.value.length > 1) {
+    payload.statuses = JSON.stringify(statusesObj.value);
+  }
   try {
     if (isEdit.value) {
       await api.patch(`/appointment-types/${route.params.id}`, payload);
@@ -209,4 +262,34 @@ async function onSubmit() {
     serverError.value = e.message || 'Failed to save';
   }
 }
+
+function addStatus(s: any) {
+  selectedStatuses.value.push(s);
+}
+
+function removeStatus(index: number) {
+  selectedStatuses.value.splice(index, 1);
+}
+
+function parseStatusOrder(map: Record<string, string[]>): string[] {
+  const nextSet = new Set<string>();
+  Object.values(map).forEach((arr) => arr.forEach((v) => nextSet.add(v)));
+  let current = Object.keys(map).find((k) => !nextSet.has(k));
+  if (!current) return Object.keys(map);
+  const order = [current];
+  while (map[current] && map[current][0]) {
+    current = map[current][0];
+    order.push(current);
+  }
+  return order;
+}
+
+const statusesObj = computed(() => {
+  const obj: Record<string, string[]> = {};
+  const arr = selectedStatuses.value;
+  for (let i = 0; i < arr.length - 1; i++) {
+    obj[arr[i].name] = [arr[i + 1].name];
+  }
+  return obj;
+});
 </script>

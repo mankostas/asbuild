@@ -34,13 +34,13 @@
             <Icon icon="heroicons-outline:trash" class="w-5 h-5" />
           </button>
           <button
-            v-for="a in changeActions"
-            :key="a.value"
+            v-for="s in getChangeActions(row)"
+            :key="s"
             class="text-blue-600"
-            :title="`Mark ${a.label}`"
-            @click="updateStatus(row, a.value)"
+            :title="`Mark ${s.replace(/_/g, ' ')}`"
+            @click="updateStatus(row, s)"
           >
-            <Icon :icon="a.icon" class="w-5 h-5" />
+            <Icon :icon="statusIcons[s] || 'heroicons-outline:arrow-right'" class="w-5 h-5" />
           </button>
         </div>
       </template>
@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
 import api from '@/services/api';
@@ -65,7 +65,7 @@ const startDate = ref('');
 const endDate = ref('');
 const tableKey = ref(0);
 
-const statusOptions = ['draft', 'assigned', 'in_progress', 'completed', 'rejected', 'redo'];
+const statusOptions = ref<string[]>([]);
 
 const columns = [
   { label: 'ID', field: 'id', sortable: true },
@@ -86,7 +86,19 @@ const statusClasses: Record<string, string> = {
   redo: 'bg-purple-100 text-purple-800',
 };
 
+const statusIcons: Record<string, string> = {
+  in_progress: 'heroicons-outline:play',
+  completed: 'heroicons-outline:check',
+  rejected: 'heroicons-outline:x-mark',
+  redo: 'heroicons-outline:arrow-path',
+};
+
 const all = ref<any[]>([]);
+
+onMounted(async () => {
+  const { data } = await api.get('/statuses');
+  statusOptions.value = data.map((s: any) => s.name);
+});
 
 async function fetchAppointments({ page, perPage, sort, search }: any) {
   if (!all.value.length) {
@@ -179,11 +191,11 @@ async function updateStatus(row: any, status: string) {
   }
 }
 
-const changeActions = [
-  { label: 'In Progress', value: 'in_progress', icon: 'heroicons-outline:play' },
-  { label: 'Completed', value: 'completed', icon: 'heroicons-outline:check' },
-  { label: 'Rejected', value: 'rejected', icon: 'heroicons-outline:x-mark' },
-  { label: 'Redo', value: 'redo', icon: 'heroicons-outline:arrow-path' },
-];
+function getChangeActions(row: any) {
+  const target = all.value.find((r) => r.id === row.id);
+  if (!target) return [];
+  const map = target.type?.statuses || {};
+  return map[target.status] || [];
+}
 </script>
 
