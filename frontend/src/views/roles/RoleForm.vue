@@ -61,6 +61,7 @@ import { useTenantStore } from '@/stores/tenant';
 import { useRolesStore } from '@/stores/roles';
 import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import vSelect from 'vue-select';
+import { TENANT_HEADER } from '@/config/app';
 import { useForm } from 'vee-validate';
 
 const route = useRoute();
@@ -113,7 +114,10 @@ onMounted(async () => {
 async function loadAbilityOptions() {
   try {
     const params = tenantId.value ? { forTenant: 1 } : undefined;
-    const { data } = await api.get('/lookups/abilities', { params });
+    const headers = tenantId.value
+      ? { [TENANT_HEADER]: tenantId.value }
+      : undefined;
+    const { data } = await api.get('/lookups/abilities', { params, headers });
     abilityOptions.value = (data || []).map((a: string) => ({
       label: a,
       value: a,
