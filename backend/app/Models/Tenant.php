@@ -21,9 +21,26 @@ class Tenant extends Model
         'features' => 'array',
     ];
 
+    protected static function booted(): void
+    {
+        static::created(function (self $tenant): void {
+            $tenant->roles()->create([
+                'name' => 'Tenant',
+                'slug' => 'tenant',
+                'level' => 1,
+                'abilities' => [],
+            ]);
+        });
+    }
+
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class);
+    }
+
+    public function roles(): HasMany
+    {
+        return $this->hasMany(Role::class);
     }
 
     public static function current(): ?Tenant
