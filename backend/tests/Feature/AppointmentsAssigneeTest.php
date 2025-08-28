@@ -19,7 +19,11 @@ class AppointmentsAssigneeTest extends TestCase
     public function test_assignee_persisted_when_creating_appointment(): void
     {
         $tenant = Tenant::create(['name' => 'Tenant']);
-        $adminRole = Role::create(['name' => 'ClientAdmin', 'slug' => 'client_admin', 'tenant_id' => $tenant->id]);
+        $adminRole = Role::create([
+            'name' => 'SuperAdmin',
+            'slug' => 'super_admin',
+            'abilities' => ['*'],
+        ]);
 
         $admin = User::create([
             'name' => 'Admin',

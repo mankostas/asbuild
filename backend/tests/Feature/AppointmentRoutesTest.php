@@ -21,7 +21,11 @@ class AppointmentRoutesTest extends TestCase
     {
         parent::setUp();
         $tenant = Tenant::create(['name' => 'Test Tenant']);
-        $role = Role::create(['name' => 'ClientAdmin', 'tenant_id' => $tenant->id]);
+        $role = Role::create([
+            'name' => 'SuperAdmin',
+            'slug' => 'super_admin',
+            'abilities' => ['*'],
+        ]);
         $user = User::create([
             'name' => 'Test User',
             'email' => 'user@example.com',

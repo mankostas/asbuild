@@ -115,4 +115,8 @@ export function can(ability: string): boolean {
   return useAuthStore().can(ability);
 }
 
+export function hasFeature(feature: string): boolean {
+  return useAuthStore().features.includes(feature);
+}
+
 registerAuthStore(() => useAuthStore());
