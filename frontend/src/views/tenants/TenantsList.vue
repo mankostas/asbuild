@@ -78,6 +78,7 @@ function reload() {
 
 async function impersonate(t: any) {
   await auth.impersonate(t.id, t.name);
+  window.location.reload();
 }
 
 function view(id: number) {
