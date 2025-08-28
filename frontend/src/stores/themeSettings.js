@@ -2,6 +2,12 @@ import { defineStore } from "pinia";
 import api from "@/services/api";
 import { useAuthStore } from "./auth";
 
+const safeSetItem = (key, value) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {}
+};
+
 // Default state for the theme customizer.  We merge any persisted values from
 // localStorage with these defaults when the store is first created so that user
 // preferences survive refreshes and future logins.
@@ -49,7 +55,7 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
     };
     // Persist the merged state so that migrations or new defaults overwrite
     // any previously saved values in localStorage.
-    localStorage.setItem("themeSettings", JSON.stringify(state));
+    safeSetItem("themeSettings", JSON.stringify(state));
     return state;
   },
   actions: {
@@ -66,7 +72,7 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
     },
 
     persistLocal() {
-      localStorage.setItem("themeSettings", JSON.stringify(this.$state));
+      safeSetItem("themeSettings", JSON.stringify(this.$state));
     },
 
     async persistRemote() {
@@ -89,7 +95,7 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
       document.body.classList.remove(this.theme);
       this.theme = this.theme === "dark" ? "light" : "dark";
       document.body.classList.add(this.theme);
-      localStorage.setItem("theme", this.theme);
+      safeSetItem("theme", this.theme);
     },
 
     toggleSettings() {
@@ -102,7 +108,7 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
       this.semidark = !this.semidark;
       this.semiDarkTheme = this.semidark ? "semi-dark" : "semi-light";
       document.body.classList.toggle(this.semiDarkTheme);
-      localStorage.setItem("semiDark", this.semidark);
+      safeSetItem("semiDark", this.semidark);
     },
     toggleCartDrawer() {
       this.cartOpener = !this.cartOpener;
