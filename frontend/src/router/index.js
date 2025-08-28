@@ -24,6 +24,7 @@ export const routes = [
     component: () => import('@/views/appointments/AppointmentsList.vue'),
     meta: {
       requiresAuth: true,
+      requiredAbilities: ['appointments.view', 'appointments.manage'],
       breadcrumb: 'routes.appointments',
       title: 'Appointments',
       layout: 'app',
@@ -35,6 +36,7 @@ export const routes = [
     component: () => import('@/views/appointments/CalendarView.vue'),
     meta: {
       requiresAuth: true,
+      requiredAbilities: ['appointments.view', 'appointments.manage'],
       breadcrumb: 'routes.appointments',
       title: 'Appointments Calendar',
       layout: 'app',
@@ -47,6 +49,7 @@ export const routes = [
     component: () => import('@/views/appointments/AppointmentDetails.vue'),
     meta: {
       requiresAuth: true,
+      requiredAbilities: ['appointments.view', 'appointments.manage'],
       breadcrumb: 'routes.appointmentDetail',
       title: 'Appointment Detail',
       layout: 'app',
@@ -59,6 +62,7 @@ export const routes = [
     component: () => import('@/views/appointments/AppointmentForm.vue'),
     meta: {
       requiresAuth: true,
+      requiredAbilities: ['appointments.create', 'appointments.manage'],
       breadcrumb: 'routes.appointmentCreate',
       title: 'Create Appointment',
       layout: 'app',
@@ -71,6 +75,7 @@ export const routes = [
     component: () => import('@/views/appointments/AppointmentForm.vue'),
     meta: {
       requiresAuth: true,
+      requiredAbilities: ['appointments.update', 'appointments.manage'],
       breadcrumb: 'routes.appointmentEdit',
       title: 'Edit Appointment',
       layout: 'app',
@@ -83,7 +88,7 @@ export const routes = [
     component: () => import('@/views/types/TypesList.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['types.view', 'types.manage'],
       breadcrumb: 'routes.types',
       title: 'Appointment Types',
       layout: 'app',
@@ -95,7 +100,7 @@ export const routes = [
     component: () => import('@/views/types/TypeForm.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['types.create', 'types.manage'],
       breadcrumb: 'routes.typeCreate',
       title: 'Create Type',
       layout: 'app',
@@ -108,7 +113,7 @@ export const routes = [
     component: () => import('@/views/types/TypeForm.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['types.update', 'types.manage'],
       breadcrumb: 'routes.typeEdit',
       title: 'Edit Type',
       layout: 'app',
@@ -121,7 +126,7 @@ export const routes = [
     component: () => import('@/views/statuses/StatusesList.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['statuses.view', 'statuses.manage'],
       breadcrumb: 'routes.statuses',
       title: 'Statuses',
       layout: 'app',
@@ -133,7 +138,7 @@ export const routes = [
     component: () => import('@/views/statuses/StatusForm.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['statuses.create', 'statuses.manage'],
       breadcrumb: 'routes.statusCreate',
       title: 'Create Status',
       layout: 'app',
@@ -146,7 +151,7 @@ export const routes = [
     component: () => import('@/views/statuses/StatusForm.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['statuses.update', 'statuses.manage'],
       breadcrumb: 'routes.statusEdit',
       title: 'Edit Status',
       layout: 'app',
@@ -159,7 +164,7 @@ export const routes = [
     component: () => import('@/views/roles/RolesList.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['roles.view', 'roles.manage'],
       breadcrumb: 'routes.roles',
       title: 'Roles',
       layout: 'app',
@@ -171,7 +176,7 @@ export const routes = [
     component: () => import('@/views/roles/RoleForm.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['roles.create', 'roles.manage'],
       breadcrumb: 'routes.roleCreate',
       title: 'Create Role',
       layout: 'app',
@@ -184,7 +189,7 @@ export const routes = [
     component: () => import('@/views/roles/RoleForm.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['roles.update', 'roles.manage'],
       breadcrumb: 'routes.roleEdit',
       title: 'Edit Role',
       layout: 'app',
@@ -347,7 +352,7 @@ export const routes = [
     component: () => import('@/views/employees/EmployeesList.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['employees.view', 'employees.manage'],
       breadcrumb: 'routes.employees',
       title: 'Employees',
       layout: 'app',
@@ -359,7 +364,7 @@ export const routes = [
     component: () => import('@/views/employees/EmployeeForm.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['employees.create', 'employees.manage'],
       breadcrumb: 'routes.employeeCreate',
       title: 'Invite Employee',
       layout: 'app',
@@ -372,7 +377,7 @@ export const routes = [
     component: () => import('@/views/employees/EmployeeForm.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['employees.update', 'employees.manage'],
       breadcrumb: 'routes.employeeEdit',
       title: 'Edit Employee',
       layout: 'app',
@@ -385,7 +390,7 @@ export const routes = [
     component: () => import('@/views/teams/TeamsList.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['teams.view', 'teams.manage'],
       breadcrumb: 'routes.teams',
       title: 'Teams',
       layout: 'app',
@@ -397,7 +402,7 @@ export const routes = [
     component: () => import('@/views/teams/TeamForm.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['teams.create', 'teams.manage'],
       breadcrumb: 'routes.teamCreate',
       title: 'Create Team',
       layout: 'app',
@@ -410,7 +415,7 @@ export const routes = [
     component: () => import('@/views/teams/TeamForm.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['teams.update', 'teams.manage'],
       breadcrumb: 'routes.teamEdit',
       title: 'Edit Team',
       layout: 'app',
@@ -569,6 +574,10 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.admin && !auth.isSuperAdmin) {
+    return next('/');
+  }
+
+  if (to.meta.requiredAbilities?.length && !auth.hasAny(to.meta.requiredAbilities)) {
     return next('/');
   }
 
