@@ -119,5 +119,6 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     });
 
     Route::get('lookups/assignees', [LookupController::class, 'assignees']);
+    Route::get('lookups/abilities', [LookupController::class, 'abilities']);
     Route::get('calendar/events', [CalendarController::class, 'events']);
 });
