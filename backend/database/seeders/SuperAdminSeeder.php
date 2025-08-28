@@ -10,16 +10,17 @@ class SuperAdminSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('users')->insert([
-            'id' => 1,
-            'name' => 'Super Admin',
-            'email' => 'anastasiou.ks@gmail.com',
-            'password' => Hash::make('Swordfish01!@#'),
-            'tenant_id' => 1,
-            'phone' => '123-456-7890',
-            'address' => '456 Admin St',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        DB::table('users')->updateOrInsert(
+            ['email' => 'anastasiou.ks@gmail.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('Swordfish01!@#'),
+                'tenant_id' => 1,
+                'phone' => '123-456-7890',
+                'address' => '456 Admin St',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
     }
 }
