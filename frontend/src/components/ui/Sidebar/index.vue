@@ -119,14 +119,12 @@ import { defineComponent } from "vue";
 import { menuItems } from "@/constant/data";
 import Navmenu from "./Navmenu";
 import { gsap } from "gsap";
-import simplebar from "simplebar-vue";
 import { ref, onMounted } from "vue";
 
 export default defineComponent({
   components: {
     // Icon,
     Navmenu,
-    simplebar,
   },
   data() {
     return {

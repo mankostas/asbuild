@@ -69,7 +69,7 @@ export default {
 
     carousels: {
       type: Array,
-      default: [],
+      default: () => [],
     },
   },
 
