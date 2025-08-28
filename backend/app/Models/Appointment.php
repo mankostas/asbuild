@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Carbon\Carbon;
 
 class Appointment extends Model
@@ -28,6 +29,8 @@ class Appointment extends Model
         'kau_notes',
         'form_data',
         'appointment_type_id',
+        'assignee_type',
+        'assignee_id',
     ];
 
     protected $casts = [
@@ -75,6 +78,11 @@ class Appointment extends Model
     public function type(): BelongsTo
     {
         return $this->belongsTo(AppointmentType::class, 'appointment_type_id');
+    }
+
+    public function assignee(): MorphTo
+    {
+        return $this->morphTo();
     }
 
     public function getFormSchemaAttribute()
