@@ -1,50 +1,34 @@
 import { defineStore } from 'pinia';
 import api from '@/services/api';
+import type { components, paths } from '@/types/api';
 
-interface FetchParams {
-  scope?: string;
-  tenantId?: string;
-}
-
-interface AssignPayload {
-  roleId: number;
-  userId: number;
-  tenantId?: string;
-}
+type Role = components['schemas']['Role'];
+type FetchParams = paths['/roles']['get']['parameters']['query'];
+type AssignPayload = paths['/roles/{roleId}/assign']['post']['requestBody']['content']['application/json'];
 
 export const useRolesStore = defineStore('roles', {
   state: () => ({
-    roles: [] as any[],
+    roles: [] as Role[],
   }),
   actions: {
     async fetch(params: FetchParams = {}) {
-      const { scope, tenantId } = params;
-      const { data } = await api.get('/roles', {
-        params: {
-          scope,
-          tenant_id: tenantId,
-        },
-      });
-      this.roles = data;
+      const { data } = await api.get('/roles', { params });
+      this.roles = data as Role[];
     },
-    async create(payload: any) {
+    async create(payload: Role) {
       const { data } = await api.post('/roles', payload);
-      return data;
+      return data as Role;
     },
-    async update(id: number, payload: any) {
+    async update(id: number, payload: Role) {
       const { data } = await api.patch(`/roles/${id}`, payload);
-      return data;
+      return data as Role;
     },
     async remove(id: number) {
       await api.delete(`/roles/${id}`);
-      this.roles = this.roles.filter((r: any) => r.id !== id);
+      this.roles = this.roles.filter((r: Role) => r.id !== id);
     },
-    async assignUser(payload: AssignPayload) {
-      const { roleId, userId, tenantId } = payload;
-      await api.post(`/roles/${roleId}/assign`, {
-        user_id: userId,
-        tenant_id: tenantId,
-      });
+    async assignUser(roleId: number, payload: AssignPayload) {
+      await api.post(`/roles/${roleId}/assign`, payload);
     },
   },
 });

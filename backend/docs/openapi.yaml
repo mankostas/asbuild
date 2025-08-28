@@ -1,0 +1,458 @@
+openapi: 3.0.3
+info:
+  title: Asbuild API
+  version: '1.0'
+paths:
+  /appointments:
+    get:
+      summary: List appointments
+      responses:
+        '200':
+          description: List of appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Appointment'
+    post:
+      summary: Create appointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Appointment'
+      responses:
+        '200':
+          description: Appointment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+  /appointments/{id}:
+    patch:
+      summary: Update appointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Appointment'
+      responses:
+        '200':
+          description: Updated appointment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+  /roles:
+    get:
+      summary: List roles
+      parameters:
+        - name: scope
+          in: query
+          schema:
+            type: string
+        - name: tenant_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+    post:
+      summary: Create role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Role'
+      responses:
+        '200':
+          description: Role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+  /roles/{id}:
+    patch:
+      summary: Update role
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Role'
+      responses:
+        '200':
+          description: Updated role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+    delete:
+      summary: Delete role
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted
+  /roles/{roleId}/assign:
+    post:
+      summary: Assign user to role
+      parameters:
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleAssignment'
+      responses:
+        '200':
+          description: Role assignment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+  /teams:
+    get:
+      summary: List teams
+      responses:
+        '200':
+          description: List of teams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+    post:
+      summary: Create team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Team'
+      responses:
+        '200':
+          description: Team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+  /teams/{id}:
+    patch:
+      summary: Update team
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Team'
+      responses:
+        '200':
+          description: Team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+    delete:
+      summary: Delete team
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted
+  /teams/{teamId}/employees:
+    post:
+      summary: Sync team employees
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                employee_ids:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Team with employees
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+  /appointment-types:
+    get:
+      summary: List appointment types
+      parameters:
+        - name: scope
+          in: query
+          schema:
+            type: string
+        - name: tenant_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Type'
+  /appointment-types/{id}/copy-to-tenant:
+    post:
+      summary: Copy appointment type to tenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tenant_id:
+                  type: string
+      responses:
+        '200':
+          description: Appointment type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Type'
+  /statuses:
+    get:
+      summary: List statuses
+      parameters:
+        - name: scope
+          in: query
+          schema:
+            type: string
+        - name: tenant_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of statuses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Status'
+  /statuses/{id}/copy-to-tenant:
+    post:
+      summary: Copy status to tenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tenant_id:
+                  type: string
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+  /notifications:
+    get:
+      summary: List notifications
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+  /notifications/{id}/read:
+    post:
+      summary: Mark notification read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Marked read
+components:
+  schemas:
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        status:
+          type: string
+        scheduled_at:
+          type: string
+          format: date-time
+        assignee:
+          $ref: '#/components/schemas/Employee'
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+    RoleAssignment:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: integer
+        tenant_id:
+          type: string
+          nullable: true
+    Team:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        employees:
+          type: array
+          items:
+            $ref: '#/components/schemas/Employee'
+    Type:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    Status:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        scope:
+          type: string
+    Employee:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    Notification:
+      type: object
+      required:
+        - id
+        - message
+        - created_at
+      properties:
+        id:
+          type: integer
+        message:
+          type: string
+        link:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        read_at:
+          type: string
+          format: date-time
+          nullable: true
+    ListMeta:
+      type: object
+      properties:
+        total:
+          type: integer
+        per_page:
+          type: integer
+        current_page:
+          type: integer
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string

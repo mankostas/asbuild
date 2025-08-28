@@ -21,7 +21,7 @@ describe('roles store', () => {
   it('fetches roles with params', async () => {
     (api.get as any).mockResolvedValue({ data: [{ id: 1 }] });
     const store = useRolesStore();
-    await store.fetch({ scope: 'tenant', tenantId: '1' });
+    await store.fetch({ scope: 'tenant', tenant_id: '1' });
     expect(api.get).toHaveBeenCalledWith('/roles', {
       params: { scope: 'tenant', tenant_id: '1' },
     });
@@ -31,7 +31,7 @@ describe('roles store', () => {
   it('assigns role to user', async () => {
     (api.post as any).mockResolvedValue({});
     const store = useRolesStore();
-    await store.assignUser({ roleId: 2, userId: 3, tenantId: '4' });
+    await store.assignUser(2, { user_id: 3, tenant_id: '4' });
     expect(api.post).toHaveBeenCalledWith('/roles/2/assign', {
       user_id: 3,
       tenant_id: '4',

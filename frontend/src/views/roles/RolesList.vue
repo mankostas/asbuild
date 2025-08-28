@@ -77,7 +77,7 @@ const columns = [
 ];
 
 async function fetchRoles({ page, perPage, sort, search }: any) {
-  await rolesStore.fetch({ scope: scope.value, tenantId: tenantStore.currentTenantId });
+  await rolesStore.fetch({ scope: scope.value, tenant_id: tenantStore.currentTenantId });
   let rows = rolesStore.roles.slice();
   if (search) {
     const q = String(search).toLowerCase();

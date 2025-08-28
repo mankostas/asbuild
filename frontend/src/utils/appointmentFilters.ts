@@ -1,8 +1,6 @@
-export interface Appointment {
-  title?: string;
-  status?: string;
-  scheduled_at?: string;
-}
+import type { components } from '@/types/api';
+
+export type Appointment = components['schemas']['Appointment'];
 
 export interface AppointmentFilters {
   global?: string | null;
