@@ -71,8 +71,16 @@ export const menuItems = [
     icon: "heroicons-outline:cog",
     child: [
       { childtitle: "Profile", childlink: "settings.profile" },
-      { childtitle: "Branding", childlink: "settings.branding", admin: true },
-      { childtitle: "Footer", childlink: "settings.footer", admin: true },
+      {
+        childtitle: "Branding",
+        childlink: "settings.branding",
+        requiredAbilities: ["branding.manage"],
+      },
+      {
+        childtitle: "Footer",
+        childlink: "settings.footer",
+        requiredAbilities: ["branding.manage"],
+      },
       { childtitle: "GDPR", childlink: "gdpr.index" },
     ],
   },

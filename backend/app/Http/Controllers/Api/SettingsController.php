@@ -4,103 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class SettingsController extends Controller
 {
-    protected function ensureAdmin(Request $request): void
-    {
-        if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
-            abort(403);
-        }
-    }
-
-    protected function ensureSuperAdmin(Request $request): void
-    {
-        if (! $request->user()->hasRole('SuperAdmin')) {
-            abort(403);
-        }
-    }
-
-    public function getBranding(Request $request)
-    {
-        $this->ensureAdmin($request);
-        $branding = json_decode(config('tenant.branding') ?? '{}', true);
-        return response()->json($branding);
-    }
-
-    public function updateBranding(Request $request)
-    {
-        $this->ensureAdmin($request);
-        $data = $request->validate([
-            'name' => 'nullable|string',
-            'color' => 'nullable|string',
-            'logo' => 'nullable|string',
-            'email_from' => 'nullable|email',
-        ]);
-
-        $tenantId = app('tenant_id');
-        $current = json_decode(config('tenant.branding') ?? '{}', true);
-        $branding = array_merge($current, $data);
-
-        DB::table('tenant_settings')->updateOrInsert(
-            ['tenant_id' => $tenantId, 'key' => 'branding'],
-            [
-                'value' => json_encode($branding),
-                'updated_at' => now(),
-                'created_at' => now(),
-            ]
-        );
-
-        config(['tenant.branding' => json_encode($branding)]);
-
-        return response()->json($branding);
-    }
-
-    public function getFooter(Request $request)
-    {
-        $this->ensureSuperAdmin($request);
-        $left = config('tenant.footer_left') ?? '';
-        $right = config('tenant.footer_right') ?? '';
-        return response()->json(['left' => $left, 'right' => $right]);
-    }
-
-    public function updateFooter(Request $request)
-    {
-        $this->ensureSuperAdmin($request);
-        $data = $request->validate([
-            'left' => 'required|string',
-            'right' => 'required|string',
-        ]);
-
-        $tenantId = app()->has('tenant_id') ? app('tenant_id') : $request->user()->tenant_id;
-        DB::table('tenant_settings')->upsert([
-            [
-                'tenant_id' => $tenantId,
-                'key' => 'footer_left',
-                'value' => $data['left'],
-                'updated_at' => now(),
-                'created_at' => now(),
-            ],
-            [
-                'tenant_id' => $tenantId,
-                'key' => 'footer_right',
-                'value' => $data['right'],
-                'updated_at' => now(),
-                'created_at' => now(),
-            ],
-        ], ['tenant_id', 'key'], ['value', 'updated_at']);
-
-        config([
-            'tenant.footer_left' => $data['left'],
-            'tenant.footer_right' => $data['right'],
-        ]);
-
-        return response()->json(['left' => $data['left'], 'right' => $data['right']]);
-    }
-
     public function getTheme(Request $request)
     {
         $user = $request->user();

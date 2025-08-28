@@ -21,12 +21,8 @@ const route = useRoute();
 
 const tabs = computed(() => {
   const t = [{ id: '/settings/profile', label: 'Profile' }];
-  if (
-    auth.user?.roles?.some((r: any) => ['ClientAdmin', 'SuperAdmin'].includes(r.name))
-  ) {
+  if (auth.can('branding.manage')) {
     t.push({ id: '/settings/branding', label: 'Branding' });
-  }
-  if (auth.user?.roles?.some((r: any) => r.name === 'SuperAdmin')) {
     t.push({ id: '/settings/footer', label: 'Footer' });
   }
   return t;

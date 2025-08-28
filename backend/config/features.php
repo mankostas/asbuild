@@ -10,5 +10,6 @@ return [
     'employees',
     'themes',
     'tenants',
+    'branding',
 ];
 

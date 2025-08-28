@@ -10,12 +10,12 @@ export const useBrandingStore = defineStore('branding', {
   }),
   actions: {
     async load() {
-      const { data } = await api.get('/settings/branding');
+      const { data } = await api.get('/branding');
       this.branding = data;
       this.applyTheme();
     },
     async update(payload: Record<string, any>) {
-      const { data } = await api.put('/settings/branding', payload);
+      const { data } = await api.put('/branding', payload);
       this.branding = data;
       this.applyTheme();
     },
