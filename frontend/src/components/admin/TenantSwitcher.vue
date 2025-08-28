@@ -17,8 +17,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useTenantStore } from '@/stores/tenant';
+import { useAuthStore } from '@/stores/auth';
 
 const tenantStore = useTenantStore();
+const authStore = useAuthStore();
 const selected = ref(tenantStore.currentTenantId);
 
 onMounted(async () => {
@@ -27,8 +29,13 @@ onMounted(async () => {
   }
 });
 
-function onChange() {
-  tenantStore.setTenant(selected.value);
+async function onChange() {
+  const tenant = tenantStore.tenants.find(
+    (t) => String(t.id) === String(selected.value),
+  );
+  if (tenant) {
+    await authStore.impersonate(tenant.id, tenant.name);
+  }
 }
 </script>
 
