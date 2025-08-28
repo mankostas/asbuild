@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Status;
 use Illuminate\Http\Request;
 use App\Http\Resources\StatusResource;
+use App\Services\StatusFlowService;
 
 class StatusController extends Controller
 {
@@ -118,6 +119,21 @@ class StatusController extends Controller
         return (new StatusResource($copy))
             ->response()
             ->setStatusCode(201);
+    }
+
+    public function transitions(Status $status, StatusFlowService $flow)
+    {
+        $names = $flow->allowedTransitions($status->name);
+        $query = Status::query()->whereIn('name', $names);
+
+        if ($status->tenant_id) {
+            $query->where('tenant_id', $status->tenant_id);
+        } else {
+            $query->whereNull('tenant_id');
+        }
+
+        $statuses = $query->get();
+        return StatusResource::collection($statuses);
     }
 }
 

@@ -9,6 +9,10 @@ export const useStatusesStore = defineStore('statuses', {
       const { data } = await api.get('/statuses', { params });
       return data;
     },
+    async fetchTransitions(id: number) {
+      const { data } = await api.get(`/statuses/${id}/transitions`);
+      return data;
+    },
     async copyToTenant(id: number, tenantId?: string | number) {
       const payload: any = {};
       if (tenantId) payload.tenant_id = tenantId;

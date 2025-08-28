@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Carbon\Carbon;
+use App\Services\StatusFlowService;
 
 class Appointment extends Model
 {
@@ -46,14 +47,7 @@ class Appointment extends Model
         'form_schema',
     ];
 
-    protected static $transitions = [
-        self::STATUS_DRAFT => [self::STATUS_ASSIGNED],
-        self::STATUS_ASSIGNED => [self::STATUS_IN_PROGRESS],
-        self::STATUS_IN_PROGRESS => [self::STATUS_COMPLETED],
-        self::STATUS_COMPLETED => [self::STATUS_REJECTED, self::STATUS_REDO],
-        self::STATUS_REJECTED => [self::STATUS_ASSIGNED],
-        self::STATUS_REDO => [self::STATUS_ASSIGNED],
-    ];
+    protected static $transitions = StatusFlowService::DEFAULT_TRANSITIONS;
 
     public function photos(): HasMany
     {

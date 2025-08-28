@@ -61,6 +61,7 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::apiResource('appointment-types', AppointmentTypeController::class)->only(['index', 'show']);
     Route::apiResource('roles', RoleController::class)->only(['index', 'show']);
     Route::apiResource('statuses', StatusController::class)->only(['index', 'show']);
+    Route::get('statuses/{status}/transitions', [StatusController::class, 'transitions']);
     Route::apiResource('teams', TeamController::class)->only(['index', 'show']);
 
     Route::post('appointment-types', [AppointmentTypeController::class, 'store'])->middleware(Ability::class . ':types.manage')->name('appointment-types.store');
