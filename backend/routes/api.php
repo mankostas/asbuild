@@ -64,34 +64,81 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function () {
-    Route::apiResource('appointments', AppointmentController::class);
-    Route::post('appointments/{appointment}/files', [FileController::class, 'attachToAppointment']);
+    Route::apiResource('appointments', AppointmentController::class)->middleware([
+        'index' => Ability::class . ':appointments.view',
+        'show' => Ability::class . ':appointments.view',
+        'store' => Ability::class . ':appointments.create',
+        'update' => Ability::class . ':appointments.update',
+        'destroy' => Ability::class . ':appointments.delete',
+    ]);
+    Route::post('appointments/{appointment}/files', [FileController::class, 'attachToAppointment'])
+        ->middleware(Ability::class . ':appointments.update');
 
-    Route::apiResource('appointment-types', AppointmentTypeController::class)->only(['index', 'show']);
-    Route::apiResource('roles', RoleController::class)->only(['index', 'show']);
-    Route::apiResource('statuses', StatusController::class)->only(['index', 'show']);
-    Route::get('statuses/{status}/transitions', [StatusController::class, 'transitions']);
-    Route::apiResource('teams', TeamController::class)->only(['index', 'show']);
+    Route::apiResource('appointment-types', AppointmentTypeController::class)
+        ->only(['index', 'show'])
+        ->middleware(Ability::class . ':types.view');
+    Route::apiResource('roles', RoleController::class)
+        ->only(['index', 'show'])
+        ->middleware(Ability::class . ':roles.view');
+    Route::apiResource('statuses', StatusController::class)
+        ->only(['index', 'show'])
+        ->middleware(Ability::class . ':statuses.view');
+    Route::get('statuses/{status}/transitions', [StatusController::class, 'transitions'])
+        ->middleware(Ability::class . ':statuses.view');
+    Route::apiResource('teams', TeamController::class)
+        ->only(['index', 'show'])
+        ->middleware(Ability::class . ':teams.view');
 
-    Route::post('appointment-types', [AppointmentTypeController::class, 'store'])->middleware(Ability::class . ':types.manage')->name('appointment-types.store');
-    Route::match(['put', 'patch'], 'appointment-types/{appointment_type}', [AppointmentTypeController::class, 'update'])->middleware(Ability::class . ':types.manage')->name('appointment-types.update');
-    Route::delete('appointment-types/{appointment_type}', [AppointmentTypeController::class, 'destroy'])->middleware(Ability::class . ':types.manage')->name('appointment-types.destroy');
-    Route::post('appointment-types/{appointment_type}/copy-to-tenant', [AppointmentTypeController::class, 'copyToTenant'])->middleware(Ability::class . ':types.manage')->name('appointment-types.copy');
+    Route::post('appointment-types', [AppointmentTypeController::class, 'store'])
+        ->middleware(Ability::class . ':types.create')
+        ->name('appointment-types.store');
+    Route::match(['put', 'patch'], 'appointment-types/{appointment_type}', [AppointmentTypeController::class, 'update'])
+        ->middleware(Ability::class . ':types.update')
+        ->name('appointment-types.update');
+    Route::delete('appointment-types/{appointment_type}', [AppointmentTypeController::class, 'destroy'])
+        ->middleware(Ability::class . ':types.delete')
+        ->name('appointment-types.destroy');
+    Route::post('appointment-types/{appointment_type}/copy-to-tenant', [AppointmentTypeController::class, 'copyToTenant'])
+        ->middleware(Ability::class . ':types.create')
+        ->name('appointment-types.copy');
 
-    Route::post('roles', [RoleController::class, 'store'])->middleware(Ability::class . ':roles.manage')->name('roles.store');
-    Route::match(['put', 'patch'], 'roles/{role}', [RoleController::class, 'update'])->middleware(Ability::class . ':roles.manage')->name('roles.update');
-    Route::delete('roles/{role}', [RoleController::class, 'destroy'])->middleware(Ability::class . ':roles.manage')->name('roles.destroy');
-    Route::post('roles/{role}/assign', [RoleController::class, 'assign'])->middleware(Ability::class . ':roles.manage')->name('roles.assign');
+    Route::post('roles', [RoleController::class, 'store'])
+        ->middleware(Ability::class . ':roles.manage')
+        ->name('roles.store');
+    Route::match(['put', 'patch'], 'roles/{role}', [RoleController::class, 'update'])
+        ->middleware(Ability::class . ':roles.manage')
+        ->name('roles.update');
+    Route::delete('roles/{role}', [RoleController::class, 'destroy'])
+        ->middleware(Ability::class . ':roles.manage')
+        ->name('roles.destroy');
+    Route::post('roles/{role}/assign', [RoleController::class, 'assign'])
+        ->middleware(Ability::class . ':roles.manage')
+        ->name('roles.assign');
 
-    Route::post('teams', [TeamController::class, 'store'])->middleware(Ability::class . ':teams.manage')->name('teams.store');
-    Route::match(['put', 'patch'], 'teams/{team}', [TeamController::class, 'update'])->middleware(Ability::class . ':teams.manage')->name('teams.update');
-    Route::delete('teams/{team}', [TeamController::class, 'destroy'])->middleware(Ability::class . ':teams.manage')->name('teams.destroy');
-    Route::post('teams/{team}/employees', [TeamController::class, 'syncEmployees'])->middleware(Ability::class . ':teams.manage');
+    Route::post('teams', [TeamController::class, 'store'])
+        ->middleware(Ability::class . ':teams.create')
+        ->name('teams.store');
+    Route::match(['put', 'patch'], 'teams/{team}', [TeamController::class, 'update'])
+        ->middleware(Ability::class . ':teams.update')
+        ->name('teams.update');
+    Route::delete('teams/{team}', [TeamController::class, 'destroy'])
+        ->middleware(Ability::class . ':teams.delete')
+        ->name('teams.destroy');
+    Route::post('teams/{team}/employees', [TeamController::class, 'syncEmployees'])
+        ->middleware(Ability::class . ':teams.update');
 
-    Route::post('statuses', [StatusController::class, 'store'])->middleware(Ability::class . ':statuses.manage')->name('statuses.store');
-    Route::match(['put', 'patch'], 'statuses/{status}', [StatusController::class, 'update'])->middleware(Ability::class . ':statuses.manage')->name('statuses.update');
-    Route::delete('statuses/{status}', [StatusController::class, 'destroy'])->middleware(Ability::class . ':statuses.manage')->name('statuses.destroy');
-    Route::post('statuses/{status}/copy-to-tenant', [StatusController::class, 'copyToTenant'])->middleware(Ability::class . ':statuses.manage')->name('statuses.copy');
+    Route::post('statuses', [StatusController::class, 'store'])
+        ->middleware(Ability::class . ':statuses.create')
+        ->name('statuses.store');
+    Route::match(['put', 'patch'], 'statuses/{status}', [StatusController::class, 'update'])
+        ->middleware(Ability::class . ':statuses.update')
+        ->name('statuses.update');
+    Route::delete('statuses/{status}', [StatusController::class, 'destroy'])
+        ->middleware(Ability::class . ':statuses.delete')
+        ->name('statuses.destroy');
+    Route::post('statuses/{status}/copy-to-tenant', [StatusController::class, 'copyToTenant'])
+        ->middleware(Ability::class . ':statuses.create')
+        ->name('statuses.copy');
     Route::apiResource('appointments.comments', AppointmentCommentController::class)
         ->shallow()
         ->only(['index', 'store', 'show', 'update', 'destroy']);
@@ -103,8 +150,15 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::get('notification-preferences', [NotificationController::class, 'getPreferences']);
     Route::put('notification-preferences', [NotificationController::class, 'updatePreferences']);
 
-    Route::apiResource('employees', EmployeeController::class);
-    Route::post('employees/{employee}', [EmployeeController::class, 'update']);
+    Route::apiResource('employees', EmployeeController::class)->middleware([
+        'index' => Ability::class . ':employees.view',
+        'show' => Ability::class . ':employees.view',
+        'store' => Ability::class . ':employees.manage',
+        'update' => Ability::class . ':employees.manage',
+        'destroy' => Ability::class . ':employees.manage',
+    ]);
+    Route::post('employees/{employee}', [EmployeeController::class, 'update'])
+        ->middleware(Ability::class . ':employees.manage');
 
     Route::get('settings/branding', [SettingsController::class, 'getBranding']);
     Route::put('settings/branding', [SettingsController::class, 'updateBranding']);
