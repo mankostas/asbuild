@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import api, { registerAuthStore } from '@/services/api';
 import { useThemeSettingsStore } from './themeSettings';
-import { useTenantStore } from '@/store/tenant';
+import { useTenantStore } from '@/stores/tenant';
 import {
   getAccessToken,
   getRefreshToken,
@@ -30,6 +30,10 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isAuthenticated: (state) => !!state.accessToken,
     isImpersonating: (state) => !!state.impersonatedTenant,
+    isSuperAdmin: (state) =>
+      state.user?.roles?.some(
+        (r: any) => r.name === 'SuperAdmin' || r.slug === 'super_admin',
+      ) || false,
   },
   actions: {
     async login(payload: LoginPayload) {

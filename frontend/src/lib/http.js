@@ -5,7 +5,7 @@ import {
   TENANT_HEADER,
 } from '../config/app';
 import { useAuthStore } from '../store/auth';
-import { useTenantStore } from '../store/tenant';
+import { useTenantStore } from '../stores/tenant';
 import notify from '@/plugins/notify';
 
 const http = axios.create({
@@ -18,8 +18,8 @@ http.interceptors.request.use((config) => {
   if (auth.token) {
     config.headers[AUTH_HEADER] = `Bearer ${auth.token}`;
   }
-  if (tenant.tenantId) {
-    config.headers[TENANT_HEADER] = tenant.tenantId;
+  if (tenant.currentTenantId) {
+    config.headers[TENANT_HEADER] = tenant.currentTenantId;
   }
   return config;
 });

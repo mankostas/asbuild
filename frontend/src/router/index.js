@@ -482,15 +482,8 @@ router.beforeEach(async (to, from, next) => {
     return next('/auth/login');
   }
 
-  if (to.meta.admin) {
-    const roles = auth.user?.roles?.map((r) => r.name) || [];
-    if (to.meta.super) {
-      if (!roles.includes('SuperAdmin')) {
-        return next('/');
-      }
-    } else if (!roles.some((r) => ['ClientAdmin', 'SuperAdmin'].includes(r))) {
-      return next('/');
-    }
+  if (to.meta.admin && !auth.isSuperAdmin) {
+    return next('/');
   }
 
   if (to.path === '/auth/login' && auth.isAuthenticated) {
