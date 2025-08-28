@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api, { extractFormErrors } from '@/services/api';
 import { useNotify } from '@/plugins/notify';
@@ -77,26 +77,43 @@ const tenantOptions = computed(() => [
 
 const isEdit = computed(() => route.name === 'roles.edit');
 
+async function loadRole() {
+  const { data } = await api.get(`/roles/${route.params.id}`);
+  if (data.name === 'SuperAdmin') {
+    notify.error('Cannot modify SuperAdmin role');
+    router.push({ name: 'roles.list' });
+    return;
+  }
+  name.value = data.name;
+  slug.value = data.slug || '';
+  abilities.value = data.abilities || [];
+  tenantId.value = data.tenant_id || '';
+  level.value = data.level ?? 0;
+}
+
 onMounted(async () => {
-  const { data: abilityData } = await api.get('/lookups/abilities');
-  abilityOptions.value = abilityData;
+  try {
+    const { data: abilityData } = await api.get('/lookups/abilities');
+    abilityOptions.value = abilityData;
+  } catch (e) {
+    abilityOptions.value = [];
+  }
   if (auth.isSuperAdmin && !tenantStore.tenants.length) {
     await tenantStore.loadTenants();
   }
   if (isEdit.value) {
-    const { data } = await api.get(`/roles/${route.params.id}`);
-    if (data.name === 'SuperAdmin') {
-      notify.error('Cannot modify SuperAdmin role');
-      router.push({ name: 'roles.list' });
-      return;
-    }
-    name.value = data.name;
-    slug.value = data.slug || '';
-    abilities.value = data.abilities || [];
-    tenantId.value = data.tenant_id || '';
-    level.value = data.level ?? 0;
+    await loadRole();
   }
 });
+
+watch(
+  () => route.params.id,
+  () => {
+    if (isEdit.value) {
+      loadRole();
+    }
+  },
+);
 
 const canSubmit = computed(() =>
   !!name.value &&
