@@ -2,6 +2,13 @@
     <div>
       <form @submit.prevent="onSubmit" class="grid grid-cols-2 gap-8">
       <div>
+        <div v-if="auth.isSuperAdmin" class="mb-4">
+          <label class="block font-medium mb-1" for="tenant">Tenant</label>
+          <select id="tenant" v-model="tenantId" class="border rounded p-2 w-full">
+            <option value="">Global</option>
+            <option v-for="t in tenantStore.tenants" :key="t.id" :value="t.id">{{ t.name }}</option>
+          </select>
+        </div>
         <div class="mb-4">
           <label class="block font-medium mb-1" for="name">Name<span class="text-red-600">*</span></label>
           <input id="name" v-model="name" class="border rounded p-2 w-full" />
@@ -114,6 +121,8 @@ import { useRoute, useRouter } from 'vue-router';
 import api from '@/services/api';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
 import draggable from 'vuedraggable';
+import { useAuthStore } from '@/stores/auth';
+import { useTenantStore } from '@/stores/tenant';
 
 interface Field {
   id: number;
@@ -126,6 +135,8 @@ interface Field {
 
 const route = useRoute();
 const router = useRouter();
+const auth = useAuthStore();
+const tenantStore = useTenantStore();
 
 const name = ref('');
 const fields = ref<Field[]>([]);
@@ -133,6 +144,7 @@ const previewModel = ref<any>({});
 const serverError = ref('');
 const allStatuses = ref<any[]>([]);
 const selectedStatuses = ref<any[]>([]);
+const tenantId = ref<string | number | ''>('');
 
 const fieldTypes = [
   { key: 'text', label: 'Text', schema: { type: 'string' } },
@@ -140,6 +152,7 @@ const fieldTypes = [
   { key: 'date', label: 'Date', schema: { type: 'string', format: 'date' } },
   { key: 'time', label: 'Time', schema: { type: 'string', format: 'time' } },
   { key: 'boolean', label: 'Checkbox', schema: { type: 'boolean' } },
+  { key: 'assignee', label: 'Assignee', schema: { type: 'object', 'x-control': 'assignee' } },
 ];
 
 const isEdit = computed(() => route.name === 'types.edit');
@@ -200,9 +213,13 @@ watch(
 onMounted(async () => {
   const { data: statusData } = await api.get('/statuses');
   allStatuses.value = statusData;
+  if (auth.isSuperAdmin && !tenantStore.tenants.length) {
+    await tenantStore.loadTenants();
+  }
   if (isEdit.value) {
     const { data } = await api.get(`/appointment-types/${route.params.id}`);
     name.value = data.name;
+    tenantId.value = data.tenant_id || '';
     if (data.fields_summary) {
       if (Array.isArray(data.fields_summary)) {
         fields.value = data.fields_summary.map((f: any) => ({
@@ -250,6 +267,9 @@ async function onSubmit() {
   };
   if (selectedStatuses.value.length > 1) {
     payload.statuses = JSON.stringify(statusesObj.value);
+  }
+  if (auth.isSuperAdmin) {
+    payload.tenant_id = tenantId.value || undefined;
   }
   try {
     if (isEdit.value) {
