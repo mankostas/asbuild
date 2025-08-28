@@ -104,8 +104,8 @@ class TenantController extends Controller
         $this->ensureSuperAdmin($request);
         $user = User::where('tenant_id', $tenant->id)->firstOrFail();
         $user->tokens()->delete();
-        $accessToken = $user->createToken('access-token', ['*'], now()->addMinutes(15));
-        $refreshToken = $user->createToken('refresh-token', ['refresh'], now()->addDays(30));
+        $accessToken = $user->createToken('impersonation', ['*'], now()->addMinutes(15));
+        $refreshToken = $user->createToken('impersonation-refresh', ['refresh'], now()->addDays(30));
         AuditLog::create([
             'user_id' => $request->user()->id,
             'action' => 'impersonate',
