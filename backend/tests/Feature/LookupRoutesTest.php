@@ -61,8 +61,10 @@ class LookupRoutesTest extends TestCase
         $this->assertEqualsCanonicalizing(['roles.manage', 'teams.manage'], $abilities);
     }
 
-    public function test_abilities_lookup_for_super_admin_returns_full_list(): void
+    public function test_super_admin_abilities_lookup_scopes_for_tenant_features(): void
     {
+        $this->tenant->update(['features' => ['appointments']]);
+
         $rootTenant = Tenant::create(['name' => 'Root']);
         $superRole = Role::create([
             'name' => 'SuperAdmin',
@@ -80,11 +82,12 @@ class LookupRoutesTest extends TestCase
         $superUser->roles()->attach($superRole->id, ['tenant_id' => $rootTenant->id]);
         Sanctum::actingAs($superUser);
 
-        $abilities = $this->getJson('/api/lookups/abilities?forTenant=1')
+        $abilities = $this->withHeader('X-Tenant-ID', $this->tenant->id)
+            ->getJson('/api/lookups/abilities?forTenant=1')
             ->assertStatus(200)
             ->json();
 
-        $this->assertEqualsCanonicalizing(config('abilities'), $abilities);
+        $this->assertEqualsCanonicalizing($this->tenant->allowedAbilities(), $abilities);
     }
 
     public function test_features_lookup_returns_list(): void
