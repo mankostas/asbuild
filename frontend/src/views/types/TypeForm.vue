@@ -1,5 +1,5 @@
 <template>
-    <div v-if="can('types.manage')">
+    <div v-if="canAccess">
       <form @submit.prevent="onSubmit" class="grid grid-cols-2 gap-8">
       <div>
         <div v-if="auth.isSuperAdmin" class="mb-4">
@@ -160,6 +160,11 @@ const fieldTypes = [
 ];
 
 const isEdit = computed(() => route.name === 'types.edit');
+const canAccess = computed(() =>
+  isEdit.value
+    ? can('types.update') || can('types.manage')
+    : can('types.create') || can('types.manage'),
+);
 
 const availableStatuses = computed(() =>
   allStatuses.value.filter(

@@ -12,7 +12,7 @@
         </select>
       </div>
       <RouterLink
-        v-if="can('roles.manage')"
+        v-if="can('roles.create') || can('roles.manage')"
         class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
         :to="{ name: 'roles.create' }"
       >
@@ -25,18 +25,33 @@
       :columns="columns"
       :fetcher="fetchRoles"
     >
-      <template #actions="{ row }">
-        <div
-          v-if="row.name !== 'SuperAdmin' && can('roles.manage')"
-          class="flex gap-2"
-        >
-          <button class="text-blue-600" title="Edit" @click="edit(row.id)">
+      <template
+        v-if="can('roles.update') || can('roles.delete') || can('roles.manage')"
+        #actions="{ row }"
+      >
+        <div v-if="row.name !== 'SuperAdmin'" class="flex gap-2">
+          <button
+            v-if="can('roles.update') || can('roles.manage')"
+            class="text-blue-600"
+            title="Edit"
+            @click="edit(row.id)"
+          >
             <Icon icon="heroicons-outline:pencil-square" class="w-5 h-5" />
           </button>
-          <button class="text-red-600" title="Delete" @click="remove(row.id)">
+          <button
+            v-if="can('roles.delete') || can('roles.manage')"
+            class="text-red-600"
+            title="Delete"
+            @click="remove(row.id)"
+          >
             <Icon icon="heroicons-outline:trash" class="w-5 h-5" />
           </button>
-          <button class="text-green-600" title="Assign" @click="openAssign(row.id)">
+          <button
+            v-if="can('roles.manage')"
+            class="text-green-600"
+            title="Assign"
+            @click="openAssign(row.id)"
+          >
             <Icon icon="heroicons-outline:user-plus" class="w-5 h-5" />
           </button>
         </div>

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="can('roles.manage')">
+  <div v-if="canAccess">
     <form @submit.prevent="onSubmit" class="max-w-md grid gap-4">
       <div>
         <label class="block font-medium mb-1" for="name">Name<span class="text-red-600">*</span></label>
@@ -91,6 +91,11 @@ const tenantOptions = computed(() => [
 ]);
 
 const isEdit = computed(() => route.name === 'roles.edit');
+const canAccess = computed(() =>
+  isEdit.value
+    ? can('roles.update') || can('roles.manage')
+    : can('roles.create') || can('roles.manage'),
+);
 
 async function loadRole() {
   const { data } = await api.get(`/roles/${route.params.id}`);

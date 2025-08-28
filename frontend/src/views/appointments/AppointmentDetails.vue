@@ -20,7 +20,10 @@
       </ul>
       <div class="mt-2">
         <StatusChanger
-          v-if="currentStatusId"
+          v-if="
+            currentStatusId &&
+            (can('appointments.update') || can('appointments.manage'))
+          "
           :appointment-id="appointment.id"
           :status-id="currentStatusId"
           @updated="onStatusChanged"
@@ -60,7 +63,11 @@
         <div v-else-if="active === 'comments'">
           <Card>
             <CommentsThread :comments="appointment.comments" class="mb-4" />
-            <CommentEditor :appointment-id="appointment.id" @added="onCommentAdded" />
+            <CommentEditor
+              v-if="can('appointments.update') || can('appointments.manage')"
+              :appointment-id="appointment.id"
+              @added="onCommentAdded"
+            />
           </Card>
         </div>
       </template>
@@ -80,6 +87,7 @@ import CommentEditor from '@/components/comments/CommentEditor.vue';
 import StatusChanger from './StatusChanger.vue';
 import { useStatusesStore } from '@/stores/statuses';
 import { formatDisplay, parseISO, toISO } from '@/utils/datetime';
+import { can } from '@/stores/auth';
 
 const route = useRoute();
 

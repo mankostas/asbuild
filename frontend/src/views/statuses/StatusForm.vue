@@ -1,5 +1,5 @@
 <template>
-  <div v-if="can('statuses.manage')">
+  <div v-if="canAccess">
     <form @submit.prevent="onSubmit" class="max-w-md grid gap-4">
       <div v-if="auth.isSuperAdmin">
         <label class="block font-medium mb-1" for="tenant">Tenant</label>
@@ -42,6 +42,11 @@ const serverError = ref('');
 const tenantId = ref<string | number | ''>('');
 
 const isEdit = computed(() => route.name === 'statuses.edit');
+const canAccess = computed(() =>
+  isEdit.value
+    ? can('statuses.update') || can('statuses.manage')
+    : can('statuses.create') || can('statuses.manage'),
+);
 
 onMounted(async () => {
   if (auth.isSuperAdmin) {
