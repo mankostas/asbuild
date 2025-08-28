@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Role;
+use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -90,6 +91,10 @@ class RoleController extends Controller
             }
             $data['tenant_id'] = $tenantId;
             $data['level'] = $level;
+
+            $tenant = Tenant::find($tenantId);
+            $allowed = $tenant ? $tenant->allowedAbilities() : [];
+            $data['abilities'] = array_values(array_intersect($data['abilities'] ?? [], $allowed));
         }
 
         if ($data['name'] === 'SuperAdmin' || $data['slug'] === 'super_admin') {
@@ -146,6 +151,10 @@ class RoleController extends Controller
                 abort(403);
             }
             $data['level'] = $level;
+
+            $tenant = Tenant::find($request->user()->tenant_id);
+            $allowed = $tenant ? $tenant->allowedAbilities() : [];
+            $data['abilities'] = array_values(array_intersect($data['abilities'] ?? [], $allowed));
         }
 
         if (($data['name'] ?? $role->name) === 'SuperAdmin' || ($data['slug'] ?? $role->slug) === 'super_admin') {
