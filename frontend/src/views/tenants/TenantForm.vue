@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="canAccess">
     <form @submit.prevent="onSubmit" class="max-w-md grid gap-4">
       <Textinput label="Name" v-model="form.name" />
       <div v-if="errors.name" class="text-red-600 text-sm">{{ errors.name }}</div>
@@ -43,11 +43,16 @@ import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import vSelect from 'vue-select';
 import { useForm } from 'vee-validate';
 import { useTenantStore } from '@/stores/tenant';
+import { can } from '@/stores/auth';
 
 const route = useRoute();
 const router = useRouter();
 const isEdit = computed(() => route.name === 'tenants.edit');
 const tenantStore = useTenantStore();
+
+const canAccess = computed(
+  () => can('tenants.create') || can('tenants.update') || can('tenants.manage'),
+);
 
 const form = ref({
   name: '',

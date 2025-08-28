@@ -56,6 +56,12 @@ export const menuItems = [
     admin: true,
   },
   {
+    title: "Tenants",
+    icon: "heroicons-outline:building-office",
+    link: "tenants.list",
+    admin: true,
+  },
+  {
     title: "Notifications",
     icon: "heroicons-outline:bell",
     link: "notifications.inbox",
@@ -68,7 +74,6 @@ export const menuItems = [
       { childtitle: "Branding", childlink: "settings.branding", admin: true },
       { childtitle: "Footer", childlink: "settings.footer", admin: true },
       { childtitle: "GDPR", childlink: "gdpr.index" },
-      { childtitle: "Tenants", childlink: "tenants.list", admin: true },
     ],
   },
 ];
@@ -148,6 +153,7 @@ export const topMenu = [
     icon: "heroicons-outline:building-office",
     link: "tenants.list",
     admin: true,
+    requiredAbilities: ["tenants.view", "tenants.manage"],
   },
 ];
 

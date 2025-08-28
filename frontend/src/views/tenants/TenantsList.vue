@@ -1,7 +1,12 @@
 <template>
     <div>
       <div class="mb-4">
-        <Button btnClass="btn-primary" text="Add Tenant" link="/tenants/create" />
+        <Button
+          v-if="can('tenants.create') || can('tenants.manage')"
+          btnClass="btn-primary"
+          text="Add Tenant"
+          link="/tenants/create"
+        />
       </div>
       <DashcodeServerTable
         :key="tableKey"
@@ -10,10 +15,30 @@
     >
       <template #actions="{ row }">
         <div class="flex gap-2">
-          <Button btnClass="btn-outline-primary btn-sm" text="View" @click="view(row.id)" />
-          <Button :link="`/tenants/${row.id}/edit`" btnClass="btn-outline-primary btn-sm" text="Edit" />
-          <Button btnClass="btn-outline-secondary btn-sm" text="Impersonate" @click="impersonate(row)" />
-          <Button btnClass="btn-outline-danger btn-sm" text="Delete" @click="remove(row.id)" />
+          <Button
+            v-if="can('tenants.view') || can('tenants.manage')"
+            btnClass="btn-outline-primary btn-sm"
+            text="View"
+            @click="view(row.id)"
+          />
+          <Button
+            v-if="can('tenants.update') || can('tenants.manage')"
+            :link="`/tenants/${row.id}/edit`"
+            btnClass="btn-outline-primary btn-sm"
+            text="Edit"
+          />
+          <Button
+            v-if="can('tenants.manage')"
+            btnClass="btn-outline-secondary btn-sm"
+            text="Impersonate"
+            @click="impersonate(row)"
+          />
+          <Button
+            v-if="can('tenants.delete') || can('tenants.manage')"
+            btnClass="btn-outline-danger btn-sm"
+            text="Delete"
+            @click="remove(row.id)"
+          />
         </div>
       </template>
     </DashcodeServerTable>
@@ -26,7 +51,7 @@ import { useRouter } from 'vue-router';
 import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
 import Button from '@/components/ui/Button/index.vue';
 import api from '@/services/api';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore, can } from '@/stores/auth';
 
 const auth = useAuthStore();
 const router = useRouter();

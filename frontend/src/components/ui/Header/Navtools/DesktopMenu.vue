@@ -103,20 +103,20 @@
 <script>
 import { topMenu } from "@/constant/data";
 import Icon from "../../Icon";
+import { useAuthStore } from "@/stores/auth";
+
 export default {
   components: {
     Icon,
   },
-  data() {
-    return {
-      topMenu,
-    };
-  },
-
   computed: {
-    newMenulist: function () {
-      return this.topMenu.filter(function (item) {
-        return Boolean(!item.isHeadr);
+    newMenulist() {
+      const auth = useAuthStore();
+      return topMenu.filter((item) => {
+        if (item.isHeadr) return false;
+        if (item.admin && !auth.isSuperAdmin) return false;
+        const req = item.requiredAbilities || [];
+        return auth.hasAny(req);
       });
     },
   },

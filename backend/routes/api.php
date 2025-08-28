@@ -59,8 +59,15 @@ Route::prefix('uploads')->middleware(['auth:sanctum', EnsureTenantScope::class])
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::apiResource('tenants', TenantController::class);
-    Route::post('tenants/{tenant}/impersonate', [TenantController::class, 'impersonate']);
+    Route::apiResource('tenants', TenantController::class)->middleware([
+        'index' => Ability::class . ':tenants.view',
+        'show' => Ability::class . ':tenants.view',
+        'store' => Ability::class . ':tenants.create',
+        'update' => Ability::class . ':tenants.update',
+        'destroy' => Ability::class . ':tenants.delete',
+    ]);
+    Route::post('tenants/{tenant}/impersonate', [TenantController::class, 'impersonate'])
+        ->middleware(Ability::class . ':tenants.manage');
 });
 
 Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function () {

@@ -7,7 +7,12 @@
       <div><strong>Address:</strong> {{ tenant.address }}</div>
     </div>
     <div class="mt-4 flex gap-2">
-      <Button btnClass="btn-primary btn-sm" text="Edit" :link="`/tenants/${tenant.id}/edit`" />
+      <Button
+        v-if="can('tenants.update') || can('tenants.manage')"
+        btnClass="btn-primary btn-sm"
+        text="Edit"
+        :link="`/tenants/${tenant.id}/edit`"
+      />
       <Button btnClass="btn-secondary btn-sm" text="Back" link="/tenants" />
     </div>
   </div>
@@ -18,6 +23,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/services/api';
 import Button from '@/components/ui/Button/index.vue';
+import { can } from '@/stores/auth';
 
 const route = useRoute();
 const tenant = ref<any>(null);

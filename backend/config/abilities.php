@@ -1,6 +1,13 @@
 <?php
 
 return [
+    // Tenants
+    'tenants.view',
+    'tenants.create',
+    'tenants.update',
+    'tenants.delete',
+    'tenants.manage',
+
     // Appointments
     'appointments.view',
     'appointments.create',
