@@ -51,14 +51,27 @@ class LookupRoutesTest extends TestCase
 
     public function test_abilities_lookup_scopes_for_tenant_features(): void
     {
-        $this->tenant->update(['features' => ['roles', 'teams']]);
+        $this->tenant->update(['features' => ['roles', 'teams', 'employees']]);
 
         $abilities = $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->getJson('/api/lookups/abilities?forTenant=1')
             ->assertStatus(200)
             ->json();
 
-        $this->assertEqualsCanonicalizing(['roles.manage', 'teams.manage'], $abilities);
+        $this->assertEqualsCanonicalizing([
+            'roles.view',
+            'roles.manage',
+            'teams.view',
+            'teams.create',
+            'teams.update',
+            'teams.delete',
+            'teams.manage',
+            'employees.view',
+            'employees.create',
+            'employees.update',
+            'employees.delete',
+            'employees.manage',
+        ], $abilities);
     }
 
     public function test_super_admin_abilities_lookup_scopes_for_tenant_features(): void
@@ -102,6 +115,7 @@ class LookupRoutesTest extends TestCase
         $this->assertContains(['slug' => 'types', 'label' => 'Appointment Types'], $features);
         $this->assertContains(['slug' => 'teams', 'label' => 'Teams'], $features);
         $this->assertContains(['slug' => 'statuses', 'label' => 'Statuses'], $features);
+        $this->assertContains(['slug' => 'employees', 'label' => 'Employees'], $features);
     }
 }
 
