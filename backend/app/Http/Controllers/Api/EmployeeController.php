@@ -8,7 +8,7 @@ use App\Models\Role;
 use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use App\Http\Resources\EmployeeResource;
 use App\Support\ListQuery;
@@ -69,8 +69,6 @@ class EmployeeController extends Controller
             abort(403, 'SuperAdmin role cannot be assigned');
         }
 
-        $password = Str::random(config('security.password.min_length'));
-
         $tenantId = $this->getTenantId($request);
         Tenant::findOrFail($tenantId);
 
@@ -78,7 +76,7 @@ class EmployeeController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'tenant_id' => $tenantId,
-            'password' => Hash::make($password),
+            'password' => Hash::make(Str::random(config('security.password.min_length'))),
             'phone' => $data['phone'] ?? null,
             'address' => $data['address'] ?? null,
         ]);
@@ -90,9 +88,7 @@ class EmployeeController extends Controller
             $user->roles()->sync($roleData);
         }
 
-        Mail::raw("You have been invited. Temporary password: {$password}", function ($m) use ($user) {
-            $m->to($user->email)->subject('Invitation');
-        });
+        Password::sendResetLink(['email' => $user->email]);
 
         return (new EmployeeResource($user->load('roles')))
             ->response()

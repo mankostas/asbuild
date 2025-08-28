@@ -10,6 +10,15 @@
       />
       <Textinput label="Phone" v-model="form.phone" />
       <Textinput label="Address" v-model="form.address" />
+      <Textinput v-if="!isEdit" label="Admin Name" v-model="form.user_name" />
+      <div v-if="!isEdit && errors.user_name" class="text-red-600 text-sm">{{ errors.user_name }}</div>
+      <Textinput
+        v-if="!isEdit"
+        label="Admin Email"
+        type="email"
+        v-model="form.user_email"
+      />
+      <div v-if="!isEdit && errors.user_email" class="text-red-600 text-sm">{{ errors.user_email }}</div>
       <VueSelect label="Features" :error="errors.features">
         <vSelect
           v-model="form.features"
@@ -46,6 +55,8 @@ const form = ref({
   phone: '',
   address: '',
   features: [] as string[],
+  user_name: '',
+  user_email: '',
 });
 
 const featureOptions = ref<{ label: string; value: string }[]>([]);
@@ -71,6 +82,8 @@ onMounted(async () => {
       phone: data.phone || '',
       address: data.address || '',
       features: Array.isArray(data.features) ? data.features : [],
+      user_name: '',
+      user_email: '',
     };
   }
 });
@@ -87,6 +100,10 @@ const onSubmit = handleSubmit(async () => {
     address: form.value.address,
     features: form.value.features,
   };
+  if (!isEdit.value) {
+    payload.user_name = form.value.user_name;
+    payload.user_email = form.value.user_email;
+  }
   try {
     if (isEdit.value) {
       await api.patch(`/tenants/${route.params.id}`, payload);
