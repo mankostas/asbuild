@@ -52,6 +52,10 @@ class LookupRoutesTest extends TestCase
             ->json();
 
         $this->assertContains('appointments', $features);
+        $this->assertContains('roles', $features);
+        $this->assertContains('types', $features);
+        $this->assertContains('teams', $features);
+        $this->assertContains('employees', $features);
     }
 }
 
