@@ -38,6 +38,10 @@ export const useAuthStore = defineStore('auth', {
       ) || false,
     can: (state) => (ability: string) =>
       state.abilities.includes('*') || state.abilities.includes(ability),
+    hasAny: (state) => (abilities: string[]) =>
+      abilities.length === 0 ||
+      state.abilities.includes('*') ||
+      abilities.some((a) => state.abilities.includes(a)),
   },
   actions: {
     async login(payload: LoginPayload) {
