@@ -15,6 +15,7 @@
         <li>Started: {{ format(appointment.started_at) || '—' }}</li>
         <li>Completed: {{ format(appointment.completed_at) || '—' }}</li>
         <li>SLA End: {{ format(appointment.sla_end_at) || '—' }}</li>
+        <li>Assignee: {{ appointment.assignee?.label || '—' }}</li>
         <li>SLA: {{ slaStatus }}</li>
       </ul>
       <div class="flex flex-wrap gap-2 mt-2">

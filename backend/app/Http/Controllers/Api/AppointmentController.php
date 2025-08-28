@@ -19,7 +19,7 @@ class AppointmentController extends Controller
     public function index(Request $request)
     {
         $appointments = Appointment::where('tenant_id', $request->user()->tenant_id)
-            ->with('type')
+            ->with(['type', 'assignee'])
             ->paginate($request->query('per_page', 15));
 
         return AppointmentResource::collection($appointments->items())->additional([
@@ -58,6 +58,7 @@ class AppointmentController extends Controller
         $this->formSchemaService->mapAssignee($type->form_schema ?? [], $data);
 
         $appointment = Appointment::create($data);
+        $appointment->load('type', 'assignee');
 
         return (new AppointmentResource($appointment))
             ->response()
@@ -67,7 +68,7 @@ class AppointmentController extends Controller
     public function show(Appointment $appointment)
     {
         $this->authorize('view', $appointment);
-        return new AppointmentResource($appointment->load('photos', 'comments', 'type'));
+        return new AppointmentResource($appointment->load('photos', 'comments', 'type', 'assignee'));
     }
 
     public function update(Request $request, Appointment $appointment)
@@ -129,7 +130,7 @@ class AppointmentController extends Controller
         $appointment->fill($data);
         $appointment->save();
 
-        return new AppointmentResource($appointment->load('photos', 'comments', 'type'));
+        return new AppointmentResource($appointment->load('photos', 'comments', 'type', 'assignee'));
     }
 
     public function destroy(Appointment $appointment)
