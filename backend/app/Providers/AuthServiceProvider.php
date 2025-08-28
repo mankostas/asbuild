@@ -34,11 +34,9 @@ class AuthServiceProvider extends ServiceProvider
             return $user->tenant_id === $tenantId;
         });
 
-        Gate::define('roles.manage', fn ($user) => $this->hasAbility($user, 'roles.manage'));
-        Gate::define('teams.manage', fn ($user) => $this->hasAbility($user, 'teams.manage'));
-        Gate::define('appointments.assign', fn ($user) => $this->hasAbility($user, 'appointments.assign'));
-        Gate::define('types.manage', fn ($user) => $this->hasAbility($user, 'types.manage'));
-        Gate::define('statuses.manage', fn ($user) => $this->hasAbility($user, 'statuses.manage'));
+        foreach (config('abilities', []) as $code) {
+            Gate::define($code, fn ($user) => $this->hasAbility($user, $code));
+        }
     }
 
     protected function hasAbility($user, string $code): bool
