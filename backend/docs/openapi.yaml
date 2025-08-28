@@ -372,6 +372,8 @@ components:
         description:
           type: string
           nullable: true
+        level:
+          type: integer
     RoleAssignment:
       type: object
       required:

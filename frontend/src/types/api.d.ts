@@ -693,6 +693,7 @@ export interface components {
             id?: number;
             name?: string;
             description?: string | null;
+            level?: number;
         };
         RoleAssignment: {
             user_id: number;
