@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Tenant;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -56,13 +57,25 @@ class LookupController extends Controller
         return $results->sortBy('label')->values();
     }
 
-    public function abilities()
+    public function abilities(Request $request)
     {
-        return collect(config('abilities'))->values();
+        if ($request->boolean('forTenant') && ! $request->user()->hasRole('SuperAdmin')) {
+            $tenant = $request->user()->tenant ?? Tenant::find($request->user()->tenant_id);
+
+            return $tenant?->allowedAbilities() ?? [];
+        }
+
+        return collect(config('abilities'))->values()->all();
     }
 
     public function features()
     {
-        return collect(config('features'))->values();
+        return collect(config('feature_map'))
+            ->map(fn ($data, $slug) => [
+                'slug' => $slug,
+                'label' => $data['label'],
+            ])
+            ->values()
+            ->all();
     }
 }
