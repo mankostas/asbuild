@@ -44,11 +44,6 @@ class User extends Authenticatable
 
     public function isSuperAdmin(): bool
     {
-        $token = $this->currentAccessToken();
-        if ($token && str_starts_with($token->name, 'impersonation')) {
-            return true;
-        }
-
         return $this->roles()
             ->where(function ($q) {
                 $q->where('slug', 'super_admin')
@@ -59,11 +54,6 @@ class User extends Authenticatable
 
     public function hasRole(string $role): bool
     {
-        $token = $this->currentAccessToken();
-        if ($token && str_starts_with($token->name, 'impersonation')) {
-            return true;
-        }
-
         $slug = Str::snake($role);
 
         return $this->roles()
