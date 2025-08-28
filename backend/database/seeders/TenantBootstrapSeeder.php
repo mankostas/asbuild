@@ -39,6 +39,17 @@ class TenantBootstrapSeeder extends Seeder
         $tenantId = DB::table('tenants')->where('id', 1)->value('id');
 
         // Tenant roles
+        DB::table('roles')->updateOrInsert(
+            ['tenant_id' => $tenantId, 'slug' => 'tenant'],
+            [
+                'name' => 'Tenant',
+                'level' => 1,
+                'abilities' => json_encode([]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
         $managerAbilities = ['appointments.manage', 'teams.manage', 'statuses.manage'];
         $agentAbilities = ['appointments.view', 'appointments.update'];
 

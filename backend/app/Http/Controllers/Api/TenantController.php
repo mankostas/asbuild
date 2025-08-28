@@ -38,7 +38,7 @@ class TenantController extends Controller
             'address' => 'nullable|string',
         ]);
         $tenant = Tenant::create($data);
-        return response()->json($tenant, 201);
+        return response()->json($tenant->load('roles'), 201);
     }
 
     public function show(Request $request, Tenant $tenant)
