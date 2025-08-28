@@ -19,11 +19,11 @@
       </ul>
       <div class="flex flex-wrap gap-2 mt-2">
         <Button
-          v-for="a in changeActions"
-          :key="a.value"
-          :text="`Mark ${a.label}`"
+          v-for="s in changeActions"
+          :key="s"
+          :text="`Mark ${s.replace(/_/g, ' ')}`"
           btnClass="btn-outline-primary btn-sm"
-          @click="updateStatus(a.value)"
+          @click="updateStatus(s)"
         />
       </div>
     </Card>
@@ -145,10 +145,9 @@ async function updateStatus(status: string) {
   }
 }
 
-const changeActions = [
-  { label: 'In Progress', value: 'in_progress' },
-  { label: 'Completed', value: 'completed' },
-  { label: 'Rejected', value: 'rejected' },
-  { label: 'Redo', value: 'redo' },
-];
+const changeActions = computed(() => {
+  const map = appointment.value?.type?.statuses || {};
+  const current = appointment.value?.status;
+  return map[current] || [];
+});
 </script>

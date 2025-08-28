@@ -73,14 +73,7 @@ const serverError = ref('');
 const showError = ref(false);
 const originalStatus = ref('');
 
-const statusOptions = [
-  'draft',
-  'assigned',
-  'in_progress',
-  'completed',
-  'rejected',
-  'redo',
-];
+const statusOptions = ref<string[]>([]);
 
 const schema = yup.object({
   typeId: yup.mixed().required('Type is required'),
@@ -94,8 +87,12 @@ const { value: typeId, errorMessage: typeError } = useField<string | number>(
 const isEdit = computed(() => route.name === 'appointments.edit');
 
 onMounted(async () => {
-  const { data } = await api.get('/appointment-types');
-  types.value = data;
+  const [typesRes, statusesRes] = await Promise.all([
+    api.get('/appointment-types'),
+    api.get('/statuses'),
+  ]);
+  types.value = typesRes.data;
+  statusOptions.value = statusesRes.data.map((s: any) => s.name);
   if (isEdit.value) {
     const res = await api.get(`/appointments/${route.params.id}`);
     const appt = res.data;
@@ -106,6 +103,11 @@ onMounted(async () => {
     slaEndAt.value = appt.sla_end_at || '';
     status.value = appt.status;
     originalStatus.value = appt.status;
+    const map = appt.type?.statuses || {};
+    const allowed = Array.from(new Set([...Object.keys(map), ...Object.values(map).flat()]));
+    if (allowed.length) {
+      statusOptions.value = allowed;
+    }
   }
 });
 
