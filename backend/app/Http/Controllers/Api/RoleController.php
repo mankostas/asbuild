@@ -8,9 +8,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\RoleUpsertRequest;
 use App\Http\Resources\RoleResource;
+use App\Support\ListQuery;
 
 class RoleController extends Controller
 {
+    use ListQuery;
+
     protected function ensureAdmin(Request $request): void
     {
         if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
@@ -27,15 +30,10 @@ class RoleController extends Controller
 
         if (! $request->user()->hasRole('SuperAdmin')) {
             $tenantId = $request->user()->tenant_id;
-            $roles = Role::where('tenant_id', $tenantId)
-                ->paginate($request->query('per_page', 15));
-
-            return RoleResource::collection($roles->items())->additional([
-                'meta' => [
-                    'page' => $roles->currentPage(),
-                    'per_page' => $roles->perPage(),
-                    'total' => $roles->total(),
-                ],
+            $base = Role::where('tenant_id', $tenantId);
+            $result = $this->listQuery($base, $request, ['name'], ['name']);
+            return RoleResource::collection($result['data'])->additional([
+                'meta' => $result['meta'],
             ]);
         }
 
@@ -64,14 +62,10 @@ class RoleController extends Controller
                 break;
         }
 
-        $roles = $query->paginate($request->query('per_page', 15));
+        $result = $this->listQuery($query, $request, ['name'], ['name']);
 
-        return RoleResource::collection($roles->items())->additional([
-            'meta' => [
-                'page' => $roles->currentPage(),
-                'per_page' => $roles->perPage(),
-                'total' => $roles->total(),
-            ],
+        return RoleResource::collection($result['data'])->additional([
+            'meta' => $result['meta'],
         ]);
     }
 

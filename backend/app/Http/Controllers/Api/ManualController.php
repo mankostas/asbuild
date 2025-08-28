@@ -8,9 +8,12 @@ use App\Services\FileStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Resources\ManualResource;
+use App\Support\ListQuery;
 
 class ManualController extends Controller
 {
+    use ListQuery;
+
     protected function ensureAdmin(Request $request): void
     {
         if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
@@ -21,29 +24,20 @@ class ManualController extends Controller
     public function index(Request $request)
     {
         $tenantId = $request->user()->tenant_id;
-        $search = $request->query('q', '');
+        $search = $request->query('search', '');
         $perPage = $request->query('per_page', 15);
         $page = $request->query('page', 1);
         $cacheKey = "manuals:{$tenantId}:{$search}:{$page}:{$perPage}";
 
-        $manuals = Cache::remember($cacheKey, 60, function () use ($request, $perPage) {
-            return Manual::where('tenant_id', $request->user()->tenant_id)
-                ->with('file')
-                ->when($request->query('q'), function ($query, $q) {
-                    $query->where(function ($q2) use ($q) {
-                        $q2->where('category', 'like', "%{$q}%")
-                            ->orWhereJsonContains('tags', $q);
-                    });
-                })
-                ->paginate($perPage);
+        $result = Cache::remember($cacheKey, 60, function () use ($request) {
+            $query = Manual::where('tenant_id', $request->user()->tenant_id)
+                ->with('file');
+
+            return $this->listQuery($query, $request, ['category'], ['created_at']);
         });
 
-        return ManualResource::collection($manuals->items())->additional([
-            'meta' => [
-                'page' => $manuals->currentPage(),
-                'per_page' => $manuals->perPage(),
-                'total' => $manuals->total(),
-            ],
+        return ManualResource::collection($result['data'])->additional([
+            'meta' => $result['meta'],
         ]);
     }
 

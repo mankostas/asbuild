@@ -7,9 +7,12 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
+use App\Support\ListQuery;
 
 class TenantController extends Controller
 {
+    use ListQuery;
+
     protected function ensureSuperAdmin(Request $request): void
     {
         if (! $request->user()->hasRole('SuperAdmin')) {
@@ -20,7 +23,8 @@ class TenantController extends Controller
     public function index(Request $request)
     {
         $this->ensureSuperAdmin($request);
-        return Tenant::all();
+        $result = $this->listQuery(Tenant::query(), $request, ['name'], ['name']);
+        return response()->json($result);
     }
 
     public function store(Request $request)

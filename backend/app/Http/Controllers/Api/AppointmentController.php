@@ -10,24 +10,23 @@ use App\Http\Resources\AppointmentResource;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use App\Support\ListQuery;
 
 class AppointmentController extends Controller
 {
+    use ListQuery;
+
     public function __construct(private FormSchemaService $formSchemaService)
     {
     }
     public function index(Request $request)
     {
-        $appointments = Appointment::where('tenant_id', $request->user()->tenant_id)
-            ->with(['type', 'assignee'])
-            ->paginate($request->query('per_page', 15));
+        $base = Appointment::where('tenant_id', $request->user()->tenant_id)
+            ->with(['type', 'assignee']);
+        $result = $this->listQuery($base, $request, [], ['scheduled_at', 'created_at']);
 
-        return AppointmentResource::collection($appointments->items())->additional([
-            'meta' => [
-                'page' => $appointments->currentPage(),
-                'per_page' => $appointments->perPage(),
-                'total' => $appointments->total(),
-            ],
+        return AppointmentResource::collection($result['data'])->additional([
+            'meta' => $result['meta'],
         ]);
     }
 

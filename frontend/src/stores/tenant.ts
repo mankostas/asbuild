@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import api from '@/services/api';
 import { TENANT_ID_KEY } from '@/config/app';
+import { withListParams, type ListParams } from './list';
 
 const initialTenant = localStorage.getItem(TENANT_ID_KEY) || '';
 
@@ -13,9 +14,12 @@ export const useTenantStore = defineStore('tenant', {
     tenantId: (state) => state.currentTenantId,
   },
   actions: {
-    async loadTenants() {
-      const { data } = await api.get('/tenants');
-      this.tenants = data;
+    async loadTenants(params: ListParams = {}) {
+      const { data } = await api.get('/tenants', {
+        params: withListParams(params),
+      });
+      this.tenants = data.data;
+      return data.meta;
     },
     setTenant(id: string) {
       this.currentTenantId = id;

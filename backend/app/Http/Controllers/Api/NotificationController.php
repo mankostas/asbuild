@@ -7,21 +7,19 @@ use App\Models\Notification;
 use App\Models\UserNotificationPreference;
 use Illuminate\Http\Request;
 use App\Http\Resources\NotificationResource;
+use App\Support\ListQuery;
 
 class NotificationController extends Controller
 {
+    use ListQuery;
+
     public function index(Request $request)
     {
-        $notifications = Notification::where('user_id', $request->user()->id)
-            ->orderByDesc('created_at')
-            ->paginate($request->query('per_page', 15));
+        $base = Notification::where('user_id', $request->user()->id);
+        $result = $this->listQuery($base, $request, [], ['created_at']);
 
-        return NotificationResource::collection($notifications->items())->additional([
-            'meta' => [
-                'page' => $notifications->currentPage(),
-                'per_page' => $notifications->perPage(),
-                'total' => $notifications->total(),
-            ],
+        return NotificationResource::collection($result['data'])->additional([
+            'meta' => $result['meta'],
         ]);
     }
 

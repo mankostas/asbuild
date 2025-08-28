@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { openDB } from 'idb';
 import api from '@/services/api';
+import { withListParams, type ListParams } from './list';
 
 const dbPromise = openDB('manuals', 1, {
   upgrade(db) {
@@ -20,13 +21,13 @@ export const useManualsStore = defineStore('manuals', {
     offline: [] as string[],
   }),
   actions: {
-    async fetch(q = '') {
+    async fetch(params: ListParams = {}) {
       try {
-        const { data } = await api.get(
-          '/manuals',
-          q ? { params: { q } } : undefined,
-        );
-        this.manuals = data;
+        const { data } = await api.get('/manuals', {
+          params: withListParams(params),
+        });
+        this.manuals = data.data;
+        return data.meta;
       } catch (e) {
         this.manuals = [];
       }

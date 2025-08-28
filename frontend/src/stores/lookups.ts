@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import api from '@/services/api';
+import { withListParams } from './list';
 
 export const useLookupsStore = defineStore('lookups', {
   state: () => ({
@@ -28,7 +29,7 @@ export const useLookupsStore = defineStore('lookups', {
         return this.assignees[type];
       }
 
-      const { data } = await api.get('/lookups/assignees', { params: { type } });
+      const { data } = await api.get('/lookups/assignees', { params: withListParams({ type }) });
 
       if (type === 'all') {
         this.assignees.teams = data.filter((a: any) => a.kind === 'team');

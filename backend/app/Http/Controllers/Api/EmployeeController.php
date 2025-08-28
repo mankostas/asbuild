@@ -11,9 +11,12 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Http\Resources\EmployeeResource;
+use App\Support\ListQuery;
 
 class EmployeeController extends Controller
 {
+    use ListQuery;
+
     protected function ensureAdmin(Request $request): void
     {
         if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
@@ -40,16 +43,12 @@ class EmployeeController extends Controller
 
         $tenantId = $this->getTenantId($request);
 
-        $employees = User::where('tenant_id', $tenantId)
-            ->with('roles')
-            ->paginate($request->query('per_page', 15));
+        $base = User::where('tenant_id', $tenantId)
+            ->with('roles');
+        $result = $this->listQuery($base, $request, ['name', 'email'], ['name', 'email']);
 
-        return EmployeeResource::collection($employees->items())->additional([
-            'meta' => [
-                'page' => $employees->currentPage(),
-                'per_page' => $employees->perPage(),
-                'total' => $employees->total(),
-            ],
+        return EmployeeResource::collection($result['data'])->additional([
+            'meta' => $result['meta'],
         ]);
     }
 

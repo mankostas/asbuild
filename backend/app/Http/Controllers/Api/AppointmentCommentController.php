@@ -9,15 +9,18 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Services\Notifier;
+use App\Support\ListQuery;
 
 class AppointmentCommentController extends Controller
 {
-    public function index(Appointment $appointment)
+    use ListQuery;
+
+    public function index(Request $request, Appointment $appointment)
     {
         $this->authorize('view', $appointment);
-        return response()->json(
-            $appointment->comments()->with(['user', 'files', 'mentions'])->get()
-        );
+        $base = $appointment->comments()->with(['user', 'files', 'mentions']);
+        $result = $this->listQuery($base, $request, ['body'], ['created_at']);
+        return response()->json($result);
     }
 
     public function store(Request $request, Appointment $appointment)
