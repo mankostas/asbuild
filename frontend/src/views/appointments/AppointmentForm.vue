@@ -107,9 +107,8 @@ onMounted(async () => {
     slaEndAt.value = appt.sla_end_at || '';
     status.value = appt.status;
     originalStatus.value = appt.status;
-    if (appt.assignee_type && appt.assignee_id) {
-      const kind = appt.assignee_type.includes('Team') ? 'team' : 'employee';
-      assignee.value = { kind, id: appt.assignee_id };
+    if (appt.assignee) {
+      assignee.value = { kind: appt.assignee.kind, id: appt.assignee.id };
     }
     const map = appt.type?.statuses || {};
     const allowed = Array.from(new Set([...Object.keys(map), ...Object.values(map).flat()]));

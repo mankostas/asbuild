@@ -2,12 +2,26 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Team;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AppointmentResource extends JsonResource
 {
     public function toArray($request): array
     {
-        return parent::toArray($request);
+        $data = parent::toArray($request);
+
+        if ($this->assignee) {
+            $kind = $this->assignee instanceof Team ? 'team' : 'employee';
+            $data['assignee'] = [
+                'id' => $this->assignee->id,
+                'kind' => $kind,
+                'label' => $this->assignee->name,
+            ];
+        } else {
+            $data['assignee'] = null;
+        }
+
+        return $data;
     }
 }
