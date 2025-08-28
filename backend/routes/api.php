@@ -66,6 +66,7 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::post('roles', [RoleController::class, 'store'])->middleware(Ability::class . ':roles.manage')->name('roles.store');
     Route::match(['put', 'patch'], 'roles/{role}', [RoleController::class, 'update'])->middleware(Ability::class . ':roles.manage')->name('roles.update');
     Route::delete('roles/{role}', [RoleController::class, 'destroy'])->middleware(Ability::class . ':roles.manage')->name('roles.destroy');
+    Route::post('roles/{role}/assign', [RoleController::class, 'assign'])->middleware(Ability::class . ':roles.manage')->name('roles.assign');
 
     Route::post('statuses', [StatusController::class, 'store'])->middleware(Ability::class . ':statuses.manage')->name('statuses.store');
     Route::match(['put', 'patch'], 'statuses/{status}', [StatusController::class, 'update'])->middleware(Ability::class . ':statuses.manage')->name('statuses.update');

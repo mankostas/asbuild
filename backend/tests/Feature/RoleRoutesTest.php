@@ -20,7 +20,7 @@ class RoleRoutesTest extends TestCase
     {
         parent::setUp();
         $tenant = Tenant::create(['name' => 'Test Tenant']);
-        $role = Role::create(['name' => 'ClientAdmin', 'tenant_id' => $tenant->id]);
+        $role = Role::create(['name' => 'ClientAdmin', 'slug' => 'client_admin', 'tenant_id' => $tenant->id]);
         $user = User::create([
             'name' => 'Test User',
             'email' => 'user@example.com',
@@ -40,7 +40,7 @@ class RoleRoutesTest extends TestCase
             ->getJson('/api/roles')
             ->assertStatus(200);
 
-        $payload = ['name' => 'Tester', 'level' => 1];
+        $payload = ['name' => 'Tester', 'slug' => 'tester'];
         $roleId = $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->postJson('/api/roles', $payload)
             ->assertStatus(201)
@@ -50,12 +50,12 @@ class RoleRoutesTest extends TestCase
             ->getJson("/api/roles/{$roleId}")
             ->assertStatus(200);
 
-        $update = ['name' => 'Updated', 'level' => 2];
+        $update = ['name' => 'Updated', 'slug' => 'updated'];
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->putJson("/api/roles/{$roleId}", $update)
             ->assertStatus(200)
             ->assertJsonPath('name', 'Updated')
-            ->assertJsonPath('level', 2);
+            ->assertJsonPath('slug', 'updated');
 
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->deleteJson("/api/roles/{$roleId}")
