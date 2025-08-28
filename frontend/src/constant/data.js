@@ -148,12 +148,14 @@ export const topMenu = [
     icon: "heroicons-outline:sparkles",
     link: "settings.branding",
     admin: true,
+    requiredAbilities: ["branding.manage"],
   },
   {
     title: "Footer",
     icon: "heroicons-outline:document-text",
     link: "settings.footer",
     admin: true,
+    requiredAbilities: ["branding.manage"],
   },
   { title: "GDPR", icon: "heroicons-outline:shield-check", link: "gdpr.index" },
   {

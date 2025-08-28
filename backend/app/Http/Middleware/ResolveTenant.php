@@ -20,6 +20,17 @@ class ResolveTenant
                 ->pluck('value', 'key')
                 ->toArray();
             config(['tenant' => $settings]);
+
+            $branding = DB::table('brandings')
+                ->where('tenant_id', $tenantId)
+                ->first();
+            if (! $branding) {
+                $branding = DB::table('brandings')->whereNull('tenant_id')->first();
+            }
+            config(['tenant.branding' => $branding]);
+        } else {
+            $branding = DB::table('brandings')->whereNull('tenant_id')->first();
+            config(['tenant.branding' => $branding]);
         }
 
         return $next($request);

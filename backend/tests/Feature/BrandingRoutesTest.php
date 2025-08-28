@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
-class FooterSettingsRoutesTest extends TestCase
+class BrandingRoutesTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -20,7 +20,11 @@ class FooterSettingsRoutesTest extends TestCase
     {
         parent::setUp();
         $tenant = Tenant::create(['name' => 'Test Tenant']);
-        $role = Role::create(['name' => 'SuperAdmin', 'tenant_id' => $tenant->id]);
+        $role = Role::create([
+            'name' => 'SuperAdmin',
+            'tenant_id' => $tenant->id,
+            'abilities' => json_encode(['*']),
+        ]);
         $user = User::create([
             'name' => 'Admin',
             'email' => 'admin@example.com',
@@ -34,26 +38,35 @@ class FooterSettingsRoutesTest extends TestCase
         $this->tenant = $tenant;
     }
 
-    public function test_super_admin_can_update_and_get_footer(): void
+    public function test_super_admin_can_update_and_get_branding(): void
     {
-        $payload = ['left' => 'Left', 'right' => 'Right'];
+        $payload = [
+            'name' => 'Brand',
+            'color' => '#ffffff',
+            'footer_left' => 'Left',
+            'footer_right' => 'Right',
+        ];
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
-            ->putJson('/api/settings/footer', $payload)
+            ->putJson('/api/branding', $payload)
             ->assertStatus(200)
-            ->assertJsonPath('left', 'Left')
-            ->assertJsonPath('right', 'Right');
+            ->assertJsonPath('footer_left', 'Left')
+            ->assertJsonPath('footer_right', 'Right');
 
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
-            ->getJson('/api/settings/footer')
+            ->getJson('/api/branding')
             ->assertStatus(200)
-            ->assertJsonPath('left', 'Left')
-            ->assertJsonPath('right', 'Right');
+            ->assertJsonPath('footer_left', 'Left')
+            ->assertJsonPath('footer_right', 'Right');
     }
 
-    public function test_client_admin_cannot_update_footer(): void
+    public function test_client_admin_cannot_update_branding(): void
     {
         $tenant = Tenant::create(['name' => 'Another Tenant']);
-        $role = Role::create(['name' => 'ClientAdmin', 'tenant_id' => $tenant->id]);
+        $role = Role::create([
+            'name' => 'ClientAdmin',
+            'tenant_id' => $tenant->id,
+            'abilities' => json_encode([]),
+        ]);
         $user = User::create([
             'name' => 'Client',
             'email' => 'client@example.com',
@@ -66,7 +79,7 @@ class FooterSettingsRoutesTest extends TestCase
         Sanctum::actingAs($user);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->putJson('/api/settings/footer', ['left' => 'Nope', 'right' => 'Nope'])
+            ->putJson('/api/branding', ['footer_left' => 'Nope'])
             ->assertStatus(403);
     }
 }

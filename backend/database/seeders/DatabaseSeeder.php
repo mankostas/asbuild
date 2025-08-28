@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             SuperAdminSeeder::class,
             RoleUserSeeder::class,
-            TenantSettingsSeeder::class,
+            BrandingSeeder::class,
         ]);
     }
 }
