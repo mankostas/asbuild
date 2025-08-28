@@ -84,7 +84,8 @@ class Appointment extends Model
 
     public function canTransitionTo(string $status): bool
     {
-        return in_array($status, self::$transitions[$this->status] ?? []);
+        $transitions = $this->type->statuses ?? self::$transitions;
+        return in_array($status, $transitions[$this->status] ?? []);
     }
 
     public function getSlaStatusAttribute(): string

@@ -47,6 +47,10 @@ class AppointmentRoutesTest extends TestCase
             'name' => 'Type A',
             'form_schema' => ['type' => 'object', 'properties' => ['note' => ['type' => 'string']], 'required' => ['note']],
             'fields_summary' => ['note' => 'string'],
+            'statuses' => [
+                'draft' => ['assigned'],
+                'assigned' => ['in_progress'],
+            ],
         ]);
 
         // store

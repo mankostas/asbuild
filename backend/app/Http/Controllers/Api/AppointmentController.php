@@ -34,12 +34,12 @@ class AppointmentController extends Controller
         ]);
 
         $data['tenant_id'] = $request->user()->tenant_id;
-        $data['status'] = Appointment::STATUS_DRAFT;
 
         $type = null;
         if (isset($data['appointment_type_id'])) {
             $type = AppointmentType::find($data['appointment_type_id']);
         }
+        $data['status'] = $type && $type->statuses ? array_key_first($type->statuses) : Appointment::STATUS_DRAFT;
         $this->validateAgainstSchema($type, $data['form_data'] ?? []);
 
         $appointment = Appointment::create($data);
@@ -57,6 +57,15 @@ class AppointmentController extends Controller
     {
         $this->authorize('update', $appointment);
 
+        $typeId = $request->input('appointment_type_id', $appointment->appointment_type_id);
+        $type = $typeId ? AppointmentType::find($typeId) : null;
+        $allowedStatuses = collect($type->statuses ?? Appointment::$transitions)
+            ->flatMap(function ($next, $current) {
+                return array_merge([$current], $next);
+            })
+            ->unique()
+            ->all();
+
         $data = $request->validate([
             'scheduled_at' => 'nullable|date',
             'sla_start_at' => 'nullable|date',
@@ -66,13 +75,7 @@ class AppointmentController extends Controller
             'form_data' => 'nullable|array',
             'status' => [
                 'nullable',
-                Rule::in([
-                    Appointment::STATUS_ASSIGNED,
-                    Appointment::STATUS_IN_PROGRESS,
-                    Appointment::STATUS_COMPLETED,
-                    Appointment::STATUS_REJECTED,
-                    Appointment::STATUS_REDO,
-                ]),
+                Rule::in($allowedStatuses),
             ],
         ]);
 
