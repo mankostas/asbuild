@@ -52,6 +52,8 @@ class TenantBootstrapSeeder extends Seeder
             ]
         );
 
+        DefaultFeatureRolesSeeder::syncDefaultRolesForFeatures(\App\Models\Tenant::find($tenantId));
+
         $managerAbilities = array_intersect(
             ['appointments.manage', 'teams.manage', 'statuses.manage', 'types.manage'],
             $tenantAbilities

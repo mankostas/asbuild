@@ -35,14 +35,11 @@ class Tenant extends Model
 
     public function allowedAbilities(): array
     {
-        $features = is_array($this->features) ? $this->features : json_decode($this->features ?? '[]', true);
-        $map = config('feature_map');
+        $map = config('feature_map', []);
         $abilities = [];
 
-        foreach ($features as $feature) {
-            if (isset($map[$feature]['abilities'])) {
-                $abilities = array_merge($abilities, $map[$feature]['abilities']);
-            }
+        foreach ($this->features ?? [] as $feature) {
+            $abilities = array_merge($abilities, $map[$feature]['abilities'] ?? []);
         }
 
         return array_values(array_unique($abilities));

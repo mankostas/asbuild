@@ -89,7 +89,7 @@ class TenantController extends Controller
             'address' => 'sometimes|nullable|string',
         ]);
         $tenant->update($data);
-        return $tenant;
+        return $tenant->load('roles');
     }
 
     public function destroy(Request $request, Tenant $tenant)
