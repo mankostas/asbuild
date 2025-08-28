@@ -9,6 +9,9 @@ export const useTenantStore = defineStore('tenant', {
     currentTenantId: initialTenant as string,
     tenants: [] as any[],
   }),
+  getters: {
+    tenantId: (state) => state.currentTenantId,
+  },
   actions: {
     async loadTenants() {
       const { data } = await api.get('/tenants');
