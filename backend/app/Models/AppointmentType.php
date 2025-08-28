@@ -12,12 +12,14 @@ class AppointmentType extends Model
         'form_schema',
         'fields_summary',
         'statuses',
+        'tenant_id',
     ];
 
     protected $casts = [
         'form_schema' => 'array',
         'fields_summary' => 'array',
         'statuses' => 'array',
+        'tenant_id' => 'integer',
     ];
 
     public function appointments(): HasMany

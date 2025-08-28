@@ -5,13 +5,16 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\AppointmentType;
+use App\Services\FormSchemaService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AppointmentController extends Controller
 {
+    public function __construct(private FormSchemaService $formSchemaService)
+    {
+    }
     public function index(Request $request)
     {
         $appointments = Appointment::where('tenant_id', $request->user()->tenant_id)
@@ -31,6 +34,9 @@ class AppointmentController extends Controller
             'kau_notes' => 'nullable|string',
             'appointment_type_id' => 'nullable|exists:appointment_types,id',
             'form_data' => 'nullable|array',
+            'assignee' => 'nullable|array',
+            'assignee.kind' => 'required_with:assignee|in:team,employee',
+            'assignee.id' => 'required_with:assignee|integer',
         ]);
 
         $data['tenant_id'] = $request->user()->tenant_id;
@@ -41,6 +47,7 @@ class AppointmentController extends Controller
         }
         $data['status'] = $type && $type->statuses ? array_key_first($type->statuses) : Appointment::STATUS_DRAFT;
         $this->validateAgainstSchema($type, $data['form_data'] ?? []);
+        $this->formSchemaService->mapAssignee($type->form_schema ?? [], $data);
 
         $appointment = Appointment::create($data);
 
@@ -73,6 +80,9 @@ class AppointmentController extends Controller
             'kau_notes' => 'nullable|string',
             'appointment_type_id' => 'nullable|exists:appointment_types,id',
             'form_data' => 'nullable|array',
+            'assignee' => 'nullable|array',
+            'assignee.kind' => 'required_with:assignee|in:team,employee',
+            'assignee.id' => 'required_with:assignee|integer',
             'status' => [
                 'nullable',
                 Rule::in($allowedStatuses),
@@ -103,6 +113,7 @@ class AppointmentController extends Controller
             $type = $appointment->type;
         }
         $this->validateAgainstSchema($type, $data['form_data'] ?? $appointment->form_data ?? []);
+        $this->formSchemaService->mapAssignee($type->form_schema ?? [], $data);
 
         unset($data['status']);
         $appointment->fill($data);

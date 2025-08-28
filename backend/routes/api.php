@@ -65,6 +65,7 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::post('appointment-types', [AppointmentTypeController::class, 'store'])->middleware(Ability::class . ':types.manage')->name('appointment-types.store');
     Route::match(['put', 'patch'], 'appointment-types/{appointment_type}', [AppointmentTypeController::class, 'update'])->middleware(Ability::class . ':types.manage')->name('appointment-types.update');
     Route::delete('appointment-types/{appointment_type}', [AppointmentTypeController::class, 'destroy'])->middleware(Ability::class . ':types.manage')->name('appointment-types.destroy');
+    Route::post('appointment-types/{appointment_type}/copy-to-tenant', [AppointmentTypeController::class, 'copyToTenant'])->middleware(Ability::class . ':types.manage')->name('appointment-types.copy');
 
     Route::post('roles', [RoleController::class, 'store'])->middleware(Ability::class . ':roles.manage')->name('roles.store');
     Route::match(['put', 'patch'], 'roles/{role}', [RoleController::class, 'update'])->middleware(Ability::class . ':roles.manage')->name('roles.update');
@@ -79,6 +80,7 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::post('statuses', [StatusController::class, 'store'])->middleware(Ability::class . ':statuses.manage')->name('statuses.store');
     Route::match(['put', 'patch'], 'statuses/{status}', [StatusController::class, 'update'])->middleware(Ability::class . ':statuses.manage')->name('statuses.update');
     Route::delete('statuses/{status}', [StatusController::class, 'destroy'])->middleware(Ability::class . ':statuses.manage')->name('statuses.destroy');
+    Route::post('statuses/{status}/copy-to-tenant', [StatusController::class, 'copyToTenant'])->middleware(Ability::class . ':statuses.manage')->name('statuses.copy');
     Route::apiResource('appointments.comments', AppointmentCommentController::class)
         ->shallow()
         ->only(['index', 'store', 'show', 'update', 'destroy']);

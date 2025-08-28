@@ -15,9 +15,23 @@ class StatusController extends Controller
         }
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return Status::all();
+        $scope = $request->query('scope', $request->user()->hasRole('SuperAdmin') ? 'all' : 'tenant');
+        $query = Status::query();
+
+        if ($scope === 'tenant') {
+            $tenantId = $request->query('tenant_id', $request->user()->tenant_id);
+            $query->where('tenant_id', $tenantId);
+        } elseif ($scope === 'global') {
+            $query->whereNull('tenant_id');
+        } else {
+            if ($request->has('tenant_id')) {
+                $query->where('tenant_id', $request->query('tenant_id'));
+            }
+        }
+
+        return $query->get();
     }
 
     public function store(Request $request)
@@ -25,7 +39,15 @@ class StatusController extends Controller
         $this->ensureAdmin($request);
         $data = $request->validate([
             'name' => 'required|string',
+            'tenant_id' => 'sometimes|integer',
         ]);
+
+        if ($request->user()->hasRole('SuperAdmin')) {
+            $data['tenant_id'] = $data['tenant_id'] ?? null;
+        } else {
+            $data['tenant_id'] = $request->user()->tenant_id;
+        }
+
         $status = Status::create($data);
         return response()->json($status, 201);
     }
@@ -38,9 +60,22 @@ class StatusController extends Controller
     public function update(Request $request, Status $status)
     {
         $this->ensureAdmin($request);
+        if (! $request->user()->hasRole('SuperAdmin') && $status->tenant_id !== $request->user()->tenant_id) {
+            abort(403);
+        }
         $data = $request->validate([
             'name' => 'required|string',
+            'tenant_id' => 'sometimes|integer',
         ]);
+
+        if ($request->user()->hasRole('SuperAdmin')) {
+            if (array_key_exists('tenant_id', $data)) {
+                $data['tenant_id'] = $data['tenant_id'];
+            }
+        } else {
+            $data['tenant_id'] = $request->user()->tenant_id;
+        }
+
         $status->update($data);
         return $status;
     }
@@ -48,8 +83,30 @@ class StatusController extends Controller
     public function destroy(Request $request, Status $status)
     {
         $this->ensureAdmin($request);
+        if (! $request->user()->hasRole('SuperAdmin') && $status->tenant_id !== $request->user()->tenant_id) {
+            abort(403);
+        }
         $status->delete();
         return response()->json(['message' => 'deleted']);
+    }
+
+    public function copyToTenant(Request $request, Status $status)
+    {
+        $this->ensureAdmin($request);
+
+        $tenantId = $request->user()->hasRole('SuperAdmin')
+            ? $request->input('tenant_id')
+            : $request->user()->tenant_id;
+
+        if (! $tenantId) {
+            abort(400, 'tenant_id required');
+        }
+
+        $copy = $status->replicate();
+        $copy->tenant_id = $tenantId;
+        $copy->save();
+
+        return response()->json($copy, 201);
     }
 }
 
