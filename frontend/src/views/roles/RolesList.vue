@@ -45,6 +45,7 @@ const all = ref<any[]>([]);
 const columns = [
   { label: 'ID', field: 'id', sortable: true },
   { label: 'Name', field: 'name', sortable: true },
+  { label: 'Level', field: 'level', sortable: true },
 ];
 
 async function fetchRoles({ page, perPage, sort, search }: any) {

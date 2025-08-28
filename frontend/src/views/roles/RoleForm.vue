@@ -5,6 +5,10 @@
         <label class="block font-medium mb-1" for="name">Name<span class="text-red-600">*</span></label>
         <input id="name" v-model="name" class="border rounded p-2 w-full" />
       </div>
+      <div>
+        <label class="block font-medium mb-1" for="level">Level<span class="text-red-600">*</span></label>
+        <input id="level" type="number" v-model.number="level" class="border rounded p-2 w-full" />
+      </div>
       <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
       <button
         type="submit"
@@ -26,6 +30,7 @@ const router = useRouter();
 const notify = useNotify();
 
 const name = ref('');
+const level = ref(0);
 const serverError = ref('');
 
 const isEdit = computed(() => route.name === 'roles.edit');
@@ -39,15 +44,18 @@ onMounted(async () => {
       return;
     }
     name.value = data.name;
+    level.value = data.level;
   }
 });
 
-const canSubmit = computed(() => !!name.value && name.value !== 'SuperAdmin');
+const canSubmit = computed(
+  () => !!name.value && name.value !== 'SuperAdmin' && Number.isInteger(level.value)
+);
 
 async function onSubmit() {
   serverError.value = '';
   if (!canSubmit.value) return;
-  const payload = { name: name.value };
+  const payload = { name: name.value, level: level.value };
   try {
     if (isEdit.value) {
       await api.patch(`/roles/${route.params.id}`, payload);

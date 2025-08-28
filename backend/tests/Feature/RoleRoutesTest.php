@@ -40,7 +40,7 @@ class RoleRoutesTest extends TestCase
             ->getJson('/api/roles')
             ->assertStatus(200);
 
-        $payload = ['name' => 'Tester'];
+        $payload = ['name' => 'Tester', 'level' => 1];
         $roleId = $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->postJson('/api/roles', $payload)
             ->assertStatus(201)
@@ -50,11 +50,12 @@ class RoleRoutesTest extends TestCase
             ->getJson("/api/roles/{$roleId}")
             ->assertStatus(200);
 
-        $update = ['name' => 'Updated'];
+        $update = ['name' => 'Updated', 'level' => 2];
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->putJson("/api/roles/{$roleId}", $update)
             ->assertStatus(200)
-            ->assertJsonPath('name', 'Updated');
+            ->assertJsonPath('name', 'Updated')
+            ->assertJsonPath('level', 2);
 
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->deleteJson("/api/roles/{$roleId}")
