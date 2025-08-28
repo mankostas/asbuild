@@ -9,17 +9,19 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('roles')->insert([
-            'id' => 1,
-            'tenant_id' => null,
-            'name' => 'SuperAdmin',
-            'slug' => 'super_admin',
-            // SuperAdmin is the root role; use level 0 so other roles can build from it
-            'level' => 0,
-            // Grant full system access via wildcard ability
-            'abilities' => json_encode(['*']),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        DB::table('roles')->updateOrInsert(
+            ['id' => 1],
+            [
+                'tenant_id' => 1,
+                'name' => 'SuperAdmin',
+                'slug' => 'super_admin',
+                // SuperAdmin is the root role; use level 0 so other roles can build from it
+                'level' => 0,
+                // Grant full system access via wildcard ability
+                'abilities' => json_encode(['*']),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
     }
 }

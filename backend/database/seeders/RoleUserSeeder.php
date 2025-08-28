@@ -10,7 +10,7 @@ class RoleUserSeeder extends Seeder
     public function run(): void
     {
         $roleId = DB::table('roles')
-            ->whereNull('tenant_id')
+            ->where('tenant_id', 1)
             ->where('slug', 'super_admin')
             ->value('id');
 

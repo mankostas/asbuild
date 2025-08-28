@@ -9,15 +9,17 @@ class TenantSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('tenants')->insert([
-            'id' => 1,
-            'name' => 'Default Tenant',
-            'quota_storage_mb' => 0,
-            'features' => json_encode([]),
-            'phone' => '123-456-7890',
-            'address' => '123 Main St',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        DB::table('tenants')->updateOrInsert(
+            ['id' => 1],
+            [
+                'name' => 'Super Admin Tenant',
+                'quota_storage_mb' => 0,
+                'features' => json_encode([]),
+                'phone' => '123-456-7890',
+                'address' => '123 Main St',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
     }
 }
