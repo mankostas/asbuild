@@ -56,6 +56,10 @@ class User extends Authenticatable
     {
         $slug = Str::snake($role);
 
-        return $this->roles->contains(fn ($r) => $r->name === $role || $r->slug === $slug);
+        return $this->roles()
+            ->where(function ($q) use ($role, $slug) {
+                $q->where('name', $role)->orWhere('slug', $slug);
+            })
+            ->exists();
     }
 }

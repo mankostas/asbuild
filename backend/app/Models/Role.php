@@ -25,7 +25,7 @@ class Role extends Model
     {
         static::creating(function (self $role): void {
             if (empty($role->slug)) {
-                $role->slug = Str::slug($role->name, '_');
+                $role->slug = Str::snake($role->name);
             }
         });
     }

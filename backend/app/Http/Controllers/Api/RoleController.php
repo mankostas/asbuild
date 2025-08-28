@@ -28,9 +28,11 @@ class RoleController extends Controller
         $scope = $request->query('scope');
         $tenantId = $request->query('tenant_id');
 
-        if (! $request->user()->hasRole('SuperAdmin')) {
+        if (! $request->user()->isSuperAdmin()) {
             $tenantId = $request->user()->tenant_id;
-            $base = Role::where('tenant_id', $tenantId);
+            $base = Role::where(function ($query) use ($tenantId) {
+                $query->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+            });
             $result = $this->listQuery($base, $request, ['name'], ['name']);
             return RoleResource::collection($result['data'])->additional([
                 'meta' => $result['meta'],
