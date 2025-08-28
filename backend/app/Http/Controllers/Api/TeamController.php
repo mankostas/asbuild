@@ -8,9 +8,12 @@ use App\Models\Team;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Resources\TeamResource;
+use App\Support\ListQuery;
 
 class TeamController extends Controller
 {
+    use ListQuery;
+
     protected function ensureAdmin(Request $request): void
     {
         if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
@@ -34,16 +37,12 @@ class TeamController extends Controller
     public function index(Request $request)
     {
         $tenantId = $this->getTenantId($request);
-        $teams = Team::where('tenant_id', $tenantId)
-            ->with('employees')
-            ->paginate($request->query('per_page', 15));
+        $base = Team::where('tenant_id', $tenantId)
+            ->with('employees');
+        $result = $this->listQuery($base, $request, ['name'], ['name']);
 
-        return TeamResource::collection($teams->items())->additional([
-            'meta' => [
-                'page' => $teams->currentPage(),
-                'per_page' => $teams->perPage(),
-                'total' => $teams->total(),
-            ],
+        return TeamResource::collection($result['data'])->additional([
+            'meta' => $result['meta'],
         ]);
     }
 

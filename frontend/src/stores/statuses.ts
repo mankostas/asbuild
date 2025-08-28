@@ -1,12 +1,13 @@
 import { defineStore } from 'pinia';
 import api from '@/services/api';
+import { withListParams, type ListParams } from './list';
 
 export const useStatusesStore = defineStore('statuses', {
   actions: {
-    async fetch(scope: 'tenant' | 'global' | 'all', tenantId?: string | number) {
-      const params: any = { scope };
-      if (tenantId) params.tenant_id = tenantId;
-      const { data } = await api.get('/statuses', { params });
+    async fetch(scope: 'tenant' | 'global' | 'all', tenantId?: string | number, params: ListParams = {}) {
+      const query: any = withListParams({ scope, ...params });
+      if (tenantId) query.tenant_id = tenantId;
+      const { data } = await api.get('/statuses', { params: query });
       return data;
     },
     async fetchTransitions(id: number) {

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import api from '@/services/api';
 import type { components, paths } from '@/types/api';
+import { withListParams, type ListParams } from './list';
 
 type Role = components['schemas']['Role'];
 type FetchParams = paths['/roles']['get']['parameters']['query'];
@@ -11,9 +12,10 @@ export const useRolesStore = defineStore('roles', {
     roles: [] as Role[],
   }),
   actions: {
-    async fetch(params: FetchParams = {}) {
-      const { data } = await api.get('/roles', { params });
-      this.roles = data as Role[];
+    async fetch(params: ListParams = {}) {
+      const { data } = await api.get('/roles', { params: withListParams(params) });
+      this.roles = data.data as Role[];
+      return data.meta;
     },
     async create(payload: Role) {
       const { data } = await api.post('/roles', payload);

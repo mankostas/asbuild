@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import api from '@/services/api';
 import type { components } from '@/types/api';
+import { withListParams, type ListParams } from './list';
 
 type Team = components['schemas']['Team'];
 type TeamPayload = Omit<Team, 'id' | 'employees'>;
@@ -10,9 +11,10 @@ export const useTeamsStore = defineStore('teams', {
     teams: [] as Team[],
   }),
   actions: {
-    async fetch() {
-      const { data } = await api.get('/teams');
-      this.teams = data as Team[];
+    async fetch(params: ListParams = {}) {
+      const { data } = await api.get('/teams', { params: withListParams(params) });
+      this.teams = data.data as Team[];
+      return data.meta;
     },
     async get(id: number) {
       if (!this.teams.length) await this.fetch();

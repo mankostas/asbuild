@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import api from '@/services/api';
+import { withListParams, type ListParams } from './list';
 
 export const useAppointmentsStore = defineStore('appointments', {
   state: () => ({
@@ -26,10 +27,13 @@ export const useAppointmentsStore = defineStore('appointments', {
       }
       return data;
     },
-    async fetch() {
+    async fetch(params: ListParams = {}) {
       try {
-        const { data } = await api.get('/appointments');
-        this.appointments = data.map((a: any) => this.normalize(a));
+        const { data } = await api.get('/appointments', {
+          params: withListParams(params),
+        });
+        this.appointments = data.data.map((a: any) => this.normalize(a));
+        return data.meta;
       } catch (e) {
         this.appointments = [];
       }

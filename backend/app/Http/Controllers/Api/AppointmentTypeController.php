@@ -7,9 +7,12 @@ use App\Models\AppointmentType;
 use App\Services\FormSchemaService;
 use Illuminate\Http\Request;
 use App\Http\Resources\AppointmentTypeResource;
+use App\Support\ListQuery;
 
 class AppointmentTypeController extends Controller
 {
+    use ListQuery;
+
     public function __construct(private FormSchemaService $formSchemaService)
     {
     }
@@ -37,14 +40,10 @@ class AppointmentTypeController extends Controller
             }
         }
 
-        $types = $query->paginate($request->query('per_page', 15));
+        $result = $this->listQuery($query, $request, ['name'], ['name']);
 
-        return AppointmentTypeResource::collection($types->items())->additional([
-            'meta' => [
-                'page' => $types->currentPage(),
-                'per_page' => $types->perPage(),
-                'total' => $types->total(),
-            ],
+        return AppointmentTypeResource::collection($result['data'])->additional([
+            'meta' => $result['meta'],
         ]);
     }
 

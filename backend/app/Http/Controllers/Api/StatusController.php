@@ -7,9 +7,12 @@ use App\Models\Status;
 use Illuminate\Http\Request;
 use App\Http\Resources\StatusResource;
 use App\Services\StatusFlowService;
+use App\Support\ListQuery;
 
 class StatusController extends Controller
 {
+    use ListQuery;
+
     protected function ensureAdmin(Request $request): void
     {
         if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
@@ -33,14 +36,10 @@ class StatusController extends Controller
             }
         }
 
-        $statuses = $query->paginate($request->query('per_page', 15));
+        $result = $this->listQuery($query, $request, ['name'], ['name']);
 
-        return StatusResource::collection($statuses->items())->additional([
-            'meta' => [
-                'page' => $statuses->currentPage(),
-                'per_page' => $statuses->perPage(),
-                'total' => $statuses->total(),
-            ],
+        return StatusResource::collection($result['data'])->additional([
+            'meta' => $result['meta'],
         ]);
     }
 
