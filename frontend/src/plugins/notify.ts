@@ -14,6 +14,24 @@ export function useNotify() {
     error(message: string, options?: ToastOptions) {
       toast.error(message, options);
     },
+    unauthorized(
+      message = 'Παρακαλώ συνδεθείτε για να συνεχίσετε.',
+      options?: ToastOptions,
+    ) {
+      toast.error(message, options);
+    },
+    forbidden(
+      message = 'Δεν έχετε δικαιώματα για αυτή την ενέργεια.',
+      options?: ToastOptions,
+    ) {
+      toast.error(message, options);
+    },
+    serverError(
+      message = 'Προέκυψε σφάλμα διακομιστή.',
+      options?: ToastOptions,
+    ) {
+      toast.error(message, options);
+    },
   };
 }
 
@@ -29,6 +47,30 @@ const notify = {
     } catch {}
   },
   error(message: string, options?: ToastOptions) {
+    try {
+      useToast().error(message, options);
+    } catch {}
+  },
+  unauthorized(
+    message = 'Παρακαλώ συνδεθείτε για να συνεχίσετε.',
+    options?: ToastOptions,
+  ) {
+    try {
+      useToast().error(message, options);
+    } catch {}
+  },
+  forbidden(
+    message = 'Δεν έχετε δικαιώματα για αυτή την ενέργεια.',
+    options?: ToastOptions,
+  ) {
+    try {
+      useToast().error(message, options);
+    } catch {}
+  },
+  serverError(
+    message = 'Προέκυψε σφάλμα διακομιστή.',
+    options?: ToastOptions,
+  ) {
     try {
       useToast().error(message, options);
     } catch {}

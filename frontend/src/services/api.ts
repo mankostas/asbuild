@@ -48,9 +48,15 @@ api.interceptors.request.use(async (config) => {
     await api.get('/sanctum/csrf-cookie', { baseURL: '/' });
   }
   const tenant = useTenantStore();
+  config.headers = config.headers || {};
   if (tenant.currentTenantId) {
-    config.headers = config.headers || {};
     config.headers[TENANT_HEADER] = tenant.currentTenantId;
+  }
+  if (authGetter) {
+    const auth = authGetter();
+    if (auth?.accessToken) {
+      config.headers['Authorization'] = `Bearer ${auth.accessToken}`;
+    }
   }
   return config;
 });
@@ -76,25 +82,38 @@ api.interceptors.response.use(
       }
     }
 
-    if (status === 401 && !config._retry && authGetter) {
-      config._retry = true;
-      const auth = authGetter();
-      if (auth.refreshToken) {
-        try {
-          await auth.refresh();
-          config.headers = config.headers || {};
-          config.headers['Authorization'] = `Bearer ${auth.accessToken}`;
-          return api(config);
-        } catch (e) {}
+    if (status === 401) {
+      if (!config._retry && authGetter) {
+        config._retry = true;
+        const auth = authGetter();
+        if (auth.refreshToken) {
+          try {
+            await auth.refresh();
+            config.headers = config.headers || {};
+            config.headers['Authorization'] = `Bearer ${auth.accessToken}`;
+            return api(config);
+          } catch (e) {}
+        }
       }
-      await auth.logout(true);
+      notify.unauthorized();
+      const auth = authGetter ? authGetter() : null;
+      await auth?.logout?.(true);
       if (window.location.pathname !== '/auth/login') {
-        window.location.href = '/auth/login';
+        const intent =
+          window.location.pathname +
+          window.location.search +
+          window.location.hash;
+        const redirect = intent && intent !== '/auth/login'
+          ? `?redirect=${encodeURIComponent(intent)}`
+          : '';
+        window.location.href = `/auth/login${redirect}`;
       }
-    }
-
-    if (status && status >= 500) {
-      notify.error('An unexpected server error occurred.');
+    } else if (status === 403) {
+      notify.forbidden();
+    } else if (status === 422) {
+      return Promise.reject(error.response?.data);
+    } else if (status && status >= 500) {
+      notify.serverError();
     }
     const apiError: ApiError = {
       message: error.message,
@@ -103,5 +122,9 @@ api.interceptors.response.use(
     return Promise.reject(apiError);
   },
 );
+
+export function extractFormErrors(error: any): Record<string, string[]> {
+  return (error && (error.errors as Record<string, string[]>)) || {};
+}
 
 export default api;
