@@ -41,12 +41,16 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
       sidebarCollaspe, // legacy key
       ...clean
     } = parsed;
-    return {
+    const state = {
       ...defaultState,
       ...clean,
       sidebarCollasp:
         clean.sidebarCollasp ?? sidebarCollaspe ?? defaultState.sidebarCollasp,
     };
+    // Persist the merged state so that migrations or new defaults overwrite
+    // any previously saved values in localStorage.
+    localStorage.setItem("themeSettings", JSON.stringify(state));
+    return state;
   },
   actions: {
     async load() {
@@ -56,6 +60,8 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
         const { data } = await api.get("/settings/theme");
         Object.assign(this.$state, data);
         this._serverSnapshot = JSON.stringify(this.$state);
+        // Ensure localStorage reflects the latest server-provided settings.
+        this.persistLocal();
       } catch (e) {}
     },
 
