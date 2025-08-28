@@ -32,4 +32,26 @@ class RoleUpsertRequest extends FormRequest
             'tenant_id' => ['nullable', 'exists:tenants,id'],
         ];
     }
+
+    public function attributes(): array
+    {
+        return [
+            'name' => 'name',
+            'slug' => 'slug',
+            'abilities' => 'abilities',
+            'tenant_id' => 'tenant',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'required' => 'Please provide a :attribute.',
+            'string' => 'The :attribute must be a string.',
+            'max' => 'The :attribute may not be greater than :max characters.',
+            'array' => 'The :attribute must be an array.',
+            'exists' => 'The selected :attribute is invalid.',
+            'unique' => 'The :attribute has already been taken.',
+        ];
+    }
 }

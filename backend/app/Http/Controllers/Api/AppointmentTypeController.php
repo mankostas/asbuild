@@ -8,6 +8,7 @@ use App\Services\FormSchemaService;
 use Illuminate\Http\Request;
 use App\Http\Resources\AppointmentTypeResource;
 use App\Support\ListQuery;
+use App\Http\Requests\TypeUpsertRequest;
 
 class AppointmentTypeController extends Controller
 {
@@ -47,10 +48,13 @@ class AppointmentTypeController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(TypeUpsertRequest $request)
     {
         $this->ensureAdmin($request);
-        $data = $this->validateSchema($request);
+        $data = $request->validated();
+        if (isset($data['form_schema'])) {
+            $this->formSchemaService->validate($data['form_schema']);
+        }
 
         if ($request->user()->hasRole('SuperAdmin')) {
             $data['tenant_id'] = $data['tenant_id'] ?? null;
@@ -67,14 +71,16 @@ class AppointmentTypeController extends Controller
         return new AppointmentTypeResource($appointmentType);
     }
 
-    public function update(Request $request, AppointmentType $appointmentType)
+    public function update(TypeUpsertRequest $request, AppointmentType $appointmentType)
     {
         $this->ensureAdmin($request);
         if (! $request->user()->hasRole('SuperAdmin') && $appointmentType->tenant_id !== $request->user()->tenant_id) {
             abort(403);
         }
-
-        $data = $this->validateSchema($request, false);
+        $data = $request->validated();
+        if (isset($data['form_schema'])) {
+            $this->formSchemaService->validate($data['form_schema']);
+        }
 
         if ($request->user()->hasRole('SuperAdmin')) {
             if (array_key_exists('tenant_id', $data)) {
@@ -117,29 +123,5 @@ class AppointmentTypeController extends Controller
         return (new AppointmentTypeResource($copy))
             ->response()
             ->setStatusCode(201);
-    }
-
-    protected function validateSchema(Request $request, bool $nameRequired = true): array
-    {
-        $rules = [
-            'name' => ($nameRequired ? 'required' : 'sometimes') . '|string|max:255',
-            'form_schema' => 'nullable|json',
-            'fields_summary' => 'nullable|json',
-            'statuses' => ($nameRequired ? 'required' : 'sometimes') . '|json',
-            'tenant_id' => 'sometimes|integer',
-        ];
-        $validated = $request->validate($rules);
-
-        foreach (['form_schema', 'fields_summary', 'statuses'] as $field) {
-            if (isset($validated[$field])) {
-                $validated[$field] = json_decode($validated[$field], true);
-            }
-        }
-
-        if (isset($validated['form_schema'])) {
-            $this->formSchemaService->validate($validated['form_schema']);
-        }
-
-        return $validated;
     }
 }

@@ -1,9 +1,9 @@
 <template>
     <div>
       <form @submit.prevent="submitForm" class="max-w-lg space-y-4">
-      <VueSelect label="Type" :error="typeError">
+      <VueSelect label="Type" :error="appointmentTypeError">
         <vSelect
-          v-model="typeId"
+          v-model="appointmentTypeId"
           :options="types"
           label="name"
           :reduce="(t: any) => t.id"
@@ -12,7 +12,7 @@
         />
       </VueSelect>
 
-      <VueSelect v-if="isEdit" label="Status">
+      <VueSelect v-if="isEdit" label="Status" :error="errors.status">
         <vSelect
           v-model="status"
           :options="statusOptions"
@@ -24,7 +24,7 @@
 
       <JsonSchemaForm
         v-if="currentSchemaNoAssignee"
-        :key="typeId"
+        :key="appointmentTypeId"
         v-model="formData"
         :schema="currentSchemaNoAssignee"
       />
@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import api from '@/services/api';
+import api, { extractFormErrors } from '@/services/api';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
 import Button from '@/components/ui/Button/index.vue';
 import VueSelect from '@/components/ui/Select/VueSelect.vue';
@@ -81,13 +81,13 @@ const assignee = ref<{ kind: 'team' | 'employee'; id: number } | null>(null);
 const statusOptions = ref<string[]>([]);
 
 const schema = yup.object({
-  typeId: yup.mixed().required('Type is required'),
+  appointment_type_id: yup.mixed().required('Type is required'),
 });
 
-const { handleSubmit, meta } = useForm({ validationSchema: schema });
-const { value: typeId, errorMessage: typeError } = useField<string | number>(
-  'typeId',
-);
+const { handleSubmit, meta, setErrors, errors } = useForm({ validationSchema: schema });
+const { value: appointmentTypeId, errorMessage: appointmentTypeError } = useField<
+  string | number
+>('appointment_type_id');
 
 const isEdit = computed(() => route.name === 'appointments.edit');
 
@@ -101,7 +101,7 @@ onMounted(async () => {
   if (isEdit.value) {
     const res = await api.get(`/appointments/${route.params.id}`);
     const appt = res.data;
-    typeId.value = appt.type?.id || appt.appointment_type_id;
+    appointmentTypeId.value = appt.type?.id || appt.appointment_type_id;
     formData.value = appt.form_data || {};
     scheduledAt.value = appt.scheduled_at ? toISO(appt.scheduled_at) : '';
     slaStartAt.value = appt.sla_start_at ? toISO(appt.sla_start_at) : '';
@@ -121,7 +121,7 @@ onMounted(async () => {
 
 function onTypeChange() {
   formData.value = {};
-  const t = types.value.find((t) => t.id === typeId.value);
+  const t = types.value.find((t) => t.id === appointmentTypeId.value);
   scheduledAt.value = t?.scheduled_at ? toISO(t.scheduled_at) : '';
   slaStartAt.value = t?.sla_start_at ? toISO(t.sla_start_at) : '';
   slaEndAt.value = t?.sla_end_at ? toISO(t.sla_end_at) : '';
@@ -129,7 +129,7 @@ function onTypeChange() {
 }
 
 const currentSchema = computed(() => {
-  const t = types.value.find((t) => t.id === typeId.value);
+  const t = types.value.find((t) => t.id === appointmentTypeId.value);
   return t ? t.form_schema : null;
 });
 
@@ -159,7 +159,7 @@ const assigneeRequired = computed(() => {
 const requiredFields = computed(() => currentSchemaNoAssignee.value?.required || []);
 
 const canSubmit = computed(() => {
-  if (!typeId.value) return false;
+  if (!appointmentTypeId.value) return false;
   const formValid = requiredFields.value.every((f: string) => {
     const val = formData.value[f];
     return !(val === undefined || val === null || val === '');
@@ -172,7 +172,7 @@ const canSubmit = computed(() => {
 const submitForm = handleSubmit(async () => {
   serverError.value = '';
   const payload: any = {
-    appointment_type_id: typeId.value,
+    appointment_type_id: appointmentTypeId.value,
     form_data: formData.value,
   };
   if (scheduledAt.value) payload.scheduled_at = toISO(scheduledAt.value);
@@ -199,9 +199,14 @@ const submitForm = handleSubmit(async () => {
       });
     }
   } catch (e: any) {
-    serverError.value = e.message || 'Failed to save';
-    notify.error(serverError.value);
-    showError.value = true;
+    const formErrors = extractFormErrors(e);
+    if (Object.keys(formErrors).length) {
+      setErrors(formErrors);
+    } else {
+      serverError.value = e.message || 'Failed to save';
+      notify.error(serverError.value);
+      showError.value = true;
+    }
   }
 });
 </script>

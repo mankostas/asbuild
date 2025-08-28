@@ -8,10 +8,12 @@
             <option value="">Global</option>
             <option v-for="t in tenantStore.tenants" :key="t.id" :value="t.id">{{ t.name }}</option>
           </select>
+          <div v-if="errors.tenant_id" class="text-red-600 text-sm">{{ errors.tenant_id }}</div>
         </div>
         <div class="mb-4">
           <label class="block font-medium mb-1" for="name">Name<span class="text-red-600">*</span></label>
           <input id="name" v-model="name" class="border rounded p-2 w-full" />
+          <div v-if="errors.name" class="text-red-600 text-sm">{{ errors.name }}</div>
         </div>
 
         <div class="mb-4">
@@ -118,11 +120,12 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import api from '@/services/api';
+import api, { extractFormErrors } from '@/services/api';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
 import draggable from 'vuedraggable';
 import { useAuthStore } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
+import { useForm } from 'vee-validate';
 
 interface Field {
   id: number;
@@ -145,6 +148,7 @@ const serverError = ref('');
 const allStatuses = ref<any[]>([]);
 const selectedStatuses = ref<any[]>([]);
 const tenantId = ref<string | number | ''>('');
+const { handleSubmit, setErrors, errors } = useForm();
 
 const fieldTypes = [
   { key: 'text', label: 'Text', schema: { type: 'string' } },
@@ -257,7 +261,7 @@ const canSubmit = computed(() => {
   return !!name.value && fields.value.length > 0;
 });
 
-async function onSubmit() {
+const onSubmit = handleSubmit(async () => {
   serverError.value = '';
   if (!canSubmit.value) return;
   const payload: any = {
@@ -279,9 +283,14 @@ async function onSubmit() {
     }
     router.push({ name: 'types.list' });
   } catch (e: any) {
-    serverError.value = e.message || 'Failed to save';
+    const errs = extractFormErrors(e);
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+    } else {
+      serverError.value = e.message || 'Failed to save';
+    }
   }
-}
+});
 
 function addStatus(s: any) {
   selectedStatuses.value.push(s);
