@@ -20,11 +20,13 @@
         />
       </VueSelect>
 
+      <AssigneePicker v-if="assigneeField" v-model="assignee" />
+
       <JsonSchemaForm
-        v-if="currentSchema"
+        v-if="currentSchemaNoAssignee"
         :key="typeId"
         v-model="formData"
-        :schema="currentSchema"
+        :schema="currentSchemaNoAssignee"
       />
 
       <div class="pt-2">
@@ -58,6 +60,7 @@ import { useField, useForm } from 'vee-validate';
 import * as yup from 'yup';
 import vSelect from 'vue-select';
 import { useNotify } from '@/plugins/notify';
+import AssigneePicker from '@/components/appointments/AssigneePicker.vue';
 
 const notify = useNotify();
 const router = useRouter();
@@ -72,6 +75,7 @@ const status = ref('');
 const serverError = ref('');
 const showError = ref(false);
 const originalStatus = ref('');
+const assignee = ref<{ kind: 'team' | 'employee'; id: number } | null>(null);
 
 const statusOptions = ref<string[]>([]);
 
@@ -103,6 +107,10 @@ onMounted(async () => {
     slaEndAt.value = appt.sla_end_at || '';
     status.value = appt.status;
     originalStatus.value = appt.status;
+    if (appt.assignee_type && appt.assignee_id) {
+      const kind = appt.assignee_type.includes('Team') ? 'team' : 'employee';
+      assignee.value = { kind, id: appt.assignee_id };
+    }
     const map = appt.type?.statuses || {};
     const allowed = Array.from(new Set([...Object.keys(map), ...Object.values(map).flat()]));
     if (allowed.length) {
@@ -117,6 +125,7 @@ function onTypeChange() {
   scheduledAt.value = t?.scheduled_at || '';
   slaStartAt.value = t?.sla_start_at || '';
   slaEndAt.value = t?.sla_end_at || '';
+  assignee.value = null;
 }
 
 const currentSchema = computed(() => {
@@ -124,14 +133,40 @@ const currentSchema = computed(() => {
   return t ? t.form_schema : null;
 });
 
-const requiredFields = computed(() => currentSchema.value?.required || []);
+const assigneeField = computed(() => {
+  const props = currentSchema.value?.properties || {};
+  return Object.entries(props).find(([, prop]: any) => prop.kind === 'assignee')?.[0] || null;
+});
+
+const currentSchemaNoAssignee = computed(() => {
+  if (!currentSchema.value) return null;
+  const schema = JSON.parse(JSON.stringify(currentSchema.value));
+  const field = assigneeField.value;
+  if (field && schema.properties) {
+    delete schema.properties[field];
+    if (schema.required) {
+      schema.required = schema.required.filter((r: string) => r !== field);
+    }
+  }
+  return schema;
+});
+
+const assigneeRequired = computed(() => {
+  const field = assigneeField.value;
+  return field ? currentSchema.value?.required?.includes(field) : false;
+});
+
+const requiredFields = computed(() => currentSchemaNoAssignee.value?.required || []);
 
 const canSubmit = computed(() => {
   if (!typeId.value) return false;
-  return requiredFields.value.every((f: string) => {
+  const formValid = requiredFields.value.every((f: string) => {
     const val = formData.value[f];
     return !(val === undefined || val === null || val === '');
   });
+  if (!formValid) return false;
+  if (assigneeRequired.value && !assignee.value) return false;
+  return true;
 });
 
 const submitForm = handleSubmit(async () => {
@@ -143,6 +178,7 @@ const submitForm = handleSubmit(async () => {
   if (scheduledAt.value) payload.scheduled_at = scheduledAt.value;
   if (slaStartAt.value) payload.sla_start_at = slaStartAt.value;
   if (slaEndAt.value) payload.sla_end_at = slaEndAt.value;
+  if (assignee.value) payload.assignee = assignee.value;
   try {
     if (isEdit.value) {
       if (status.value && status.value !== originalStatus.value) {
