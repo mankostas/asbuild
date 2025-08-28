@@ -10,6 +10,7 @@ return [
     'employees',
     'themes',
     'tenants',
+    'gdpr',
     'branding',
 ];
 

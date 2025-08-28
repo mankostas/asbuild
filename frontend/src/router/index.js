@@ -318,6 +318,7 @@ export const routes = [
       title: 'GDPR',
       layout: 'app',
       groupParent: 'settings',
+      requiredAbilities: ['gdpr.view', 'gdpr.manage'],
     },
   },
   {

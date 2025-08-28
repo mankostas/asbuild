@@ -118,6 +118,7 @@ class LookupRoutesTest extends TestCase
         $this->assertContains(['slug' => 'employees', 'label' => 'Employees'], $features);
         $this->assertContains(['slug' => 'themes', 'label' => 'Theme Customizer'], $features);
         $this->assertContains(['slug' => 'tenants', 'label' => 'Tenants'], $features);
+        $this->assertContains(['slug' => 'gdpr', 'label' => 'GDPR'], $features);
     }
 }
 
