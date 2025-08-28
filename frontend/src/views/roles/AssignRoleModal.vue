@@ -106,7 +106,7 @@ async function onSubmit() {
 
 onMounted(async () => {
   if (auth.isSuperAdmin) {
-    if (!tenantStore.tenants.length) await tenantStore.loadTenants();
+    await tenantStore.loadTenants();
   } else {
     tenantId.value = tenantStore.currentTenantId;
   }

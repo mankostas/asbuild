@@ -44,7 +44,7 @@ const tenantId = ref<string | number | ''>('');
 const isEdit = computed(() => route.name === 'statuses.edit');
 
 onMounted(async () => {
-  if (auth.isSuperAdmin && !tenantStore.tenants.length) {
+  if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
   }
   if (isEdit.value) {
