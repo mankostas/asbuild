@@ -49,6 +49,7 @@ import { useCalendarStore } from '@/stores/calendar';
 import { useStatusesStore } from '@/stores/statuses';
 import { useTypesStore } from '@/stores/types';
 import { useLookupsStore } from '@/stores/lookups';
+import { toISO } from '@/utils/datetime';
 
 const router = useRouter();
 const store = useCalendarStore();
@@ -89,7 +90,9 @@ async function loadEvents(info?: { startStr: string; endStr: string }) {
     type_id: typeId.value,
     status_id: statusId.value,
   } as any;
-  await store.fetch(currentRange.value.startStr, currentRange.value.endStr);
+  const start = toISO(currentRange.value.startStr);
+  const end = toISO(currentRange.value.endStr);
+  await store.fetch(start, end);
 }
 
 watch([teamId, employeeId, typeId, statusId], () => {
@@ -104,7 +107,7 @@ const calendarOptions = computed(() => ({
     loadEvents({ startStr: info.startStr, endStr: info.endStr });
   },
   dateClick(info: any) {
-    selectedDate.value = info.dateStr;
+    selectedDate.value = toISO(info.dateStr);
     showCreate.value = true;
   },
   eventClick(info: any) {

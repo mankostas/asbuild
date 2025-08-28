@@ -3,11 +3,14 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Concerns\FormatsDateTimes;
 
 class StatusResource extends JsonResource
 {
+    use FormatsDateTimes;
+
     public function toArray($request): array
     {
-        return parent::toArray($request);
+        return $this->formatDates(parent::toArray($request));
     }
 }

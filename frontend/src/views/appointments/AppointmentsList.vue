@@ -56,6 +56,7 @@ import api from '@/services/api';
 import { useNotify } from '@/plugins/notify';
 import Icon from '@/components/ui/Icon';
 import Swal from 'sweetalert2';
+import { parseISO, formatDisplay } from '@/utils/datetime';
 
 const router = useRouter();
 const notify = useNotify();
@@ -111,15 +112,15 @@ async function fetchAppointments({ page, perPage, sort, search }: any) {
     rows = rows.filter((r) => r.status === statusFilter.value);
   }
   if (startDate.value) {
-    const start = new Date(startDate.value);
+    const start = parseISO(startDate.value);
     rows = rows.filter(
-      (r) => r.scheduled_at && new Date(r.scheduled_at) >= start,
+      (r) => r.scheduled_at && parseISO(r.scheduled_at) >= start,
     );
   }
   if (endDate.value) {
-    const end = new Date(endDate.value);
+    const end = parseISO(endDate.value);
     rows = rows.filter(
-      (r) => r.scheduled_at && new Date(r.scheduled_at) <= end,
+      (r) => r.scheduled_at && parseISO(r.scheduled_at) <= end,
     );
   }
   if (search) {
@@ -143,10 +144,10 @@ async function fetchAppointments({ page, perPage, sort, search }: any) {
     id: r.id,
     type: r.type?.name || '—',
     status: `<span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClasses[r.status] ?? ''}">${r.status.replace(/_/g, ' ')}</span>`,
-    scheduled_at: r.scheduled_at,
-    sla_end_at: r.sla_end_at,
-    started_at: r.started_at,
-    completed_at: r.completed_at,
+    scheduled_at: r.scheduled_at ? formatDisplay(r.scheduled_at) : '',
+    sla_end_at: r.sla_end_at ? formatDisplay(r.sla_end_at) : '',
+    started_at: r.started_at ? formatDisplay(r.started_at) : '',
+    completed_at: r.completed_at ? formatDisplay(r.completed_at) : '',
   }));
   return { rows: paged, total };
 }
