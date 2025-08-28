@@ -61,6 +61,7 @@ import * as yup from 'yup';
 import vSelect from 'vue-select';
 import { useNotify } from '@/plugins/notify';
 import AssigneePicker from '@/components/appointments/AssigneePicker.vue';
+import { toISO } from '@/utils/datetime';
 
 const notify = useNotify();
 const router = useRouter();
@@ -102,9 +103,9 @@ onMounted(async () => {
     const appt = res.data;
     typeId.value = appt.type?.id || appt.appointment_type_id;
     formData.value = appt.form_data || {};
-    scheduledAt.value = appt.scheduled_at || '';
-    slaStartAt.value = appt.sla_start_at || '';
-    slaEndAt.value = appt.sla_end_at || '';
+    scheduledAt.value = appt.scheduled_at ? toISO(appt.scheduled_at) : '';
+    slaStartAt.value = appt.sla_start_at ? toISO(appt.sla_start_at) : '';
+    slaEndAt.value = appt.sla_end_at ? toISO(appt.sla_end_at) : '';
     status.value = appt.status;
     originalStatus.value = appt.status;
     if (appt.assignee) {
@@ -121,9 +122,9 @@ onMounted(async () => {
 function onTypeChange() {
   formData.value = {};
   const t = types.value.find((t) => t.id === typeId.value);
-  scheduledAt.value = t?.scheduled_at || '';
-  slaStartAt.value = t?.sla_start_at || '';
-  slaEndAt.value = t?.sla_end_at || '';
+  scheduledAt.value = t?.scheduled_at ? toISO(t.scheduled_at) : '';
+  slaStartAt.value = t?.sla_start_at ? toISO(t.sla_start_at) : '';
+  slaEndAt.value = t?.sla_end_at ? toISO(t.sla_end_at) : '';
   assignee.value = null;
 }
 
@@ -174,9 +175,9 @@ const submitForm = handleSubmit(async () => {
     appointment_type_id: typeId.value,
     form_data: formData.value,
   };
-  if (scheduledAt.value) payload.scheduled_at = scheduledAt.value;
-  if (slaStartAt.value) payload.sla_start_at = slaStartAt.value;
-  if (slaEndAt.value) payload.sla_end_at = slaEndAt.value;
+  if (scheduledAt.value) payload.scheduled_at = toISO(scheduledAt.value);
+  if (slaStartAt.value) payload.sla_start_at = toISO(slaStartAt.value);
+  if (slaEndAt.value) payload.sla_end_at = toISO(slaEndAt.value);
   if (assignee.value) payload.assignee = assignee.value;
   try {
     if (isEdit.value) {

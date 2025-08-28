@@ -55,6 +55,7 @@ import ChartCard from '@/components/reports/ChartCard.vue';
 import Card from '@/components/ui/Card/index.vue';
 import Skeleton from '@/components/ui/Skeleton.vue';
 import Button from '@/components/ui/Button/index.vue';
+import { parseISO } from '@/utils/datetime';
 
 interface Kpi {
   label: string;
@@ -84,7 +85,10 @@ async function fetchData() {
   try {
     const { data } = await api.get('/reports/overview');
     kpis.value = data.kpis || [];
-    chartSeries.value = data.chart?.series || [];
+    chartSeries.value = (data.chart?.series || []).map((s: any) => ({
+      label: s.label,
+      data: (s.data || []).map((d: any) => ({ x: parseISO(d.x), y: d.y })),
+    }));
     chartType.value = data.chart?.type || 'line';
     chartTitle.value = data.chart?.title || t('dashboard.chart.trend');
   } catch (e) {

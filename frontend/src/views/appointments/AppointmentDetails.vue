@@ -79,6 +79,7 @@ import CommentsThread from '@/components/comments/CommentsThread.vue';
 import CommentEditor from '@/components/comments/CommentEditor.vue';
 import StatusChanger from './StatusChanger.vue';
 import { useStatusesStore } from '@/stores/statuses';
+import { formatDisplay, parseISO, toISO } from '@/utils/datetime';
 
 const route = useRoute();
 
@@ -103,7 +104,7 @@ const tabs = [
 const activeTab = ref('details');
 
 function format(date?: string) {
-  return date ? new Date(date).toLocaleString() : '';
+  return date ? formatDisplay(date) : '';
 }
 
 const slaStatus = computed(() => {
@@ -111,8 +112,8 @@ const slaStatus = computed(() => {
   if (!appt) return 'none';
   if (appt.sla_status) return appt.sla_status;
   if (!appt.sla_end_at) return 'none';
-  const reference = appt.completed_at || new Date().toISOString();
-  return new Date(reference) <= new Date(appt.sla_end_at)
+  const reference = appt.completed_at || toISO(new Date());
+  return parseISO(reference) <= parseISO(appt.sla_end_at)
     ? 'within'
     : 'breached';
 });

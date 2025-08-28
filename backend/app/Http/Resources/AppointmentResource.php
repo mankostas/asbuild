@@ -4,9 +4,12 @@ namespace App\Http\Resources;
 
 use App\Models\Team;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Concerns\FormatsDateTimes;
 
 class AppointmentResource extends JsonResource
 {
+    use FormatsDateTimes;
+
     public function toArray($request): array
     {
         $data = parent::toArray($request);
@@ -22,6 +25,6 @@ class AppointmentResource extends JsonResource
             $data['assignee'] = null;
         }
 
-        return $data;
+        return $this->formatDates($data);
     }
 }
