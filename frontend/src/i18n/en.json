@@ -50,7 +50,13 @@
     "footer": "Footer",
     "types": "Appointment Types",
     "typeCreate": "Create Type",
-    "typeEdit": "Edit Type"
+    "typeEdit": "Edit Type",
+    "statuses": "Statuses",
+    "statusCreate": "Create Status",
+    "statusEdit": "Edit Status",
+    "roles": "Roles",
+    "roleCreate": "Create Role",
+    "roleEdit": "Edit Role"
   },
   "appointments": {
     "new": "New Appointment",

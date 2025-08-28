@@ -18,6 +18,18 @@ export const menuItems = [
     admin: true,
   },
   {
+    title: "Statuses",
+    icon: "heroicons-outline:check-circle",
+    link: "statuses.list",
+    admin: true,
+  },
+  {
+    title: "Roles",
+    icon: "heroicons-outline:key",
+    link: "roles.list",
+    admin: true,
+  },
+  {
     title: "Manuals",
     icon: "heroicons-outline:book-open",
     link: "manuals.list",
@@ -61,6 +73,8 @@ export const topMenu = [
     link: "appointments.list",
   },
   { title: "Types", icon: "heroicons-outline:tag", link: "types.list", admin: true },
+  { title: "Statuses", icon: "heroicons-outline:check-circle", link: "statuses.list", admin: true },
+  { title: "Roles", icon: "heroicons-outline:key", link: "roles.list", admin: true },
   {
     title: "Manuals",
     icon: "heroicons-outline:book-open",
@@ -129,6 +143,18 @@ export const addNewOptions = [
     label: 'Employee',
     icon: 'heroicons-outline:users',
     link: 'employees.create',
+    admin: true,
+  },
+  {
+    label: 'Status',
+    icon: 'heroicons-outline:check-circle',
+    link: 'statuses.create',
+    admin: true,
+  },
+  {
+    label: 'Role',
+    icon: 'heroicons-outline:key',
+    link: 'roles.create',
     admin: true,
   },
 ];

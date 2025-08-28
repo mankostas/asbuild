@@ -1,22 +1,16 @@
 <template>
   <span>
-    <Icon :icon="icon" :class="class" />
+    <Icon v-bind="$attrs" :icon="icon" />
   </span>
 </template>
 <script>
 import { Icon } from "@iconify/vue";
 export default {
-  components: {
-    Icon,
-  },
+  components: { Icon },
   props: {
     icon: {
       type: String,
       default: "heroicons-outline:home",
-    },
-    class: {
-      type: String,
-      default: null,
     },
   },
 };

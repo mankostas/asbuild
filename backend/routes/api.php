@@ -15,6 +15,8 @@ use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Api\GdprController;
+use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\StatusController;
 
 Route::middleware(['api','tenant'])->get('/health', function () {
     return response()->json(['status' => 'ok', 'tenant' => config('tenant.branding')]);
@@ -51,6 +53,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
     Route::apiResource('appointments', AppointmentController::class);
     Route::apiResource('appointment-types', AppointmentTypeController::class);
+    Route::apiResource('roles', RoleController::class);
+    Route::apiResource('statuses', StatusController::class);
     Route::apiResource('appointments.comments', AppointmentCommentController::class)
         ->shallow()
         ->only(['index', 'store', 'show', 'update', 'destroy']);
