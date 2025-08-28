@@ -8,14 +8,17 @@ export const useFooterStore = defineStore('footer', {
   }),
   actions: {
     async load() {
-      const { data } = await api.get('/settings/footer');
-      this.left = data.left;
-      this.right = data.right;
+      const { data } = await api.get('/branding');
+      this.left = data.footer_left || '';
+      this.right = data.footer_right || '';
     },
     async update(left: string, right: string) {
-      const { data } = await api.put('/settings/footer', { left, right });
-      this.left = data.left;
-      this.right = data.right;
+      const { data } = await api.put('/branding', {
+        footer_left: left,
+        footer_right: right,
+      });
+      this.left = data.footer_left || '';
+      this.right = data.footer_right || '';
     },
   },
 });

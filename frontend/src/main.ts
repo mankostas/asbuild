@@ -23,6 +23,7 @@ import VCalendar from "v-calendar";
 import "v-calendar/dist/style.css";
 import { VueQueryPlugin } from "@tanstack/vue-query";
 import { useThemeSettingsStore } from "./stores/themeSettings";
+import { useBrandingStore } from "./stores/branding";
 
 const app = createApp(App)
   .use(stores)
@@ -46,7 +47,10 @@ async function bootstrap() {
   app.config.globalProperties.$store = {};
   const themeSettingsStore = useThemeSettingsStore();
   await themeSettingsStore.load();
+  const brandingStore = useBrandingStore();
+  await brandingStore.load();
   app.config.globalProperties.$store.themeSettingsStore = themeSettingsStore;
+  app.config.globalProperties.$store.brandingStore = brandingStore;
 
   // Apply any saved theme customizer settings on startup and persist future
   // changes so user preferences survive page reloads and new sessions.

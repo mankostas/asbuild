@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\StatusController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\LookupController;
 use App\Http\Controllers\Api\CalendarController;
+use App\Http\Controllers\Api\BrandingController;
 use App\Http\Middleware\EnsureTenantScope;
 use App\Http\Middleware\Ability;
 use Illuminate\Http\Request;
@@ -167,11 +168,10 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::post('employees/{employee}', [EmployeeController::class, 'update'])
         ->middleware(Ability::class . ':employees.manage');
 
-    Route::get('settings/branding', [SettingsController::class, 'getBranding']);
-    Route::put('settings/branding', [SettingsController::class, 'updateBranding']);
+    Route::get('branding', [BrandingController::class, 'show']);
+    Route::put('branding', [BrandingController::class, 'update'])
+        ->middleware(Ability::class . ':branding.manage');
     Route::put('settings/profile', [SettingsController::class, 'updateProfile']);
-    Route::get('settings/footer', [SettingsController::class, 'getFooter']);
-    Route::put('settings/footer', [SettingsController::class, 'updateFooter']);
     Route::get('settings/theme', [SettingsController::class, 'getTheme'])
         ->middleware(Ability::class . ':themes.view');
     Route::put('settings/theme', [SettingsController::class, 'updateTheme'])
