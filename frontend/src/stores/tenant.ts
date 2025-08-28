@@ -22,13 +22,14 @@ export const useTenantStore = defineStore('tenant', {
       return data.meta;
     },
     setTenant(id: string) {
+      const changed = this.currentTenantId !== id;
       this.currentTenantId = id;
       if (id) {
         localStorage.setItem(TENANT_ID_KEY, id);
       } else {
         localStorage.removeItem(TENANT_ID_KEY);
       }
-      if (typeof window !== 'undefined') {
+      if (changed && typeof window !== 'undefined') {
         window.location.reload();
       }
     },
