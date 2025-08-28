@@ -55,4 +55,9 @@ class LookupController extends Controller
 
         return $results->sortBy('label')->values();
     }
+
+    public function abilities()
+    {
+        return collect(config('abilities'))->values();
+    }
 }

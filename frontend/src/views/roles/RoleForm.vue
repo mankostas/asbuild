@@ -22,11 +22,9 @@
         />
         <div v-if="errors.level" class="text-red-600 text-sm">{{ errors.level }}</div>
       </div>
-      <div>
-        <label class="block font-medium mb-1" for="abilities">Abilities (comma separated)</label>
-        <input id="abilities" v-model="abilities" class="border rounded p-2 w-full" />
-        <div v-if="errors.abilities" class="text-red-600 text-sm">{{ errors.abilities }}</div>
-      </div>
+      <VueSelect label="Abilities" :error="errors.abilities">
+        <vSelect v-model="abilities" :options="abilityOptions" multiple />
+      </VueSelect>
       <div v-if="auth.isSuperAdmin">
         <VueSelect label="Tenant" :error="errors.tenant_id">
           <vSelect
@@ -66,7 +64,8 @@ const tenantStore = useTenantStore();
 
 const name = ref('');
 const slug = ref('');
-const abilities = ref('');
+const abilities = ref<string[]>([]);
+const abilityOptions = ref<string[]>([]);
 const level = ref<number>(0);
 const tenantId = ref<string>(auth.isSuperAdmin ? '' : tenantStore.currentTenantId);
 const serverError = ref('');
@@ -79,6 +78,8 @@ const tenantOptions = computed(() => [
 const isEdit = computed(() => route.name === 'roles.edit');
 
 onMounted(async () => {
+  const { data: abilityData } = await api.get('/lookups/abilities');
+  abilityOptions.value = abilityData;
   if (auth.isSuperAdmin && !tenantStore.tenants.length) {
     await tenantStore.loadTenants();
   }
@@ -91,7 +92,7 @@ onMounted(async () => {
     }
     name.value = data.name;
     slug.value = data.slug || '';
-    abilities.value = (data.abilities || []).join(', ');
+    abilities.value = data.abilities || [];
     tenantId.value = data.tenant_id || '';
     level.value = data.level ?? 0;
   }
@@ -114,10 +115,7 @@ const onSubmit = handleSubmit(async () => {
   const payload: any = {
     name: name.value,
     slug: slug.value,
-    abilities: abilities.value
-      .split(',')
-      .map((t) => t.trim())
-      .filter((t) => t),
+    abilities: abilities.value,
     level: level.value,
   };
   if (auth.isSuperAdmin) {
