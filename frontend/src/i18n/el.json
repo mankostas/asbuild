@@ -1,5 +1,7 @@
 {
-  "app": { "title": "Asbuild" },
+  "app": {
+    "title": "Asbuild"
+  },
   "actions": {
     "toggleTheme": "Αλλαγή θέματος",
     "toggleDensity": "Αλλαγή πυκνότητας",
@@ -56,7 +58,10 @@
     "statusEdit": "Επεξεργασία Κατάστασης",
     "roles": "Ρόλοι",
     "roleCreate": "Δημιουργία Ρόλου",
-    "roleEdit": "Επεξεργασία Ρόλου"
+    "roleEdit": "Επεξεργασία Ρόλου",
+    "tenantDetail": "Λεπτομέρειες Μισθωτή",
+    "tenantCreate": "Δημιουργία Μισθωτή",
+    "tenantEdit": "Επεξεργασία Μισθωτή"
   },
   "appointments": {
     "new": "Νέο Ραντεβού",
