@@ -10,6 +10,7 @@ class Role extends Model
     protected $fillable = [
         'tenant_id',
         'name',
+        'level',
     ];
 
     public function users(): BelongsToMany

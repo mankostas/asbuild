@@ -13,6 +13,7 @@ class RoleSeeder extends Seeder
             'id' => 1,
             'tenant_id' => 1,
             'name' => 'SuperAdmin',
+            'level' => 100,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

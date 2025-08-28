@@ -41,12 +41,14 @@ class RoleController extends Controller
         $tenantId = $this->getTenantId($request);
         $data = $request->validate([
             'name' => 'required|string',
+            'level' => 'required|integer',
         ]);
         if ($data['name'] === 'SuperAdmin') {
             abort(403, 'SuperAdmin role cannot be created');
         }
         $role = Role::create([
             'name' => $data['name'],
+            'level' => $data['level'],
             'tenant_id' => $tenantId,
         ]);
         return response()->json($role, 201);
@@ -74,11 +76,15 @@ class RoleController extends Controller
         }
         $data = $request->validate([
             'name' => 'required|string',
+            'level' => 'required|integer',
         ]);
         if ($data['name'] === 'SuperAdmin') {
             abort(403, 'SuperAdmin role cannot be used');
         }
-        $role->update(['name' => $data['name']]);
+        $role->update([
+            'name' => $data['name'],
+            'level' => $data['level'],
+        ]);
         return $role;
     }
 
