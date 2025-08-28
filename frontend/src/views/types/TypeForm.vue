@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="can('types.manage')">
       <form @submit.prevent="onSubmit" class="grid grid-cols-2 gap-8">
       <div>
         <div v-if="auth.isSuperAdmin" class="mb-4">
@@ -123,7 +123,7 @@ import { useRoute, useRouter } from 'vue-router';
 import api, { extractFormErrors } from '@/services/api';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
 import draggable from 'vuedraggable';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
 import { useForm } from 'vee-validate';
 

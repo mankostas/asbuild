@@ -11,6 +11,7 @@
         </option>
       </select>
       <RouterLink
+        v-if="can('statuses.manage')"
         class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
         :to="{ name: 'statuses.create' }"
       >
@@ -24,7 +25,7 @@
       :fetcher="fetchStatuses"
     >
       <template #actions="{ row }">
-        <div class="flex gap-2">
+        <div v-if="can('statuses.manage')" class="flex gap-2">
           <button class="text-blue-600" title="Edit" @click="edit(row.id)">
             <Icon icon="heroicons-outline:pencil-square" class="w-5 h-5" />
           </button>
@@ -52,7 +53,7 @@ import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue'
 import Swal from 'sweetalert2';
 import Icon from '@/components/ui/Icon';
 import api from '@/services/api';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
 import { useStatusesStore } from '@/stores/statuses';
 

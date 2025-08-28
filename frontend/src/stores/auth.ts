@@ -26,14 +26,18 @@ export const useAuthStore = defineStore('auth', {
     accessToken: initialAccess as string | null,
     refreshToken: initialRefresh as string | null,
     impersonatedTenant: localStorage.getItem('impersonatingTenant') || '',
+    abilities: [] as string[],
   }),
   getters: {
     isAuthenticated: (state) => !!state.accessToken,
     isImpersonating: (state) => !!state.impersonatedTenant,
     isSuperAdmin: (state) =>
+      state.abilities.includes('*') ||
       state.user?.roles?.some(
         (r: any) => r.name === 'SuperAdmin' || r.slug === 'super_admin',
       ) || false,
+    can: (state) => (ability: string) =>
+      state.abilities.includes('*') || state.abilities.includes(ability),
   },
   actions: {
     async login(payload: LoginPayload) {
@@ -41,18 +45,18 @@ export const useAuthStore = defineStore('auth', {
       if (data.access_token) {
         this.accessToken = data.access_token;
         this.refreshToken = data.refresh_token;
-        this.user = data.user;
-        useTenantStore().setTenant(data.user?.tenant_id || '');
         setTokens(data.access_token, data.refresh_token);
         api.defaults.headers.common['Authorization'] =
           `Bearer ${data.access_token}`;
+        await this.fetchUser();
         await useThemeSettingsStore().load();
       }
     },
     async fetchUser() {
       const { data } = await api.get('/me');
-      this.user = data;
-      useTenantStore().setTenant(data?.tenant_id || '');
+      this.user = data.user;
+      this.abilities = data.abilities || [];
+      useTenantStore().setTenant(data.user?.tenant_id || '');
     },
     async logout(skipServer = false) {
       if (!skipServer) {
@@ -63,6 +67,7 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = '';
       this.refreshToken = '';
       this.user = null;
+      this.abilities = [];
       clearTokens();
       delete api.defaults.headers.common['Authorization'];
       this.impersonatedTenant = '';
@@ -90,15 +95,18 @@ export const useAuthStore = defineStore('auth', {
       const { data } = await api.post(`/tenants/${tenantId}/impersonate`);
       this.accessToken = data.access_token;
       this.refreshToken = data.refresh_token;
-      this.user = data.user;
-      useTenantStore().setTenant(data.user?.tenant_id || '');
       setTokens(data.access_token, data.refresh_token);
       api.defaults.headers.common['Authorization'] =
         `Bearer ${data.access_token}`;
       this.impersonatedTenant = tenantName;
       localStorage.setItem('impersonatingTenant', tenantName);
+      await this.fetchUser();
     },
   },
 });
+
+export function can(ability: string): boolean {
+  return useAuthStore().can(ability);
+}
 
 registerAuthStore(() => useAuthStore());

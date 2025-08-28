@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="can('teams.manage')">
     <form @submit.prevent="submit" class="grid gap-4 max-w-lg">
       <Textinput label="Name" v-model="form.name" :error="errors.name" />
       <Textinput label="Description" v-model="form.description" :error="errors.description" />
@@ -30,6 +30,7 @@ import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import Button from '@/components/ui/Button/index.vue';
 import vSelect from 'vue-select';
 import { useTeamsStore } from '@/stores/teams';
+import { can } from '@/stores/auth';
 import { useForm } from 'vee-validate';
 
 const route = useRoute();

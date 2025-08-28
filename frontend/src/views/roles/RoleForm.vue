@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="can('roles.manage')">
     <form @submit.prevent="onSubmit" class="max-w-md grid gap-4">
       <div>
         <label class="block font-medium mb-1" for="name">Name<span class="text-red-600">*</span></label>
@@ -41,7 +41,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api, { extractFormErrors } from '@/services/api';
 import { useNotify } from '@/plugins/notify';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
 import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import vSelect from 'vue-select';

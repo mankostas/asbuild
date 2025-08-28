@@ -62,7 +62,7 @@
           @change="validateField(name)"
         />
         <AssigneePicker
-          v-else-if="fieldType(prop) === 'assignee'"
+          v-else-if="fieldType(prop) === 'assignee' && can('appointments.assign')"
           v-model="form[name]"
         />
       </template>
@@ -74,6 +74,7 @@
 <script setup lang="ts">
 import { reactive, watch, onMounted } from 'vue';
 import AssigneePicker from '@/components/appointments/AssigneePicker.vue';
+import { can } from '@/stores/auth';
 
 interface Schema {
   properties: Record<string, any>;

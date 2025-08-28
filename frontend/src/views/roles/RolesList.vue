@@ -12,6 +12,7 @@
         </select>
       </div>
       <RouterLink
+        v-if="can('roles.manage')"
         class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
         :to="{ name: 'roles.create' }"
       >
@@ -25,7 +26,10 @@
       :fetcher="fetchRoles"
     >
       <template #actions="{ row }">
-        <div v-if="row.name !== 'SuperAdmin'" class="flex gap-2">
+        <div
+          v-if="row.name !== 'SuperAdmin' && can('roles.manage')"
+          class="flex gap-2"
+        >
           <button class="text-blue-600" title="Edit" @click="edit(row.id)">
             <Icon icon="heroicons-outline:pencil-square" class="w-5 h-5" />
           </button>
@@ -55,7 +59,7 @@ import Swal from 'sweetalert2';
 import Icon from '@/components/ui/Icon';
 import { useNotify } from '@/plugins/notify';
 import { useRolesStore } from '@/stores/roles';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
 import AssignRoleModal from './AssignRoleModal.vue';
 

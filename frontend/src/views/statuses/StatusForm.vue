@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="can('statuses.manage')">
     <form @submit.prevent="onSubmit" class="max-w-md grid gap-4">
       <div v-if="auth.isSuperAdmin">
         <label class="block font-medium mb-1" for="tenant">Tenant</label>
@@ -28,7 +28,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api, { extractFormErrors } from '@/services/api';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
 import { useForm } from 'vee-validate';
 
