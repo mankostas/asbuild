@@ -7,6 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class TenantOwnedPolicy
 {
+    public function before(User $user, string $ability)
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+    }
+
     public function view(User $user, Model $model): bool
     {
         return $user->tenant_id === $model->tenant_id;

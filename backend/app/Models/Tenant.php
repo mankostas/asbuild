@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\App;
 
 class Tenant extends Model
 {
+    protected static ?Tenant $current = null;
     protected $fillable = [
         'name',
         'quota_storage_mb',
@@ -22,5 +24,26 @@ class Tenant extends Model
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class);
+    }
+
+    public static function current(): ?Tenant
+    {
+        if (static::$current) {
+            return static::$current;
+        }
+
+        if (App::bound('tenant_id')) {
+            return static::$current = static::find(App::get('tenant_id'));
+        }
+
+        return null;
+    }
+
+    public static function setCurrent(?Tenant $tenant): void
+    {
+        static::$current = $tenant;
+        if ($tenant) {
+            App::instance('tenant_id', $tenant->id);
+        }
     }
 }

@@ -17,6 +17,8 @@ use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Api\GdprController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\StatusController;
+use App\Http\Middleware\EnsureTenantScope;
+use App\Http\Middleware\Ability;
 
 Route::middleware(['api','tenant'])->get('/health', function () {
     return response()->json(['status' => 'ok', 'tenant' => config('tenant.branding')]);
@@ -40,7 +42,7 @@ Route::get('files/{file}/{variant?}', [FileController::class, 'download'])
     ->name('files.download')
     ->middleware('signed.url');
 
-Route::prefix('uploads')->middleware(['auth:sanctum', 'tenant'])->group(function () {
+Route::prefix('uploads')->middleware(['auth:sanctum', EnsureTenantScope::class])->group(function () {
     Route::post('chunk', [UploadController::class, 'chunk'])->middleware('throttle:uploads');
     Route::delete('cleanup', [UploadController::class, 'cleanup'])->middleware('throttle:uploads');
 });
@@ -50,11 +52,24 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('tenants/{tenant}/impersonate', [TenantController::class, 'impersonate']);
 });
 
-Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
+Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function () {
     Route::apiResource('appointments', AppointmentController::class);
-    Route::apiResource('appointment-types', AppointmentTypeController::class);
-    Route::apiResource('roles', RoleController::class);
-    Route::apiResource('statuses', StatusController::class);
+
+    Route::apiResource('appointment-types', AppointmentTypeController::class)->only(['index', 'show']);
+    Route::apiResource('roles', RoleController::class)->only(['index', 'show']);
+    Route::apiResource('statuses', StatusController::class)->only(['index', 'show']);
+
+    Route::post('appointment-types', [AppointmentTypeController::class, 'store'])->middleware(Ability::class . ':types.manage')->name('appointment-types.store');
+    Route::match(['put', 'patch'], 'appointment-types/{appointment_type}', [AppointmentTypeController::class, 'update'])->middleware(Ability::class . ':types.manage')->name('appointment-types.update');
+    Route::delete('appointment-types/{appointment_type}', [AppointmentTypeController::class, 'destroy'])->middleware(Ability::class . ':types.manage')->name('appointment-types.destroy');
+
+    Route::post('roles', [RoleController::class, 'store'])->middleware(Ability::class . ':roles.manage')->name('roles.store');
+    Route::match(['put', 'patch'], 'roles/{role}', [RoleController::class, 'update'])->middleware(Ability::class . ':roles.manage')->name('roles.update');
+    Route::delete('roles/{role}', [RoleController::class, 'destroy'])->middleware(Ability::class . ':roles.manage')->name('roles.destroy');
+
+    Route::post('statuses', [StatusController::class, 'store'])->middleware(Ability::class . ':statuses.manage')->name('statuses.store');
+    Route::match(['put', 'patch'], 'statuses/{status}', [StatusController::class, 'update'])->middleware(Ability::class . ':statuses.manage')->name('statuses.update');
+    Route::delete('statuses/{status}', [StatusController::class, 'destroy'])->middleware(Ability::class . ':statuses.manage')->name('statuses.destroy');
     Route::apiResource('appointments.comments', AppointmentCommentController::class)
         ->shallow()
         ->only(['index', 'store', 'show', 'update', 'destroy']);
