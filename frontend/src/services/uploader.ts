@@ -5,8 +5,10 @@ export interface UploadOptions {
   onProgress?: (percent: number) => void;
 }
 
+export const DEFAULT_CHUNK_SIZE = 1024 * 1024; // 1MB default, backend allows up to 5MB
+
 export async function uploadFile(file: File, options: UploadOptions = {}) {
-  const chunkSize = options.chunkSize || 1024 * 1024;
+  const chunkSize = options.chunkSize || DEFAULT_CHUNK_SIZE;
   const uploadId = crypto.randomUUID();
   const total = Math.ceil(file.size / chunkSize);
 
@@ -36,5 +38,9 @@ export async function uploadFile(file: File, options: UploadOptions = {}) {
     }
   }
 
-  return uploadId;
+  const { data } = await api.post(`/uploads/${uploadId}/finalize`, {
+    filename: file.name,
+  });
+
+  return data;
 }
