@@ -24,7 +24,10 @@ class Ability
         $abilities = $roles->pluck('abilities')->flatten()->filter()->unique()->all();
 
         if (! in_array('*', $abilities) && ! in_array($code, $abilities)) {
-            return response()->json(['message' => 'forbidden'], 403);
+            $prefix = explode('.', $code)[0] . '.manage';
+            if (! in_array($prefix, $abilities)) {
+                return response()->json(['message' => 'forbidden'], 403);
+            }
         }
 
         return $next($request);
