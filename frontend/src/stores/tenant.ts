@@ -19,6 +19,14 @@ export const useTenantStore = defineStore('tenant', {
         params: withListParams(params),
       });
       this.tenants = data.data;
+
+      if (
+        this.currentTenantId &&
+        !this.tenants.some((t) => String(t.id) === this.currentTenantId)
+      ) {
+        this.setTenant('');
+      }
+
       return data.meta;
     },
     setTenant(id: string | number) {
