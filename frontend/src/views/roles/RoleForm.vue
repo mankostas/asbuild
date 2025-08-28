@@ -12,6 +12,17 @@
         <div v-if="errors.slug" class="text-red-600 text-sm">{{ errors.slug }}</div>
       </div>
       <div>
+        <label class="block font-medium mb-1" for="level">Level<span class="text-red-600">*</span></label>
+        <input
+          id="level"
+          type="number"
+          min="0"
+          v-model.number="level"
+          class="border rounded p-2 w-full"
+        />
+        <div v-if="errors.level" class="text-red-600 text-sm">{{ errors.level }}</div>
+      </div>
+      <div>
         <label class="block font-medium mb-1" for="abilities">Abilities (comma separated)</label>
         <input id="abilities" v-model="abilities" class="border rounded p-2 w-full" />
         <div v-if="errors.abilities" class="text-red-600 text-sm">{{ errors.abilities }}</div>
@@ -56,6 +67,7 @@ const tenantStore = useTenantStore();
 const name = ref('');
 const slug = ref('');
 const abilities = ref('');
+const level = ref<number>(0);
 const tenantId = ref<string>(auth.isSuperAdmin ? '' : tenantStore.currentTenantId);
 const serverError = ref('');
 
@@ -81,10 +93,18 @@ onMounted(async () => {
     slug.value = data.slug || '';
     abilities.value = (data.abilities || []).join(', ');
     tenantId.value = data.tenant_id || '';
+    level.value = data.level ?? 0;
   }
 });
 
-const canSubmit = computed(() => !!name.value && !!slug.value && name.value !== 'SuperAdmin');
+const canSubmit = computed(() =>
+  !!name.value &&
+  !!slug.value &&
+  name.value !== 'SuperAdmin' &&
+  typeof level.value === 'number' &&
+  !isNaN(level.value) &&
+  level.value >= 0
+);
 
 const { handleSubmit, setErrors, errors } = useForm();
 
@@ -98,6 +118,7 @@ const onSubmit = handleSubmit(async () => {
       .split(',')
       .map((t) => t.trim())
       .filter((t) => t),
+    level: level.value,
   };
   if (auth.isSuperAdmin) {
     payload.tenant_id = tenantId.value || null;
