@@ -83,7 +83,8 @@ api.interceptors.response.use(
     }
 
     if (status === 401) {
-      if (!config._retry && authGetter) {
+      const isRefresh = config.url?.includes('/auth/refresh');
+      if (!isRefresh && !config._retry && authGetter) {
         config._retry = true;
         const auth = authGetter();
         if (auth.refreshToken) {
@@ -103,9 +104,10 @@ api.interceptors.response.use(
           window.location.pathname +
           window.location.search +
           window.location.hash;
-        const redirect = intent && intent !== '/auth/login'
-          ? `?redirect=${encodeURIComponent(intent)}`
-          : '';
+        const redirect =
+          intent && intent !== '/auth/login'
+            ? `?redirect=${encodeURIComponent(intent)}`
+            : '';
         window.location.href = `/auth/login${redirect}`;
       }
     } else if (status === 403) {

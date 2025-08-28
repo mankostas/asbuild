@@ -21,6 +21,10 @@ describe('auth store', () => {
       removeItem: (k: string) => delete store[k],
     };
 
+    globalThis.window = {
+      location: { href: '', pathname: '', search: '', hash: '' },
+    } as any;
+
     ({ default: api } = await import('../src/services/api'));
     ({ useAuthStore } = await import('../src/stores/auth'));
     ({ injectStorage } = await import('../src/services/authStorage'));
@@ -76,6 +80,34 @@ describe('auth store', () => {
 
     const { data } = await api.get('/protected');
     expect(data.ok).toBe(true);
+  });
+
+  it('redirects to login when refresh token is invalid', async () => {
+    mock.onPost('/auth/login').reply(200, {
+      access_token: 'token',
+      refresh_token: 'ref',
+    });
+    mock.onGet('/me').reply(200, { user: { id: 1 } });
+
+    await auth.login({ email: 'a', password: 'b' });
+
+    mock.onGet('/protected').reply(401);
+    mock.onPost('/auth/refresh').reply(401);
+
+    const loc: any = {
+      href: '/dashboard',
+      pathname: '/dashboard',
+      search: '',
+      hash: '',
+    };
+    window.location = loc;
+
+    const logoutSpy = vi.spyOn(auth, 'logout');
+
+    await api.get('/protected').catch(() => {});
+
+    expect(logoutSpy).toHaveBeenCalled();
+    expect(window.location.href).toBe('/auth/login?redirect=%2Fdashboard');
   });
 });
 
