@@ -2,7 +2,7 @@
   <div class="space-y-5 divide-y divide-slate-100 dark:divide-slate-700 -mx-6">
     <div class="px-6">
       <InputGroup type="text" placeholder="Search....">
-        <template v-slot:append>
+        <template #append>
           <Button
             icon="heroicons-outline:search"
             btnClass="btn-dark dark:bg-slate-600"

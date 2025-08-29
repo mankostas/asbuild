@@ -12,7 +12,7 @@
         enabled: false,
       }"
     >
-      <template v-slot:table-row="props">
+      <template #table-row="props">
         <span
           v-if="props.column.field == 'customer'"
           class="flex items-center min-w-[150px]"
@@ -79,7 +79,7 @@
             <span class="text-xl"
               ><Icon icon="heroicons-outline:dots-vertical"
             /></span>
-            <template v-slot:menus>
+            <template #menus>
               <MenuItem v-for="(item, i) in actions" :key="i">
                 <div
                   :class="`

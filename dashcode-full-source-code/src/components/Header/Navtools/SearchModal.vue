@@ -81,7 +81,7 @@
                       as="template"
                       :key="item.id"
                       :value="item"
-                      v-slot="{ active }"
+                      #default="{ active }"
                     >
                       <li
                         class="px-4 text-[15px] font-normal capitalize py-2"

@@ -2,7 +2,7 @@
   <TabGroup>
     <TabList class="lg:space-x-6 md:space-x-3 space-x-0 rtl:space-x-reverse">
       <Tab
-        v-slot="{ selected }"
+        #default="{ selected }"
         as="template"
         v-for="(item, i) in buttons"
         :key="i"

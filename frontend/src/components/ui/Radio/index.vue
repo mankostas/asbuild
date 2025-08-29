@@ -1,10 +1,10 @@
 <template>
   <div>
     <input
+      :id="inputId"
       v-model="localValue"
       type="radio"
       class="hidden"
-      :id="inputId"
       :disabled="disabled"
       :name="name"
       :value="value"

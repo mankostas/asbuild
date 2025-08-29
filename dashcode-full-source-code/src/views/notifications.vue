@@ -12,7 +12,7 @@
           </div>
         </div>
         <MenuItem
-          v-slot="{ active }"
+          #default="{ active }"
           v-for="(item, i) in notifications"
           :key="i"
         >

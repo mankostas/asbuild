@@ -23,7 +23,7 @@
             selectAllByGroup: true, // when used in combination with a grouped table, add a checkbox in the header row to check/uncheck the entire group
           }"
         >
-          <template v-slot:table-row="props">
+          <template #table-row="props">
             <span v-if="props.column.field == 'customer'" class="flex">
               <span class="w-7 h-7 rounded-full ltr:mr-3 rtl:ml-3 flex-none">
                 <img

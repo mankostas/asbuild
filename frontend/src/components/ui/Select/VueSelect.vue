@@ -24,7 +24,7 @@
           :validate="validate"
           :multiple="multiple"
           :options="options"
-          @update:modelValue="$emit('update:modelValue', $event)"
+          @update:model-value="$emit('update:modelValue', $event)"
           @input="$emit('input', $event)"
           @change="$emit('change', $event)"
         >

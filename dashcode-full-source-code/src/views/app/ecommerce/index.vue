@@ -188,7 +188,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center justify-start">
                 <Checkbox>
-                  <template v-slot:labelHtml>
+                  <template #labelHtml>
                     <span
                       class="text-slate-900 dark:text-slate-300 text-sm font-normal flex"
                       ><Icon icon="ph:star-fill" class="text-yellow-400" /><Icon
@@ -212,7 +212,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center justify-start">
                 <Checkbox>
-                  <template v-slot:labelHtml>
+                  <template #labelHtml>
                     <span
                       class="text-slate-900 dark:text-slate-300 text-sm font-normal flex"
                       ><Icon icon="ph:star-fill" class="text-yellow-400" /><Icon
@@ -236,7 +236,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center justify-start">
                 <Checkbox>
-                  <template v-slot:labelHtml>
+                  <template #labelHtml>
                     <span
                       class="text-slate-900 dark:text-slate-300 text-sm font-normal flex"
                       ><Icon icon="ph:star-fill" class="text-yellow-400" /><Icon
@@ -260,7 +260,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center justify-start">
                 <Checkbox>
-                  <template v-slot:labelHtml>
+                  <template #labelHtml>
                     <span
                       class="text-slate-900 dark:text-slate-300 text-sm font-normal flex"
                       ><Icon icon="ph:star-fill" class="text-yellow-400" /><Icon
@@ -284,7 +284,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center justify-start">
                 <Checkbox>
-                  <template v-slot:labelHtml>
+                  <template #labelHtml>
                     <span
                       class="text-slate-900 dark:text-slate-300 text-sm font-normal flex"
                       ><Icon icon="ph:star-fill" class="text-yellow-400" /><Icon

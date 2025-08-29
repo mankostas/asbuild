@@ -4,7 +4,7 @@
       <div class="lg:col-span-3 md:col-span-5 col-span-12">
         <TabList>
           <Tab
-            v-slot="{ selected }"
+            #default="{ selected }"
             as="template"
             v-for="(item, i) in buttons"
             :key="i"

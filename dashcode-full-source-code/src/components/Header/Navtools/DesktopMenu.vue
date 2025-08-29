@@ -78,7 +78,7 @@
               :to="ms_item.m_childlink"
               :key="ms_i"
               class="flex items-center space-x-2 text-[15px] leading-6 rtl:space-x-reverse"
-              v-slot="{ isActive }"
+              #default="{ isActive }"
             >
               <span
                 class="h-[6px] w-[6px] rounded-full border border-slate-600 dark:border-white inline-block flex-none"

@@ -19,7 +19,7 @@
         class="absolute ltr:right-0 rtl:left-0 origin-top-right rounded bg-white dark:bg-slate-800 dark:border dark:border-slate-700 shadow-dropdown z-[9999]"
       >
         <div v-if="!$slots.menus">
-          <MenuItem v-slot="{ active }" v-for="(item, i) in items" :key="i">
+          <MenuItem #default="{ active }" v-for="(item, i) in items" :key="i">
             <router-link
               :class="`${
                 active

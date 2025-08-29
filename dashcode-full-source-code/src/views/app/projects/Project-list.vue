@@ -14,7 +14,7 @@
           enabled: false,
         }"
       >
-        <template v-slot:table-row="props">
+        <template #table-row="props">
           <span v-if="props.column.field == 'name'">
             <div
                 class="flex space-x-3 items-center text-left rtl:space-x-reverse"
@@ -98,7 +98,7 @@
               <div class="text-xl">
                 <Icon icon="heroicons-outline:dots-vertical"/>
               </div>
-              <template v-slot:menus>
+              <template #menus>
                 <MenuItem v-for="(item, i) in actions" :key="i">
                   <div
                       @click="item.doit(props.row)"

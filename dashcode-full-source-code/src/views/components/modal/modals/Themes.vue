@@ -16,7 +16,7 @@
         topping halvah. Cake sweet roll cake cheesecake cookie chocolate cake
         liquorice.
       </div>
-      <template v-slot:footer>
+      <template #footer>
         <Button
           text="Accept"
           btnClass="btn-primary"
@@ -40,7 +40,7 @@
         topping halvah. Cake sweet roll cake cheesecake cookie chocolate cake
         liquorice.
       </div>
-      <template v-slot:footer>
+      <template #footer>
         <Button
           text="Accept"
           btnClass="btn-secondary"
@@ -64,7 +64,7 @@
         topping halvah. Cake sweet roll cake cheesecake cookie chocolate cake
         liquorice.
       </div>
-      <template v-slot:footer>
+      <template #footer>
         <Button
           text="Accept"
           btnClass="btn-success "
@@ -88,7 +88,7 @@
         topping halvah. Cake sweet roll cake cheesecake cookie chocolate cake
         liquorice.
       </div>
-      <template v-slot:footer>
+      <template #footer>
         <Button
           text="Accept"
           btnClass="btn-info "
@@ -112,7 +112,7 @@
         topping halvah. Cake sweet roll cake cheesecake cookie chocolate cake
         liquorice.
       </div>
-      <template v-slot:footer>
+      <template #footer>
         <Button
           text="Accept"
           btnClass="btn-warning "
@@ -136,7 +136,7 @@
         topping halvah. Cake sweet roll cake cheesecake cookie chocolate cake
         liquorice.
       </div>
-      <template v-slot:footer>
+      <template #footer>
         <Button
           text="Accept"
           btnClass="btn-danger "
@@ -160,7 +160,7 @@
         topping halvah. Cake sweet roll cake cheesecake cookie chocolate cake
         liquorice.
       </div>
-      <template v-slot:footer>
+      <template #footer>
         <Button
           text="Accept"
           btnClass="bg-slate-600 text-white "

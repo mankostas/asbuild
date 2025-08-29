@@ -5,7 +5,7 @@
         class="text-lg inline-flex h-6 w-6 flex-col items-center justify-center border border-slate-200 dark:border-slate-700 rounded dark:text-slate-400"
         ><Icon icon="heroicons-outline:dots-horizontal"
       /></span>
-      <template v-slot:menus>
+      <template #menus>
         <MenuItem v-for="(item, i) in actions" :key="i">
           <div
             :class="`

@@ -413,7 +413,7 @@ const { isLoading, isError, isFetching, data, error, refetch } = useQuery({
               class="lg:space-x-8 md:space-x-4 space-x-0 rtl:space-x-reverse"
             >
               <Tab
-                v-slot="{ selected }"
+                #default="{ selected }"
                 as="template"
                 v-for="(item, i) in buttons"
                 :key="i"

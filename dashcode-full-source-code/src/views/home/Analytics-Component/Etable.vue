@@ -12,7 +12,7 @@
         enabled: false,
       }"
     >
-      <template v-slot:table-row="props">
+      <template #table-row="props">
         <div v-if="props.column.field == 'user'" class="flex items-center">
           <div class="flex-none">
             <div class="w-8 h-8 rounded-[100%] ltr:mr-2 rtl:ml-2">
