@@ -14,6 +14,11 @@ class TaskComment extends Model
         'body',
     ];
 
+    public function setBodyAttribute(string $value): void
+    {
+        $this->attributes['body'] = strip_tags($value);
+    }
+
     public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class);
