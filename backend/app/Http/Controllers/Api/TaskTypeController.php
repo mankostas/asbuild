@@ -8,7 +8,7 @@ use App\Services\FormSchemaService;
 use Illuminate\Http\Request;
 use App\Http\Resources\TaskTypeResource;
 use App\Support\ListQuery;
-use App\Http\Requests\TypeUpsertRequest;
+use App\Http\Requests\TaskTypeRequest;
 
 class TaskTypeController extends Controller
 {
@@ -48,12 +48,12 @@ class TaskTypeController extends Controller
         ]);
     }
 
-    public function store(TypeUpsertRequest $request)
+    public function store(TaskTypeRequest $request)
     {
         $this->ensureAdmin($request);
         $data = $request->validated();
-        if (isset($data['form_schema'])) {
-            $this->formSchemaService->validate($data['form_schema']);
+        if (isset($data['schema_json'])) {
+            $this->formSchemaService->validate($data['schema_json']);
         }
 
         if ($request->user()->hasRole('SuperAdmin')) {
@@ -71,15 +71,15 @@ class TaskTypeController extends Controller
         return new TaskTypeResource($taskType);
     }
 
-    public function update(TypeUpsertRequest $request, TaskType $taskType)
+    public function update(TaskTypeRequest $request, TaskType $taskType)
     {
         $this->ensureAdmin($request);
         if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
             abort(403);
         }
         $data = $request->validated();
-        if (isset($data['form_schema'])) {
-            $this->formSchemaService->validate($data['form_schema']);
+        if (isset($data['schema_json'])) {
+            $this->formSchemaService->validate($data['schema_json']);
         }
 
         if ($request->user()->hasRole('SuperAdmin')) {

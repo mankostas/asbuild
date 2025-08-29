@@ -774,6 +774,11 @@ export interface components {
         TaskType: {
             id?: number;
             name?: string;
+            schema_json?: Record<string, never> | null;
+            statuses?: {
+                [key: string]: string[];
+            } | null;
+            tenant_id?: number | null;
         };
         TaskStatus: {
             id?: number;

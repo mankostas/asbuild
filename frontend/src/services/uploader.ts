@@ -3,6 +3,8 @@ import api from '@/services/api';
 export interface UploadOptions {
   chunkSize?: number;
   onProgress?: (percent: number) => void;
+  fieldKey?: string;
+  sectionKey?: string;
 }
 
 export const DEFAULT_CHUNK_SIZE = 1024 * 1024; // 1MB default, backend allows up to 5MB
@@ -40,6 +42,8 @@ export async function uploadFile(file: File, options: UploadOptions = {}) {
 
   const { data } = await api.post(`/uploads/${uploadId}/finalize`, {
     filename: file.name,
+    field_key: options.fieldKey,
+    section_key: options.sectionKey,
   });
 
   return data;

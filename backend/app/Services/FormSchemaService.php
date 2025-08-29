@@ -7,24 +7,58 @@ use Illuminate\Validation\ValidationException;
 class FormSchemaService
 {
     /**
-     * Validate the form schema structure.
+     * Validate the task type schema structure.
+     *
+     * Schema keys:
+     *  sections[]: { key, label, fields[], photos[], allow_subtasks }
+     *  fields[]: { key, label, type: text|textarea|number|date|time|datetime|boolean|select|multiselect|assignee|file, required, enum?, x-cols? }
+     *  photos[]: { key, label, type: photo_single|photo_repeater }
      */
     public function validate(array $schema): void
     {
-        if (($schema['type'] ?? null) !== 'object' || ! is_array($schema['properties'] ?? null)) {
+        if (! is_array($schema['sections'] ?? null)) {
             throw ValidationException::withMessages([
-                'form_schema' => 'Schema must be an object with properties',
+                'schema_json' => 'sections missing',
             ]);
         }
 
-        if (isset($schema['required'])) {
-            foreach ($schema['required'] as $field) {
-                if (! array_key_exists($field, $schema['properties'])) {
-                    throw ValidationException::withMessages([
-                        'form_schema' => "Required field {$field} missing from properties",
-                    ]);
-                }
+        foreach ($schema['sections'] as $section) {
+            if (! isset($section['key'], $section['label'])) {
+                throw ValidationException::withMessages([
+                    'schema_json' => 'section key/label required',
+                ]);
             }
+            foreach ($section['fields'] ?? [] as $field) {
+                $this->validateField($field);
+            }
+            foreach ($section['photos'] ?? [] as $photo) {
+                $this->validatePhoto($photo);
+            }
+        }
+    }
+
+    protected function validateField(array $field): void
+    {
+        $allowed = ['text','textarea','number','date','time','datetime','boolean','select','multiselect','assignee','file'];
+        if (! isset($field['key'], $field['label']) || ! in_array($field['type'] ?? '', $allowed, true)) {
+            throw ValidationException::withMessages([
+                'schema_json' => 'invalid field',
+            ]);
+        }
+        if (in_array($field['type'], ['select','multiselect'], true) && ! is_array($field['enum'] ?? null)) {
+            throw ValidationException::withMessages([
+                'schema_json' => 'enum required for select types',
+            ]);
+        }
+    }
+
+    protected function validatePhoto(array $photo): void
+    {
+        $allowed = ['photo_single','photo_repeater'];
+        if (! isset($photo['key'], $photo['label']) || ! in_array($photo['type'] ?? '', $allowed, true)) {
+            throw ValidationException::withMessages([
+                'schema_json' => 'invalid photo',
+            ]);
         }
     }
 
@@ -33,15 +67,21 @@ class FormSchemaService
      */
     public function mapAssignee(array $schema, array &$payload): void
     {
-        $hasAssignee = collect($schema['properties'] ?? [])
-            ->contains(fn ($field) => ($field['kind'] ?? null) === 'assignee');
+        $fields = collect($schema['sections'] ?? [])
+            ->flatMap(fn ($s) => $s['fields'] ?? []);
+        $assigneeField = $fields->first(fn ($field) => ($field['type'] ?? null) === 'assignee');
 
-        if (! $hasAssignee || ! isset($payload['assignee'])) {
+        if (! $assigneeField) {
             return;
         }
 
-        $kind = $payload['assignee']['kind'] ?? null;
-        $id = $payload['assignee']['id'] ?? null;
+        $key = $assigneeField['key'];
+        if (! isset($payload[$key])) {
+            return;
+        }
+
+        $kind = $payload[$key]['kind'] ?? null;
+        $id = $payload[$key]['id'] ?? null;
 
         if ($kind === 'team') {
             $payload['assignee_type'] = \App\Models\Team::class;
@@ -60,6 +100,6 @@ class FormSchemaService
         }
 
         $payload['assignee_id'] = $id;
-        unset($payload['assignee']);
+        unset($payload[$key]);
     }
 }

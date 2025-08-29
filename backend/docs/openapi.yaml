@@ -447,6 +447,19 @@ components:
           type: integer
         name:
           type: string
+        schema_json:
+          type: object
+          nullable: true
+        statuses:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          nullable: true
+        tenant_id:
+          type: integer
+          nullable: true
     TaskStatus:
       type: object
       properties:
