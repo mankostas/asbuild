@@ -2,11 +2,11 @@
   <div>
       <div class="flex items-center justify-between mb-4">
         <div>
-          <label :for="ids.scope" class="sr-only">Scope</label>
           <select
-            :id="ids.scope"
+            id="types-scope"
             v-model="scope"
             class="border rounded px-2 py-1"
+            aria-label="Scope"
             @change="changeScope"
           >
             <option v-for="opt in scopeOptions" :key="opt.value" :value="opt.value">
@@ -89,7 +89,6 @@ const scope = ref<'tenant' | 'global' | 'all'>("tenant");
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
 const typesStore = useTypesStore();
-const ids = { scope: 'types-scope' };
 
 if (auth.isSuperAdmin) {
   scope.value = 'all';

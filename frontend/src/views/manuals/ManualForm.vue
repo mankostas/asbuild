@@ -30,23 +30,38 @@
               </h2>
               <form class="grid gap-4" @submit.prevent="onSubmit">
                 <div>
-                  <label class="block mb-1" :for="ids.file">File</label>
+                  <span class="block mb-1">File</span>
                   <div
                     v-bind="getRootProps()"
                     class="border-dashed border-2 rounded-md p-6 text-center cursor-pointer"
                   >
-                    <input :id="ids.file" v-bind="getInputProps()" class="hidden" />
+                    <input
+                      id="manual-file"
+                      v-bind="getInputProps()"
+                      class="hidden"
+                      aria-label="File"
+                    />
                     <p v-if="!file">Drop file here or click to upload</p>
                     <p v-else>{{ file.name }}</p>
                   </div>
                 </div>
                 <div>
-                  <label class="block mb-1" :for="ids.category">Category</label>
-                  <input :id="ids.category" v-model="category" class="border p-2 w-full" />
+                  <span class="block mb-1">Category</span>
+                  <input
+                    id="manual-category"
+                    v-model="category"
+                    class="border p-2 w-full"
+                    aria-label="Category"
+                  />
                 </div>
                 <div>
-                  <label class="block mb-1" :for="ids.tags">Tags (comma separated)</label>
-                  <input :id="ids.tags" v-model="tags" class="border p-2 w-full" />
+                  <span class="block mb-1">Tags (comma separated)</span>
+                  <input
+                    id="manual-tags"
+                    v-model="tags"
+                    class="border p-2 w-full"
+                    aria-label="Tags"
+                  />
                 </div>
                 <div class="flex justify-end gap-2 mt-4">
                   <button type="button" class="btn btn-outline-secondary" @click="emit('close')">Cancel</button>
@@ -78,11 +93,6 @@ const emit = defineEmits(['saved', 'close']);
 const file = ref<File | null>(null);
 const category = ref('');
 const tags = ref('');
-const ids = {
-  file: 'manual-file',
-  category: 'manual-category',
-  tags: 'manual-tags',
-};
 
 const isEdit = computed(() => !!props.manualId);
 

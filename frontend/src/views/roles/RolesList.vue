@@ -2,11 +2,11 @@
   <div>
     <div class="flex items-center justify-between mb-4">
       <div>
-        <label :for="ids.scope" class="sr-only">Scope</label>
         <select
-          :id="ids.scope"
+          id="roles-scope"
           v-model="scope"
           class="border rounded p-2"
+          aria-label="Scope"
         >
           <option value="tenant">Tenant</option>
           <option v-if="auth.isSuperAdmin" value="global">Global</option>
@@ -89,7 +89,6 @@ const tenantStore = useTenantStore();
 const tableKey = ref(0);
 const scope = ref(auth.isSuperAdmin ? 'all' : 'tenant');
 const assignRoleId = ref<number | null>(null);
-const ids = { scope: 'roles-scope' };
 
 const columns = [
   { label: 'ID', field: 'id', sortable: true },

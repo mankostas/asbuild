@@ -2,16 +2,26 @@
   <div v-if="canAccess">
     <form class="max-w-md grid gap-4" @submit.prevent="onSubmit">
       <div v-if="auth.isSuperAdmin">
-        <label class="block font-medium mb-1" for="tenant">Tenant</label>
-        <select id="tenant" v-model="tenantId" class="border rounded p-2 w-full">
+        <span class="block font-medium mb-1">Tenant</span>
+        <select
+          id="tenant"
+          v-model="tenantId"
+          class="border rounded p-2 w-full"
+          aria-label="Tenant"
+        >
           <option value="">Global</option>
           <option v-for="t in tenantStore.tenants" :key="t.id" :value="t.id">{{ t.name }}</option>
         </select>
         <div v-if="errors.tenant_id" class="text-red-600 text-sm">{{ errors.tenant_id }}</div>
       </div>
       <div>
-        <label class="block font-medium mb-1" for="name">Name<span class="text-red-600">*</span></label>
-        <input id="name" v-model="name" class="border rounded p-2 w-full" />
+        <span class="block font-medium mb-1">Name<span class="text-red-600">*</span></span>
+        <input
+          id="name"
+          v-model="name"
+          class="border rounded p-2 w-full"
+          aria-label="Name"
+        />
         <div v-if="errors.name" class="text-red-600 text-sm">{{ errors.name }}</div>
       </div>
       <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>

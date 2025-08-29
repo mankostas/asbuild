@@ -1,28 +1,44 @@
 <template>
     <div>
       <div class="flex flex-wrap items-center gap-2 mb-4">
-      <label :for="ids.search" class="text-sm">Search</label>
       <input
-        :id="ids.search"
+        id="manuals-search"
         v-model="search"
         placeholder="Search"
         type="text"
         class="border p-2 flex-1"
+        aria-label="Search"
         @input="onSearch"
       />
-      <label :for="ids.category" class="text-sm">Category</label>
-      <select :id="ids.category" v-model="category" class="border p-2">
+      <select
+        id="manuals-category"
+        v-model="category"
+        class="border p-2"
+        aria-label="Category"
+      >
         <option value="">All</option>
         <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
       </select>
-      <label class="flex items-center gap-1 text-sm">
-        Favorites
-        <input v-model="showFavorites" type="checkbox" class="form-switch" />
-      </label>
-      <label class="flex items-center gap-1 text-sm">
-        Offline
-        <input v-model="showOffline" type="checkbox" class="form-switch" />
-      </label>
+      <div class="flex items-center gap-1 text-sm">
+        <input
+          id="manuals-favorites"
+          v-model="showFavorites"
+          type="checkbox"
+          class="form-switch"
+          aria-label="Favorites"
+        />
+        <span>Favorites</span>
+      </div>
+      <div class="flex items-center gap-1 text-sm">
+        <input
+          id="manuals-offline"
+          v-model="showOffline"
+          type="checkbox"
+          class="form-switch"
+          aria-label="Offline"
+        />
+        <span>Offline</span>
+      </div>
       <button class="btn btn-primary ml-auto" @click="openCreate">
         Upload Manual
       </button>
@@ -64,7 +80,6 @@ const showFavorites = ref(false);
 const showOffline = ref(false);
 const showForm = ref(false);
 const editId = ref<string | null>(null);
-const ids = { search: 'manuals-search', category: 'manuals-category' };
 
 onMounted(async () => {
   await store.fetch();

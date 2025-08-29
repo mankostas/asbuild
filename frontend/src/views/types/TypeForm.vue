@@ -3,16 +3,26 @@
       <form class="grid grid-cols-2 gap-8" @submit.prevent="onSubmit">
       <div>
         <div v-if="auth.isSuperAdmin" class="mb-4">
-          <label class="block font-medium mb-1" for="tenant">Tenant</label>
-          <select id="tenant" v-model="tenantId" class="border rounded p-2 w-full">
+          <span class="block font-medium mb-1">Tenant</span>
+          <select
+            id="tenant"
+            v-model="tenantId"
+            class="border rounded p-2 w-full"
+            aria-label="Tenant"
+          >
             <option value="">Global</option>
             <option v-for="t in tenantStore.tenants" :key="t.id" :value="t.id">{{ t.name }}</option>
           </select>
           <div v-if="errors.tenant_id" class="text-red-600 text-sm">{{ errors.tenant_id }}</div>
         </div>
         <div class="mb-4">
-          <label class="block font-medium mb-1" for="name">Name<span class="text-red-600">*</span></label>
-          <input id="name" v-model="name" class="border rounded p-2 w-full" />
+          <span class="block font-medium mb-1">Name<span class="text-red-600">*</span></span>
+          <input
+            id="name"
+            v-model="name"
+            class="border rounded p-2 w-full"
+            aria-label="Name"
+          />
           <div v-if="errors.name" class="text-red-600 text-sm">{{ errors.name }}</div>
         </div>
 
@@ -61,10 +71,14 @@
                       >
                         <option v-for="t in fieldTypes" :key="t.key" :value="t.key">{{ t.label }}</option>
                       </select>
-                      <label class="flex items-center gap-1 text-sm">
-                        <input v-model="element.required" type="checkbox" />
-                        required
-                      </label>
+                      <div class="flex items-center gap-1 text-sm">
+                        <input
+                          v-model="element.required"
+                          type="checkbox"
+                          aria-label="required"
+                        />
+                        <span>required</span>
+                      </div>
                       <select
                         v-model.number="element.cols"
                         class="border rounded p-1 w-24"
