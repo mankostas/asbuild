@@ -5,22 +5,25 @@
 
     <Sidebar
       v-if="
-        this.$store.themeSettingsStore.menuLayout === 'vertical' &&
-        this.$store.themeSettingsStore.sidebarHidden === false &&
+        $store.themeSettingsStore.menuLayout === 'vertical' &&
+        $store.themeSettingsStore.sidebarHidden === false &&
         window.width > 1280
       "
     />
     <!-- main sidebar end -->
     <Transition name="mobilemenu">
       <mobile-sidebar
-        v-if="window.width < 1280 && this.$store.themeSettingsStore.mobielSidebar"
+        v-if="window.width < 1280 && $store.themeSettingsStore.mobielSidebar"
       />
     </Transition>
     <Transition name="overlay-fade">
       <div
-        v-if="window.width < 1280 && this.$store.themeSettingsStore.mobielSidebar"
+        v-if="window.width < 1280 && $store.themeSettingsStore.mobielSidebar"
         class="overlay bg-slate-900 bg-opacity-70 backdrop-filter backdrop-blur-[3px] backdrop-brightness-10 fixed inset-0 z-[999]"
-        @click="this.$store.themeSettingsStore.mobielSidebar = false"
+        role="button"
+        tabindex="0"
+        @click="$store.themeSettingsStore.mobielSidebar = false"
+        @keydown.enter="$store.themeSettingsStore.mobielSidebar = false"
       ></div>
     </Transition>
     <!-- mobile sidebar -->
@@ -32,16 +35,16 @@
     >
       <div
         class="page-content"
-        :class="this.$route.meta.appheight ? 'h-full' : 'page-min-height'"
+        :class="$route.meta.appheight ? 'h-full' : 'page-min-height'"
       >
         <div
           :class="` transition-all duration-150 ${
-            this.$store.themeSettingsStore.cWidth === 'boxed'
+            $store.themeSettingsStore.cWidth === 'boxed'
               ? 'container mx-auto'
               : 'container-fluid'
           }`"
         >
-          <Breadcrumbs v-if="!this.$route.meta.hide" />
+          <Breadcrumbs v-if="!$route.meta.hide" />
           <router-view v-slot="{ Component }">
             <Transition name="fade" mode="out-in">
               <component :is="Component" />
@@ -53,8 +56,8 @@
     <!-- end page content -->
     <FooterMenu v-if="window.width < 768" />
     <Footer
-      :class="window.width > 1280 ? switchHeaderClass() : ''"
       v-if="window.width > 768"
+      :class="window.width > 1280 ? switchHeaderClass() : ''"
     />
   </main>
 </template>
@@ -69,7 +72,6 @@ import MobileSidebar from "@/components/ui/Sidebar/MobileSidebar.vue";
 import FooterMenu from "@/components/ui/Footer/FooterMenu.vue";
 
 export default {
-  mixins: [window],
   components: {
     Header,
     Footer,
@@ -79,6 +81,7 @@ export default {
     FooterMenu,
     MobileSidebar,
   },
+  mixins: [window],
   methods: {
     switchHeaderClass() {
       if (
