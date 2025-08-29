@@ -193,12 +193,15 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
             ->middleware(Ability::class . ':gdpr.delete');
     });
 
-    Route::prefix('reports')->group(function () {
-        Route::get('overview', [ReportController::class, 'overview']);
-        Route::get('kpis', [ReportController::class, 'kpis']);
-        Route::get('materials', [ReportController::class, 'materials']);
-        Route::get('export', [ReportController::class, 'export']);
-    });
+    Route::prefix('reports')
+        ->middleware(Ability::class . ':reports.view')
+        ->group(function () {
+            Route::get('overview', [ReportController::class, 'overview']);
+            Route::get('kpis', [ReportController::class, 'kpis']);
+            Route::get('materials', [ReportController::class, 'materials']);
+            Route::get('export', [ReportController::class, 'export'])
+                ->middleware(Ability::class . ':reports.manage');
+        });
 
     // Lookup endpoints
     Route::get('lookups/assignees', [LookupController::class, 'assignees']);
