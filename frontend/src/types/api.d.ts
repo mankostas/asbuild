@@ -14,7 +14,19 @@ export interface paths {
         /** List tasks */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    type?: number;
+                    status?: string;
+                    assignee?: number;
+                    team?: number;
+                    priority?: number;
+                    due_from?: string;
+                    due_to?: string;
+                    has_photos?: boolean;
+                    mine?: boolean;
+                    sort?: "created_at" | "due_at" | "priority" | "board_position";
+                    dir?: "asc" | "desc";
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -27,7 +39,15 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Task"][];
+                        "application/json": {
+                            data?: components["schemas"]["Task"][];
+                            meta?: {
+                                page?: number;
+                                per_page?: number;
+                                total?: number;
+                                last_page?: number;
+                            };
+                        };
                     };
                 };
             };
@@ -1059,9 +1079,20 @@ export interface components {
             id?: string;
             title?: string;
             status?: string;
+            status_color?: string | null;
             /** Format: date-time */
             scheduled_at?: string;
+            /** Format: date-time */
+            due_at?: string | null;
+            priority?: number | null;
             assignee?: components["schemas"]["Employee"];
+            counts?: {
+                comments?: number;
+                attachments?: number;
+                watchers?: number;
+                subtasks?: number;
+            };
+            sla_chip?: string | null;
             is_watching?: boolean;
         };
         TaskComment: {

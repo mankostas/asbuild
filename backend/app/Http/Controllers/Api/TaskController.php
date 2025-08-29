@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\TaskType;
 use App\Models\User;
+use App\Models\Team;
 use App\Services\FormSchemaService;
 use App\Services\StatusFlowService;
 use App\Http\Resources\TaskResource;
@@ -27,8 +28,46 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         $base = Task::where('tenant_id', $request->user()->tenant_id)
-            ->with(['type', 'assignee']);
-        $result = $this->listQuery($base, $request, [], ['scheduled_at', 'created_at']);
+            ->with(['type', 'assignee', 'status'])
+            ->withCount(['comments', 'attachments', 'watchers', 'subtasks']);
+
+        if ($type = $request->query('type')) {
+            $base->where('task_type_id', $type);
+        }
+
+        if ($status = $request->query('status')) {
+            $base->where('status_slug', $status);
+        }
+
+        if ($assignee = $request->query('assignee')) {
+            $base->where('assignee_type', User::class)->where('assignee_id', $assignee);
+        }
+
+        if ($team = $request->query('team')) {
+            $base->where('assignee_type', Team::class)->where('assignee_id', $team);
+        }
+
+        if ($priority = $request->query('priority')) {
+            $base->where('priority', $priority);
+        }
+
+        if ($dueFrom = $request->query('due_from')) {
+            $base->whereDate('due_at', '>=', $dueFrom);
+        }
+
+        if ($dueTo = $request->query('due_to')) {
+            $base->whereDate('due_at', '<=', $dueTo);
+        }
+
+        if ($request->boolean('has_photos')) {
+            $base->whereHas('attachments');
+        }
+
+        if ($request->boolean('mine')) {
+            $base->where('assignee_type', User::class)->where('assignee_id', $request->user()->id);
+        }
+
+        $result = $this->listQuery($base, $request, [], ['created_at', 'due_at', 'priority', 'board_position']);
 
         return TaskResource::collection($result['data'])->additional([
             'meta' => $result['meta'],

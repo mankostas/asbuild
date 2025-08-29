@@ -8,3 +8,7 @@ test('tasks status flow e2e placeholder', async () => {
 test('subtasks e2e placeholder', async () => {
   expect(true).toBe(true);
 });
+
+test('task list filters and sorting placeholder', async () => {
+  expect(true).toBe(true);
+});

@@ -25,6 +25,20 @@ class TaskResource extends JsonResource
             $data['assignee'] = null;
         }
 
+        $data['status_color'] = $this->status->color ?? null;
+
+        $data['counts'] = [
+            'comments' => $this->comments_count ?? 0,
+            'attachments' => $this->attachments_count ?? 0,
+            'watchers' => $this->watchers_count ?? 0,
+            'subtasks' => $this->subtasks_count ?? 0,
+        ];
+
+        $data['sla_chip'] = null;
+        if ($this->sla_end_at) {
+            $data['sla_chip'] = now()->greaterThan($this->sla_end_at) ? 'overdue' : 'on_track';
+        }
+
         $data['is_watching'] = $this->relationLoaded('watchers')
             ? $this->watchers->contains('user_id', $request->user()->id)
             : false;
