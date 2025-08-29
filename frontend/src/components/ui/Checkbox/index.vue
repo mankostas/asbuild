@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <div
+    class="relative"
+    :class="`${errorText ? 'has-error' : ''}  ${showSuccessIcon ? 'is-valid' : ''}`"
+  >
     <label
       :class="disabled ? ' cursor-not-allowed opacity-50' : 'cursor-pointer'"
       class="flex items-center"
@@ -37,47 +40,57 @@
         {{ label }}
       </span>
       <slot name="labelHtml"></slot>
+      <span v-if="showSuccessIcon" class="text-success-500 ltr:ml-2 rtl:mr-2">
+        <Icon icon="bi:check-lg" />
+      </span>
     </label>
+    <p
+      v-if="errorText"
+      class="mt-1 text-danger-500 text-sm whitespace-pre-line"
+    >
+      {{ errorText }}
+    </p>
+    <p v-if="successText" class="mt-1 text-success-500 text-sm">
+      {{ successText }}
+    </p>
+    <span
+      v-if="description"
+      class="block text-secondary-500 font-light leading-4 text-xs mt-2"
+      >{{ description }}</span
+    >
   </div>
 </template>
 <script>
+import Icon from "@/components/Icon";
 import { computed, defineComponent, ref } from "vue";
 export default defineComponent({
   name: "Checkbox",
+  components: { Icon },
   inheritAttrs: false,
   props: {
     modelValue: {
-      type: [String, Number, Boolean, Object, Array],
+      type: [String, Number, Boolean, Object, Array, Date],
       default: "",
     },
-    label: {
-      type: String,
-      default: "",
-    },
-    name: {
-      type: String,
-      default: "checkbox",
-    },
-    id: {
-      type: String,
-      default: "",
-    },
-    checked: {
-      type: Boolean,
-      default: false,
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
+    // incoming error could be string or array from backend/lib
+    error: { type: [String, Array, Object, Boolean], default: "" },
+    // legacy: sometimes boolean, sometimes string/array -> normalize
+    validate: { type: [Boolean, String, Array, Object], default: false },
+    // NEW (preferred): explicit flags/messages
+    showValidation: { type: Boolean, default: false },
+    successMessage: { type: String, default: "" },
+    label: { type: String, default: "" },
+    name: { type: String, default: "checkbox" },
+    id: { type: String, default: "" },
+    description: { type: String, default: "" },
+    checked: { type: Boolean, default: false },
+    disabled: { type: Boolean, default: false },
     activeClass: {
       type: String,
       default:
         " ring-black-500  bg-slate-900 dark:bg-slate-700 dark:ring-slate-700 ",
     },
-    value: {
-      type: null,
-    },
+    value: { type: null },
   },
   emits: ["update:modelValue", "input", "change"],
 
@@ -97,7 +110,40 @@ export default defineComponent({
       set: (newValue) => context.emit("update:modelValue", newValue),
     });
 
-    return { localValue, ck, onChange, inputId };
+    // normalize error to string
+    const errorText = computed(() => {
+      const e = props.error;
+      if (!e) return "";
+      if (Array.isArray(e)) return e.filter(Boolean).join("\n");
+      if (typeof e === "object")
+        return Object.values(e).flat().filter(Boolean).join("\n");
+      return String(e);
+    });
+    // determine whether validation UI should show
+    const validationEnabled = computed(
+      () => props.showValidation || !!props.validate
+    );
+    // success text comes only from dedicated prop or legacy when string
+    const successText = computed(() => {
+      if (props.successMessage) return props.successMessage;
+      if (typeof props.validate === "string") return props.validate;
+      return "";
+    });
+    // success icon shows only if validation is enabled and there is no error
+    const showSuccessIcon = computed(
+      () => validationEnabled.value && !errorText.value
+    );
+
+    return {
+      localValue,
+      ck,
+      onChange,
+      inputId,
+      errorText,
+      successText,
+      showSuccessIcon,
+      description: props.description,
+    };
   },
 });
 </script>
