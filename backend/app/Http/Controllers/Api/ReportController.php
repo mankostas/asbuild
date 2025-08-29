@@ -8,16 +8,11 @@ use App\Models\Manual;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
-    protected function ensureAdmin(Request $request): void
-    {
-        if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
-            abort(403);
-        }
-    }
 
     protected function dateRange(Request $request): array
     {
@@ -46,7 +41,7 @@ class ReportController extends Controller
 
     public function overview(Request $request)
     {
-        $this->ensureAdmin($request);
+        Gate::authorize('reports.view');
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
 
@@ -102,7 +97,7 @@ class ReportController extends Controller
 
     public function kpis(Request $request)
     {
-        $this->ensureAdmin($request);
+        Gate::authorize('reports.view');
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
 
@@ -135,7 +130,7 @@ class ReportController extends Controller
 
     public function materials(Request $request)
     {
-        $this->ensureAdmin($request);
+        Gate::authorize('reports.view');
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
 
@@ -150,7 +145,7 @@ class ReportController extends Controller
 
     public function export(Request $request): StreamedResponse
     {
-        $this->ensureAdmin($request);
+        Gate::authorize('reports.view');
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
 
