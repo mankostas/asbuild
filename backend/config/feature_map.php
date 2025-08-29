@@ -15,6 +15,7 @@ return [
             'tasks.board.view',
             'tasks.list.view',
             'tasks.watch',
+            'tasks.manage',
         ],
     ],
     'notifications' => [
