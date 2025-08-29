@@ -192,11 +192,11 @@ const fieldTypes = [
   { key: 'assignee', label: 'Assignee', schema: { type: 'object', 'x-control': 'assignee' } },
 ];
 
-const isEdit = computed(() => route.name === 'types.edit');
+const isEdit = computed(() => route.name === 'taskTypes.edit');
 const canAccess = computed(() =>
   isEdit.value
-    ? can('types.update') || can('types.manage')
-    : can('types.create') || can('types.manage'),
+    ? can('task_types.update') || can('task_types.manage')
+    : can('task_types.create') || can('task_types.manage'),
 );
 
 const availableStatuses = computed(() =>
@@ -253,13 +253,13 @@ watch(
 );
 
 onMounted(async () => {
-  const { data: statusData } = await api.get('/statuses');
+  const { data: statusData } = await api.get('/task-statuses');
   allStatuses.value = statusData;
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
   }
   if (isEdit.value) {
-    const { data } = await api.get(`/appointment-types/${route.params.id}`);
+    const { data } = await api.get(`/task-types/${route.params.id}`);
     name.value = data.name;
     tenantId.value = data.tenant_id || '';
     if (data.fields_summary) {
@@ -315,11 +315,11 @@ const onSubmit = handleSubmit(async () => {
   }
   try {
     if (isEdit.value) {
-      await api.patch(`/appointment-types/${route.params.id}`, payload);
+      await api.patch(`/task-types/${route.params.id}`, payload);
     } else {
-      await api.post('/appointment-types', payload);
+      await api.post('/task-types', payload);
     }
-    router.push({ name: 'types.list' });
+    router.push({ name: 'taskTypes.list' });
   } catch (e: any) {
     const errs = extractFormErrors(e);
     if (Object.keys(errs).length) {

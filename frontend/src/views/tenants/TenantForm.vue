@@ -99,7 +99,7 @@ onMounted(async () => {
 const onSubmit = handleSubmit(async () => {
   serverError.value = '';
   if (!isEdit.value && form.value.features.length === 0) {
-    form.value.features = ['appointments'];
+    form.value.features = ['tasks'];
   }
   const payload: any = {
     name: form.value.name,

@@ -43,7 +43,7 @@ import Textinput from '@/components/ui/Textinput/index.vue';
 import Button from '@/components/ui/Button/index.vue';
 import vSelect from 'vue-select';
 
-const props = defineProps<{ appointmentId: number | string; allowFiles?: boolean }>();
+const props = defineProps<{ taskId: number | string; allowFiles?: boolean }>();
 const emit = defineEmits<{ (e: 'added', comment: any): void }>();
 
 const body = ref('');
@@ -65,7 +65,7 @@ async function submit() {
         .map((s) => parseInt(s.trim()))
         .filter((n) => !isNaN(n))
     : [];
-  const { data } = await api.post(`/appointments/${props.appointmentId}/comments`, {
+  const { data } = await api.post(`/tasks/${props.taskId}/comments`, {
     body: body.value,
     mentions,
     files,

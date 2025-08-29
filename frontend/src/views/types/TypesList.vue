@@ -3,7 +3,7 @@
       <div class="flex items-center justify-between mb-4">
         <div>
           <select
-            id="types-scope"
+            id="task-types-scope"
             v-model="scope"
             class="border rounded px-2 py-1"
             aria-label="Scope"
@@ -15,9 +15,9 @@
           </select>
         </div>
         <RouterLink
-          v-if="can('types.create') || can('types.manage')"
+          v-if="can('task_types.create') || can('task_types.manage')"
           class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-          :to="{ name: 'types.create' }"
+          :to="{ name: 'taskTypes.create' }"
         >
           <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
           Add Type
@@ -30,16 +30,16 @@
     >
       <template
         v-if="
-          can('types.update') ||
-          can('types.delete') ||
-          can('types.create') ||
-          can('types.manage')
+          can('task_types.update') ||
+          can('task_types.delete') ||
+          can('task_types.create') ||
+          can('task_types.manage')
         "
         #actions="{ row }"
       >
         <div class="flex gap-2">
           <button
-            v-if="can('types.update') || can('types.manage')"
+            v-if="can('task_types.update') || can('task_types.manage')"
             class="text-blue-600"
             title="Edit"
             @click="edit(row.id)"
@@ -47,7 +47,7 @@
             <Icon icon="heroicons-outline:pencil-square" class="w-5 h-5" />
           </button>
           <button
-            v-if="can('types.delete') || can('types.manage')"
+            v-if="can('task_types.delete') || can('task_types.manage')"
             class="text-red-600"
             title="Delete"
             @click="remove(row.id)"
@@ -56,7 +56,7 @@
           </button>
           <button
             v-if="
-              (can('types.create') || can('types.manage')) &&
+              (can('task_types.create') || can('task_types.manage')) &&
               (auth.isSuperAdmin || !row.tenant_id)
             "
             class="text-green-600"
@@ -80,7 +80,7 @@ import Icon from '@/components/ui/Icon';
 import api from '@/services/api';
 import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
-import { useTypesStore } from '@/stores/types';
+import { useTaskTypesStore } from '@/stores/taskTypes';
 
 const router = useRouter();
 const tableKey = ref(0);
@@ -88,7 +88,7 @@ const all = ref<any[]>([]);
 const scope = ref<'tenant' | 'global' | 'all'>("tenant");
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
-const typesStore = useTypesStore();
+const typesStore = useTaskTypesStore();
 
 if (auth.isSuperAdmin) {
   scope.value = 'all';
@@ -145,7 +145,7 @@ function changeScope() {
 }
 
 function edit(id: number) {
-  router.push({ name: 'types.edit', params: { id } });
+  router.push({ name: 'taskTypes.edit', params: { id } });
 }
 
 async function remove(id: number) {
@@ -155,7 +155,7 @@ async function remove(id: number) {
     showCancelButton: true,
   });
   if (res.isConfirmed) {
-    await api.delete(`/appointment-types/${id}`);
+    await api.delete(`/task-types/${id}`);
     all.value = [];
     reload();
   }

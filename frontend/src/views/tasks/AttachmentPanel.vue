@@ -23,11 +23,11 @@ import api from '@/services/api';
 import { uploadFile } from '@/services/uploader';
 import Card from '@/components/ui/Card/index.vue';
 
-const props = defineProps<{ appointmentId: number }>();
+const props = defineProps<{ taskId: number }>();
 const attachments = ref<any[]>([]);
 
 async function load() {
-  const { data } = await api.get(`/appointments/${props.appointmentId}`);
+  const { data } = await api.get(`/tasks/${props.taskId}`);
   attachments.value = data.photos?.filter((p: any) => p.type === 'attachment') || [];
 }
 
@@ -35,7 +35,7 @@ async function onFileChange(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0];
   if (!file) return;
   const uploaded = await uploadFile(file);
-  await api.post(`/appointments/${props.appointmentId}/files`, { file_id: uploaded.file_id });
+  await api.post(`/tasks/${props.taskId}/files`, { file_id: uploaded.file_id });
   await load();
 }
 

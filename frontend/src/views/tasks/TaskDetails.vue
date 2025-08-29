@@ -1,54 +1,161 @@
 <template>
-  <div>
-    <header class="flex items-center justify-end mb-4">
-      <button
-        v-if="canWatch"
-        class="btn btn-sm"
-        :aria-label="isWatching ? t('tasks.unwatch') : t('tasks.watch')"
-        :aria-pressed="isWatching.toString()"
-        type="button"
-        @click="toggleWatch"
-        @keyup.enter.prevent="toggleWatch"
-        @keyup.space.prevent="toggleWatch"
-      >
-        {{ isWatching ? t('tasks.unwatch') : t('tasks.watch') }}
-      </button>
-    </header>
-    <SubtaskList :task-id="Number(route.params.id)" />
+  <div v-if="task">
+    <Card class="mb-4" :title="`Task ${task.id}`">
+      <div class="mb-2 flex items-center gap-2">
+        <span class="font-semibold">{{ task.type?.name || '—' }}</span>
+        <span
+          class="px-2 py-1 rounded-full text-xs font-semibold"
+          :class="statusClasses[task.status]"
+        >
+          {{ task.status.replace(/_/g, ' ') }}
+        </span>
+      </div>
+      <ul class="text-sm mb-2">
+        <li>Scheduled: {{ format(task.scheduled_at) || '—' }}</li>
+        <li>Started: {{ format(task.started_at) || '—' }}</li>
+        <li>Completed: {{ format(task.completed_at) || '—' }}</li>
+        <li>SLA End: {{ format(task.sla_end_at) || '—' }}</li>
+        <li>Assignee: {{ task.assignee?.label || '—' }}</li>
+        <li>SLA: {{ slaStatus }}</li>
+      </ul>
+      <div class="mt-2">
+        <StatusChanger
+          v-if="
+            currentStatusId &&
+            (can('tasks.update') || can('tasks.manage'))
+          "
+          :task-id="task.id"
+          :status-id="currentStatusId"
+          @updated="onStatusChanged"
+        />
+      </div>
+    </Card>
+
+    <Tabs v-model="activeTab" :tabs="tabs">
+      <template #default="{ active }">
+        <div v-if="active === 'details'">
+          <Card>
+            <div class="text-sm">
+              <div>Kau Notes: {{ task.kau_notes || '—' }}</div>
+            </div>
+          </Card>
+        </div>
+        <div v-else-if="active === 'photos'">
+          <Card>
+            <div class="flex flex-wrap gap-4">
+              <template v-for="photo in task.photos" :key="photo.id">
+                <img
+                  v-if="hasThumb(photo.file)"
+                  :src="photo.file.variants.thumb"
+                  :alt="photo.file?.filename || ''"
+                  class="w-24 h-24 object-cover rounded"
+                />
+                <div
+                  v-else
+                  class="flex items-center gap-2 px-2 py-1 border rounded text-sm text-gray-600"
+                >
+                  <span>{{ photo.file?.filename }}</span>
+                  <Button text="Open" btnClass="btn-dark" :isDisabled="true" />
+                </div>
+              </template>
+            </div>
+          </Card>
+        </div>
+        <div v-else-if="active === 'comments'">
+          <Card>
+            <CommentsThread :comments="task.comments" class="mb-4" />
+            <CommentEditor
+              v-if="can('tasks.update') || can('tasks.manage')"
+              :task-id="task.id"
+              @added="onCommentAdded"
+            />
+          </Card>
+        </div>
+      </template>
+    </Tabs>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '@/stores/auth';
 import api from '@/services/api';
-import SubtaskList from '@/components/tasks/SubtaskList.vue';
+import Card from '@/components/ui/Card/index.vue';
+import Tabs from '@/components/ui/Tabs.vue';
+import Button from '@/components/ui/Button/index.vue';
+import CommentsThread from '@/components/comments/CommentsThread.vue';
+import CommentEditor from '@/components/comments/CommentEditor.vue';
+import StatusChanger from './StatusChanger.vue';
+import { useTaskStatusesStore } from '@/stores/taskStatuses';
+import { formatDisplay, parseISO, toISO } from '@/utils/datetime';
+import { can } from '@/stores/auth';
 
 const route = useRoute();
-const { t } = useI18n();
-const auth = useAuthStore();
 
-const isWatching = ref(false);
-const canWatch = computed(() => auth.can('tasks.watch'));
+const task = ref<any>(null);
+const statusesStore = useTaskStatusesStore();
+const statuses = ref<any[]>([]);
 
-async function load() {
-  if (!canWatch.value) return;
-  const { data } = await api.get(`/tasks/${route.params.id}`);
-  isWatching.value = !!data.is_watching;
+const statusClasses: Record<string, string> = {
+  draft: 'bg-gray-100 text-gray-800',
+  assigned: 'bg-blue-100 text-blue-800',
+  in_progress: 'bg-yellow-100 text-yellow-800',
+  completed: 'bg-green-100 text-green-800',
+  rejected: 'bg-red-100 text-red-800',
+  redo: 'bg-purple-100 text-purple-800',
+};
+
+const tabs = [
+  { id: 'details', label: 'Details' },
+  { id: 'photos', label: 'Photos' },
+  { id: 'comments', label: 'Comments' },
+];
+const activeTab = ref('details');
+
+function format(date?: string) {
+  return date ? formatDisplay(date) : '';
 }
 
-async function toggleWatch() {
-  const id = route.params.id;
-  if (isWatching.value) {
-    await api.delete(`/tasks/${id}/watch`);
-    isWatching.value = false;
-  } else {
-    await api.post(`/tasks/${id}/watch`);
-    isWatching.value = true;
-  }
+const slaStatus = computed(() => {
+  const t = task.value;
+  if (!t) return 'none';
+  if (t.sla_status) return t.sla_status;
+  if (!t.sla_end_at) return 'none';
+  const reference = t.completed_at || toISO(new Date());
+  return parseISO(reference) <= parseISO(t.sla_end_at)
+    ? 'within'
+    : 'breached';
+});
+
+function hasThumb(file: any) {
+  if (file?.variants?.thumb) return true;
+  console.warn('TODO: needs signed URL endpoint');
+  return false;
+}
+
+async function load() {
+  const { data } = await api.get(`/tasks/${route.params.id}`);
+  task.value = data;
+  const res = await statusesStore.fetch('all');
+  statuses.value = res.data;
 }
 
 onMounted(load);
+
+function onCommentAdded(c: any) {
+  task.value.comments.push(c);
+}
+
+const currentStatusId = computed(() => {
+  const current = task.value?.status;
+  const found = statuses.value.find((s: any) => s.name === current);
+  return found?.id;
+});
+
+function onStatusChanged(id: number) {
+  const found = statuses.value.find((s: any) => s.id === id);
+  if (found && task.value) {
+    task.value.status = found.name;
+  }
+}
 </script>

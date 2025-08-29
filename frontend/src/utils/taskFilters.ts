@@ -1,17 +1,17 @@
 import type { components } from '@/types/api';
 
-export type Appointment = components['schemas']['Appointment'];
+export type Task = components['schemas']['Task'];
 
-export interface AppointmentFilters {
+export interface TaskFilters {
   global?: string | null;
   title?: string | null;
   status?: string[];
 }
 
-export function filterAppointments(
-  list: Appointment[],
-  filters: AppointmentFilters,
-): Appointment[] {
+export function filterTasks(
+  list: Task[],
+  filters: TaskFilters,
+): Task[] {
   const g = (filters.global || '').toLowerCase();
   const titleFilter = (filters.title || '').toLowerCase();
   const statusFilter = filters.status && filters.status.length ? filters.status : null;

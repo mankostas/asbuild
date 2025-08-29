@@ -1,9 +1,9 @@
 <template>
     <div v-if="canAccess">
       <form class="max-w-lg space-y-4" @submit.prevent="submitForm">
-      <VueSelect label="Type" :error="appointmentTypeError">
+      <VueSelect label="Type" :error="taskTypeError">
         <vSelect
-          v-model="appointmentTypeId"
+          v-model="taskTypeId"
           :options="types"
           label="name"
           :reduce="(t: any) => t.id"
@@ -20,11 +20,11 @@
         />
       </VueSelect>
 
-      <AssigneePicker v-if="assigneeField && can('appointments.assign')" v-model="assignee" />
+      <AssigneePicker v-if="assigneeField && can('tasks.assign')" v-model="assignee" />
 
       <JsonSchemaForm
         v-if="currentSchemaNoAssignee"
-        :key="appointmentTypeId"
+        :key="taskTypeId"
         v-model="formData"
         :schema="currentSchemaNoAssignee"
         :task-id="0"
@@ -83,42 +83,42 @@ const assignee = ref<{ kind: 'team' | 'employee'; id: number } | null>(null);
 const statusOptions = ref<string[]>([]);
 
 const schema = yup.object({
-  appointment_type_id: yup.mixed().required('Type is required'),
+  task_type_id: yup.mixed().required('Type is required'),
 });
 
 const { handleSubmit, meta, setErrors, errors } = useForm({ validationSchema: schema });
-const { value: appointmentTypeId, errorMessage: appointmentTypeError } = useField<
-  string | number
->('appointment_type_id');
+const { value: taskTypeId, errorMessage: taskTypeError } = useField<string | number>(
+  'task_type_id',
+);
 
-const isEdit = computed(() => route.name === 'appointments.edit');
+const isEdit = computed(() => route.name === 'tasks.edit');
 const canAccess = computed(() =>
   isEdit.value
-    ? can('appointments.update') || can('appointments.manage')
-    : can('appointments.create') || can('appointments.manage'),
+    ? can('tasks.update') || can('tasks.manage')
+    : can('tasks.create') || can('tasks.manage'),
 );
 
 onMounted(async () => {
   const [typesRes, statusesRes] = await Promise.all([
-    api.get('/appointment-types'),
-    api.get('/statuses'),
+    api.get('/task-types'),
+    api.get('/task-statuses'),
   ]);
   types.value = typesRes.data;
   statusOptions.value = statusesRes.data.map((s: any) => s.name);
   if (isEdit.value) {
-    const res = await api.get(`/appointments/${route.params.id}`);
-    const appt = res.data;
-    appointmentTypeId.value = appt.type?.id || appt.appointment_type_id;
-    formData.value = appt.form_data || {};
-    scheduledAt.value = appt.scheduled_at ? toISO(appt.scheduled_at) : '';
-    slaStartAt.value = appt.sla_start_at ? toISO(appt.sla_start_at) : '';
-    slaEndAt.value = appt.sla_end_at ? toISO(appt.sla_end_at) : '';
-    status.value = appt.status;
-    originalStatus.value = appt.status;
-    if (appt.assignee) {
-      assignee.value = { kind: appt.assignee.kind, id: appt.assignee.id };
+    const res = await api.get(`/tasks/${route.params.id}`);
+    const task = res.data;
+    taskTypeId.value = task.type?.id || task.task_type_id;
+    formData.value = task.form_data || {};
+    scheduledAt.value = task.scheduled_at ? toISO(task.scheduled_at) : '';
+    slaStartAt.value = task.sla_start_at ? toISO(task.sla_start_at) : '';
+    slaEndAt.value = task.sla_end_at ? toISO(task.sla_end_at) : '';
+    status.value = task.status;
+    originalStatus.value = task.status;
+    if (task.assignee) {
+      assignee.value = { kind: task.assignee.kind, id: task.assignee.id };
     }
-    const map = appt.type?.statuses || {};
+    const map = task.type?.statuses || {};
     const allowed = Array.from(new Set([...Object.keys(map), ...Object.values(map).flat()]));
     if (allowed.length) {
       statusOptions.value = allowed;
@@ -128,7 +128,7 @@ onMounted(async () => {
 
 function onTypeChange() {
   formData.value = {};
-  const t = types.value.find((t) => t.id === appointmentTypeId.value);
+  const t = types.value.find((t) => t.id === taskTypeId.value);
   scheduledAt.value = t?.scheduled_at ? toISO(t.scheduled_at) : '';
   slaStartAt.value = t?.sla_start_at ? toISO(t.sla_start_at) : '';
   slaEndAt.value = t?.sla_end_at ? toISO(t.sla_end_at) : '';
@@ -136,7 +136,7 @@ function onTypeChange() {
 }
 
 const currentSchema = computed(() => {
-  const t = types.value.find((t) => t.id === appointmentTypeId.value);
+  const t = types.value.find((t) => t.id === taskTypeId.value);
   return t ? t.form_schema : null;
 });
 
@@ -166,7 +166,7 @@ const assigneeRequired = computed(() => {
 const requiredFields = computed(() => currentSchemaNoAssignee.value?.required || []);
 
 const canSubmit = computed(() => {
-  if (!appointmentTypeId.value) return false;
+  if (!taskTypeId.value) return false;
   const formValid = requiredFields.value.every((f: string) => {
     const val = formData.value[f];
     return !(val === undefined || val === null || val === '');
@@ -179,7 +179,7 @@ const canSubmit = computed(() => {
 const submitForm = handleSubmit(async () => {
   serverError.value = '';
   const payload: any = {
-    appointment_type_id: appointmentTypeId.value,
+    task_type_id: taskTypeId.value,
     form_data: formData.value,
   };
   if (scheduledAt.value) payload.scheduled_at = toISO(scheduledAt.value);
@@ -191,17 +191,17 @@ const submitForm = handleSubmit(async () => {
       if (status.value && status.value !== originalStatus.value) {
         payload.status = status.value;
       }
-      await api.patch(`/appointments/${route.params.id}`, payload);
-      notify.success('Appointment updated');
+      await api.patch(`/tasks/${route.params.id}`, payload);
+      notify.success('Task updated');
       router.push({
-        name: 'appointments.details',
+        name: 'tasks.details',
         params: { id: route.params.id },
       });
     } else {
-      const res = await api.post('/appointments', payload);
-      notify.success('Appointment created');
+      const res = await api.post('/tasks', payload);
+      notify.success('Task created');
       router.push({
-        name: 'appointments.details',
+        name: 'tasks.details',
         params: { id: res.data.id },
       });
     }
