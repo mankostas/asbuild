@@ -19,6 +19,13 @@ return [
             'notifications.manage',
         ],
     ],
+    'reports' => [
+        'label' => 'Reports',
+        'abilities' => [
+            'reports.view',
+            'reports.manage',
+        ],
+    ],
     'roles' => [
         'label' => 'Roles & Permissions',
         'abilities' => [

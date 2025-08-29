@@ -67,5 +67,9 @@ return [
     'gdpr.manage',
     'gdpr.export',
     'gdpr.delete',
+
+    // Reports
+    'reports.view',
+    'reports.manage',
 ];
 
