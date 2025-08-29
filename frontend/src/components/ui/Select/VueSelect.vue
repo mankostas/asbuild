@@ -8,20 +8,20 @@
     <label
       v-if="label"
       :class="`${classLabel} inline-block input-label `"
-      :for="inputId"
+      :id="inputId"
     >
       {{ label }}</label
     >
     <div class="relative">
       <div v-if="!$slots.default">
         <vSelect
-          :id="inputId"
           :name="name"
           :modelValue="modelValue"
           :readonly="isReadonly"
           :disabled="disabled"
           :multiple="multiple"
           :options="options"
+          :aria-labelledby="inputId"
           @update:model-value="$emit('update:modelValue', $event)"
           @input="$emit('input', $event)"
           @change="$emit('change', $event)"
