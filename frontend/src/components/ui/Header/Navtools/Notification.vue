@@ -45,7 +45,7 @@
                 <div class="h-8 w-8 bg-white rounded-full">
                   <img
                     :src="item.image"
-                    alt=""
+                    :alt="item.title || ''"
                     :class="`${
                       active ? ' border-white' : ' border-transparent'
                     } block w-full h-full object-cover rounded-full border`"

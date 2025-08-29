@@ -19,7 +19,7 @@
       <img
         class="h-full w-full object-contain transition-all duration-300 group-hover:scale-105"
         :src="image"
-        alt="."
+        :alt="product?.title || ''"
       />
     </SwiperSlide>
   </Swiper>
@@ -40,7 +40,7 @@
         :key="i"
         class="h-[90px] w-[90px] py-[14px] px-[17px] bg-secondary-200 rounded"
       >
-        <img class="h-full w-full object-contain" :src="image" alt="." />
+        <img class="h-full w-full object-contain" :src="image" :alt="product?.title || ''" />
       </SwiperSlide>
     </Swiper>
   </div>

@@ -126,6 +126,7 @@
                         <img
                           class="w-full h-full object-contain"
                           :src="item.img"
+                          :alt="item?.title || ''"
                         />
                       </div>
                       <div>

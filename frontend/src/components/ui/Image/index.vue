@@ -27,7 +27,7 @@ export default {
     },
     alt: {
       type: String,
-      default: 'image title',
+      default: '',
     },
     imageClass: {
       type: String,

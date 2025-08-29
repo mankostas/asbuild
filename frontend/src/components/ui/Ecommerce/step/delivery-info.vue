@@ -13,7 +13,7 @@
               <div
                 class="md:p-4 p-2 flex-none bg-slate-200 rounded md:h-20 md:w-20 w-16 h-16 rtl:ml-3"
               >
-                <img class="w-full h-full object-contain" :src="item.img" />
+                <img class="w-full h-full object-contain" :src="item.img" :alt="item?.title || ''" />
               </div>
               <div class="md:text-base text-sm">
                 <p

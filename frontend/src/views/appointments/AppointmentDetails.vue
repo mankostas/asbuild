@@ -47,6 +47,7 @@
                 <img
                   v-if="hasThumb(photo.file)"
                   :src="photo.file.variants.thumb"
+                  :alt="photo.file?.filename || ''"
                   class="w-24 h-24 object-cover rounded"
                 />
                 <div

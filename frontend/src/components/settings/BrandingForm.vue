@@ -10,7 +10,7 @@
         <input :id="ids.logo" v-bind="getLogoInputProps()" class="hidden" />
         <p v-if="!logoFile && !form.logo">Drop logo here or click to upload</p>
         <p v-else-if="logoFile">{{ logoFile.name }}</p>
-        <img v-else :src="form.logo" class="mx-auto h-24" />
+        <img v-else :src="form.logo" alt="" class="mx-auto h-24" />
       </div>
     </div>
     <div>
@@ -26,7 +26,7 @@
         />
         <p v-if="!logoDarkFile && !form.logo_dark">Drop logo here or click to upload</p>
         <p v-else-if="logoDarkFile">{{ logoDarkFile.name }}</p>
-        <img v-else :src="form.logo_dark" class="mx-auto h-24" />
+        <img v-else :src="form.logo_dark" alt="" class="mx-auto h-24" />
       </div>
     </div>
     <div>

@@ -18,6 +18,7 @@
           <img
             v-if="hasThumb(file)"
             :src="file.variants.thumb"
+            :alt="file.filename || ''"
             class="w-16 h-16 object-cover rounded"
           />
           <div

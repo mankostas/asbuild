@@ -53,7 +53,7 @@
                   ></span>
                   <img
                     :src="item.image"
-                    alt=""
+                    :alt="item.title || ''"
                     class="block w-full h-full object-cover rounded-full border hover:border-white border-transparent"
                   />
                 </div>
