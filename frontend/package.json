@@ -10,6 +10,8 @@
     "test": "vitest run tests/unit tests/*.test.ts && playwright test tests/e2e",
     "lint": "eslint --ext .vue,.js,.ts src",
     "lint:fix": "eslint --ext .vue,.js,.ts src --fix",
+    "precommit": "pnpm run lint",
+    "ci:lint": "pnpm run lint",
     "format": "prettier --write .",
     "gen:api:types": "openapi-typescript ../backend/docs/openapi.yaml -o src/types/api.d.ts"
   },
