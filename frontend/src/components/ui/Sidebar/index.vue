@@ -30,7 +30,7 @@
           "
         >
           <img
-            src="@/assets/images/logo/logo.svg"
+            :src="$store.brandingStore.branding.logo || logoLight"
             alt=""
             v-if="
               !this.$store.themeSettingsStore.isDark &&
@@ -39,7 +39,7 @@
           />
 
           <img
-            src="@/assets/images/logo/logo-white.svg"
+            :src="$store.brandingStore.branding.logo_dark || logoDark"
             alt=""
             v-if="
               this.$store.themeSettingsStore.isDark ||
@@ -120,6 +120,8 @@ import { menuItems } from "@/constant/data";
 import Navmenu from "./Navmenu";
 import { gsap } from "gsap";
 import { ref, onMounted } from "vue";
+import logoLight from "@/assets/images/logo/logo.svg";
+import logoDark from "@/assets/images/logo/logo-white.svg";
 
 export default defineComponent({
   components: {
@@ -131,6 +133,8 @@ export default defineComponent({
       menuItems,
       openClass: "w-[248px]",
       closeClass: "w-[72px] close_sidebar",
+      logoLight,
+      logoDark,
     };
   },
 

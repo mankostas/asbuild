@@ -3,16 +3,20 @@ import api from '@/services/api';
 
 export const useBrandingStore = defineStore('branding', {
   state: () => ({
-    branding: { name: '', color: '', logo: '', email_from: '' } as Record<
-      string,
-      any
-    >,
+    branding: {
+      name: 'Asbuild SPA',
+      color: '#4669fa',
+      secondary_color: '#A0AEC0',
+      logo: '',
+      logo_dark: '',
+      email_from: '',
+    } as Record<string, any>,
   }),
   actions: {
     async load() {
       try {
         const { data } = await api.get('/branding');
-        this.branding = data;
+        this.branding = { ...this.branding, ...data };
       } catch (_) {
         // Ignore errors so the app can still load without branding info
       }
@@ -24,16 +28,18 @@ export const useBrandingStore = defineStore('branding', {
       this.applyTheme();
     },
     applyTheme() {
-      const color = this.branding.color;
-      if (color) {
-        const hex = color.replace('#', '');
-        const r = parseInt(hex.slice(0, 2), 16);
-        const g = parseInt(hex.slice(2, 4), 16);
-        const b = parseInt(hex.slice(4, 6), 16);
-        document.documentElement.style.setProperty(
-          '--color-primary',
-          `${r} ${g} ${b}`,
-        );
+      const setVar = (name: string, hex?: string) => {
+        if (!hex) return;
+        const clean = hex.replace('#', '');
+        const r = parseInt(clean.slice(0, 2), 16);
+        const g = parseInt(clean.slice(2, 4), 16);
+        const b = parseInt(clean.slice(4, 6), 16);
+        document.documentElement.style.setProperty(name, `${r} ${g} ${b}`);
+      };
+      setVar('--color-primary', this.branding.color);
+      setVar('--color-secondary', this.branding.secondary_color);
+      if (this.branding.name) {
+        document.title = this.branding.name;
       }
     },
   },
