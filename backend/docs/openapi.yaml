@@ -832,10 +832,17 @@ components:
       properties:
         id:
           type: integer
+        slug:
+          type: string
         name:
           type: string
-        scope:
+        color:
           type: string
+        position:
+          type: integer
+        tenant_id:
+          type: integer
+          nullable: true
     Employee:
       type: object
       properties:

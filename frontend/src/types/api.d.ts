@@ -1236,8 +1236,11 @@ export interface components {
         };
         TaskStatus: {
             id?: number;
+            slug?: string;
             name?: string;
-            scope?: string;
+            color?: string;
+            position?: number;
+            tenant_id?: number | null;
         };
         Employee: {
             id?: number;
