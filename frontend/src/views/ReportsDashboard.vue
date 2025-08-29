@@ -2,7 +2,7 @@
   <div class="mx-auto max-w-7xl space-y-8 p-6">
     <div class="flex justify-end mb-4">
       <div class="flex flex-wrap items-end gap-2">
-        <Select v-model="range" :id="ids.range" label="Range" class="w-40">
+        <Select v-model="range" label="Range" class="w-40">
           <option value="today">Today</option>
           <option value="7">Last 7 days</option>
           <option value="30">Last 30 days</option>
@@ -11,7 +11,6 @@
         <Textinput
           v-if="range === 'custom'"
           v-model="from"
-          :id="ids.from"
           type="date"
           label="From"
           class="w-40"
@@ -19,7 +18,6 @@
         <Textinput
           v-if="range === 'custom'"
           v-model="to"
-          :id="ids.to"
           type="date"
           label="To"
           class="w-40"
@@ -48,11 +46,6 @@ import ChartCard from '@/components/reports/ChartCard.vue';
 const range = ref('today');
 const from = ref('');
 const to = ref('');
-const ids = {
-  range: 'reports-range',
-  from: 'reports-from',
-  to: 'reports-to',
-};
 const kpis = ref([] as any);
 const materials = ref([] as any);
 const materialSeries = computed(() => [

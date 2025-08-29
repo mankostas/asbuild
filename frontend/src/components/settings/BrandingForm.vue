@@ -1,6 +1,6 @@
 <template>
   <form class="space-y-4" @submit.prevent="save">
-    <Textinput v-model="form.name" :id="ids.name" label="Name" />
+    <Textinput v-model="form.name" label="Name" />
     <div>
       <label class="form-label" :for="ids.logo">Logo</label>
       <div
@@ -65,12 +65,7 @@
         class="h-10 w-20 rounded border border-slate-200"
       />
     </div>
-    <Textinput
-      v-model="form.email_from"
-      :id="ids.emailFrom"
-      label="Email From"
-      type="email"
-    />
+    <Textinput v-model="form.email_from" label="Email From" type="email" />
     <Button type="submit" :isDisabled="!dirty" btnClass="btn-dark"
       >Save Branding</Button
     >
@@ -92,14 +87,12 @@ const form = reactive({ ...initial });
 const logoFile = ref<File | null>(null);
 const logoDarkFile = ref<File | null>(null);
 const ids = {
-  name: 'branding-name',
   logo: 'branding-logo',
   logoDark: 'branding-logo-dark',
   color: 'branding-color',
   secondaryColor: 'branding-secondary-color',
   colorDark: 'branding-color-dark',
   secondaryColorDark: 'branding-secondary-color-dark',
-  emailFrom: 'branding-email-from',
 };
 
 function onDrop(files: File[]) {

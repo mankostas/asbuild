@@ -4,16 +4,10 @@
       <div class="text-slate-600 text-base dark:text-slate-300">Semi Dark</div>
       <div>
         <label
-          :for="ids.semidark"
           :class="semidark ? 'bg-primary-500' : 'bg-secondary-500'"
           class="relative inline-flex h-6 w-[46px] items-center rounded-full transition-all duration-150 cursor-pointer"
         >
-          <input
-            :id="ids.semidark"
-            v-model="semidark"
-            type="checkbox"
-            class="hidden"
-          />
+          <input v-model="semidark" type="checkbox" class="hidden" />
           <span
             :class="
               semidark
@@ -29,13 +23,6 @@
 </template>
 <script>
 export default {
-  data() {
-    return {
-      ids: {
-        semidark: 'semidark-toggle',
-      },
-    };
-  },
   computed: {
     semidark: {
       get() {

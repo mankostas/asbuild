@@ -15,23 +15,13 @@
         <option value="">All</option>
         <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
       </select>
-      <label :for="ids.favorites" class="flex items-center gap-1 text-sm">
+      <label class="flex items-center gap-1 text-sm">
         Favorites
-        <input
-          :id="ids.favorites"
-          v-model="showFavorites"
-          type="checkbox"
-          class="form-switch"
-        />
+        <input v-model="showFavorites" type="checkbox" class="form-switch" />
       </label>
-      <label :for="ids.offline" class="flex items-center gap-1 text-sm">
+      <label class="flex items-center gap-1 text-sm">
         Offline
-        <input
-          :id="ids.offline"
-          v-model="showOffline"
-          type="checkbox"
-          class="form-switch"
-        />
+        <input v-model="showOffline" type="checkbox" class="form-switch" />
       </label>
       <button class="btn btn-primary ml-auto" @click="openCreate">
         Upload Manual
@@ -74,12 +64,7 @@ const showFavorites = ref(false);
 const showOffline = ref(false);
 const showForm = ref(false);
 const editId = ref<string | null>(null);
-const ids = {
-  search: 'manuals-search',
-  category: 'manuals-category',
-  favorites: 'manuals-favorites',
-  offline: 'manuals-offline',
-};
+const ids = { search: 'manuals-search', category: 'manuals-category' };
 
 onMounted(async () => {
   await store.fetch();

@@ -2,7 +2,6 @@
   <form class="space-y-4" @submit.prevent="onSubmit">
     <Textinput
       v-model="email"
-      :id="ids.email"
       label="Email"
       type="email"
       placeholder="Type your email"
@@ -12,7 +11,6 @@
     />
     <Textinput
       v-model="password"
-      :id="ids.password"
       label="Password"
       type="password"
       placeholder="8+ characters, 1 capitat letter "
@@ -24,13 +22,13 @@
 
     <div class="flex justify-between">
       <input
-        :id="ids.remember"
+        id="signin-remember"
         type="checkbox"
         class="hidden"
         @change="() => (checkbox = !checkbox)"
       />
       <label
-        :for="ids.remember"
+        for="signin-remember"
         class="cursor-pointer flex items-start"
       >
         <span
@@ -102,11 +100,6 @@ export default {
   data() {
     return {
       checkbox: false,
-      ids: {
-        email: 'signin-email',
-        password: 'signin-password',
-        remember: 'signin-remember',
-      },
     };
   },
 };

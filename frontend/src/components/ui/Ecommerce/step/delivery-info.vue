@@ -51,31 +51,17 @@
           class="space-x-0 sm:space-x-2 md:space-x-5 md:space-y-0 space-y-3 rtl:space-x-reverse md:flex justify-start lg:justify-end flex-1 md:text-base text-sm"
         >
           <label
-            :for="ids.home"
             class="inline-flex items-center border border-slate-900 dark:border-slate-700 rounded py-3 lg:px-10 px-5 md:w-auto w-[200px]"
           >
-            <Radio
-              :id="ids.home"
-              v-model="picked1"
-              name="x"
-              value="A"
-              checked
-            />
+            <Radio v-model="picked1" name="x" value="A" checked />
             <span class="text-slate-900 dark:text-slate-300">
               Home Delivery
             </span>
           </label>
           <label
-            :for="ids.pickup"
             class="inline-flex items-center border border-slate-900 dark:border-slate-700 rounded py-3 lg:px-10 px-5 md:w-auto w-[200px]"
           >
-            <Radio
-              :id="ids.pickup"
-              v-model="picked1"
-              name="x"
-              value="B"
-              @click="toggleModal"
-            />
+            <Radio v-model="picked1" name="x" value="B" @click="toggleModal" />
             <span class="text-slate-900 dark:text-slate-300">
               Local Pickup
             </span>
@@ -95,11 +81,6 @@ import { cartStore } from "@/store/cart";
 
 const cart = cartStore();
 const activeModal = ref(false);
-
-const ids = {
-  home: 'delivery-home',
-  pickup: 'delivery-pickup',
-};
 
 const toggleModal = () => {
   activeModal.value = !activeModal.value;

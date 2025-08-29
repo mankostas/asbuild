@@ -2,30 +2,25 @@
   <div class="flex flex-col gap-2">
     <Textarea
       v-model="body"
-      :id="ids.body"
       :rows="3"
       label="Comment"
       placeholder="Add a comment"
     />
-    <div>
-      <label :for="ids.mentions" class="sr-only">Mentions</label>
-      <VueSelect class="w-full">
-        <template #default>
-          <vSelect
-            :id="ids.mentions"
-            v-model="selectedMentions"
-            :options="employees"
-            label="name"
-            multiple
-            placeholder="Mention users"
-          />
-        </template>
-      </VueSelect>
-    </div>
+    <VueSelect class="w-full" label="Mentions">
+      <template #default="{ inputId }">
+        <vSelect
+          :id="inputId"
+          v-model="selectedMentions"
+          :options="employees"
+          label="name"
+          multiple
+          placeholder="Mention users"
+        />
+      </template>
+    </VueSelect>
     <Textinput
       v-if="allowFiles"
       v-model="fileIds"
-      :id="ids.fileIds"
       label="File IDs"
       placeholder="File IDs comma separated"
     />
@@ -50,11 +45,6 @@ const selectedMentions = ref<any[]>([]);
 const fileIds = ref('');
 const employees = ref<any[]>([]);
 const allowFiles = props.allowFiles ?? false;
-const ids = {
-  body: 'comment-body',
-  mentions: 'comment-mentions',
-  fileIds: 'comment-file-ids',
-};
 
 onMounted(async () => {
   const { data } = await api.get('/employees');

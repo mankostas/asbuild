@@ -2,7 +2,6 @@
   <form class="space-y-4" @submit.prevent="onSubmit">
     <Textinput
       v-model="name"
-      :id="ids.name"
       label="Full name"
       type="text"
       placeholder="Full Name"
@@ -12,7 +11,6 @@
     />
     <Textinput
       v-model="email"
-      :id="ids.email"
       label="Email"
       type="email"
       placeholder="Type your email"
@@ -22,7 +20,6 @@
     />
     <Textinput
       v-model="password"
-      :id="ids.password"
       label="Password"
       type="password"
       placeholder="8+ characters, 1 capitat letter "
@@ -33,12 +30,12 @@
     />
 
     <input
-      :id="ids.accept"
+      id="signup-accept"
       type="checkbox"
       class="hidden"
       @change="() => (checkbox = !checkbox)"
     />
-    <label :for="ids.accept" class="cursor-pointer flex items-start">
+    <label for="signup-accept" class="cursor-pointer flex items-start">
       <span
         class="h-4 w-4 border rounded inline-flex mr-3 relative flex-none top-1 transition-all duration-150"
         :class="
@@ -132,12 +129,6 @@ export default {
   data() {
     return {
       checkbox: false,
-      ids: {
-        name: 'signup-name',
-        email: 'signup-email',
-        password: 'signup-password',
-        accept: 'signup-accept',
-      },
     };
   },
 };
