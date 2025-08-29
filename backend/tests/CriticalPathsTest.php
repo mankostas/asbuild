@@ -8,9 +8,9 @@ class CriticalPathsTest extends TestCase
         $this->markTestIncomplete('File handling tests not implemented.');
     }
 
-    public function test_appointments_lifecycle_placeholder(): void
+    public function test_tasks_lifecycle_placeholder(): void
     {
-        $this->markTestIncomplete('Appointment lifecycle tests not implemented.');
+        $this->markTestIncomplete('Task lifecycle tests not implemented.');
     }
 
     public function test_schema_validation_placeholder(): void

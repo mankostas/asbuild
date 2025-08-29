@@ -68,9 +68,9 @@ class FeatureAbilitiesTest extends TestCase
             'gdpr' => ['gdpr', '/api/gdpr/consents', 'gdpr.view'],
             'notifications' => ['notifications', '/api/notifications', 'notifications.view'],
             'roles' => ['roles', '/api/roles', 'roles.manage'],
-            'types' => ['types', '/api/appointment-types', 'types.view'],
+            'task_types' => ['task_types', '/api/task-types', 'task_types.manage'],
             'teams' => ['teams', '/api/teams', 'teams.view'],
-            'statuses' => ['statuses', '/api/statuses', 'statuses.view'],
+            'task_statuses' => ['task_statuses', '/api/task-statuses', 'task_statuses.manage'],
         ];
     }
 }

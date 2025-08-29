@@ -4,14 +4,14 @@
  */
 
 export interface paths {
-    "/appointments": {
+    "/tasks": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List appointments */
+        /** List tasks */
         get: {
             parameters: {
                 query?: never;
@@ -21,19 +21,19 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description List of appointments */
+                /** @description List of tasks */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Appointment"][];
+                        "application/json": components["schemas"]["Task"][];
                     };
                 };
             };
         };
         put?: never;
-        /** Create appointment */
+        /** Create task */
         post: {
             parameters: {
                 query?: never;
@@ -43,17 +43,17 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["Appointment"];
+                    "application/json": components["schemas"]["Task"];
                 };
             };
             responses: {
-                /** @description Appointment created */
+                /** @description Task created */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Appointment"];
+                        "application/json": components["schemas"]["Task"];
                     };
                 };
             };
@@ -64,7 +64,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/appointments/{id}": {
+    "/tasks/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -77,7 +77,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Update appointment */
+        /** Update task */
         patch: {
             parameters: {
                 query?: never;
@@ -89,17 +89,17 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["Appointment"];
+                    "application/json": components["schemas"]["Task"];
                 };
             };
             responses: {
-                /** @description Updated appointment */
+                /** @description Updated task */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Appointment"];
+                        "application/json": components["schemas"]["Task"];
                     };
                 };
             };
@@ -439,14 +439,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/appointment-types": {
+    "/task-types": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List appointment types */
+        /** List task types */
         get: {
             parameters: {
                 query?: {
@@ -465,7 +465,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Type"][];
+                        "application/json": components["schemas"]["TaskType"][];
                     };
                 };
             };
@@ -478,7 +478,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/appointment-types/{id}/copy-to-tenant": {
+    "/task-types/{id}/copy-to-tenant": {
         parameters: {
             query?: never;
             header?: never;
@@ -487,7 +487,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Copy appointment type to tenant */
+        /** Copy task type to tenant */
         post: {
             parameters: {
                 query?: never;
@@ -505,13 +505,13 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Appointment type */
+                /** @description Task type */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Type"];
+                        "application/json": components["schemas"]["TaskType"];
                     };
                 };
             };
@@ -522,14 +522,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/statuses": {
+    "/task-statuses": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List statuses */
+        /** List task statuses */
         get: {
             parameters: {
                 query?: {
@@ -542,13 +542,13 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description List of statuses */
+                /** @description List of task statuses */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Status"][];
+                        "application/json": components["schemas"]["TaskStatus"][];
                     };
                 };
             };
@@ -561,7 +561,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/statuses/{id}/copy-to-tenant": {
+    "/task-statuses/{id}/copy-to-tenant": {
         parameters: {
             query?: never;
             header?: never;
@@ -594,7 +594,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Status"];
+                        "application/json": components["schemas"]["TaskStatus"];
                     };
                 };
             };
@@ -681,7 +681,7 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        Appointment: {
+        Task: {
             id?: string;
             title?: string;
             status?: string;
@@ -705,11 +705,11 @@ export interface components {
             description?: string | null;
             employees?: components["schemas"]["Employee"][];
         };
-        Type: {
+        TaskType: {
             id?: number;
             name?: string;
         };
-        Status: {
+        TaskStatus: {
             id?: number;
             name?: string;
             scope?: string;

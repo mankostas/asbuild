@@ -55,7 +55,7 @@ class RolesTest extends TestCase
 
     public function test_super_admin_can_assign_any_ability(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['appointments']]);
+        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['tasks']]);
         $superRole = Role::create([
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
@@ -76,20 +76,20 @@ class RolesTest extends TestCase
 
         $payload = [
             'name' => 'Types Manager',
-            'slug' => 'types_manager',
-            'abilities' => ['types.manage'],
+            'slug' => 'task_types.manager',
+            'abilities' => ['task_types.manage'],
             'tenant_id' => $tenant->id,
             'level' => 1,
         ];
 
         $this->postJson('/api/roles', $payload)
             ->assertStatus(201)
-            ->assertJsonFragment(['abilities' => ['types.manage']]);
+            ->assertJsonFragment(['abilities' => ['task_types.manage']]);
     }
 
     public function test_features_limit_assignable_abilities(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['appointments']]);
+        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['tasks']]);
         $adminRole = Role::create([
             'name' => 'Manager',
             'slug' => 'manager',
@@ -111,7 +111,7 @@ class RolesTest extends TestCase
         $payload = [
             'name' => 'Type Manager',
             'slug' => 'type_manager',
-            'abilities' => ['types.manage'],
+            'abilities' => ['task_types.manage'],
             'level' => 1,
         ];
 
@@ -119,11 +119,11 @@ class RolesTest extends TestCase
             ->postJson('/api/roles', $payload)
             ->assertStatus(422);
 
-        $tenant->update(['features' => ['appointments', 'types']]);
+        $tenant->update(['features' => ['tasks', 'task_types']]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/roles', $payload)
             ->assertStatus(201)
-            ->assertJsonFragment(['abilities' => ['types.manage']]);
+            ->assertJsonFragment(['abilities' => ['task_types.manage']]);
     }
 }
