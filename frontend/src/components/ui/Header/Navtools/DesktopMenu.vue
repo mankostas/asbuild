@@ -112,12 +112,20 @@ export default {
   computed: {
     newMenulist() {
       const auth = useAuthStore();
-      return topMenu.filter((item) => {
-        if (item.isHeadr) return false;
-        if (item.admin && !auth.isSuperAdmin) return false;
-        const req = item.requiredAbilities || [];
-        return auth.hasAny(req);
-      });
+      const filterItems = (items = []) =>
+        items.filter((item) => {
+          if (item.isHeadr) return false;
+          if (item.admin && !auth.isSuperAdmin) return false;
+          const req = item.requiredAbilities || [];
+          const features = item.requiredFeatures || [];
+          return (
+            auth.hasAny(req) && features.every((f) => auth.features.includes(f))
+          );
+        });
+      return filterItems(topMenu).map((item) => ({
+        ...item,
+        child: filterItems(item.child || []),
+      }));
     },
   },
 };

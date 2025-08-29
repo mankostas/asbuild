@@ -137,12 +137,20 @@ export default {
 
   setup(props) {
     const auth = useAuthStore();
-    const visibleItems = computed(() =>
-      props.items.filter((it) => {
+    const filterItems = (items = []) =>
+      items.filter((it) => {
         if (it.admin && !auth.isSuperAdmin) return false;
         const req = it.requiredAbilities || [];
-        return auth.hasAny(req);
-      }),
+        const features = it.requiredFeatures || [];
+        return (
+          auth.hasAny(req) && features.every((f) => auth.features.includes(f))
+        );
+      });
+    const visibleItems = computed(() =>
+      filterItems(props.items).map((it) => ({
+        ...it,
+        child: filterItems(it.child || []),
+      })),
     );
     return { visibleItems };
   },
