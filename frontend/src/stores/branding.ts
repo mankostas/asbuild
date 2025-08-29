@@ -10,8 +10,12 @@ export const useBrandingStore = defineStore('branding', {
   }),
   actions: {
     async load() {
-      const { data } = await api.get('/branding');
-      this.branding = data;
+      try {
+        const { data } = await api.get('/branding');
+        this.branding = data;
+      } catch (_) {
+        // Ignore errors so the app can still load without branding info
+      }
       this.applyTheme();
     },
     async update(payload: Record<string, any>) {
