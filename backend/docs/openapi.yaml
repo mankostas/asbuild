@@ -6,15 +6,78 @@ paths:
   /tasks:
     get:
       summary: List tasks
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: assignee
+          in: query
+          schema:
+            type: integer
+        - name: team
+          in: query
+          schema:
+            type: integer
+        - name: priority
+          in: query
+          schema:
+            type: integer
+        - name: due_from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: due_to
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: has_photos
+          in: query
+          schema:
+            type: boolean
+        - name: mine
+          in: query
+          schema:
+            type: boolean
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [created_at, due_at, priority, board_position]
+        - name: dir
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
       responses:
         '200':
           description: List of tasks
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Task'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total:
+                        type: integer
+                      last_page:
+                        type: integer
     post:
       summary: Create task
       requestBody:
@@ -583,11 +646,35 @@ components:
           type: string
         status:
           type: string
+        status_color:
+          type: string
+          nullable: true
         scheduled_at:
           type: string
           format: date-time
+        due_at:
+          type: string
+          format: date-time
+          nullable: true
+        priority:
+          type: integer
+          nullable: true
         assignee:
           $ref: '#/components/schemas/Employee'
+        counts:
+          type: object
+          properties:
+            comments:
+              type: integer
+            attachments:
+              type: integer
+            watchers:
+              type: integer
+            subtasks:
+              type: integer
+        sla_chip:
+          type: string
+          nullable: true
         is_watching:
           type: boolean
     TaskComment:
