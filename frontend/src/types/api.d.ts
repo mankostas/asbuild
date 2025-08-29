@@ -84,7 +84,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tasks/{id}": {
+    "/tasks/{task}": {
         parameters: {
             query?: never;
             header?: never;
@@ -103,7 +103,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: string;
+                    task: string;
                 };
                 cookie?: never;
             };
@@ -126,7 +126,7 @@ export interface paths {
         };
         trace?: never;
     };
-    "/tasks/{id}/status": {
+    "/tasks/{task}/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -141,7 +141,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: string;
+                    task: string;
                 };
                 cookie?: never;
             };
@@ -177,7 +177,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tasks/{id}/watch": {
+    "/tasks/{task}/watch": {
         parameters: {
             query?: never;
             header?: never;
@@ -192,7 +192,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    task: number;
                 };
                 cookie?: never;
             };
@@ -213,7 +213,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    task: number;
                 };
                 cookie?: never;
             };
@@ -233,7 +233,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tasks/{id}/subtasks": {
+    "/tasks/{task}/subtasks": {
         parameters: {
             query?: never;
             header?: never;
@@ -248,7 +248,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    task: number;
                 };
                 cookie?: never;
             };
@@ -275,7 +275,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tasks/{id}/subtasks/{subtask}": {
+    "/tasks/{task}/subtasks/{subtask}": {
         parameters: {
             query?: never;
             header?: never;
@@ -291,7 +291,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    task: number;
                     subtask: number;
                 };
                 cookie?: never;
@@ -315,7 +315,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    task: number;
                     subtask: number;
                 };
                 cookie?: never;
@@ -339,7 +339,7 @@ export interface paths {
         };
         trace?: never;
     };
-    "/tasks/{id}/subtasks/reorder": {
+    "/tasks/{task}/subtasks/reorder": {
         parameters: {
             query?: never;
             header?: never;
@@ -358,7 +358,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    task: number;
                 };
                 cookie?: never;
             };
@@ -381,7 +381,7 @@ export interface paths {
         };
         trace?: never;
     };
-    "/tasks/{id}/comments": {
+    "/tasks/{task}/comments": {
         parameters: {
             query?: never;
             header?: never;
@@ -394,7 +394,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    task: number;
                 };
                 cookie?: never;
             };
@@ -418,7 +418,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    task: number;
                 };
                 cookie?: never;
             };
