@@ -31,11 +31,10 @@
   },
   "routes": {
     "dashboard": "Dashboard",
-    "appointments": "Appointments",
-    "appointmentDetail": "Appointment Detail",
-    "appointmentCreate": "Create Appointment",
-    "appointmentEdit": "Edit Appointment",
+    "tasks": "Tasks",
     "taskDetail": "Task Detail",
+    "taskCreate": "Create Task",
+    "taskEdit": "Edit Task",
     "taskBoard": "Task Board",
     "manuals": "Manuals",
     "manualDetail": "Manual Detail",
@@ -52,12 +51,12 @@
     "profile": "Profile",
     "branding": "Branding",
     "footer": "Footer",
-    "types": "Appointment Types",
-    "typeCreate": "Create Type",
-    "typeEdit": "Edit Type",
-    "statuses": "Statuses",
-    "statusCreate": "Create Status",
-    "statusEdit": "Edit Status",
+    "taskTypes": "Task Types",
+    "taskTypeCreate": "Create Task Type",
+    "taskTypeEdit": "Edit Task Type",
+    "taskStatuses": "Task Statuses",
+    "taskStatusCreate": "Create Task Status",
+    "taskStatusEdit": "Edit Task Status",
     "roles": "Roles",
     "roleCreate": "Create Role",
     "roleEdit": "Edit Role",
@@ -65,34 +64,27 @@
     "tenantCreate": "Create Tenant",
     "tenantEdit": "Edit Tenant"
   },
-  "appointments": {
-    "new": "New Appointment",
-    "edit": "Edit Appointment",
+  "tasks": {
+    "new": "New Task",
+    "edit": "Edit Task",
     "form": {
       "title": "Title",
       "date": "Scheduled At",
       "status": "Status"
     },
     "filters": {
-      "global": "Search appointments",
+      "global": "Search tasks",
       "statusPlaceholder": "Select statuses"
     },
     "messages": {
-      "created": "Appointment created",
-      "updated": "Appointment updated",
-      "deleted": "Appointment deleted",
-      "deleteConfirm": "Delete appointment?",
+      "created": "Task created",
+      "updated": "Task updated",
+      "deleted": "Task deleted",
+      "deleteConfirm": "Delete task?",
       "error": "Operation failed",
-      "empty": "No appointments",
+      "empty": "No tasks",
       "titleRequired": "Title is required"
     },
-    "status": {
-      "draft": "Draft",
-      "scheduled": "Scheduled",
-      "completed": "Completed"
-    }
-  },
-  "tasks": {
     "status": {
       "update": "Update",
       "updated": "Status updated",

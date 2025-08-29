@@ -51,11 +51,11 @@ const name = ref('');
 const serverError = ref('');
 const tenantId = ref<string | number | ''>('');
 
-const isEdit = computed(() => route.name === 'statuses.edit');
+const isEdit = computed(() => route.name === 'taskStatuses.edit');
 const canAccess = computed(() =>
   isEdit.value
-    ? can('statuses.update') || can('statuses.manage')
-    : can('statuses.create') || can('statuses.manage'),
+    ? can('task_statuses.update') || can('task_statuses.manage')
+    : can('task_statuses.create') || can('task_statuses.manage'),
 );
 
 onMounted(async () => {
@@ -63,7 +63,7 @@ onMounted(async () => {
     await tenantStore.loadTenants();
   }
   if (isEdit.value) {
-    const { data } = await api.get(`/statuses/${route.params.id}`);
+    const { data } = await api.get(`/task-statuses/${route.params.id}`);
     name.value = data.name;
     tenantId.value = data.tenant_id || '';
   }
@@ -82,11 +82,11 @@ const onSubmit = handleSubmit(async () => {
   }
   try {
     if (isEdit.value) {
-      await api.patch(`/statuses/${route.params.id}`, payload);
+      await api.patch(`/task-statuses/${route.params.id}`, payload);
     } else {
-      await api.post('/statuses', payload);
+      await api.post('/task-statuses', payload);
     }
-    router.push({ name: 'statuses.list' });
+    router.push({ name: 'taskStatuses.list' });
   } catch (e: any) {
     const errs = extractFormErrors(e);
     if (Object.keys(errs).length) {

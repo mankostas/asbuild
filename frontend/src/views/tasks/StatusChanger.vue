@@ -1,15 +1,15 @@
 <template>
   <div class="flex items-center gap-2">
     <Select
-      id="task-status-changer-select"
+      id="status-changer-select"
       v-model="selected"
       :options="options"
-      :placeholder="t('tasks.status.update')"
+      placeholder="Change status"
       classInput="min-w-[160px]"
       aria-label="Status"
     />
     <Button
-      :text="t('tasks.status.update')"
+      text="Update"
       btnClass="btn-dark btn-sm"
       :isDisabled="!selected"
       @click="apply"
@@ -22,22 +22,21 @@
 import { ref, onMounted, computed } from 'vue';
 import Select from '@/components/ui/Select/index.vue';
 import Button from '@/components/ui/Button/index.vue';
+import { useTaskStatusesStore } from '@/stores/taskStatuses';
 import api from '@/services/api';
 import { useNotify } from '@/plugins/notify';
-import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{ taskId: number; statusId: number }>();
 const emit = defineEmits<{ (e: 'updated', statusId: number): void }>();
 
-const { t } = useI18n();
+const store = useTaskStatusesStore();
 const notify = useNotify();
 
 const transitions = ref<any[]>([]);
 const selected = ref<number | null>(null);
 
 onMounted(async () => {
-  const { data } = await api.get(`/task-statuses/${props.statusId}/transitions`);
-  transitions.value = data.data ?? data;
+  transitions.value = await store.fetchTransitions(props.statusId);
 });
 
 const options = computed(() =>
@@ -50,11 +49,10 @@ async function apply() {
   try {
     await api.post(`/tasks/${props.taskId}/status`, { status: target.name });
     emit('updated', target.id);
-    notify.success(t('tasks.status.updated'));
+    notify.success('Status updated');
   } catch (e: any) {
     if (e.status === 422) {
-      const reason = e.data?.reason || 'invalid_transition';
-      notify.error(t(`tasks.status.errors.${reason}`));
+      notify.error('Invalid status transition');
     }
   }
 }

@@ -7,16 +7,16 @@ export const menuItems = [
     link: "dashboard",
   },
   {
-    title: "Appointments",
+    title: "Tasks",
     icon: "heroicons-outline:calendar",
-    link: "appointments.list",
-    requiredAbilities: ["appointments.view", "appointments.manage"],
+    link: "tasks.list",
+    requiredAbilities: ["tasks.view", "tasks.manage"],
   },
   {
-    title: "Types",
+    title: "Task Types",
     icon: "heroicons-outline:tag",
-    link: "types.list",
-    requiredAbilities: ["types.view", "types.manage"],
+    link: "taskTypes.list",
+    requiredAbilities: ["task_types.view", "task_types.manage"],
   },
   {
     title: "Teams",
@@ -25,10 +25,10 @@ export const menuItems = [
     requiredAbilities: ["teams.view", "teams.manage"],
   },
   {
-    title: "Statuses",
+    title: "Task Statuses",
     icon: "heroicons-outline:check-circle",
-    link: "statuses.list",
-    requiredAbilities: ["statuses.view", "statuses.manage"],
+    link: "taskStatuses.list",
+    requiredAbilities: ["task_statuses.view", "task_statuses.manage"],
   },
   {
     title: "Roles",
@@ -98,16 +98,16 @@ export const menuItems = [
 export const topMenu = [
   { title: "Dashboard", icon: "heroicons-outline:home", link: "dashboard" },
   {
-    title: "Appointments",
+    title: "Tasks",
     icon: "heroicons-outline:calendar",
-    link: "appointments.list",
-    requiredAbilities: ["appointments.view", "appointments.manage"],
+    link: "tasks.list",
+    requiredAbilities: ["tasks.view", "tasks.manage"],
   },
   {
-    title: "Types",
+    title: "Task Types",
     icon: "heroicons-outline:tag",
-    link: "types.list",
-    requiredAbilities: ["types.view", "types.manage"],
+    link: "taskTypes.list",
+    requiredAbilities: ["task_types.view", "task_types.manage"],
   },
   {
     title: "Teams",
@@ -116,10 +116,10 @@ export const topMenu = [
     requiredAbilities: ["teams.view", "teams.manage"],
   },
   {
-    title: "Statuses",
+    title: "Task Statuses",
     icon: "heroicons-outline:check-circle",
-    link: "statuses.list",
-    requiredAbilities: ["statuses.view", "statuses.manage"],
+    link: "taskStatuses.list",
+    requiredAbilities: ["task_statuses.view", "task_statuses.manage"],
   },
   {
     title: "Roles",
@@ -189,16 +189,16 @@ export const topMenu = [
 // Quick access options for creating new resources
 export const addNewOptions = [
   {
-    label: 'Appointment',
+    label: 'Task',
     icon: 'heroicons-outline:calendar',
-    link: 'appointments.create',
-    requiredAbilities: ['appointments.manage'],
+    link: 'tasks.create',
+    requiredAbilities: ['tasks.manage'],
   },
   {
-    label: 'Type',
+    label: 'Task Type',
     icon: 'heroicons-outline:tag',
-    link: 'types.create',
-    requiredAbilities: ['types.manage'],
+    link: 'taskTypes.create',
+    requiredAbilities: ['task_types.manage'],
     admin: true,
   },
   {
@@ -215,10 +215,10 @@ export const addNewOptions = [
     requiredAbilities: ['employees.manage'],
   },
   {
-    label: 'Status',
+    label: 'Task Status',
     icon: 'heroicons-outline:check-circle',
-    link: 'statuses.create',
-    requiredAbilities: ['statuses.manage'],
+    link: 'taskStatuses.create',
+    requiredAbilities: ['task_statuses.manage'],
     admin: true,
   },
   {

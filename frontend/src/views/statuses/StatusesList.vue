@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between mb-4">
       <div>
         <select
-          id="statuses-scope"
+          id="task-statuses-scope"
           v-model="scope"
           class="border rounded px-2 py-1"
           aria-label="Scope"
@@ -15,9 +15,9 @@
         </select>
       </div>
       <RouterLink
-        v-if="can('statuses.create') || can('statuses.manage')"
+        v-if="can('task_statuses.create') || can('task_statuses.manage')"
         class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-        :to="{ name: 'statuses.create' }"
+        :to="{ name: 'taskStatuses.create' }"
       >
         <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
         Add Status
@@ -30,16 +30,16 @@
     >
       <template
         v-if="
-          can('statuses.update') ||
-          can('statuses.delete') ||
-          can('statuses.create') ||
-          can('statuses.manage')
+          can('task_statuses.update') ||
+          can('task_statuses.delete') ||
+          can('task_statuses.create') ||
+          can('task_statuses.manage')
         "
         #actions="{ row }"
       >
         <div class="flex gap-2">
           <button
-            v-if="can('statuses.update') || can('statuses.manage')"
+            v-if="can('task_statuses.update') || can('task_statuses.manage')"
             class="text-blue-600"
             title="Edit"
             @click="edit(row.id)"
@@ -47,7 +47,7 @@
             <Icon icon="heroicons-outline:pencil-square" class="w-5 h-5" />
           </button>
           <button
-            v-if="can('statuses.delete') || can('statuses.manage')"
+            v-if="can('task_statuses.delete') || can('task_statuses.manage')"
             class="text-red-600"
             title="Delete"
             @click="remove(row.id)"
@@ -56,7 +56,7 @@
           </button>
           <button
             v-if="
-              (can('statuses.create') || can('statuses.manage')) &&
+              (can('task_statuses.create') || can('task_statuses.manage')) &&
               (auth.isSuperAdmin || !row.tenant_id)
             "
             class="text-green-600"
@@ -80,7 +80,7 @@ import Icon from '@/components/ui/Icon';
 import api from '@/services/api';
 import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
-import { useStatusesStore } from '@/stores/statuses';
+import { useTaskStatusesStore } from '@/stores/taskStatuses';
 
 const router = useRouter();
 const tableKey = ref(0);
@@ -88,7 +88,7 @@ const all = ref<any[]>([]);
 const scope = ref<'tenant' | 'global' | 'all'>('tenant');
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
-const statusesStore = useStatusesStore();
+const statusesStore = useTaskStatusesStore();
 
 if (auth.isSuperAdmin) {
   scope.value = 'all';
@@ -145,7 +145,7 @@ function changeScope() {
 }
 
 function edit(id: number) {
-  router.push({ name: 'statuses.edit', params: { id } });
+  router.push({ name: 'taskStatuses.edit', params: { id } });
 }
 
 async function remove(id: number) {
@@ -155,7 +155,7 @@ async function remove(id: number) {
     showCancelButton: true,
   });
   if (res.isConfirmed) {
-    await api.delete(`/statuses/${id}`);
+    await api.delete(`/task-statuses/${id}`);
     all.value = [];
     reload();
   }

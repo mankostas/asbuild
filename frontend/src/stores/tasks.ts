@@ -2,9 +2,9 @@ import { defineStore } from 'pinia';
 import api from '@/services/api';
 import { withListParams, type ListParams } from './list';
 
-export const useAppointmentsStore = defineStore('appointments', {
+export const useTasksStore = defineStore('tasks', {
   state: () => ({
-    appointments: [] as any[],
+    tasks: [] as any[],
   }),
   actions: {
     normalize(payload: any) {
@@ -29,30 +29,30 @@ export const useAppointmentsStore = defineStore('appointments', {
     },
     async fetch(params: ListParams = {}) {
       try {
-        const { data } = await api.get('/appointments', {
+        const { data } = await api.get('/tasks', {
           params: withListParams(params),
         });
-        this.appointments = data.data.map((a: any) => this.normalize(a));
+        this.tasks = data.data.map((a: any) => this.normalize(a));
         return data.meta;
       } catch (e) {
-        this.appointments = [];
+        this.tasks = [];
       }
     },
     async get(id: string) {
-      if (!this.appointments.length) await this.fetch();
-      return this.appointments.find((a: any) => a.id == id);
+      if (!this.tasks.length) await this.fetch();
+      return this.tasks.find((a: any) => a.id == id);
     },
     async create(payload: any) {
-      const res = await api.post('/appointments', this.toPayload(payload));
-      const appt = this.normalize(res.data);
-      this.appointments.push(appt);
-      return appt;
+      const res = await api.post('/tasks', this.toPayload(payload));
+      const task = this.normalize(res.data);
+      this.tasks.push(task);
+      return task;
     },
     async update(id: string, payload: any) {
-      const { data: updated } = await api.patch(`/appointments/${id}`, this.toPayload(payload));
-      const appt = this.normalize(updated);
-      this.appointments = this.appointments.map((a: any) => (a.id === id ? appt : a));
-      return appt;
+      const { data: updated } = await api.patch(`/tasks/${id}`, this.toPayload(payload));
+      const task = this.normalize(updated);
+      this.tasks = this.tasks.map((a: any) => (a.id === id ? task : a));
+      return task;
     },
   },
 });

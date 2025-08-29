@@ -2,9 +2,9 @@
     <div>
       <div class="flex items-center justify-end mb-4">
         <RouterLink
-          v-if="can('appointments.create') || can('appointments.manage')"
+          v-if="can('tasks.create') || can('tasks.manage')"
           class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-          :to="{ name: 'appointments.create' }"
+          :to="{ name: 'tasks.create' }"
         >
           <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
           New
@@ -12,68 +12,80 @@
       </div>
     <div class="flex gap-4 mb-4">
       <div class="flex flex-col">
-        <span id="appointments-status-label" class="mb-1 text-sm">Status</span>
+        <span id="tasks-status-label" class="mb-1 text-sm">Status</span>
         <select
           v-model="statusFilter"
           class="border rounded p-2"
-          aria-labelledby="appointments-status-label"
+          aria-labelledby="tasks-status-label"
         >
           <option value="">All Statuses</option>
           <option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
         </select>
       </div>
       <div class="flex flex-col">
-        <span id="appointments-start-label" class="mb-1 text-sm">Start Date</span>
+        <span id="tasks-start-label" class="mb-1 text-sm">Start Date</span>
         <input
           v-model="startDate"
           type="date"
           class="border rounded p-2"
-          aria-labelledby="appointments-start-label"
+          aria-labelledby="tasks-start-label"
         />
       </div>
       <div class="flex flex-col">
-        <span id="appointments-end-label" class="mb-1 text-sm">End Date</span>
+        <span id="tasks-end-label" class="mb-1 text-sm">End Date</span>
         <input
           v-model="endDate"
           type="date"
           class="border rounded p-2"
-          aria-labelledby="appointments-end-label"
+          aria-labelledby="tasks-end-label"
         />
       </div>
     </div>
     <DashcodeServerTable
       :key="tableKey"
       :columns="columns"
-      :fetcher="fetchAppointments"
+      :fetcher="fetchTasks"
     >
       <template #actions="{ row }">
         <div class="flex gap-2">
-          <button class="text-blue-600" title="View" @click="view(row.id)">
+          <button
+            class="text-blue-600"
+            title="View"
+            aria-label="View"
+            @click="view(row.id)"
+            @keyup.enter="view(row.id)"
+          >
             <Icon icon="heroicons-outline:eye" class="w-5 h-5" />
           </button>
           <button
-            v-if="can('appointments.update') || can('appointments.manage')"
+            v-if="can('tasks.update') || can('tasks.manage')"
             class="text-blue-600"
             title="Edit"
+            aria-label="Edit"
             @click="edit(row.id)"
+            @keyup.enter="edit(row.id)"
           >
             <Icon icon="heroicons-outline:pencil-square" class="w-5 h-5" />
           </button>
           <button
-            v-if="can('appointments.delete') || can('appointments.manage')"
+            v-if="can('tasks.delete') || can('tasks.manage')"
             class="text-red-600"
             title="Delete"
+            aria-label="Delete"
             @click="remove(row.id)"
+            @keyup.enter="remove(row.id)"
           >
             <Icon icon="heroicons-outline:trash" class="w-5 h-5" />
           </button>
-          <template v-if="can('appointments.update') || can('appointments.manage')">
+          <template v-if="can('tasks.update') || can('tasks.manage')">
             <button
               v-for="s in getChangeActions(row)"
               :key="s"
               class="text-blue-600"
               :title="`Mark ${s.replace(/_/g, ' ')}`"
+              :aria-label="`Mark ${s.replace(/_/g, ' ')}`"
               @click="updateStatus(row, s)"
+              @keyup.enter="updateStatus(row, s)"
             >
               <Icon :icon="statusIcons[s] || 'heroicons-outline:arrow-right'" class="w-5 h-5" />
             </button>
@@ -134,13 +146,13 @@ const statusIcons: Record<string, string> = {
 const all = ref<any[]>([]);
 
 onMounted(async () => {
-  const { data } = await api.get('/statuses');
+  const { data } = await api.get('/task-statuses');
   statusOptions.value = data.map((s: any) => s.name);
 });
 
-async function fetchAppointments({ page, perPage, sort, search }: any) {
+async function fetchTasks({ page, perPage, sort, search }: any) {
   if (!all.value.length) {
-    const { data } = await api.get('/appointments');
+    const { data } = await api.get('/tasks');
     all.value = data;
   }
   let rows = all.value.slice();
@@ -196,21 +208,21 @@ function reload() {
 watch([statusFilter, startDate, endDate], reload);
 
 function view(id: number) {
-  router.push({ name: 'appointments.details', params: { id } });
+  router.push({ name: 'tasks.details', params: { id } });
 }
 
 function edit(id: number) {
-  router.push({ name: 'appointments.edit', params: { id } });
+  router.push({ name: 'tasks.edit', params: { id } });
 }
 
 async function remove(id: number) {
   const res = await Swal.fire({
-    title: 'Delete appointment?',
+    title: 'Delete task?',
     icon: 'warning',
     showCancelButton: true,
   });
   if (res.isConfirmed) {
-    await api.delete(`/appointments/${id}`);
+    await api.delete(`/tasks/${id}`);
     all.value = all.value.filter((r) => r.id !== id);
     reload();
   }
@@ -218,7 +230,7 @@ async function remove(id: number) {
 
 async function updateStatus(row: any, status: string) {
   try {
-    await api.patch(`/appointments/${row.id}`, { status });
+    await api.post(`/tasks/${row.id}/status`, { status });
     const target = all.value.find((r) => r.id === row.id);
     if (target) target.status = status;
     reload();
