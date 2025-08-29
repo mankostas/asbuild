@@ -4,12 +4,12 @@
       <div>
         <label class="block font-medium mb-1" for="name">Name<span class="text-red-600">*</span></label>
         <input id="name" v-model="name" class="border rounded p-2 w-full" />
-        <div v-if="errors.name" class="text-red-600 text-sm">{{ errors.name }}</div>
+        <div v-if="errors.name" class="text-red-600 text-sm">{{ $msg(errors.name) }}</div>
       </div>
       <div>
         <label class="block font-medium mb-1" for="slug">Slug<span class="text-red-600">*</span></label>
         <input id="slug" v-model="slug" class="border rounded p-2 w-full" />
-        <div v-if="errors.slug" class="text-red-600 text-sm">{{ errors.slug }}</div>
+        <div v-if="errors.slug" class="text-red-600 text-sm">{{ $msg(errors.slug) }}</div>
       </div>
       <div>
         <label class="block font-medium mb-1" for="level">Level<span class="text-red-600">*</span></label>
@@ -20,7 +20,7 @@
           min="0"
           class="border rounded p-2 w-full"
         />
-        <div v-if="errors.level" class="text-red-600 text-sm">{{ errors.level }}</div>
+        <div v-if="errors.level" class="text-red-600 text-sm">{{ $msg(errors.level) }}</div>
       </div>
       <div v-if="auth.isSuperAdmin">
         <VueSelect label="Tenant" :error="errors.tenant_id">
@@ -51,7 +51,7 @@
           />
         </template>
       </VueSelect>
-      <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
+      <div v-if="serverError" class="text-red-600 text-sm">{{ $msg(serverError) }}</div>
       <button
         type="submit"
         class="px-4 py-2 bg-blue-600 text-white rounded"

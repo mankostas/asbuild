@@ -8,12 +8,12 @@
             <option value="">Global</option>
             <option v-for="t in tenantStore.tenants" :key="t.id" :value="t.id">{{ t.name }}</option>
           </select>
-          <div v-if="errors.tenant_id" class="text-red-600 text-sm">{{ errors.tenant_id }}</div>
+          <div v-if="errors.tenant_id" class="text-red-600 text-sm">{{ $msg(errors.tenant_id) }}</div>
         </div>
         <div class="mb-4">
           <label class="block font-medium mb-1" for="name">Name<span class="text-red-600">*</span></label>
           <input id="name" v-model="name" class="border rounded p-2 w-full" />
-          <div v-if="errors.name" class="text-red-600 text-sm">{{ errors.name }}</div>
+          <div v-if="errors.name" class="text-red-600 text-sm">{{ $msg(errors.name) }}</div>
         </div>
 
         <div class="mb-4">
@@ -116,7 +116,7 @@
           </div>
         </div>
 
-        <div v-if="serverError" class="text-red-600 text-sm mb-2">{{ serverError }}</div>
+        <div v-if="serverError" class="text-red-600 text-sm mb-2">{{ $msg(serverError) }}</div>
         <button
           type="submit"
           class="px-4 py-2 bg-blue-600 text-white rounded"

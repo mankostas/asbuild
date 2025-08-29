@@ -19,7 +19,7 @@
       class="flex flex-col items-center justify-center gap-4 py-10"
     >
       <p class="text-center text-sm text-foreground/70">
-        {{ t('dashboard.messages.loadFailed') }}
+        {{ $msg(t('dashboard.messages.loadFailed')) }}
       </p>
       <Button @click="fetchData">{{ t('actions.retry') }}</Button>
     </div>
@@ -33,13 +33,13 @@
         </div>
         <Card v-else class="mt-6 flex h-64 items-center justify-center">
           <p class="text-sm text-foreground/70">
-            {{ t('dashboard.messages.noChartData') }}
+            {{ $msg(t('dashboard.messages.noChartData')) }}
           </p>
         </Card>
       </div>
       <div v-else class="flex h-64 items-center justify-center">
         <p class="text-sm text-foreground/70">
-          {{ t('dashboard.messages.noData') }}
+          {{ $msg(t('dashboard.messages.noData')) }}
         </p>
       </div>
     </template>
