@@ -49,9 +49,9 @@
       {{ successText }}
     </p>
     <span
-      v-if="description"
+      v-if="descriptionText"
       class="block text-secondary-500 font-light leading-4 text-xs mt-2"
-      >{{ description }}</span
+      >{{ descriptionText }}</span
     >
   </div>
 </template>
@@ -133,7 +133,7 @@ export default defineComponent({
       errorText,
       successText,
       showSuccessIcon,
-      description: props.description,
+      descriptionText: props.description,
     };
   },
 });
