@@ -182,7 +182,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>[];
+                        "application/json": components["schemas"]["TaskComment"][];
                     };
                 };
             };
@@ -202,6 +202,8 @@ export interface paths {
                 content: {
                     "application/json": {
                         body?: string;
+                        mentions?: number[];
+                        files?: number[];
                     };
                 };
             };
@@ -212,7 +214,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["TaskComment"];
                     };
                 };
             };
@@ -805,6 +807,14 @@ export interface components {
             /** Format: date-time */
             scheduled_at?: string;
             assignee?: components["schemas"]["Employee"];
+        };
+        TaskComment: {
+            id?: number;
+            body?: string;
+            user?: components["schemas"]["Employee"];
+            mentions?: components["schemas"]["Employee"][];
+            /** Format: date-time */
+            created_at?: string;
         };
         Role: {
             id?: number;

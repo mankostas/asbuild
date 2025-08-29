@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Services\Notifier;
 use App\Support\ListQuery;
+use App\Http\Resources\TaskCommentResource;
 
 class TaskCommentController extends Controller
 {
@@ -20,7 +21,9 @@ class TaskCommentController extends Controller
         $this->authorize('view', $task);
         $base = $task->comments()->with(['user', 'files', 'mentions']);
         $result = $this->listQuery($base, $request, ['body'], ['created_at']);
-        return response()->json($result);
+        return TaskCommentResource::collection($result['data'])->additional([
+            'meta' => $result['meta'],
+        ]);
     }
 
     public function store(Request $request, Task $task)
@@ -31,7 +34,16 @@ class TaskCommentController extends Controller
             'body' => 'required|string',
             'files' => 'array',
             'files.*' => 'integer|exists:files,id',
+            'mentions' => 'array',
+            'mentions.*' => 'integer|exists:users,id',
         ]);
+
+        $mentions = User::whereIn('id', $data['mentions'] ?? [])->get();
+        foreach ($mentions as $user) {
+            if ($user->tenant_id !== $request->user()->tenant_id || Gate::forUser($user)->denies('tasks.view')) {
+                return response()->json(['message' => 'invalid mentions'], 422);
+            }
+        }
 
         $comment = $task->comments()->create([
             'user_id' => $request->user()->id,
@@ -42,31 +54,27 @@ class TaskCommentController extends Controller
             $comment->files()->attach($data['files']);
         }
 
-        preg_match_all('/@([\w]+)/', $data['body'], $matches);
-        $names = array_unique($matches[1] ?? []);
-        if ($names) {
-            $mentioned = User::whereIn('name', $names)->get();
-            $allowed = $mentioned->filter(fn ($user) => Gate::forUser($user)->allows('view', $task));
-            if ($allowed->isNotEmpty()) {
-                $comment->mentions()->attach($allowed->pluck('id'));
-                $allowed->each(function ($user) use ($task) {
-                    app(Notifier::class)->send(
-                        $user,
-                        'comment',
-                        'You were mentioned in a task comment.',
-                        '/tasks/' . $task->id
-                    );
-                });
-            }
+        if ($mentions->isNotEmpty()) {
+            $comment->mentions()->attach($mentions->pluck('id'));
+            $mentions->each(function ($user) use ($task) {
+                app(Notifier::class)->send(
+                    $user,
+                    'comment',
+                    'You were mentioned in a task comment.',
+                    '/tasks/' . $task->id
+                );
+            });
         }
 
-        return response()->json($comment->load(['user', 'files', 'mentions']), 201);
+        return (new TaskCommentResource($comment->load(['user', 'files', 'mentions'])))
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show(TaskComment $comment)
     {
         $this->authorize('view', $comment->task);
-        return response()->json($comment->load(['user', 'files', 'mentions']));
+        return new TaskCommentResource($comment->load(['user', 'files', 'mentions']));
     }
 
     public function update(Request $request, TaskComment $comment)
@@ -77,7 +85,16 @@ class TaskCommentController extends Controller
             'body' => 'required|string',
             'files' => 'array',
             'files.*' => 'integer|exists:files,id',
+            'mentions' => 'array',
+            'mentions.*' => 'integer|exists:users,id',
         ]);
+
+        $mentions = User::whereIn('id', $data['mentions'] ?? [])->get();
+        foreach ($mentions as $user) {
+            if ($user->tenant_id !== $request->user()->tenant_id || Gate::forUser($user)->denies('tasks.view')) {
+                return response()->json(['message' => 'invalid mentions'], 422);
+            }
+        }
 
         $comment->body = $data['body'];
         $comment->save();
@@ -86,26 +103,19 @@ class TaskCommentController extends Controller
             $comment->files()->sync($data['files']);
         }
 
-        preg_match_all('/@([\w]+)/', $data['body'], $matches);
-        $names = array_unique($matches[1] ?? []);
-        $comment->mentions()->sync([]);
-        if ($names) {
-            $mentioned = User::whereIn('name', $names)->get();
-            $allowed = $mentioned->filter(fn ($user) => Gate::forUser($user)->allows('view', $comment->task));
-            if ($allowed->isNotEmpty()) {
-                $comment->mentions()->sync($allowed->pluck('id'));
-                $allowed->each(function ($user) use ($comment) {
-                    app(Notifier::class)->send(
-                        $user,
-                        'comment',
-                        'You were mentioned in a task comment.',
-                        '/tasks/' . $comment->task_id
-                    );
-                });
-            }
+        $comment->mentions()->sync($mentions->pluck('id'));
+        if ($mentions->isNotEmpty()) {
+            $mentions->each(function ($user) use ($comment) {
+                app(Notifier::class)->send(
+                    $user,
+                    'comment',
+                    'You were mentioned in a task comment.',
+                    '/tasks/' . $comment->task_id
+                );
+            });
         }
 
-        return response()->json($comment->load(['user', 'files', 'mentions']));
+        return new TaskCommentResource($comment->load(['user', 'files', 'mentions']));
     }
 
     public function destroy(TaskComment $comment)
