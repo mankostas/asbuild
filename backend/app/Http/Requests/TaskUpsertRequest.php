@@ -2,12 +2,12 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Appointment;
-use App\Models\AppointmentType;
+use App\Models\Task;
+use App\Models\TaskType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class AppointmentUpsertRequest extends FormRequest
+class TaskUpsertRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -21,17 +21,18 @@ class AppointmentUpsertRequest extends FormRequest
             'sla_start_at' => ['nullable', 'date'],
             'sla_end_at' => ['nullable', 'date'],
             'kau_notes' => ['nullable', 'string'],
-            'appointment_type_id' => ['nullable', 'exists:appointment_types,id'],
+            'task_type_id' => ['nullable', 'exists:task_types,id'],
             'form_data' => ['nullable', 'array'],
             'assignee' => ['nullable', 'array'],
             'assignee.kind' => ['required_with:assignee', 'in:team,employee'],
             'assignee.id' => ['required_with:assignee', 'integer'],
         ];
 
-        if ($appointment = $this->route('appointment')) {
-            $typeId = $this->input('appointment_type_id', $appointment->appointment_type_id);
-            $type = $typeId ? AppointmentType::find($typeId) : null;
-            $allowed = collect($type->statuses ?? Appointment::$transitions)
+        if ($task = $this->route('task')) {
+            $typeId = $this->input('task_type_id', $task->task_type_id);
+            $type = $typeId ? TaskType::find($typeId) : null;
+            $transitions = property_exists(Task::class, 'transitions') ? Task::$transitions : [];
+            $allowed = collect($type->statuses ?? $transitions)
                 ->flatMap(fn ($next, $current) => array_merge([$current], $next))
                 ->unique()
                 ->all();
@@ -48,7 +49,7 @@ class AppointmentUpsertRequest extends FormRequest
             'sla_start_at' => 'SLA start',
             'sla_end_at' => 'SLA end',
             'kau_notes' => 'Kau notes',
-            'appointment_type_id' => 'appointment type',
+            'task_type_id' => 'task type',
             'form_data' => 'form data',
             'assignee.kind' => 'assignee type',
             'assignee.id' => 'assignee',

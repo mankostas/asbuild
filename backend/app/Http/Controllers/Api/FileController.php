@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\File;
-use App\Models\Appointment;
+use App\Models\Task;
 use App\Services\FileStorageService;
 use Illuminate\Http\Request;
 
@@ -19,13 +19,13 @@ class FileController extends Controller
         return $storage->stream($file, $variant ?? 'original');
     }
 
-    public function attachToAppointment(Request $request, Appointment $appointment)
+    public function attachToTask(Request $request, Task $task)
     {
         $data = $request->validate([
             'file_id' => 'required|exists:files,id',
         ]);
 
-        $attachment = $appointment->photos()->create([
+        $attachment = $task->photos()->create([
             'file_id' => $data['file_id'],
             'type' => 'attachment',
         ]);

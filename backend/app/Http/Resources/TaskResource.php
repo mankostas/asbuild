@@ -6,7 +6,7 @@ use App\Models\Team;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Concerns\FormatsDateTimes;
 
-class AppointmentResource extends JsonResource
+class TaskResource extends JsonResource
 {
     use FormatsDateTimes;
 

@@ -3,29 +3,29 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Appointment;
-use App\Models\AppointmentComment;
+use App\Models\Task;
+use App\Models\TaskComment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Services\Notifier;
 use App\Support\ListQuery;
 
-class AppointmentCommentController extends Controller
+class TaskCommentController extends Controller
 {
     use ListQuery;
 
-    public function index(Request $request, Appointment $appointment)
+    public function index(Request $request, Task $task)
     {
-        $this->authorize('view', $appointment);
-        $base = $appointment->comments()->with(['user', 'files', 'mentions']);
+        $this->authorize('view', $task);
+        $base = $task->comments()->with(['user', 'files', 'mentions']);
         $result = $this->listQuery($base, $request, ['body'], ['created_at']);
         return response()->json($result);
     }
 
-    public function store(Request $request, Appointment $appointment)
+    public function store(Request $request, Task $task)
     {
-        $this->authorize('update', $appointment);
+        $this->authorize('update', $task);
 
         $data = $request->validate([
             'body' => 'required|string',
@@ -33,7 +33,7 @@ class AppointmentCommentController extends Controller
             'files.*' => 'integer|exists:files,id',
         ]);
 
-        $comment = $appointment->comments()->create([
+        $comment = $task->comments()->create([
             'user_id' => $request->user()->id,
             'body' => $data['body'],
         ]);
@@ -46,15 +46,15 @@ class AppointmentCommentController extends Controller
         $names = array_unique($matches[1] ?? []);
         if ($names) {
             $mentioned = User::whereIn('name', $names)->get();
-            $allowed = $mentioned->filter(fn ($user) => Gate::forUser($user)->allows('view', $appointment));
+            $allowed = $mentioned->filter(fn ($user) => Gate::forUser($user)->allows('view', $task));
             if ($allowed->isNotEmpty()) {
                 $comment->mentions()->attach($allowed->pluck('id'));
-                $allowed->each(function ($user) use ($appointment) {
+                $allowed->each(function ($user) use ($task) {
                     app(Notifier::class)->send(
                         $user,
                         'comment',
-                        'You were mentioned in an appointment comment.',
-                        '/appointments/' . $appointment->id
+                        'You were mentioned in a task comment.',
+                        '/tasks/' . $task->id
                     );
                 });
             }
@@ -63,15 +63,15 @@ class AppointmentCommentController extends Controller
         return response()->json($comment->load(['user', 'files', 'mentions']), 201);
     }
 
-    public function show(AppointmentComment $comment)
+    public function show(TaskComment $comment)
     {
-        $this->authorize('view', $comment->appointment);
+        $this->authorize('view', $comment->task);
         return response()->json($comment->load(['user', 'files', 'mentions']));
     }
 
-    public function update(Request $request, AppointmentComment $comment)
+    public function update(Request $request, TaskComment $comment)
     {
-        $this->authorize('update', $comment->appointment);
+        $this->authorize('update', $comment->task);
 
         $data = $request->validate([
             'body' => 'required|string',
@@ -91,15 +91,15 @@ class AppointmentCommentController extends Controller
         $comment->mentions()->sync([]);
         if ($names) {
             $mentioned = User::whereIn('name', $names)->get();
-            $allowed = $mentioned->filter(fn ($user) => Gate::forUser($user)->allows('view', $comment->appointment));
+            $allowed = $mentioned->filter(fn ($user) => Gate::forUser($user)->allows('view', $comment->task));
             if ($allowed->isNotEmpty()) {
                 $comment->mentions()->sync($allowed->pluck('id'));
                 $allowed->each(function ($user) use ($comment) {
                     app(Notifier::class)->send(
                         $user,
                         'comment',
-                        'You were mentioned in an appointment comment.',
-                        '/appointments/' . $comment->appointment_id
+                        'You were mentioned in a task comment.',
+                        '/tasks/' . $comment->task_id
                     );
                 });
             }
@@ -108,9 +108,9 @@ class AppointmentCommentController extends Controller
         return response()->json($comment->load(['user', 'files', 'mentions']));
     }
 
-    public function destroy(AppointmentComment $comment)
+    public function destroy(TaskComment $comment)
     {
-        $this->authorize('delete', $comment->appointment);
+        $this->authorize('delete', $comment->task);
         $comment->delete();
         return response()->json(['message' => 'deleted']);
     }

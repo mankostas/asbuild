@@ -13,7 +13,7 @@ class TypeUpsertRequest extends FormRequest
 
     public function rules(): array
     {
-        $isUpdate = (bool) $this->route('appointmentType');
+        $isUpdate = (bool) $this->route('taskType');
         $required = $isUpdate ? 'sometimes' : 'required';
 
         return [

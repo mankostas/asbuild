@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\App;
+use App\Models\Task;
 
 class Tenant extends Model
 {
@@ -45,9 +46,9 @@ class Tenant extends Model
         return array_values(array_unique($abilities));
     }
 
-    public function appointments(): HasMany
+    public function tasks(): HasMany
     {
-        return $this->hasMany(Appointment::class);
+        return $this->hasMany(Task::class);
     }
 
     public function roles(): HasMany

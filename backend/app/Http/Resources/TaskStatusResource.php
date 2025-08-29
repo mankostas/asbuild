@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Concerns\FormatsDateTimes;
 
-class StatusResource extends JsonResource
+class TaskStatusResource extends JsonResource
 {
     use FormatsDateTimes;
 
