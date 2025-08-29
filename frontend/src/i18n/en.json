@@ -90,6 +90,18 @@
       "completed": "Completed"
     }
   },
+  "tasks": {
+    "status": {
+      "update": "Update",
+      "updated": "Status updated",
+      "errors": {
+        "invalid_transition": "Invalid status transition",
+        "missing_field": "Required field missing",
+        "missing_photo": "Required photo missing",
+        "subtasks_incomplete": "Required subtasks not completed"
+      }
+    }
+  },
   "dashboard": {
     "messages": {
       "loadFailed": "Failed to load dashboard data.",

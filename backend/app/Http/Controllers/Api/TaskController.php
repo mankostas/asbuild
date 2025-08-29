@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\TaskType;
 use App\Services\FormSchemaService;
+use App\Services\StatusFlowService;
 use App\Http\Resources\TaskResource;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -16,8 +17,10 @@ class TaskController extends Controller
 {
     use ListQuery;
 
-    public function __construct(private FormSchemaService $formSchemaService)
-    {
+    public function __construct(
+        private FormSchemaService $formSchemaService,
+        private StatusFlowService $statusFlow
+    ) {
     }
 
     public function index(Request $request)
@@ -67,26 +70,12 @@ class TaskController extends Controller
 
         $data = $request->validated();
 
-        if (isset($data['status']) && $data['status'] !== $task->status) {
-            $newStatus = $data['status'];
-            if (! $task->canTransitionTo($newStatus)) {
-                return response()->json(['message' => 'invalid_transition'], 422);
-            }
-            $task->status = $newStatus;
-            if ($newStatus === Task::STATUS_IN_PROGRESS && ! $task->started_at) {
-                $task->started_at = now();
-            }
-            if ($newStatus === Task::STATUS_COMPLETED && ! $task->completed_at) {
-                $task->completed_at = now();
-            }
-        }
+        unset($data['status']);
 
         $typeId = $data['task_type_id'] ?? $task->task_type_id;
         $type = $typeId ? TaskType::find($typeId) : $task->type;
         $this->validateAgainstSchema($type, $data['form_data'] ?? $task->form_data ?? []);
         $this->formSchemaService->mapAssignee($type->schema_json ?? [], $data);
-
-        unset($data['status']);
         $task->fill($data);
         $task->save();
 
@@ -98,6 +87,35 @@ class TaskController extends Controller
         $this->authorize('delete', $task);
         $task->delete();
         return response()->json(['message' => 'deleted']);
+    }
+
+    public function updateStatus(Request $request, Task $task)
+    {
+        $this->authorize('update', $task);
+
+        $data = $request->validate(['status' => 'required|string']);
+        $next = $data['status'];
+        $type = $task->type;
+
+        if (! $this->statusFlow->canTransition($task->status, $next, $type)) {
+            return response()->json(['message' => 'invalid_transition'], 422);
+        }
+
+        $reason = $this->statusFlow->checkConstraints($task, $next);
+        if ($reason) {
+            return response()->json(['message' => 'constraint_failed', 'reason' => $reason], 422);
+        }
+
+        $task->status = $next;
+        if ($next === Task::STATUS_IN_PROGRESS && ! $task->started_at) {
+            $task->started_at = now();
+        }
+        if ($next === Task::STATUS_COMPLETED && ! $task->completed_at) {
+            $task->completed_at = now();
+        }
+        $task->save();
+
+        return new TaskResource($task->load('type', 'assignee'));
     }
 
     protected function validateAgainstSchema(?TaskType $type, array $data): void

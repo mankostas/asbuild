@@ -90,6 +90,18 @@
       "completed": "Ολοκληρωμένο"
     }
   },
+  "tasks": {
+    "status": {
+      "update": "Ενημέρωση",
+      "updated": "Η κατάσταση ενημερώθηκε",
+      "errors": {
+        "invalid_transition": "Μη έγκυρη αλλαγή κατάστασης",
+        "missing_field": "Απαιτείται πεδίο",
+        "missing_photo": "Απαιτείται φωτογραφία",
+        "subtasks_incomplete": "Δεν ολοκληρώθηκαν οι απαιτούμενες υποεργασίες"
+      }
+    }
+  },
   "dashboard": {
     "messages": {
       "loadFailed": "Αποτυχία φόρτωσης δεδομένων πίνακα.",

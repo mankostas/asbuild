@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('tasks placeholder e2e', async () => {
+test('tasks status flow e2e placeholder', async () => {
+  // Backend not available in test environment; placeholder asserts always true.
   expect(true).toBe(true);
 });
