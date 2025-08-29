@@ -41,7 +41,7 @@ export default defineConfig(({ command }) => ({
     }
   },
   build: {
-    outDir: '../public',
+    outDir: '../public/build',
     emptyOutDir: true,
     rollupOptions: {
       output: {

@@ -24,7 +24,7 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::fallback(function () {
             $candidates = [
-                public_path('index.html'),
+                public_path('build/index.html'),
                 base_path('frontend/index.html'),
             ];
 
