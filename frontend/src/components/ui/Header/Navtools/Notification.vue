@@ -1,5 +1,9 @@
 <template>
-  <Dropdown classMenuItems="md:w-[300px] top-[58px]" classItem="px-4 py-2">
+  <Dropdown
+    v-if="canShow"
+    classMenuItems="md:w-[300px] top-[58px]"
+    classItem="px-4 py-2"
+  >
     <span
       class="relative lg:h-[32px] lg:w-[32px] lg:bg-slate-100 lg:dark:bg-slate-900 dark:text-white cursor-pointer rounded-full text-[20px] flex flex-col items-center justify-center"
       ><Icon icon="heroicons-outline:bell" class="animate-tada" />
@@ -18,7 +22,7 @@
           Notifications
         </div>
         <div class="text-slate-800 dark:text-slate-200 text-xs md:text-right">
-          <router-link :to="{ name: 'notifications' }" class="underline"
+          <router-link :to="{ name: 'notifications.inbox' }" class="underline"
             >View all</router-link
           >
         </div>
@@ -89,6 +93,7 @@ import Dropdown from "@/components/Dropdown";
 import Icon from "@/components/Icon";
 import { MenuItem } from "@headlessui/vue";
 import { notifications } from "@/constant/data";
+import { useAuthStore } from "@/stores/auth";
 export default {
   components: {
     Icon,
@@ -99,6 +104,13 @@ export default {
     return {
       notifications,
     };
+  },
+  computed: {
+    canShow() {
+      const auth = useAuthStore();
+      const req = ["notifications.view", "notifications.manage"];
+      return auth.hasAny(req) && auth.features.includes("notifications");
+    },
   },
 };
 </script>

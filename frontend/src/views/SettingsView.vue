@@ -64,8 +64,13 @@ const tabs = computed(() => {
     { id: 'profile', label: 'Profile' },
     { id: 'branding', label: 'Branding' },
     { id: 'footer', label: 'Footer' },
-    { id: 'notifications', label: 'Notifications' },
   ];
+  if (
+    auth.hasAny(['notifications.view', 'notifications.manage']) &&
+    auth.features.includes('notifications')
+  ) {
+    t.push({ id: 'notifications', label: 'Notifications' });
+  }
   if (auth.hasAny(['gdpr.view', 'gdpr.manage'])) {
     t.push({ id: 'gdpr', label: 'GDPR' });
   }
@@ -94,5 +99,12 @@ async function savePrefs() {
   notify.success('Preferences saved');
 }
 
-onMounted(load);
+onMounted(() => {
+  if (
+    auth.hasAny(['notifications.view', 'notifications.manage']) &&
+    auth.features.includes('notifications')
+  ) {
+    load();
+  }
+});
 </script>

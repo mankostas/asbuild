@@ -2,6 +2,7 @@
 
 return [
     'appointments',
+    'notifications',
     'reports',
     'billing',
     'roles',

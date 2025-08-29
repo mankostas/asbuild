@@ -16,6 +16,10 @@ return [
     'appointments.assign',
     'appointments.manage',
 
+    // Notifications
+    'notifications.view',
+    'notifications.manage',
+
     // Roles & Permissions
     'roles.view',
     'roles.create',

@@ -42,7 +42,11 @@
         />
       </div>
     </router-link>
-    <router-link :to="{ name: 'notifications' }" v-slot="{ isActive }">
+    <router-link
+      v-if="canShow"
+      :to="{ name: 'notifications.inbox' }"
+      v-slot="{ isActive }"
+    >
       <span
         class="relative cursor-pointer rounded-full text-[20px] flex flex-col items-center justify-center"
         :class="[
@@ -66,9 +70,17 @@
 </template>
 <script>
 import Icon from "@/components/ui/Icon";
+import { useAuthStore } from "@/stores/auth";
 export default {
   components: {
     Icon,
+  },
+  computed: {
+    canShow() {
+      const auth = useAuthStore();
+      const req = ["notifications.view", "notifications.manage"];
+      return auth.hasAny(req) && auth.features.includes("notifications");
+    },
   },
 };
 </script>
