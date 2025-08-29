@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\AppointmentType;
+use App\Models\TaskType;
 use App\Services\FormSchemaService;
 use Illuminate\Http\Request;
-use App\Http\Resources\AppointmentTypeResource;
+use App\Http\Resources\TaskTypeResource;
 use App\Support\ListQuery;
 use App\Http\Requests\TypeUpsertRequest;
 
-class AppointmentTypeController extends Controller
+class TaskTypeController extends Controller
 {
     use ListQuery;
 
@@ -28,7 +28,7 @@ class AppointmentTypeController extends Controller
     public function index(Request $request)
     {
         $scope = $request->query('scope', $request->user()->hasRole('SuperAdmin') ? 'all' : 'tenant');
-        $query = AppointmentType::query();
+        $query = TaskType::query();
 
         if ($scope === 'tenant') {
             $tenantId = $request->query('tenant_id', $request->user()->tenant_id);
@@ -43,7 +43,7 @@ class AppointmentTypeController extends Controller
 
         $result = $this->listQuery($query, $request, ['name'], ['name']);
 
-        return AppointmentTypeResource::collection($result['data'])->additional([
+        return TaskTypeResource::collection($result['data'])->additional([
             'meta' => $result['meta'],
         ]);
     }
@@ -62,19 +62,19 @@ class AppointmentTypeController extends Controller
             $data['tenant_id'] = $request->user()->tenant_id;
         }
 
-        $type = AppointmentType::create($data);
-        return (new AppointmentTypeResource($type))->response()->setStatusCode(201);
+        $type = TaskType::create($data);
+        return (new TaskTypeResource($type))->response()->setStatusCode(201);
     }
 
-    public function show(AppointmentType $appointmentType)
+    public function show(TaskType $taskType)
     {
-        return new AppointmentTypeResource($appointmentType);
+        return new TaskTypeResource($taskType);
     }
 
-    public function update(TypeUpsertRequest $request, AppointmentType $appointmentType)
+    public function update(TypeUpsertRequest $request, TaskType $taskType)
     {
         $this->ensureAdmin($request);
-        if (! $request->user()->hasRole('SuperAdmin') && $appointmentType->tenant_id !== $request->user()->tenant_id) {
+        if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
             abort(403);
         }
         $data = $request->validated();
@@ -90,21 +90,21 @@ class AppointmentTypeController extends Controller
             $data['tenant_id'] = $request->user()->tenant_id;
         }
 
-        $appointmentType->update($data);
-        return new AppointmentTypeResource($appointmentType);
+        $taskType->update($data);
+        return new TaskTypeResource($taskType);
     }
 
-    public function destroy(Request $request, AppointmentType $appointmentType)
+    public function destroy(Request $request, TaskType $taskType)
     {
         $this->ensureAdmin($request);
-        if (! $request->user()->hasRole('SuperAdmin') && $appointmentType->tenant_id !== $request->user()->tenant_id) {
+        if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
             abort(403);
         }
-        $appointmentType->delete();
+        $taskType->delete();
         return response()->json(['message' => 'deleted']);
     }
 
-    public function copyToTenant(Request $request, AppointmentType $appointmentType)
+    public function copyToTenant(Request $request, TaskType $taskType)
     {
         $this->ensureAdmin($request);
 
@@ -116,11 +116,11 @@ class AppointmentTypeController extends Controller
             abort(400, 'tenant_id required');
         }
 
-        $copy = $appointmentType->replicate();
+        $copy = $taskType->replicate();
         $copy->tenant_id = $tenantId;
         $copy->save();
 
-        return (new AppointmentTypeResource($copy))
+        return (new TaskTypeResource($copy))
             ->response()
             ->setStatusCode(201);
     }

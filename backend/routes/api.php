@@ -4,9 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\UploadController;
-use App\Http\Controllers\Api\AppointmentController;
-use App\Http\Controllers\Api\AppointmentCommentController;
-use App\Http\Controllers\Api\AppointmentTypeController;
+use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\Api\TaskCommentController;
+use App\Http\Controllers\Api\TaskTypeController;
 use App\Http\Controllers\Api\ManualController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReportController;
@@ -15,7 +15,7 @@ use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Api\GdprController;
 use App\Http\Controllers\Api\RoleController;
-use App\Http\Controllers\Api\StatusController;
+use App\Http\Controllers\Api\TaskStatusController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\LookupController;
 use App\Http\Controllers\Api\CalendarController;
@@ -74,43 +74,43 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function () {
-    Route::apiResource('appointments', AppointmentController::class)->middleware([
-        'index' => Ability::class . ':appointments.view',
-        'show' => Ability::class . ':appointments.view',
-        'store' => Ability::class . ':appointments.create',
-        'update' => Ability::class . ':appointments.update',
-        'destroy' => Ability::class . ':appointments.delete',
+    Route::apiResource('tasks', TaskController::class)->middleware([
+        'index' => Ability::class . ':tasks.view',
+        'show' => Ability::class . ':tasks.view',
+        'store' => Ability::class . ':tasks.create',
+        'update' => Ability::class . ':tasks.update',
+        'destroy' => Ability::class . ':tasks.delete',
     ]);
-    Route::post('appointments/{appointment}/files', [FileController::class, 'attachToAppointment'])
-        ->middleware(Ability::class . ':appointments.update');
+    Route::post('tasks/{task}/files', [FileController::class, 'attachToTask'])
+        ->middleware(Ability::class . ':tasks.attach.upload');
 
-    Route::apiResource('appointment-types', AppointmentTypeController::class)
+    Route::apiResource('task-types', TaskTypeController::class)
         ->only(['index', 'show'])
-        ->middleware(Ability::class . ':types.view');
+        ->middleware(Ability::class . ':task_types.manage');
     Route::apiResource('roles', RoleController::class)
         ->only(['index', 'show'])
         ->middleware(Ability::class . ':roles.view');
-    Route::apiResource('statuses', StatusController::class)
+    Route::apiResource('task-statuses', TaskStatusController::class)
         ->only(['index', 'show'])
-        ->middleware(Ability::class . ':statuses.view');
-    Route::get('statuses/{status}/transitions', [StatusController::class, 'transitions'])
-        ->middleware(Ability::class . ':statuses.view');
+        ->middleware(Ability::class . ':task_statuses.manage');
+    Route::get('task-statuses/{task_status}/transitions', [TaskStatusController::class, 'transitions'])
+        ->middleware(Ability::class . ':task_statuses.manage');
     Route::apiResource('teams', TeamController::class)
         ->only(['index', 'show'])
         ->middleware(Ability::class . ':teams.view');
 
-    Route::post('appointment-types', [AppointmentTypeController::class, 'store'])
-        ->middleware(Ability::class . ':types.create')
-        ->name('appointment-types.store');
-    Route::match(['put', 'patch'], 'appointment-types/{appointment_type}', [AppointmentTypeController::class, 'update'])
-        ->middleware(Ability::class . ':types.update')
-        ->name('appointment-types.update');
-    Route::delete('appointment-types/{appointment_type}', [AppointmentTypeController::class, 'destroy'])
-        ->middleware(Ability::class . ':types.delete')
-        ->name('appointment-types.destroy');
-    Route::post('appointment-types/{appointment_type}/copy-to-tenant', [AppointmentTypeController::class, 'copyToTenant'])
-        ->middleware(Ability::class . ':types.create')
-        ->name('appointment-types.copy');
+    Route::post('task-types', [TaskTypeController::class, 'store'])
+        ->middleware(Ability::class . ':task_types.manage')
+        ->name('task-types.store');
+    Route::match(['put', 'patch'], 'task-types/{task_type}', [TaskTypeController::class, 'update'])
+        ->middleware(Ability::class . ':task_types.manage')
+        ->name('task-types.update');
+    Route::delete('task-types/{task_type}', [TaskTypeController::class, 'destroy'])
+        ->middleware(Ability::class . ':task_types.manage')
+        ->name('task-types.destroy');
+    Route::post('task-types/{task_type}/copy-to-tenant', [TaskTypeController::class, 'copyToTenant'])
+        ->middleware(Ability::class . ':task_types.manage')
+        ->name('task-types.copy');
 
     Route::post('roles', [RoleController::class, 'store'])
         ->middleware(Ability::class . ':roles.manage')
@@ -137,21 +137,28 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::post('teams/{team}/employees', [TeamController::class, 'syncEmployees'])
         ->middleware(Ability::class . ':teams.update');
 
-    Route::post('statuses', [StatusController::class, 'store'])
-        ->middleware(Ability::class . ':statuses.create')
-        ->name('statuses.store');
-    Route::match(['put', 'patch'], 'statuses/{status}', [StatusController::class, 'update'])
-        ->middleware(Ability::class . ':statuses.update')
-        ->name('statuses.update');
-    Route::delete('statuses/{status}', [StatusController::class, 'destroy'])
-        ->middleware(Ability::class . ':statuses.delete')
-        ->name('statuses.destroy');
-    Route::post('statuses/{status}/copy-to-tenant', [StatusController::class, 'copyToTenant'])
-        ->middleware(Ability::class . ':statuses.create')
-        ->name('statuses.copy');
-    Route::apiResource('appointments.comments', AppointmentCommentController::class)
+    Route::post('task-statuses', [TaskStatusController::class, 'store'])
+        ->middleware(Ability::class . ':task_statuses.manage')
+        ->name('task-statuses.store');
+    Route::match(['put', 'patch'], 'task-statuses/{task_status}', [TaskStatusController::class, 'update'])
+        ->middleware(Ability::class . ':task_statuses.manage')
+        ->name('task-statuses.update');
+    Route::delete('task-statuses/{task_status}', [TaskStatusController::class, 'destroy'])
+        ->middleware(Ability::class . ':task_statuses.manage')
+        ->name('task-statuses.destroy');
+    Route::post('task-statuses/{task_status}/copy-to-tenant', [TaskStatusController::class, 'copyToTenant'])
+        ->middleware(Ability::class . ':task_statuses.manage')
+        ->name('task-statuses.copy');
+    Route::apiResource('tasks.comments', TaskCommentController::class)
         ->shallow()
-        ->only(['index', 'store', 'show', 'update', 'destroy']);
+        ->only(['index', 'store', 'show', 'update', 'destroy'])
+        ->middleware([
+            'index' => Ability::class . ':tasks.view',
+            'show' => Ability::class . ':tasks.view',
+            'store' => Ability::class . ':tasks.comment.create',
+            'update' => Ability::class . ':tasks.update',
+            'destroy' => Ability::class . ':tasks.delete',
+        ]);
     Route::get('manuals/{manual}/download', [ManualController::class, 'download']);
     Route::post('manuals/{manual}/replace', [ManualController::class, 'replace']);
     Route::apiResource('manuals', ManualController::class);

@@ -2,17 +2,17 @@
 
 namespace App\Providers;
 
-use App\Models\Appointment;
-use App\Models\AppointmentType;
 use App\Models\Manual;
 use App\Models\Role;
-use App\Models\Status;
+use App\Models\Task;
+use App\Models\TaskStatus;
+use App\Models\TaskType;
 use App\Models\Team;
-use App\Policies\AppointmentPolicy;
-use App\Policies\AppointmentTypePolicy;
 use App\Policies\ManualPolicy;
 use App\Policies\RolePolicy;
-use App\Policies\StatusPolicy;
+use App\Policies\TaskPolicy;
+use App\Policies\TaskStatusPolicy;
+use App\Policies\TaskTypePolicy;
 use App\Policies\TeamPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -20,11 +20,11 @@ use Illuminate\Support\Facades\Gate;
 class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
-        Appointment::class => AppointmentPolicy::class,
-        AppointmentType::class => AppointmentTypePolicy::class,
+        Task::class => TaskPolicy::class,
+        TaskType::class => TaskTypePolicy::class,
+        TaskStatus::class => TaskStatusPolicy::class,
         Manual::class => ManualPolicy::class,
         Role::class => RolePolicy::class,
-        Status::class => StatusPolicy::class,
         Team::class => TeamPolicy::class,
     ];
 

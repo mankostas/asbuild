@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Status;
+use App\Models\TaskStatus;
 use Illuminate\Http\Request;
-use App\Http\Resources\StatusResource;
+use App\Http\Resources\TaskStatusResource;
 use App\Services\StatusFlowService;
 use App\Support\ListQuery;
-use App\Http\Requests\StatusUpsertRequest;
+use App\Http\Requests\TaskStatusUpsertRequest;
 
-class StatusController extends Controller
+class TaskStatusController extends Controller
 {
     use ListQuery;
 
@@ -24,7 +24,7 @@ class StatusController extends Controller
     public function index(Request $request)
     {
         $scope = $request->query('scope', $request->user()->hasRole('SuperAdmin') ? 'all' : 'tenant');
-        $query = Status::query();
+        $query = TaskStatus::query();
 
         if ($scope === 'tenant') {
             $tenantId = $request->query('tenant_id', $request->user()->tenant_id);
@@ -39,12 +39,12 @@ class StatusController extends Controller
 
         $result = $this->listQuery($query, $request, ['name'], ['name']);
 
-        return StatusResource::collection($result['data'])->additional([
+        return TaskStatusResource::collection($result['data'])->additional([
             'meta' => $result['meta'],
         ]);
     }
 
-    public function store(StatusUpsertRequest $request)
+    public function store(TaskStatusUpsertRequest $request)
     {
         $this->ensureAdmin($request);
         $data = $request->validated();
@@ -55,19 +55,19 @@ class StatusController extends Controller
             $data['tenant_id'] = $request->user()->tenant_id;
         }
 
-        $status = Status::create($data);
-        return (new StatusResource($status))->response()->setStatusCode(201);
+        $status = TaskStatus::create($data);
+        return (new TaskStatusResource($status))->response()->setStatusCode(201);
     }
 
-    public function show(Status $status)
+    public function show(TaskStatus $taskStatus)
     {
-        return new StatusResource($status);
+        return new TaskStatusResource($taskStatus);
     }
 
-    public function update(StatusUpsertRequest $request, Status $status)
+    public function update(TaskStatusUpsertRequest $request, TaskStatus $taskStatus)
     {
         $this->ensureAdmin($request);
-        if (! $request->user()->hasRole('SuperAdmin') && $status->tenant_id !== $request->user()->tenant_id) {
+        if (! $request->user()->hasRole('SuperAdmin') && $taskStatus->tenant_id !== $request->user()->tenant_id) {
             abort(403);
         }
         $data = $request->validated();
@@ -80,21 +80,21 @@ class StatusController extends Controller
             $data['tenant_id'] = $request->user()->tenant_id;
         }
 
-        $status->update($data);
-        return new StatusResource($status);
+        $taskStatus->update($data);
+        return new TaskStatusResource($taskStatus);
     }
 
-    public function destroy(Request $request, Status $status)
+    public function destroy(Request $request, TaskStatus $taskStatus)
     {
         $this->ensureAdmin($request);
-        if (! $request->user()->hasRole('SuperAdmin') && $status->tenant_id !== $request->user()->tenant_id) {
+        if (! $request->user()->hasRole('SuperAdmin') && $taskStatus->tenant_id !== $request->user()->tenant_id) {
             abort(403);
         }
-        $status->delete();
+        $taskStatus->delete();
         return response()->json(['message' => 'deleted']);
     }
 
-    public function copyToTenant(Request $request, Status $status)
+    public function copyToTenant(Request $request, TaskStatus $taskStatus)
     {
         $this->ensureAdmin($request);
 
@@ -106,28 +106,27 @@ class StatusController extends Controller
             abort(400, 'tenant_id required');
         }
 
-        $copy = $status->replicate();
+        $copy = $taskStatus->replicate();
         $copy->tenant_id = $tenantId;
         $copy->save();
 
-        return (new StatusResource($copy))
+        return (new TaskStatusResource($copy))
             ->response()
             ->setStatusCode(201);
     }
 
-    public function transitions(Status $status, StatusFlowService $flow)
+    public function transitions(TaskStatus $taskStatus, StatusFlowService $flow)
     {
-        $names = $flow->allowedTransitions($status->name);
-        $query = Status::query()->whereIn('name', $names);
+        $names = $flow->allowedTransitions($taskStatus->name);
+        $query = TaskStatus::query()->whereIn('name', $names);
 
-        if ($status->tenant_id) {
-            $query->where('tenant_id', $status->tenant_id);
+        if ($taskStatus->tenant_id) {
+            $query->where('tenant_id', $taskStatus->tenant_id);
         } else {
             $query->whereNull('tenant_id');
         }
 
         $statuses = $query->get();
-        return StatusResource::collection($statuses);
+        return TaskStatusResource::collection($statuses);
     }
 }
-
