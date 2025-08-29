@@ -5,7 +5,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Appointment;
+use App\Models\TaskStatus;
+use App\Models\TaskType;
 
 class TenantBootstrapSeeder extends Seeder
 {
@@ -29,7 +30,7 @@ class TenantBootstrapSeeder extends Seeder
             [
                 'name' => 'Acme Vet',
                 'quota_storage_mb' => 0,
-                'features' => json_encode(['appointments', 'notifications', 'themes']),
+                'features' => json_encode(['tasks', 'notifications', 'task_types', 'task_statuses', 'teams', 'themes']),
                 'phone' => '555-123-4567',
                 'address' => '1 Pet Street',
                 'created_at' => now(),
@@ -55,11 +56,11 @@ class TenantBootstrapSeeder extends Seeder
         DefaultFeatureRolesSeeder::syncDefaultRolesForFeatures(\App\Models\Tenant::find($tenantId));
 
         $managerAbilities = array_intersect(
-            ['appointments.manage', 'teams.manage', 'statuses.manage', 'types.manage'],
+            ['tasks.manage', 'teams.manage', 'task_statuses.manage', 'task_types.manage'],
             $tenantAbilities
         );
         $agentAbilities = array_intersect(
-            ['appointments.view', 'appointments.update'],
+            ['tasks.view', 'tasks.update', 'tasks.status.update'],
             $tenantAbilities
         );
 
@@ -145,53 +146,67 @@ class TenantBootstrapSeeder extends Seeder
             );
         }
 
-        // Default statuses
+        // Default task statuses
         $defaultStatuses = [
-            Appointment::STATUS_DRAFT,
-            Appointment::STATUS_ASSIGNED,
-            Appointment::STATUS_IN_PROGRESS,
-            Appointment::STATUS_COMPLETED,
+            ['slug' => 'todo', 'name' => 'To Do', 'color' => '#9ca3af'],
+            ['slug' => 'in_progress', 'name' => 'In Progress', 'color' => '#3b82f6'],
+            ['slug' => 'qa', 'name' => 'QA', 'color' => '#f59e0b'],
+            ['slug' => 'done', 'name' => 'Done', 'color' => '#10b981'],
         ];
 
-        foreach ($defaultStatuses as $status) {
-            DB::table('statuses')->updateOrInsert(
-                ['tenant_id' => $tenantId, 'name' => $status],
-                ['created_at' => now(), 'updated_at' => now()]
+        foreach ($defaultStatuses as $index => $status) {
+            DB::table('task_statuses')->updateOrInsert(
+                ['tenant_id' => $tenantId, 'slug' => $status['slug']],
+                [
+                    'name' => $status['name'],
+                    'color' => $status['color'],
+                    'position' => $index + 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
             );
         }
 
-        // Appointment type with assignee
+        // Example task type
         $schema = [
-            'type' => 'object',
-            'properties' => [
-                'assignee' => [
-                    'type' => 'object',
-                    'kind' => 'assignee',
-                    'properties' => [
-                        'kind' => ['type' => 'string', 'enum' => ['team', 'employee']],
-                        'id' => ['type' => 'integer'],
+            'sections' => [
+                [
+                    'key' => 'details',
+                    'label' => 'Details',
+                    'fields' => [
+                        ['key' => 'description', 'label' => 'Description', 'type' => 'text'],
                     ],
-                    'required' => ['kind', 'id'],
+                ],
+                [
+                    'key' => 'photos',
+                    'label' => 'Photos',
+                    'fields' => [
+                        ['key' => 'before_photo', 'label' => 'Before Photo', 'type' => 'photo'],
+                        ['key' => 'after_photo', 'label' => 'After Photo', 'type' => 'photo'],
+                    ],
                 ],
             ],
-            'required' => ['assignee'],
         ];
 
-        $fieldsSummary = ['assignee' => 'Assignee'];
+        $typeStatuses = [
+            'todo' => [],
+            'in_progress' => [],
+            'qa' => [],
+            'done' => [],
+        ];
 
         $transitions = [
-            Appointment::STATUS_DRAFT => [Appointment::STATUS_ASSIGNED],
-            Appointment::STATUS_ASSIGNED => [Appointment::STATUS_IN_PROGRESS],
-            Appointment::STATUS_IN_PROGRESS => [Appointment::STATUS_COMPLETED],
-            Appointment::STATUS_COMPLETED => [],
+            ['todo', 'in_progress'],
+            ['in_progress', 'qa'],
+            ['qa', 'done'],
         ];
 
-        DB::table('appointment_types')->updateOrInsert(
-            ['tenant_id' => $tenantId, 'name' => 'Basic'],
+        DB::table('task_types')->updateOrInsert(
+            ['tenant_id' => $tenantId, 'name' => 'General Task'],
             [
-                'form_schema' => json_encode($schema),
-                'fields_summary' => json_encode($fieldsSummary),
-                'statuses' => json_encode($transitions),
+                'schema_json' => json_encode($schema),
+                'statuses' => json_encode($typeStatuses),
+                'status_flow_json' => json_encode($transitions),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
