@@ -1,8 +1,8 @@
 <template>
   <div
     class="fromGroup relative"
-    :class="`${error ? 'has-error' : ''}  ${horizontal ? 'flex' : ''}  ${
-      validate ? 'is-valid' : ''
+    :class="`${errorText ? 'has-error' : ''}  ${horizontal ? 'flex' : ''}  ${
+      showSuccessIcon ? 'is-valid' : ''
     } `"
   >
     <label
@@ -18,10 +18,8 @@
         :name="name"
         :class="`${classInput} input-control block w-full focus:outline-none min-h-[40px] `"
         :value="modelValue"
-        :error="error"
         :readonly="isReadonly"
         :disabled="disabled"
-        :validate="validate"
         :formatter="formatter"
         :size="size"
         :multiple="multiple"
@@ -47,26 +45,28 @@
       </select>
     </div>
 
-    <span
-      v-if="error"
+    <p
+      v-if="errorText"
       class="mt-2"
       :class="
         msgTooltip
           ? ' inline-block bg-danger-500 text-white text-[10px] px-2 py-1 rounded'
-          : ' text-danger-500 block text-sm'
+          : ' text-danger-500 block text-sm whitespace-pre-line'
       "
-      >{{ error }}</span
     >
-    <span
-      v-if="validate"
+      {{ errorText }}
+    </p>
+    <p
+      v-if="successText"
       class="mt-2"
       :class="
         msgTooltip
           ? ' inline-block bg-success-500 text-white text-[10px] px-2 py-1 rounded'
           : ' text-success-500 block text-sm'
       "
-      >{{ validate }}</span
     >
+      {{ successText }}
+    </p>
     <span
       v-if="description"
       class="block text-secondary-500 font-light leading-4 text-xs mt-2"
@@ -78,33 +78,26 @@
 export default {
   props: {
     modelValue: {
-      type: [String, Number, Boolean, Object, Array],
+      type: [String, Number, Boolean, Object, Array, Date],
       default: "",
     },
-    label: {
-      type: String,
-      default: "",
-    },
-    name: {
-      type: String,
-      default: "",
-    },
-    id: {
-      type: String,
-      default: "",
-    },
+    // incoming error could be string or array from backend/lib
     error: {
-      type: [String, Boolean],
+      type: [String, Array, Object, Boolean],
       default: "",
     },
-    description: {
-      type: String,
-      default: "",
-    },
+    // legacy: sometimes boolean, sometimes string/array -> normalize
     validate: {
-      type: [Array, String, Function],
-      default: () => [],
+      type: [Boolean, String, Array, Object],
+      default: false,
     },
+    // NEW (preferred): explicit flags/messages
+    showValidation: { type: Boolean, default: false },
+    successMessage: { type: String, default: "" },
+    label: { type: String, default: "" },
+    id: { type: String, default: "" },
+    name: { type: String, default: "" },
+    description: { type: String, default: "" },
     placeholder: {
       type: String,
       default: "Select Option",
@@ -168,6 +161,29 @@ export default {
   computed: {
     inputId() {
       return this.id || this.generatedId;
+    },
+    // normalize error to string
+    errorText() {
+      const e = this.error;
+      if (!e) return "";
+      if (Array.isArray(e)) return e.filter(Boolean).join("\n");
+      if (typeof e === "object")
+        return Object.values(e).flat().filter(Boolean).join("\n");
+      return String(e);
+    },
+    // determine whether validation UI should show
+    validationEnabled() {
+      return this.showValidation || !!this.validate;
+    },
+    // success text comes only from dedicated prop or legacy when string
+    successText() {
+      if (this.successMessage) return this.successMessage;
+      if (typeof this.validate === "string") return this.validate;
+      return "";
+    },
+    // success icon shows only if validation is enabled and there is no error
+    showSuccessIcon() {
+      return this.validationEnabled && !this.errorText;
     },
   },
 };

@@ -12,12 +12,12 @@
     <div
       class="flex items-stretch inputGroup"
       :class="`
-    
+
     ${append || appendIcon ? 'has-append' : ''}
     ${prepend || prependIcon ? 'has-prepend' : ''}
 
-    ${error ? 'is-invalid' : ''}  ${validate ? 'is-valid' : ''}
-    
+    ${errorText ? 'is-invalid' : ''}  ${showSuccessIcon ? 'is-valid' : ''}
+
     ${$slots.prepend ? 'has-prepend-slot' : ''}
     ${$slots.append ? 'has-append-slot' : ''}
     ${horizontal ? 'flex-1' : ''}
@@ -40,7 +40,7 @@
       <div class="flex-1">
         <div
           class="relative fromGroup2"
-          :class="`${error ? 'has-error' : ''}  ${validate ? 'is-valid' : ''}`"
+          :class="`${errorText ? 'has-error' : ''}  ${showSuccessIcon ? 'is-valid' : ''}`"
         >
           <input
             v-if="!isMask"
@@ -50,10 +50,8 @@
             :placeholder="placeholder"
             :class="`${classInput} input-group-control block w-full focus:outline-none h-[40px] `"
             :value="modelValue"
-            :error="error"
             :readonly="isReadonly"
             :disabled="disabled"
-            :validate="validate"
             @input="
               ($event) => {
                 $emit('update:modelValue', $event.target.value);
@@ -69,10 +67,8 @@
             :name="name"
             :placeholder="placeholder"
             :value="modelValue"
-            :error="error"
             :readonly="isReadonly"
             :disabled="disabled"
-            :validate="validate"
             :options="options"
             modelValue="modelValue"
             @input="
@@ -84,14 +80,14 @@
             @change="$emit('change', $event)"
           />
           <div
-            v-if="error || validate"
+            v-if="errorText || showSuccessIcon"
             class="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2 -translate-y-1/2"
           >
-            <span v-if="error" class="text-danger-500">
+            <span v-if="errorText" class="text-danger-500">
               <Icon icon="heroicons-outline:information-circle" />
             </span>
 
-            <span v-if="validate" class="text-success-500">
+            <span v-if="showSuccessIcon" class="text-success-500">
               <Icon icon="bi:check-lg" />
             </span>
           </div>
@@ -112,26 +108,28 @@
         </span>
       </span>
     </div>
-    <span
-      v-if="error"
+    <p
+      v-if="errorText"
       class="mt-2"
       :class="
         msgTooltip
           ? ' inline-block bg-danger-500 text-white text-[10px] px-2 py-1 rounded'
-          : ' text-danger-500 block text-sm'
+          : ' text-danger-500 block text-sm whitespace-pre-line'
       "
-      >{{ error }}</span
     >
-    <span
-      v-if="validate"
+      {{ errorText }}
+    </p>
+    <p
+      v-if="successText"
       class="mt-2"
       :class="
         msgTooltip
           ? ' inline-block bg-success-500 text-white text-[10px] px-2 py-1 rounded'
           : ' text-success-500 block text-sm'
       "
-      >{{ validate }}</span
     >
+      {{ successText }}
+    </p>
     <span
       v-if="description"
       class="block text-slate-400 font-light leading-4 text-xs mt-2"
@@ -146,33 +144,20 @@ export default {
   components: { Icon, Cleave },
   props: {
     modelValue: {
-      type: [String, Number, Boolean, Object, Array],
+      type: [String, Number, Boolean, Object, Array, Date],
       default: "",
     },
-    label: {
-      type: String,
-      default: "",
-    },
-    name: {
-      type: String,
-      default: "",
-    },
-    id: {
-      type: String,
-      default: "",
-    },
-    error: {
-      type: [String, Boolean],
-      default: "",
-    },
-    description: {
-      type: String,
-      default: "",
-    },
-    validate: {
-      type: [Array, String, Function],
-      default: () => [],
-    },
+    // incoming error could be string or array from backend/lib
+    error: { type: [String, Array, Object, Boolean], default: "" },
+    // legacy: sometimes boolean, sometimes string/array -> normalize
+    validate: { type: [Boolean, String, Array, Object], default: false },
+    // NEW (preferred): explicit flags/messages
+    showValidation: { type: Boolean, default: false },
+    successMessage: { type: String, default: "" },
+    label: { type: String, default: "" },
+    name: { type: String, default: "" },
+    id: { type: String, default: "" },
+    description: { type: String, default: "" },
     placeholder: {
       type: String,
       default: "Search",
@@ -247,6 +232,29 @@ export default {
   computed: {
     inputId() {
       return this.id || this.generatedId;
+    },
+    // normalize error to string
+    errorText() {
+      const e = this.error;
+      if (!e) return "";
+      if (Array.isArray(e)) return e.filter(Boolean).join("\n");
+      if (typeof e === "object")
+        return Object.values(e).flat().filter(Boolean).join("\n");
+      return String(e);
+    },
+    // determine whether validation UI should show
+    validationEnabled() {
+      return this.showValidation || !!this.validate;
+    },
+    // success text comes only from dedicated prop or legacy when string
+    successText() {
+      if (this.successMessage) return this.successMessage;
+      if (typeof this.validate === "string") return this.validate;
+      return "";
+    },
+    // success icon shows only if validation is enabled and there is no error
+    showSuccessIcon() {
+      return this.validationEnabled && !this.errorText;
     },
   },
   methods: {
