@@ -18,7 +18,10 @@ export const useBrandingStore = defineStore('branding', {
     async load() {
       try {
         const { data } = await api.get('/branding');
-        this.branding = { ...this.branding, ...data };
+        const clean = Object.fromEntries(
+          Object.entries(data || {}).filter(([, v]) => v != null && v !== '')
+        );
+        this.branding = { ...this.branding, ...clean };
       } catch (_) {
         // Ignore errors so the app can still load without branding info
       }
@@ -26,7 +29,10 @@ export const useBrandingStore = defineStore('branding', {
     },
     async update(payload: Record<string, any>) {
       const { data } = await api.put('/branding', payload);
-      this.branding = data;
+      const clean = Object.fromEntries(
+        Object.entries(data || {}).filter(([, v]) => v != null && v !== '')
+      );
+      this.branding = { ...this.branding, ...clean };
       this.applyTheme();
     },
     applyTheme() {
