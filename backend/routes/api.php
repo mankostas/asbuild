@@ -155,10 +155,14 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::get('manuals/{manual}/download', [ManualController::class, 'download']);
     Route::post('manuals/{manual}/replace', [ManualController::class, 'replace']);
     Route::apiResource('manuals', ManualController::class);
-    Route::get('notifications', [NotificationController::class, 'index']);
-    Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
-    Route::get('notification-preferences', [NotificationController::class, 'getPreferences']);
-    Route::put('notification-preferences', [NotificationController::class, 'updatePreferences']);
+    Route::get('notifications', [NotificationController::class, 'index'])
+        ->middleware(Ability::class . ':notifications.view');
+    Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
+        ->middleware(Ability::class . ':notifications.manage');
+    Route::get('notification-preferences', [NotificationController::class, 'getPreferences'])
+        ->middleware(Ability::class . ':notifications.view');
+    Route::put('notification-preferences', [NotificationController::class, 'updatePreferences'])
+        ->middleware(Ability::class . ':notifications.manage');
 
     Route::apiResource('employees', EmployeeController::class)->middleware([
         'index' => Ability::class . ':employees.view',

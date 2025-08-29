@@ -65,6 +65,8 @@ export const menuItems = [
     title: "Notifications",
     icon: "heroicons-outline:bell",
     link: "notifications.inbox",
+    requiredAbilities: ["notifications.view", "notifications.manage"],
+    requiredFeatures: ["notifications"],
   },
   {
     title: "Settings",
@@ -147,6 +149,8 @@ export const topMenu = [
     title: "Notifications",
     icon: "heroicons-outline:bell",
     link: "notifications.inbox",
+    requiredAbilities: ["notifications.view", "notifications.manage"],
+    requiredFeatures: ["notifications"],
   },
   { title: "Settings", icon: "heroicons-outline:cog", link: "settings.profile" },
   {

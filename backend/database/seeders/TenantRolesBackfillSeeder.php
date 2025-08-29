@@ -9,7 +9,7 @@ class TenantRolesBackfillSeeder extends Seeder
 {
     public function run(): void
     {
-        $defaultFeatures = ['appointments','roles','types','teams','statuses','themes'];
+        $defaultFeatures = ['appointments','notifications','roles','types','teams','statuses','themes'];
 
         Tenant::query()->lazy()->each(function (Tenant $tenant) use ($defaultFeatures) {
             if (empty($tenant->features)) {

@@ -240,6 +240,8 @@ export const routes = [
     component: () => import('@/views/notifications/NotificationsInbox.vue'),
     meta: {
       requiresAuth: true,
+      requiredAbilities: ['notifications.view', 'notifications.manage'],
+      requiredFeatures: ['notifications'],
       breadcrumb: 'routes.notifications',
       title: 'Notifications',
       layout: 'app',
@@ -252,6 +254,8 @@ export const routes = [
       import('@/views/notifications/NotificationPreferences.vue'),
     meta: {
       requiresAuth: true,
+      requiredAbilities: ['notifications.view', 'notifications.manage'],
+      requiredFeatures: ['notifications'],
       breadcrumb: 'routes.notifications',
       title: 'Notification Preferences',
       layout: 'app',
