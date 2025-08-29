@@ -72,7 +72,7 @@ export const routes = [
   {
     path: '/tasks/board',
     name: 'tasks.board',
-    component: () => import('@/views/tasks/TaskBoard.vue'),
+    component: () => import('@/views/tasks/BoardView.vue'),
     meta: {
       requiresAuth: true,
       requiredAbilities: ['tasks.view', 'tasks.update'],
