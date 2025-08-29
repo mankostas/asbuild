@@ -1,12 +1,12 @@
 <template>
   <div class="flex items-center gap-2">
-    <label for="status-changer-select" class="sr-only">Status</label>
     <Select
       id="status-changer-select"
       v-model="selected"
       :options="options"
       placeholder="Change status"
       classInput="min-w-[160px]"
+      aria-label="Status"
     />
     <Button
       text="Update"

@@ -1,20 +1,22 @@
 <template>
-  <div :class="$store.themeSettingsStore.semidark ? 'dark' : ''">
-    <div
-      :class="`sidebar-wrapper bg-white dark:bg-slate-800 shadow-base ${
-        $store.themeSettingsStore.sidebarCollasp
-          ? closeClass
-          : openClass
-      }
-      ${$store.themeSettingsStore.isMouseHovered ? 'sidebar-hovered' : ''}
+    <div :class="$store.themeSettingsStore.semidark ? 'dark' : ''">
+      <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -->
+      <div
+        :class="`sidebar-wrapper bg-white dark:bg-slate-800 shadow-base ${
+          $store.themeSettingsStore.sidebarCollasp
+            ? closeClass
+            : openClass
+        }
+        ${$store.themeSettingsStore.isMouseHovered ? 'sidebar-hovered' : ''}
 
-      `"
-      tabindex="0"
-      @mouseenter="$store.themeSettingsStore.isMouseHovered = true"
-      @mouseleave="$store.themeSettingsStore.isMouseHovered = false"
-      @focusin="$store.themeSettingsStore.isMouseHovered = true"
-      @focusout="$store.themeSettingsStore.isMouseHovered = false"
-    >
+        `"
+        tabindex="0"
+        role="complementary"
+        @mouseenter="$store.themeSettingsStore.isMouseHovered = true"
+        @mouseleave="$store.themeSettingsStore.isMouseHovered = false"
+        @focusin="$store.themeSettingsStore.isMouseHovered = true"
+        @focusout="$store.themeSettingsStore.isMouseHovered = false"
+      >
       <div
         :class="`logo-segment flex justify-between items-center bg-white dark:bg-slate-800 z-[9] py-6  sticky top-0   px-4  ${
           $store.themeSettingsStore.sidebarCollasp

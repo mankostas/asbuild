@@ -1,37 +1,38 @@
 <template>
-  <div
-    class="fromGroup relative"
-    :class="`${errorText ? 'has-error' : ''}  ${horizontal ? 'flex' : ''} ${
-      showSuccessIcon ? 'is-valid' : ''
-    } `"
-  >
-    <label
-      v-if="label"
-      :class="`${classLabel}  ${
-        horizontal ? 'flex-0 mr-6 md:w-[100px] w-[60px] break-words' : ''
-      }  ltr:inline-block rtl:block  input-label `"
-      :for="inputId"
+    <div
+      class="fromGroup relative"
+      :class="`${errorText ? 'has-error' : ''}  ${horizontal ? 'flex' : ''} ${
+        showSuccessIcon ? 'is-valid' : ''
+      } `"
     >
-      {{ label }}</label
-    >
-    <div class="relative" :class="horizontal ? 'flex-1' : ''">
-      <textarea
-        :id="inputId"
-        :name="name"
-        :placeholder="placeholder"
-        :class="`${classInput} input-control block w-full focus:outline-none pt-3 `"
-        :value="modelValue"
-        :readonly="isReadonly"
-        :disabled="disabled"
-        :rows="rows"
-        @input="
-          ($event) => {
-            $emit('update:modelValue', $event.target.value);
-            $emit('input', $event);
-          }
-        "
-        @change="$emit('change', $event)"
-      ></textarea>
+      <span
+        v-if="label"
+        :id="`${inputId}-label`"
+        :class="`${classLabel}  ${
+          horizontal ? 'flex-0 mr-6 md:w-[100px] w-[60px] break-words' : ''
+        }  ltr:inline-block rtl:block  input-label `"
+      >
+        {{ label }}</span
+      >
+      <div class="relative" :class="horizontal ? 'flex-1' : ''">
+        <textarea
+          :id="inputId"
+          :name="name"
+          :placeholder="placeholder"
+          :class="`${classInput} input-control block w-full focus:outline-none pt-3 `"
+          :value="modelValue"
+          :readonly="isReadonly"
+          :disabled="disabled"
+          :rows="rows"
+          :aria-labelledby="label ? `${inputId}-label` : null"
+          @input="
+            ($event) => {
+              $emit('update:modelValue', $event.target.value);
+              $emit('input', $event);
+            }
+          "
+          @change="$emit('change', $event)"
+        ></textarea>
 
       <div
         class="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2 -translate-y-1/2"

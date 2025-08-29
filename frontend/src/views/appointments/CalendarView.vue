@@ -2,29 +2,29 @@
   <div>
     <div class="flex gap-4 mb-4">
       <div class="flex flex-col">
-        <label for="calendar-status" class="mb-1 text-sm">Status</label>
-        <select id="calendar-status" v-model="statusId" class="border rounded p-2">
+        <span id="calendar-status-label" class="mb-1 text-sm">Status</span>
+        <select v-model="statusId" class="border rounded p-2" aria-labelledby="calendar-status-label">
           <option value="">All Statuses</option>
           <option v-for="s in statusOptions" :key="s.id" :value="s.id">{{ s.name }}</option>
         </select>
       </div>
       <div class="flex flex-col">
-        <label for="calendar-type" class="mb-1 text-sm">Type</label>
-        <select id="calendar-type" v-model="typeId" class="border rounded p-2">
+        <span id="calendar-type-label" class="mb-1 text-sm">Type</span>
+        <select v-model="typeId" class="border rounded p-2" aria-labelledby="calendar-type-label">
           <option value="">All Types</option>
           <option v-for="t in typeOptions" :key="t.id" :value="t.id">{{ t.name }}</option>
         </select>
       </div>
       <div class="flex flex-col">
-        <label for="calendar-team" class="mb-1 text-sm">Team</label>
-        <select id="calendar-team" v-model="teamId" class="border rounded p-2">
+        <span id="calendar-team-label" class="mb-1 text-sm">Team</span>
+        <select v-model="teamId" class="border rounded p-2" aria-labelledby="calendar-team-label">
           <option value="">All Teams</option>
           <option v-for="t in teamOptions" :key="t.id" :value="t.id">{{ t.label || t.name }}</option>
         </select>
       </div>
       <div class="flex flex-col">
-        <label for="calendar-employee" class="mb-1 text-sm">Employee</label>
-        <select id="calendar-employee" v-model="employeeId" class="border rounded p-2">
+        <span id="calendar-employee-label" class="mb-1 text-sm">Employee</span>
+        <select v-model="employeeId" class="border rounded p-2" aria-labelledby="calendar-employee-label">
           <option value="">All Employees</option>
           <option v-for="e in employeeOptions" :key="e.id" :value="e.id">{{ e.label || e.name }}</option>
         </select>

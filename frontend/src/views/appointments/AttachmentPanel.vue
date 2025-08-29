@@ -1,8 +1,13 @@
 <template>
   <Card>
     <div class="mb-4">
-      <label for="attachment-file" class="block mb-1">Attachment</label>
-      <input id="attachment-file" type="file" @change="onFileChange" />
+      <span id="attachment-file-label" class="block mb-1">Attachment</span>
+      <input
+        id="attachment-file"
+        type="file"
+        aria-labelledby="attachment-file-label"
+        @change="onFileChange"
+      />
     </div>
     <ul class="text-sm">
       <li v-for="att in attachments" :key="att.id">

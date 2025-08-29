@@ -12,28 +12,32 @@
       </div>
     <div class="flex gap-4 mb-4">
       <div class="flex flex-col">
-        <label for="appointments-status" class="mb-1 text-sm">Status</label>
-        <select id="appointments-status" v-model="statusFilter" class="border rounded p-2">
+        <span id="appointments-status-label" class="mb-1 text-sm">Status</span>
+        <select
+          v-model="statusFilter"
+          class="border rounded p-2"
+          aria-labelledby="appointments-status-label"
+        >
           <option value="">All Statuses</option>
           <option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
         </select>
       </div>
       <div class="flex flex-col">
-        <label for="appointments-start" class="mb-1 text-sm">Start Date</label>
+        <span id="appointments-start-label" class="mb-1 text-sm">Start Date</span>
         <input
-          id="appointments-start"
           v-model="startDate"
           type="date"
           class="border rounded p-2"
+          aria-labelledby="appointments-start-label"
         />
       </div>
       <div class="flex flex-col">
-        <label for="appointments-end" class="mb-1 text-sm">End Date</label>
+        <span id="appointments-end-label" class="mb-1 text-sm">End Date</span>
         <input
-          id="appointments-end"
           v-model="endDate"
           type="date"
           class="border rounded p-2"
+          aria-labelledby="appointments-end-label"
         />
       </div>
     </div>
