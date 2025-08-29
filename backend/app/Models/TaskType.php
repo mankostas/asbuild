@@ -14,12 +14,14 @@ class TaskType extends Model
         'name',
         'schema_json',
         'statuses',
+        'status_flow_json',
         'tenant_id',
     ];
 
     protected $casts = [
         'schema_json' => 'array',
         'statuses' => 'array',
+        'status_flow_json' => 'array',
         'tenant_id' => 'integer',
     ];
 

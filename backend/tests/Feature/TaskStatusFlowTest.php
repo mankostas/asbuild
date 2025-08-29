@@ -1,0 +1,88 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Role;
+use App\Models\Task;
+use App\Models\TaskType;
+use App\Models\Tenant;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\Sanctum;
+use Tests\TestCase;
+
+class TaskStatusFlowTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Tenant::create(['id' => 1, 'name' => 'T', 'features' => ['tasks']]);
+    }
+
+    protected function authUser(): User
+    {
+        $role = Role::create([
+            'name' => 'User',
+            'slug' => 'user',
+            'tenant_id' => 1,
+            'abilities' => ['tasks.status.update', 'tasks.manage'],
+            'level' => 1,
+        ]);
+        $user = User::create([
+            'name' => 'U',
+            'email' => 'u@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => 1,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($role->id, ['tenant_id' => 1]);
+        Sanctum::actingAs($user);
+        return $user;
+    }
+
+    protected function makeTask(User $user): Task
+    {
+        $type = TaskType::create([
+            'name' => 'Type',
+            'tenant_id' => 1,
+            'statuses' => ['draft' => [], 'assigned' => [], 'completed' => []],
+            'status_flow_json' => [
+                ['draft', 'assigned'],
+                ['assigned', 'completed'],
+            ],
+        ]);
+
+        return Task::create([
+            'tenant_id' => 1,
+            'user_id' => $user->id,
+            'task_type_id' => $type->id,
+            'status' => 'draft',
+        ]);
+    }
+
+    public function test_allows_valid_transition(): void
+    {
+        $user = $this->authUser();
+        $task = $this->makeTask($user);
+
+        $this->withHeader('X-Tenant-ID', 1)
+            ->postJson("/api/tasks/{$task->id}/status", ['status' => 'assigned'])
+            ->assertStatus(200)
+            ->assertJsonPath('data.status', 'assigned');
+    }
+
+    public function test_rejects_invalid_transition(): void
+    {
+        $user = $this->authUser();
+        $task = $this->makeTask($user);
+
+        $this->withHeader('X-Tenant-ID', 1)
+            ->postJson("/api/tasks/{$task->id}/status", ['status' => 'completed'])
+            ->assertStatus(422)
+            ->assertJson(['message' => 'invalid_transition']);
+    }
+}
