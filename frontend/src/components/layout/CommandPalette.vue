@@ -15,7 +15,13 @@
       ref="panel"
       class="relative z-10 w-full max-w-md rounded-2xl bg-background p-4 shadow-lg"
     >
+      <label
+        for="command-palette-search"
+        class="sr-only"
+        >{{ t('commandPalette.placeholder') }}</label
+      >
       <input
+        id="command-palette-search"
         ref="input"
         v-model="query"
         type="text"
@@ -34,7 +40,9 @@
               i === index ? 'bg-foreground/10' : '',
             ]"
             @mouseenter="index = i"
+            @mouseleave="index = -1"
             @focusin="index = i"
+            @focusout="index = -1"
             @click="select(a)"
           >
             {{ a.label }}

@@ -1,21 +1,20 @@
 <template>
   <div>
-    <input
-      :id="inputId"
-      v-model="localValue"
-      type="checkbox"
-      class="hidden"
-      :disabled="disabled"
-      :name="name"
-      :value="value"
-      v-bind="$attrs"
-      @change="onChange"
-    />
     <label
       class="flex items-start"
-      :for="inputId"
       :class="disabled ? ' cursor-not-allowed opacity-40' : 'cursor-pointer'"
     >
+      <input
+        :id="inputId"
+        v-model="localValue"
+        type="checkbox"
+        class="hidden"
+        :disabled="disabled"
+        :name="name"
+        :value="value"
+        v-bind="$attrs"
+        @change="onChange"
+      />
       <div
         :class="ck ? activeClass : 'bg-secondary-500'"
         class="relative inline-flex h-6 w-[46px] ltr:mr-3 rtl:ml-3 items-center rounded-full transition-all duration-150"

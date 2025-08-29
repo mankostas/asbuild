@@ -1,21 +1,20 @@
 <template>
   <div>
-    <input
-      :id="inputId"
-      v-model="localValue"
-      type="checkbox"
-      class="hidden"
-      :disabled="disabled"
-      :name="name"
-      :value="value"
-      v-bind="$attrs"
-      @change="onChange"
-    />
     <label
-      class="flex items-center"
-      :for="inputId"
       :class="disabled ? ' cursor-not-allowed opacity-50' : 'cursor-pointer'"
+      class="flex items-center"
     >
+      <input
+        :id="inputId"
+        v-model="localValue"
+        type="checkbox"
+        class="hidden"
+        :disabled="disabled"
+        :name="name"
+        :value="value"
+        v-bind="$attrs"
+        @change="onChange"
+      />
       <span
         class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex ltr:mr-3 rtl:ml-3 relative transition-all duration-150"
         :class="

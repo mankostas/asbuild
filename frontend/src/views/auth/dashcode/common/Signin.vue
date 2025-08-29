@@ -21,12 +21,16 @@
     />
 
     <div class="flex justify-between">
-      <label class="cursor-pointer flex items-start">
-        <input
-          type="checkbox"
-          class="hidden"
-          @change="() => (checkbox = !checkbox)"
-        />
+      <input
+        id="signin-remember"
+        type="checkbox"
+        class="hidden"
+        @change="() => (checkbox = !checkbox)"
+      />
+      <label
+        for="signin-remember"
+        class="cursor-pointer flex items-start"
+      >
         <span
           class="h-4 w-4 border rounded flex-none inline-flex mr-3 relative top-1 transition-all duration-150"
           :class="
