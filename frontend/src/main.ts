@@ -24,6 +24,7 @@ import "v-calendar/dist/style.css";
 import { VueQueryPlugin } from "@tanstack/vue-query";
 import { useThemeSettingsStore } from "./stores/themeSettings";
 import { useBrandingStore } from "./stores/branding";
+import VueDOMPurifyHTML from "vue-dompurify-html";
 
 const app = createApp(App)
   .use(stores)
@@ -39,7 +40,8 @@ const app = createApp(App)
   .use(VueGoodTablePlugin)
   .use(VueApexCharts)
   .use(PerfectScrollbar)
-  .use(VCalendar);
+  .use(VCalendar)
+  .use(VueDOMPurifyHTML);
 
 app.use(VueQueryPlugin);
 

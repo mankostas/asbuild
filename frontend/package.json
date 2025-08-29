@@ -43,6 +43,7 @@
     "vue": "^3.5.20",
     "vue-chartjs": "5.3.1",
     "vue-cleave-component": "^3.0.2",
+    "vue-dompurify-html": "^3.1.2",
     "vue-flatpickr-component": "^9",
     "vue-good-table-next": "^0.2.2",
     "vue-i18n": "11.1.10",
