@@ -70,7 +70,10 @@
     "form": {
       "title": "Title",
       "date": "Scheduled At",
-      "status": "Status"
+      "status": "Status",
+      "priority": "Priority",
+      "priorityPlaceholder": "Select priority",
+      "dueAt": "Due"
     },
     "filters": {
       "global": "Search tasks",
@@ -98,7 +101,20 @@
     "comments": {
       "placeholder": "Add a comment",
       "mentions": "Mentions",
-      "mentionUsers": "Mention users"
+      "mentionUsers": "Mention users",
+      "file": "Attachment"
+    },
+    "priority": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "tabs": {
+      "details": "Details",
+      "photos": "Photos",
+      "subtasks": "Subtasks",
+      "comments": "Comments"
     },
     "subtasks": {
       "title": "Subtasks",

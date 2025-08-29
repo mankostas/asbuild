@@ -70,7 +70,10 @@
     "form": {
       "title": "Τίτλος",
       "date": "Ημερομηνία",
-      "status": "Κατάσταση"
+      "status": "Κατάσταση",
+      "priority": "Προτεραιότητα",
+      "priorityPlaceholder": "Επιλογή προτεραιότητας",
+      "dueAt": "Προθεσμία"
     },
     "filters": {
       "global": "Αναζήτηση εργασιών",
@@ -98,7 +101,20 @@
     "comments": {
       "placeholder": "Προσθέστε σχόλιο",
       "mentions": "Αναφορές",
-      "mentionUsers": "Αναφέρετε χρήστες"
+      "mentionUsers": "Αναφέρετε χρήστες",
+      "file": "Συνημμένο"
+    },
+    "priority": {
+      "low": "Χαμηλή",
+      "normal": "Κανονική",
+      "high": "Υψηλή",
+      "urgent": "Επείγον"
+    },
+    "tabs": {
+      "details": "Λεπτομέρειες",
+      "photos": "Φωτογραφίες",
+      "subtasks": "Υποεργασίες",
+      "comments": "Σχόλια"
     },
     "subtasks": {
       "title": "Υποεργασίες",

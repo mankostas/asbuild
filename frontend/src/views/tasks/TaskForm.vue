@@ -22,6 +22,27 @@
 
       <AssigneePicker v-if="assigneeField && can('tasks.assign')" v-model="assignee" />
 
+      <VueSelect :label="t('tasks.form.priority')">
+        <vSelect
+          v-model="priority"
+          :options="priorityOptions"
+          label="label"
+          :reduce="(o: any) => o.value"
+          :placeholder="t('tasks.form.priorityPlaceholder')"
+        />
+      </VueSelect>
+
+      <div class="flex flex-col">
+        <span id="due-at-label" class="mb-1">{{ t('tasks.form.dueAt') }}</span>
+        <input
+          id="due-at"
+          v-model="dueAt"
+          type="datetime-local"
+          class="border rounded p-2"
+          :aria-labelledby="'due-at-label'"
+        />
+      </div>
+
       <JsonSchemaForm
         v-if="currentSchemaNoAssignee"
         :key="taskTypeId"
@@ -52,6 +73,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import api, { extractFormErrors } from '@/services/api';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
 import Button from '@/components/ui/Button/index.vue';
@@ -68,6 +90,7 @@ import { can } from '@/stores/auth';
 const notify = useNotify();
 const router = useRouter();
 const route = useRoute();
+const { t } = useI18n();
 
 const types = ref<any[]>([]);
 const formData = ref<any>({});
@@ -79,8 +102,16 @@ const serverError = ref('');
 const showError = ref(false);
 const originalStatus = ref('');
 const assignee = ref<{ kind: 'team' | 'employee'; id: number } | null>(null);
+const priority = ref('');
+const dueAt = ref('');
 
 const statusOptions = ref<string[]>([]);
+const priorityOptions = computed(() => [
+  { label: t('tasks.priority.low'), value: 'low' },
+  { label: t('tasks.priority.normal'), value: 'normal' },
+  { label: t('tasks.priority.high'), value: 'high' },
+  { label: t('tasks.priority.urgent'), value: 'urgent' },
+]);
 
 const schema = yup.object({
   task_type_id: yup.mixed().required('Type is required'),
@@ -113,6 +144,8 @@ onMounted(async () => {
     scheduledAt.value = task.scheduled_at ? toISO(task.scheduled_at) : '';
     slaStartAt.value = task.sla_start_at ? toISO(task.sla_start_at) : '';
     slaEndAt.value = task.sla_end_at ? toISO(task.sla_end_at) : '';
+    dueAt.value = task.due_at ? toISO(task.due_at) : '';
+    priority.value = task.priority || '';
     status.value = task.status;
     originalStatus.value = task.status;
     if (task.assignee) {
@@ -133,6 +166,8 @@ function onTypeChange() {
   slaStartAt.value = t?.sla_start_at ? toISO(t.sla_start_at) : '';
   slaEndAt.value = t?.sla_end_at ? toISO(t.sla_end_at) : '';
   assignee.value = null;
+  dueAt.value = '';
+  priority.value = '';
 }
 
 const currentSchema = computed(() => {
@@ -185,6 +220,8 @@ const submitForm = handleSubmit(async () => {
   if (scheduledAt.value) payload.scheduled_at = toISO(scheduledAt.value);
   if (slaStartAt.value) payload.sla_start_at = toISO(slaStartAt.value);
   if (slaEndAt.value) payload.sla_end_at = toISO(slaEndAt.value);
+  if (dueAt.value) payload.due_at = toISO(dueAt.value);
+  if (priority.value) payload.priority = priority.value;
   if (assignee.value) payload.assignee = assignee.value;
   try {
     if (isEdit.value) {
