@@ -93,11 +93,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
-  /tasks/{id}:
+  /tasks/{task}:
     patch:
       summary: Update task
       parameters:
-        - name: id
+        - name: task
           in: path
           required: true
           schema:
@@ -115,11 +115,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
-  /tasks/{id}/status:
+  /tasks/{task}/status:
     post:
       summary: Update task status
       parameters:
-        - name: id
+        - name: task
           in: path
           required: true
           schema:
@@ -142,11 +142,11 @@ paths:
                 $ref: '#/components/schemas/Task'
         '422':
           description: Invalid transition
-  /tasks/{id}/watch:
+  /tasks/{task}/watch:
     post:
       summary: Watch task
       parameters:
-        - name: id
+        - name: task
           in: path
           required: true
           schema:
@@ -157,7 +157,7 @@ paths:
     delete:
       summary: Unwatch task
       parameters:
-        - name: id
+        - name: task
           in: path
           required: true
           schema:
@@ -165,11 +165,11 @@ paths:
       responses:
         '200':
           description: Not watching
-  /tasks/{id}/subtasks:
+  /tasks/{task}/subtasks:
     post:
       summary: Create task subtask
       parameters:
-        - name: id
+        - name: task
           in: path
           required: true
           schema:
@@ -187,11 +187,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TaskSubtask'
-  /tasks/{id}/subtasks/{subtask}:
+  /tasks/{task}/subtasks/{subtask}:
     patch:
       summary: Update task subtask
       parameters:
-        - name: id
+        - name: task
           in: path
           required: true
           schema:
@@ -217,7 +217,7 @@ paths:
     delete:
       summary: Delete task subtask
       parameters:
-        - name: id
+        - name: task
           in: path
           required: true
           schema:
@@ -230,11 +230,11 @@ paths:
       responses:
         '200':
           description: Deleted
-  /tasks/{id}/subtasks/reorder:
+  /tasks/{task}/subtasks/reorder:
     patch:
       summary: Reorder subtasks
       parameters:
-        - name: id
+        - name: task
           in: path
           required: true
           schema:
@@ -253,11 +253,11 @@ paths:
       responses:
         '200':
           description: Reordered
-  /tasks/{id}/comments:
+  /tasks/{task}/comments:
     get:
       summary: List task comments
       parameters:
-        - name: id
+        - name: task
           in: path
           required: true
           schema:
@@ -274,7 +274,7 @@ paths:
     post:
       summary: Create task comment
       parameters:
-        - name: id
+        - name: task
           in: path
           required: true
           schema:
