@@ -41,6 +41,22 @@
         class="h-10 w-20 rounded border border-slate-200"
       />
     </div>
+    <div>
+      <label class="form-label">Primary Color (Dark)</label>
+      <input
+        type="color"
+        v-model="form.color_dark"
+        class="h-10 w-20 rounded border border-slate-200"
+      />
+    </div>
+    <div>
+      <label class="form-label">Secondary Color (Dark)</label>
+      <input
+        type="color"
+        v-model="form.secondary_color_dark"
+        class="h-10 w-20 rounded border border-slate-200"
+      />
+    </div>
     <Textinput label="Email From" type="email" v-model="form.email_from" />
     <Button type="submit" :isDisabled="!dirty" btnClass="btn-dark"
       >Save Branding</Button

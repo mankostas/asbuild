@@ -15,6 +15,8 @@ class BrandingSeeder extends Seeder
                 'name' => 'Default Brand',
                 'color' => '#4669fa',
                 'secondary_color' => '#A0AEC0',
+                'color_dark' => '#4669fa',
+                'secondary_color_dark' => '#A0AEC0',
                 'logo' => null,
                 'logo_dark' => null,
                 'email_from' => null,

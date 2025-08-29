@@ -14,6 +14,8 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('color')->nullable();
             $table->string('secondary_color')->nullable();
+            $table->string('color_dark')->nullable();
+            $table->string('secondary_color_dark')->nullable();
             $table->string('logo')->nullable();
             $table->string('logo_dark')->nullable();
             $table->string('email_from')->nullable();

@@ -44,6 +44,8 @@ class BrandingRoutesTest extends TestCase
             'name' => 'Brand',
             'color' => '#ffffff',
             'secondary_color' => '#000000',
+            'color_dark' => '#111111',
+            'secondary_color_dark' => '#222222',
             'logo' => 'logo.png',
             'logo_dark' => 'logo-dark.png',
             'footer_left' => 'Left',
@@ -61,6 +63,8 @@ class BrandingRoutesTest extends TestCase
             ->assertJsonPath('footer_left', 'Left')
             ->assertJsonPath('footer_right', 'Right')
             ->assertJsonPath('secondary_color', '#000000')
+            ->assertJsonPath('color_dark', '#111111')
+            ->assertJsonPath('secondary_color_dark', '#222222')
             ->assertJsonPath('logo_dark', 'logo-dark.png');
     }
 

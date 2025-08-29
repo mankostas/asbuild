@@ -24,6 +24,8 @@ class BrandingController extends Controller
             'name' => 'nullable|string',
             'color' => 'nullable|string',
             'secondary_color' => 'nullable|string',
+            'color_dark' => 'nullable|string',
+            'secondary_color_dark' => 'nullable|string',
             'logo' => 'nullable|string',
             'logo_dark' => 'nullable|string',
             'email_from' => 'nullable|email',
