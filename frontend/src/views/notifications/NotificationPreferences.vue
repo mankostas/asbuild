@@ -13,22 +13,28 @@
         <tr v-for="(p, i) in prefs" :key="p.name" class="border-t">
           <td class="p-2 capitalize">{{ p.name }}</td>
           <td class="p-2">
-            <label :for="`inapp-${i}`" class="sr-only"
-              >In-app for {{ p.name }}</label
-            >
-            <input :id="`inapp-${i}`" v-model="p.inapp" type="checkbox" />
+            <input
+              :id="`inapp-${i}`"
+              v-model="p.inapp"
+              type="checkbox"
+              :aria-label="`In-app for ${p.name}`"
+            />
           </td>
           <td class="p-2">
-            <label :for="`email-${i}`" class="sr-only"
-              >Email for {{ p.name }}</label
-            >
-            <input :id="`email-${i}`" v-model="p.email" type="checkbox" />
+            <input
+              :id="`email-${i}`"
+              v-model="p.email"
+              type="checkbox"
+              :aria-label="`Email for ${p.name}`"
+            />
           </td>
           <td class="p-2">
-            <label :for="`sms-${i}`" class="sr-only"
-              >SMS for {{ p.name }}</label
-            >
-            <input :id="`sms-${i}`" v-model="p.sms" type="checkbox" />
+            <input
+              :id="`sms-${i}`"
+              v-model="p.sms"
+              type="checkbox"
+              :aria-label="`SMS for ${p.name}`"
+            />
           </td>
         </tr>
       </tbody>
