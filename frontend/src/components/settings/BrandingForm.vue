@@ -1,6 +1,6 @@
 <template>
-  <form @submit.prevent="save" class="space-y-4">
-    <Textinput label="Name" v-model="form.name" />
+  <form class="space-y-4" @submit.prevent="save">
+    <Textinput v-model="form.name" label="Name" />
     <div>
       <label class="form-label">Logo</label>
       <div
@@ -28,36 +28,36 @@
     <div>
       <label class="form-label">Primary Color</label>
       <input
-        type="color"
         v-model="form.color"
+        type="color"
         class="h-10 w-20 rounded border border-slate-200"
       />
     </div>
     <div>
       <label class="form-label">Secondary Color</label>
       <input
-        type="color"
         v-model="form.secondary_color"
+        type="color"
         class="h-10 w-20 rounded border border-slate-200"
       />
     </div>
     <div>
       <label class="form-label">Primary Color (Dark)</label>
       <input
-        type="color"
         v-model="form.color_dark"
+        type="color"
         class="h-10 w-20 rounded border border-slate-200"
       />
     </div>
     <div>
       <label class="form-label">Secondary Color (Dark)</label>
       <input
-        type="color"
         v-model="form.secondary_color_dark"
+        type="color"
         class="h-10 w-20 rounded border border-slate-200"
       />
     </div>
-    <Textinput label="Email From" type="email" v-model="form.email_from" />
+    <Textinput v-model="form.email_from" label="Email From" type="email" />
     <Button type="submit" :isDisabled="!dirty" btnClass="btn-dark"
       >Save Branding</Button
     >

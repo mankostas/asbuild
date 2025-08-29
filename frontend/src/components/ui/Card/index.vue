@@ -1,7 +1,7 @@
 <template>
   <div
-    :class="cn('card rounded-md bg-white dark:bg-slate-800 shadow-base', props.class)"
     v-if="!overlay"
+    :class="cn('card rounded-md bg-white dark:bg-slate-800 shadow-base', props.class)"
   >
     <div :class="cn('card-body flex flex-col', bodyClass)">
       <header
@@ -22,7 +22,7 @@
             {{ subtitle }}
           </div>
         </div>
-        <div class="flex-0" v-if="$slots.header">
+        <div v-if="$slots.header" class="flex-0">
           <slot name="header"></slot>
         </div>
       </header>
@@ -49,8 +49,8 @@
     </div>
   </div>
   <div
-   :class="cn('rounded-md overlay bg-no-repeat bg-center bg-cover card', customClass)"
-    v-if="overlay"
+   v-if="overlay"
+    :class="cn('rounded-md overlay bg-no-repeat bg-center bg-cover card', customClass)"
     :style="{
       backgroundImage: 'url(' + `${img}` + ')',
     }"

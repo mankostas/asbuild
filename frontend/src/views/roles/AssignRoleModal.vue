@@ -1,5 +1,5 @@
 <template>
-  <TransitionRoot appear :show="true" as="template" v-if="can('roles.manage')">
+  <TransitionRoot v-if="can('roles.manage')" appear :show="true" as="template">
     <Dialog as="div" class="relative z-50" @close="emit('close')">
       <TransitionChild
         as="template"

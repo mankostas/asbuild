@@ -1,5 +1,6 @@
 <template>
   <button
+    v-if="!link && !div"
     :disabled="isDisabled"
     class="btn inline-flex justify-center"
     :class="`
@@ -8,11 +9,11 @@
     ${btnClass}
     `"
     v-bind="$attrs"
-    v-if="!link && !div"
   >
     <template v-if="!isLoading && !$slots.default">
       <span class="flex items-center">
         <span
+          v-if="icon"
           :class="`
           ${iconPosition === 'right' ? 'order-1 ltr:ml-2 rtl:mr-2' : ' '}
           ${text && iconPosition === 'left' ? 'ltr:mr-2 rtl:ml-2' : ''}
@@ -20,7 +21,6 @@
           ${iconClass}
           
           `"
-          v-if="icon"
           ><Icon :icon="icon"
         /></span>
         <span v-if="text">{{ text }}</span>
@@ -56,6 +56,7 @@
   </button>
 
   <router-link
+    v-if="link && !div"
     :to="link"
     class="btn inline-flex justify-center"
     :class="`
@@ -63,11 +64,11 @@
     ${isDisabled ? ' opacity-40 cursor-not-allowed' : ''}
     ${btnClass}
     `"
-    v-if="link && !div"
   >
     <template v-if="!isLoading && !$slots.default">
       <span class="flex items-center">
         <span
+          v-if="icon"
           :class="`
           ${iconPosition === 'right' ? 'order-1 ltr:ml-2 rtl:mr-2' : ' '}
           ${text && iconPosition === 'left' ? 'ltr:mr-2 rtl:ml-2' : ''}
@@ -75,7 +76,6 @@
           ${iconClass}
           
           `"
-          v-if="icon"
           ><Icon :icon="icon"
         /></span>
         <span v-if="text">{{ text }}</span>
@@ -110,17 +110,18 @@
     </div>
   </router-link>
   <div
+    v-if="div && !link"
     class="btn inline-flex justify-center"
     :class="`
     ${isLoading ? ' pointer-events-none' : ''}
     ${isDisabled ? ' opacity-40 cursor-not-allowed' : ''}
     ${btnClass}
     `"
-    v-if="div && !link"
   >
     <template v-if="!isLoading && !$slots.default">
       <span class="flex items-center">
         <span
+          v-if="icon"
           :class="`
           ${iconPosition === 'right' ? 'order-1 ltr:ml-2 rtl:mr-2' : ' '}
           ${text && iconPosition === 'left' ? 'ltr:mr-2 rtl:ml-2' : ''}
@@ -128,7 +129,6 @@
           ${iconClass}
           
           `"
-          v-if="icon"
           ><Icon :icon="icon"
         /></span>
         <span v-if="text">{{ text }}</span>
@@ -166,10 +166,10 @@
 <script>
 import Icon from "@/components/Icon";
 export default {
+  name: "Button",
   components: {
     Icon,
   },
-  name: "Button",
   props: {
     text: {
       type: String,

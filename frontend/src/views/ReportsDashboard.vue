@@ -10,14 +10,14 @@
         </Select>
         <Textinput
           v-if="range === 'custom'"
-          type="date"
           v-model="from"
+          type="date"
           class="w-40"
         />
         <Textinput
           v-if="range === 'custom'"
-          type="date"
           v-model="to"
+          type="date"
           class="w-40"
         />
         <Button @click="fetchData">Apply</Button>

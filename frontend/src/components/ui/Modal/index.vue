@@ -10,8 +10,8 @@
         :leave-to="noFade ? '' : 'opacity-0'"
       >
         <div
-          class="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm"
           v-if="disableBackdrop === false"
+          class="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm"
         />
       </TransitionChild>
 
@@ -43,7 +43,7 @@
                 >
                   {{ title }}
                 </h2>
-                <button @click="close" class="text-[22px]">
+                <button class="text-[22px]" @click="close">
                   <Icon icon="heroicons-outline:x" />
                 </button>
               </div>
@@ -54,8 +54,8 @@
                 <slot />
               </div>
               <div
-                class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
                 v-if="$slots.footer"
+                class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
               >
                 <slot name="footer"></slot>
               </div>

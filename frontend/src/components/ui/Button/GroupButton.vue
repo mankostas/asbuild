@@ -5,10 +5,10 @@
       :key="i"
       :text="item.title"
       :class="{ active: activeIndex === i }"
-      @click="activeIndex = activeIndex === i ? null : i"
       :btnClass="btnClass"
       :icon="item.icon"
       :iconPosition="item.iconPosition"
+      @click="activeIndex = activeIndex === i ? null : i"
     />
   </div>
 </template>

@@ -1,6 +1,6 @@
 <template>
     <div v-if="canAccess">
-      <form @submit.prevent="onSubmit" class="grid grid-cols-2 gap-8">
+      <form class="grid grid-cols-2 gap-8" @submit.prevent="onSubmit">
       <div>
         <div v-if="auth.isSuperAdmin" class="mb-4">
           <label class="block font-medium mb-1" for="tenant">Tenant</label>
@@ -48,7 +48,7 @@
                         <option v-for="t in fieldTypes" :key="t.key" :value="t.key">{{ t.label }}</option>
                       </select>
                       <label class="flex items-center gap-1 text-sm">
-                        <input type="checkbox" v-model="element.required" />
+                        <input v-model="element.required" type="checkbox" />
                         required
                       </label>
                       <select v-model.number="element.cols" class="border rounded p-1 w-24">

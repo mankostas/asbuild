@@ -1,14 +1,14 @@
 <template>
-  <button type="button" @click="openModal" class="btn" :class="labelClass">
+  <button type="button" class="btn" :class="labelClass" @click="openModal">
     {{ label }}
   </button>
 
   <TransitionRoot :show="isOpen" as="template">
     <Dialog
-      as="div"
-      @close="closeModal"
-      class="relative z-[99999]"
       v-if="disableBackdrop === false"
+      as="div"
+      class="relative z-[99999]"
+      @close="closeModal"
     >
       <TransitionChild
         :enter="noFade ? '' : 'duration-300 ease-out'"
@@ -51,7 +51,7 @@
                 >
                   {{ title }}
                 </h2>
-                <button @click="closeModal" class="text-[22px]">
+                <button class="text-[22px]" @click="closeModal">
                   <Icon icon="heroicons-outline:x" />
                 </button>
               </div>
@@ -62,8 +62,8 @@
                 <slot />
               </div>
               <div
-                class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
                 v-if="$slots.footer"
+                class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
               >
                 <slot name="footer"></slot>
               </div>
@@ -72,7 +72,7 @@
         </div>
       </div>
     </Dialog>
-    <Dialog as="div" class="relative z-[99999]" v-else>
+    <Dialog v-else as="div" class="relative z-[99999]">
       <div class="fixed inset-0 overflow-y-auto">
         <div
           class="flex min-h-full justify-center text-center p-6"
@@ -101,7 +101,7 @@
                 >
                   {{ title }}
                 </h2>
-                <button @click="closeModal" class="text-[22px]">
+                <button class="text-[22px]" @click="closeModal">
                   <Icon icon="heroicons-outline:x" />
                 </button>
               </div>
@@ -112,8 +112,8 @@
                 <slot />
               </div>
               <div
-                class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
                 v-if="$slots.footer"
+                class="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700"
               >
                 <slot name="footer"></slot>
               </div>

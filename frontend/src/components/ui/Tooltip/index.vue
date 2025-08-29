@@ -1,7 +1,6 @@
 <template>
   <button
     v-if="!$slots.default"
-    :content="content"
     v-tippy="{
       placement: placement,
       arrow: arrow,
@@ -16,6 +15,7 @@
       offset: offset,
       maxWidth: maxWidth,
     }"
+    :content="content"
     class="btn"
     :class="btnClass"
   >
@@ -23,6 +23,7 @@
   </button>
 
   <tippy
+    v-if="$slots.default"
     :placement="placement"
     :arrow="arrow"
     :theme="theme"
@@ -35,9 +36,8 @@
     :maxWidth="maxWidth"
     :distance="distance"
     :offset="offset"
-    v-if="$slots.default"
   >
-    <button class="btn" :class="btnClass" v-if="!$slots.button">
+    <button v-if="!$slots.button" class="btn" :class="btnClass">
       {{ title }}
     </button>
 

@@ -12,7 +12,7 @@
         >2</span
       >
     </span>
-    <template v-slot:menus>
+    <template #menus>
       <div
         class="flex justify-between px-4 py-4 border-b border-slate-100 dark:border-slate-600"
       >
@@ -29,8 +29,8 @@
       </div>
       <div class="divide-y divide-slate-100 dark:divide-slate-800">
         <MenuItem
-          v-slot="{ active }"
           v-for="(item, i) in notifications"
+          #default="{ active }"
           :key="i"
         >
           <div
@@ -75,7 +75,7 @@
                   3 min ago
                 </div>
               </div>
-              <div class="flex-0" v-if="item.unread">
+              <div v-if="item.unread" class="flex-0">
                 <span
                   class="h-[10px] w-[10px] bg-danger-500 border border-white dark:border-slate-400 rounded-full inline-block"
                 >

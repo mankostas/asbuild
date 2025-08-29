@@ -6,7 +6,7 @@
       <Icon icon="heroicons-outline:plus" />
     </span>
     <template #menus>
-      <MenuItem v-slot="{ active }" v-for="(item, i) in items" :key="i">
+      <MenuItem v-for="(item, i) in items" #default="{ active }" :key="i">
         <div
           :class="[
             'px-4 py-2 text-sm flex items-center space-x-2 rtl:space-x-reverse cursor-pointer first:rounded-t last:rounded-b',

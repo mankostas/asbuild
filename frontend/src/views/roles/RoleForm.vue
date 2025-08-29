@@ -1,6 +1,6 @@
 <template>
   <div v-if="canAccess">
-    <form @submit.prevent="onSubmit" class="max-w-md grid gap-4">
+    <form class="max-w-md grid gap-4" @submit.prevent="onSubmit">
       <div>
         <label class="block font-medium mb-1" for="name">Name<span class="text-red-600">*</span></label>
         <input id="name" v-model="name" class="border rounded p-2 w-full" />
@@ -15,9 +15,9 @@
         <label class="block font-medium mb-1" for="level">Level<span class="text-red-600">*</span></label>
         <input
           id="level"
+          v-model.number="level"
           type="number"
           min="0"
-          v-model.number="level"
           class="border rounded p-2 w-full"
         />
         <div v-if="errors.level" class="text-red-600 text-sm">{{ errors.level }}</div>

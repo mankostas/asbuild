@@ -10,12 +10,12 @@
           class="flex items-center text-sm text-slate-500 dark:text-slate-400 cursor-pointer"
         >
           <input
+            :id="`theme_id${i}`"
+            v-model="theme"
             class="hidden"
             type="radio"
             name="sidebar"
-            :id="`theme_id${i}`"
             :value="item.value"
-            v-model="theme"
           />
 
           <span

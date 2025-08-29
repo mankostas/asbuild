@@ -12,12 +12,12 @@
           class="text-slate-500 dark:text-slate-400 text-sm cursor-pointer flex items-center"
         >
           <input
+            :id="`foo_type${i}`"
+            v-model="footer"
             class="hidden"
             type="radio"
             name="footerType"
-            :id="`foo_type${i}`"
             :value="item.value"
-            v-model="footer"
           />
           <span
             :class="item.value === footer ? 'shadow-inset-4' : ''"
@@ -50,9 +50,6 @@ export default {
       ],
     };
   },
-  mounted() {
-
-  },
   watch: {
     footer: {
       handler() {
@@ -79,6 +76,9 @@ export default {
       },
       immediate: true,
     },
+  },
+  mounted() {
+
   },
 };
 </script>

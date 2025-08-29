@@ -1,29 +1,29 @@
 <template>
-  <form @submit.prevent="onSubmit" class="space-y-4">
+  <form class="space-y-4" @submit.prevent="onSubmit">
     <Textinput
+      v-model="name"
       label="Full name"
       type="text"
       placeholder="Full Name"
       name="name"
-      v-model="name"
       :error="nameError"
       classInput="h-[48px]"
     />
     <Textinput
+      v-model="email"
       label="Email"
       type="email"
       placeholder="Type your email"
       name="emil"
-      v-model="email"
       :error="emailError"
       classInput="h-[48px]"
     />
     <Textinput
+      v-model="password"
       label="Password"
       type="password"
       placeholder="8+ characters, 1 capitat letter "
       name="password"
-      v-model="password"
       :error="passwordError"
       hasicon
       classInput="h-[48px]"
@@ -44,10 +44,10 @@
         "
       >
         <img
+          v-if="checkbox"
           src="@/assets/images/icon/ck-white.svg"
           alt=""
           class="h-[10px] w-[10px] block m-auto"
-          v-if="checkbox"
         />
       </span>
       <span class="text-slate-500 dark:text-slate-400 text-sm leading-6"
@@ -71,11 +71,6 @@ import { useNotify } from "@/plugins/notify";
 export default {
   components: {
     Textinput,
-  },
-  data() {
-    return {
-      checkbox: false,
-    };
   },
   setup() {
     // Define a validation schema
@@ -128,6 +123,11 @@ export default {
       password,
       passwordError,
       onSubmit,
+    };
+  },
+  data() {
+    return {
+      checkbox: false,
     };
   },
 };

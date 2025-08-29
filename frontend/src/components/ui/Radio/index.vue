@@ -5,14 +5,14 @@
       :class="disabled ? ' cursor-not-allowed opacity-50' : 'cursor-pointer'"
     >
       <input
+        v-model="localValue"
         type="radio"
         class="hidden"
         :disabled="disabled"
         :name="name"
-        @change="onChange"
         :value="value"
-        v-model="localValue"
         v-bind="$attrs"
+        @change="onChange"
       />
 
       <span
@@ -26,8 +26,8 @@
       >
       </span>
       <span
-        class="text-slate-500 dark:text-slate-400 text-sm leading-6"
         v-if="label"
+        class="text-slate-500 dark:text-slate-400 text-sm leading-6"
       >
         {{ label }}
       </span>

@@ -3,9 +3,9 @@
       <div class="flex gap-2 mb-4">
       <input
         v-model="search"
-        @input="onSearch"
         placeholder="Search"
         class="border p-2 flex-1"
+        @input="onSearch"
       />
       <select v-model="category" class="border p-2">
         <option value="">All</option>

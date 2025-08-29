@@ -6,7 +6,7 @@
       :class="`
       ${item.child ? 'item-has-children' : ''}
       ${activeSubmenu === i ? 'open' : ''}
-      ${this.$route.name === item.link ? 'menu-item-active' : ''}
+      ${$route.name === item.link ? 'menu-item-active' : ''}
       
       `"
       class="single-sidebar-menu"
@@ -14,19 +14,19 @@
       <!-- ?? single menu with no childred !!  -->
 
       <router-link
+        v-if="!item.child && !item.isHeadr"
         :to="{ name: item.link }"
         class="menu-link"
-        v-if="!item.child && !item.isHeadr"
       >
-        <span class="menu-icon flex-grow-0" v-if="item.icon">
+        <span v-if="item.icon" class="menu-icon flex-grow-0">
           <Icon :icon="item.icon"
         /></span>
-        <div class="text-box flex-grow" v-if="item.title">
+        <div v-if="item.title" class="text-box flex-grow">
           {{ item.title }}
         </div>
         <span
+          v-if="item.badge && !$store.themeSettingsStore.sidebarCollasp"
           class="menu-badge"
-          v-if="item.badge && !this.$store.themeSettingsStore.sidebarCollasp"
           >{{ item.badge }}</span
         >
       </router-link>
@@ -37,18 +37,18 @@
       </div>
       <!-- !!sub menu parent li !! -->
       <div
-        class="menu-link"
         v-else
+        class="menu-link"
         :class="
           activeSubmenu === i ? 'parent_active not-collapsed' : 'collapsed'
         "
         @click="toggleSubmenu(i)"
       >
         <div class="flex-1 flex items-start">
-          <span class="menu-icon" v-show="item.icon">
+          <span v-show="item.icon" class="menu-icon">
             <Icon :icon="item.icon"
           /></span>
-          <div class="text-box" v-if="item.title">{{ item.title }}</div>
+          <div v-if="item.title" class="text-box">{{ item.title }}</div>
         </div>
         <div class="flex-0">
           <div
@@ -74,13 +74,13 @@
         @after-leave="afterLeave"
       >
         <!-- !! SubMenu !! -->
-        <ul calss="sub-menu " v-if="i === activeSubmenu">
+        <ul v-if="i === activeSubmenu" calss="sub-menu ">
           <li
             v-for="(ci, index) in item.child"
             :key="index"
             class="block ltr:pl-4 rtl:pr-4 ltr:pr-1 rtl:-l-1 mb-4 first:mt-4"
           >
-            <router-link :to="{ name: ci.childlink }" v-slot="{ isActive }">
+            <router-link #default="{ isActive }" :to="{ name: ci.childlink }">
               <span
                 class="text-sm flex space-x-3 rtl:space-x-reverse items-center transition-all duration-150"
                 :class="
@@ -174,6 +174,34 @@ export default {
     };
   },
 
+  watch: {
+    $route() {
+      if (this.$store.themeSettingsStore.mobielSidebar) {
+        this.$store.themeSettingsStore.mobielSidebar = false;
+      }
+
+      this.visibleItems.map((item) => {
+        if (item.link === this.$route.name) {
+          this.activeSubmenu = null;
+        }
+      });
+    },
+  },
+
+  created() {
+    const router = useRouter();
+    this.visibleItems.map((item, i) => {
+      item.child?.map((ci) => {
+        if (ci.childlink === router.currentRoute.value.name) {
+          this.activeSubmenu = i;
+        }
+      });
+    });
+  },
+  // update if route chnage then activesubmenu null
+
+  updated() {},
+
   methods: {
     beforeEnter(element) {
       requestAnimationFrame(() => {
@@ -219,34 +247,6 @@ export default {
       }
     },
   },
-
-  watch: {
-    $route() {
-      if (this.$store.themeSettingsStore.mobielSidebar) {
-        this.$store.themeSettingsStore.mobielSidebar = false;
-      }
-
-      this.visibleItems.map((item) => {
-        if (item.link === this.$route.name) {
-          this.activeSubmenu = null;
-        }
-      });
-    },
-  },
-
-  created() {
-    const router = useRouter();
-    this.visibleItems.map((item, i) => {
-      item.child?.map((ci) => {
-        if (ci.childlink === router.currentRoute.value.name) {
-          this.activeSubmenu = i;
-        }
-      });
-    });
-  },
-  // update if route chnage then activesubmenu null
-
-  updated() {},
 };
 </script>
 <style lang="scss">

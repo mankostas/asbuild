@@ -14,25 +14,25 @@
     >
     <div class="relative">
       <select
+        :id="name"
         :name="name"
         :class="`${classInput} input-control block w-full focus:outline-none min-h-[40px] `"
         :value="modelValue"
-        @input="$emit('update:modelValue', $event.target.value)"
         :error="error"
-        :id="name"
         :readonly="isReadonly"
         :disabled="disabled"
         :validate="validate"
         :formatter="formatter"
         :size="size"
         :multiple="multiple"
+        @input="$emit('update:modelValue', $event.target.value)"
       >
         <option value="" disabled selected>{{ placeholder }}</option>
         <template v-if="!$slots.default && options">
           <option
             v-for="(item, index) in options"
-            :value="item.value"
             :key="index"
+            :value="item.value"
           >
             {{ item.label }}
           </option>
@@ -62,8 +62,8 @@
       >{{ validate }}</span
     >
     <span
-      class="block text-secondary-500 font-light leading-4 text-xs mt-2"
       v-if="description"
+      class="block text-secondary-500 font-light leading-4 text-xs mt-2"
       >{{ description }}</span
     >
   </div>

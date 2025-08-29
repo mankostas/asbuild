@@ -21,7 +21,7 @@
       </div>
     </div>
     <template #menus>
-      <MenuItem v-slot="{ active }" v-for="(item, i) in ProfileMenu" :key="i">
+      <MenuItem v-for="(item, i) in ProfileMenu" #default="{ active }" :key="i">
         <div
           type="button"
           :class="

@@ -1,6 +1,6 @@
 <template>
   <div v-if="canAccess">
-    <form @submit.prevent="onSubmit" class="max-w-md grid gap-4">
+    <form class="max-w-md grid gap-4" @submit.prevent="onSubmit">
       <div v-if="auth.isSuperAdmin">
         <label class="block font-medium mb-1" for="tenant">Tenant</label>
         <select id="tenant" v-model="tenantId" class="border rounded p-2 w-full">

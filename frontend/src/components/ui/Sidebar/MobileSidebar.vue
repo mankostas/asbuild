@@ -5,15 +5,15 @@
     <div class="logo-segment flex justify-between items-center px-4 py-6">
         <router-link :to="{ name: 'dashboard' }">
         <img
+          v-if="!$store.themeSettingsStore.isDark"
           :src="$store.brandingStore.branding.logo || logoLight"
           alt=""
-          v-if="!this.$store.themeSettingsStore.isDark"
         />
 
         <img
+          v-if="$store.themeSettingsStore.isDark"
           :src="$store.brandingStore.branding.logo_dark || logoDark"
           alt=""
-          v-if="this.$store.themeSettingsStore.isDark"
         />
       </router-link>
       <span

@@ -83,13 +83,13 @@ import logoWhite from "@/assets/images/logo/logo-white.svg"
 import logo from "@/assets/images/logo/logo.svg"
 
 export default {
+  components: {
+    ForgotPass,
+  },
   data () {
     return {
       logoWhite,logo,pageBg
     }
-  },
-  components: {
-    ForgotPass,
   },
 };
 </script>

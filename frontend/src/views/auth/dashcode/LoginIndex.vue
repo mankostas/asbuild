@@ -5,16 +5,16 @@
         <div class="max-w-[520px] pt-20 ltr:pl-20 rtl:pr-20">
           <router-link to="/">
             <img
+              v-if="!$store.themeSettingsStore.isDark"
               :src="logo"
               alt=""
               class="mb-10"
-              v-if="!this.$store.themeSettingsStore.isDark"
             />
             <img
+              v-else
               :src="logoWhite"
               alt=""
               class="mb-10"
-              v-else
             />
           </router-link>
 
@@ -43,16 +43,16 @@
             <div class="mobile-logo text-center mb-6 lg:hidden block">
               <router-link to="/">
                 <img
+                  v-if="!$store.themeSettingsStore.isDark"
                   :src="logo"
                   alt=""
                   class="mx-auto"
-                  v-if="!this.$store.themeSettingsStore.isDark"
                 />
                 <img
+                  v-else
                   :src="logoWhite"
                   alt=""
                   class="mx-auto"
-                  v-else
                 />
               </router-link>
             </div>
@@ -104,6 +104,10 @@ import logo from "@/assets/images/logo/logo.svg"
 import sideImg from "@/assets/images/auth/ils1.svg"
 
 export default {
+  components: {
+    Social,
+    Signin,
+  },
   emits: ["submit"],
   data() {
     return {
@@ -111,10 +115,6 @@ export default {
       logo,
       sideImg,
     };
-  },
-  components: {
-    Social,
-    Signin,
   },
 };
 </script>

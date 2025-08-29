@@ -20,8 +20,8 @@
         <input
           v-if="fieldType(prop) === 'text'"
           :id="name"
-          type="text"
           v-model="form[name]"
+          type="text"
           class="border rounded p-2 w-full"
           :readonly="readonly"
           @input="validateField(name)"
@@ -29,8 +29,8 @@
         <input
           v-else-if="fieldType(prop) === 'number'"
           :id="name"
-          type="number"
           v-model.number="form[name]"
+          type="number"
           class="border rounded p-2 w-full"
           :readonly="readonly"
           @input="validateField(name)"
@@ -38,8 +38,8 @@
         <input
           v-else-if="fieldType(prop) === 'date'"
           :id="name"
-          type="date"
           v-model="form[name]"
+          type="date"
           class="border rounded p-2 w-full"
           :readonly="readonly"
           @input="validateField(name)"
@@ -47,8 +47,8 @@
         <input
           v-else-if="fieldType(prop) === 'time'"
           :id="name"
-          type="time"
           v-model="form[name]"
+          type="time"
           class="border rounded p-2 w-full"
           :readonly="readonly"
           @input="validateField(name)"
@@ -56,8 +56,8 @@
         <input
           v-else-if="fieldType(prop) === 'boolean'"
           :id="name"
-          type="checkbox"
           v-model="form[name]"
+          type="checkbox"
           :disabled="readonly"
           @change="validateField(name)"
         />

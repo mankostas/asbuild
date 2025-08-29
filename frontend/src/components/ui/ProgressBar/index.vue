@@ -1,14 +1,14 @@
 <template>
   <div class="relative">
     <span
-      class="block text-slate-500 font-medium text-lg tracking-[0.01em] mb-2"
       v-if="title"
+      class="block text-slate-500 font-medium text-lg tracking-[0.01em] mb-2"
       >{{ title }}</span
     >
     <div
+      v-if="!$slots.default"
       class="w-full rounded-[999px] overflow-hidden bg-opacity-10"
       :class="`${backColor} ${height}`"
-      v-if="!$slots.default"
     >
       <Bar
         :barColor="barColor"
@@ -19,9 +19,9 @@
       />
     </div>
     <div
+      v-if="$slots.default"
       class="w-full rounded-[999px] overflow-hidden bg-opacity-10 flex"
       :class="`${backColor} ${height}`"
-      v-if="$slots.default"
     >
       <slot></slot>
     </div>

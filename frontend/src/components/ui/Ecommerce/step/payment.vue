@@ -21,12 +21,12 @@
                   class="flex justify-center h-full text-slate-900 dark:text-white border cursor-pointer rounded text-center border-slate-300 dark:border-slate-700 p-2 transition-all duration-150"
                 >
                   <input
+                    :id="`sa_id${i}`"
+                    v-model="selected"
                     class="hidden"
                     type="radio"
                     name="sidebar"
-                    :id="`sa_id${i}`"
                     :value="item.value"
-                    v-model="selected"
                   />
 
                   <div class="w-full h-full">
@@ -136,7 +136,7 @@
             </ul>
 
             <InputGroup type="text" placeholder="Have coupon code? Apply here ">
-              <template v-slot:append>
+              <template #append>
                 <Button text="Go" btnClass="btn-dark dark:bg-slate-700 " />
               </template>
             </InputGroup>

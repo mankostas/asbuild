@@ -92,13 +92,13 @@ import logoWhite from "@/assets/images/logo/logo-white.svg"
 import logo from "@/assets/images/logo/logo.svg"
 
 export default {
+  components: {
+    Lockscreen,
+  },
   data () {
     return {
       logoWhite,logo,pageBg,userBg
     }
-  },
-  components: {
-    Lockscreen,
   },
 };
 </script>

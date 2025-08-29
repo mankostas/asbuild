@@ -1,18 +1,18 @@
 <template>
-  <form @submit.prevent="save" class="space-y-4">
-    <Textinput label="Name" v-model="form.name" />
-    <Textinput label="Email" type="email" v-model="form.email" />
+  <form class="space-y-4" @submit.prevent="save">
+    <Textinput v-model="form.name" label="Name" />
+    <Textinput v-model="form.email" label="Email" type="email" />
     <Textinput
+      v-model="form.password"
       label="Password"
       type="password"
       hasicon
-      v-model="form.password"
     />
     <Textinput
+      v-model="form.password_confirmation"
       label="Confirm Password"
       type="password"
       hasicon
-      v-model="form.password_confirmation"
     />
     <Button type="submit" :isDisabled="!dirty" btnClass="btn-dark"
       >Save Profile</Button

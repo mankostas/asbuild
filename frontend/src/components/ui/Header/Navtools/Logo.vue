@@ -1,14 +1,14 @@
 <template>
   <router-link :to="{ name: 'dashboard' }">
     <img
+      v-if="!themeSettingsStore.isDark"
       :src="branding.branding.logo || logoLight"
       alt=""
-      v-if="!themeSettingsStore.isDark"
     />
     <img
+      v-else
       :src="branding.branding.logo_dark || logoDark"
       alt=""
-      v-else
     />
   </router-link>
 </template>

@@ -37,8 +37,8 @@
       >{{ validate }}</span
     >
     <span
-      class="block text-secondary-500 font-light leading-4 text-xs mt-2"
       v-if="description"
+      class="block text-secondary-500 font-light leading-4 text-xs mt-2"
       >{{ description }}</span
     >
   </div>
