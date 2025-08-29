@@ -102,6 +102,16 @@ const tenantId = ref<string | null>(
 );
 const serverError = ref('');
 
+const tenantFeatures = computed(() => {
+  if (tenantId.value) {
+    const tenant = tenantStore.tenants.find(
+      (t: any) => String(t.id) === tenantId.value,
+    );
+    return tenant?.features || [];
+  }
+  return [];
+});
+
 const tenantOptions = computed(() => [
   { id: '', name: 'Global' },
   ...tenantStore.tenants.map((t: any) => ({ id: t.id, name: t.name })),
@@ -148,10 +158,15 @@ async function loadAbilityOptions() {
       ? { [TENANT_HEADER]: tenantId.value }
       : undefined;
     const { data } = await api.get('/lookups/abilities', { params, headers });
-    abilityOptions.value = (data || []).map((a: string) => ({
-      label: a,
-      value: a,
-    }));
+    const features = tenantFeatures.value;
+    abilityOptions.value = (data || [])
+      .filter((a: string) =>
+        features.length ? features.some((f: string) => a.startsWith(f + '.')) : true,
+      )
+      .map((a: string) => ({
+        label: a,
+        value: a,
+      }));
   } catch (e) {
     abilityOptions.value = [];
   }
