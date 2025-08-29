@@ -143,6 +143,7 @@ export default {
     },
     options: {
       type: Array,
+      default: () => [],
     },
   },
   emits: ["update:modelValue", "input", "change"],

@@ -139,6 +139,7 @@ export default {
     },
     size: {
       type: String,
+      default: "",
     },
     multiple: {
       type: Boolean,

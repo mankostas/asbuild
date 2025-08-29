@@ -5,6 +5,7 @@
     title="New Address"
     label="New"
     labelClass="btn-outline-dark"
+    @close="emit('close')"
   >
     <form
       class="space-y-4 flex flex-col justify-between"
@@ -97,10 +98,14 @@ import Modal from "@/components/ui/Modal";
 import Textarea from "@/components/ui/Textarea";
 import InputGroup from "@/components/ui/InputGroup";
 import Select from "@/components/ui/Select";
-import { defineProps, ref } from "vue";
+import { defineProps, defineEmits, ref } from "vue";
 const props = defineProps({
-  activeModal: Boolean,
+  activeModal: {
+    type: Boolean,
+    default: false,
+  },
 });
+const emit = defineEmits(["close"]);
 </script>
 
 <style lang="scss" scoped></style>

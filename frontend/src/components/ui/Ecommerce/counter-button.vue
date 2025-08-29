@@ -37,7 +37,10 @@ import { cartStore } from "@/store/cart";
 const cart = cartStore();
 
 const props = defineProps({
-  product: Object,
+  product: {
+    type: Object,
+    required: true,
+  },
 });
 
 const increment = () => cart.addToCart(cartProduct);

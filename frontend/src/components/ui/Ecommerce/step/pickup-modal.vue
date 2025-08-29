@@ -5,7 +5,7 @@
     title="Pickup Address"
     label="Pickup"
     labelClass="btn-outline-dark"
-    @close="activeModal"
+    @close="emit('close')"
   >
     <form class="space-y-5" @submit.prevent="submit">
       <InputGroup
@@ -82,10 +82,14 @@ import InputGroup from "@/components/ui/InputGroup";
 import Radio from "@/components/ui/Radio";
 import Modal from "@/components/ui/Modal";
 
-import { defineProps, ref } from "vue";
+import { defineProps, defineEmits, ref } from "vue";
 const props = defineProps({
-  activeModal: Boolean,
+  activeModal: {
+    type: Boolean,
+    default: false,
+  },
 });
+const emit = defineEmits(["close"]);
 
 const picked1 = ref("A");
 </script>

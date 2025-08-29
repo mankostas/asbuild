@@ -85,6 +85,7 @@ export default {
     },
     labelClass: {
       type: String,
+      default: "",
     },
     classMenuItems: {
       type: String,
