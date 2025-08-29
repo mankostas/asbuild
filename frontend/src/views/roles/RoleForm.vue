@@ -23,10 +23,11 @@
         <div v-if="errors.level" class="text-red-600 text-sm">{{ errors.level }}</div>
       </div>
       <div v-if="auth.isSuperAdmin">
-        <VueSelect label="Tenant" :error="errors.tenant_id">
-          <template #default="{ inputId }">
+        <label :for="ids.tenant" class="block font-medium mb-1">Tenant</label>
+        <VueSelect :error="errors.tenant_id">
+          <template #default>
             <vSelect
-              :id="inputId"
+              :id="ids.tenant"
               v-model="tenantId"
               :options="tenantOptions"
               :reduce="(t: any) => t.id"
@@ -35,22 +36,23 @@
           </template>
         </VueSelect>
       </div>
-      <VueSelect
-        v-if="!auth.isSuperAdmin || tenantId !== null"
-        label="Abilities"
-        :error="errors.abilities"
-      >
-        <template #default="{ inputId }">
-          <vSelect
-            :id="inputId"
-            v-model="abilities"
-            :options="abilityOptions"
-            multiple
-            label="label"
-            :reduce="(a: any) => a.value"
-          />
-        </template>
-      </VueSelect>
+      <div v-if="!auth.isSuperAdmin || tenantId !== null">
+        <label :for="ids.abilities" class="block font-medium mb-1"
+          >Abilities</label
+        >
+        <VueSelect :error="errors.abilities">
+          <template #default>
+            <vSelect
+              :id="ids.abilities"
+              v-model="abilities"
+              :options="abilityOptions"
+              multiple
+              label="label"
+              :reduce="(a: any) => a.value"
+            />
+          </template>
+        </VueSelect>
+      </div>
       <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
       <button
         type="submit"
@@ -90,6 +92,10 @@ const tenantId = ref<string | null>(
   auth.isSuperAdmin ? null : tenantStore.currentTenantId,
 );
 const serverError = ref('');
+const ids = {
+  tenant: 'role-tenant',
+  abilities: 'role-abilities',
+};
 
 const tenantOptions = computed(() => [
   { id: '', name: 'Global' },

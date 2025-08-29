@@ -13,18 +13,21 @@
     >
       <Textarea
         label="Address"
+        :id="ids.address"
         name="pn4"
         placeholder="Your Address"
         horizontal
       />
       <div class="flex">
-        <p
+        <label
+          :for="ids.country"
           class="flex-none flex-0 mr-6 md:w-[100px] break-words ltr:inline-block rtl:block input-label"
         >
           Country
-        </p>
+        </label>
         <div class="flex-1 w-full">
           <Select
+            :id="ids.country"
             :options="options"
             placeholder="Select Your Country"
             classLabel="!w-[150px]"
@@ -32,13 +35,15 @@
         </div>
       </div>
       <div class="flex">
-        <p
+        <label
+          :for="ids.state"
           class="flex-none flex-0 mr-6 md:w-[100px] break-words ltr:inline-block rtl:block input-label"
         >
           State
-        </p>
+        </label>
         <div class="flex-1 w-full">
           <Select
+            :id="ids.state"
             :options="options"
             placeholder="Select Your State"
             classLabel="!w-[150px]"
@@ -46,13 +51,15 @@
         </div>
       </div>
       <div class="flex">
-        <p
+        <label
+          :for="ids.city"
           class="flex-none flex-0 mr-6 md:w-[100px] break-words ltr:inline-block rtl:block input-label"
         >
           City
-        </p>
+        </label>
         <div class="flex-1 w-full">
           <Select
+            :id="ids.city"
             :options="options"
             placeholder="Select Your City"
             classLabel="!w-[150px]"
@@ -62,6 +69,7 @@
 
       <InputGroup
         type="text"
+        :id="ids.postalCode"
         label="Postal Code"
         name="ps-1"
         placeholder="Your Postal Code"
@@ -69,6 +77,7 @@
       />
       <InputGroup
         type="text"
+        :id="ids.phone"
         label="Phone No"
         name="ps-1"
         placeholder="+880"
@@ -106,6 +115,14 @@ const props = defineProps({
   },
 });
 const emit = defineEmits(["close"]);
+const ids = {
+  address: 'address-input',
+  country: 'country-select',
+  state: 'state-select',
+  city: 'city-select',
+  postalCode: 'postal-code',
+  phone: 'phone-number',
+};
 </script>
 
 <style lang="scss" scoped></style>

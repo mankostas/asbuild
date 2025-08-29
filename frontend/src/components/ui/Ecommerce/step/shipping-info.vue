@@ -2,8 +2,11 @@
   <div>
     <div class="bg-white dark:bg-slate-800">
       <div class="rounded p-5 space-y-5">
-        <label class="flex border dark:border-slate-700 rounded p-5">
-          <Radio v-model="picked1" name="x" value="A" checked />
+        <label
+          :for="ids.addressA"
+          class="flex border dark:border-slate-700 rounded p-5"
+        >
+          <Radio :id="ids.addressA" v-model="picked1" name="x" value="A" checked />
 
           <div
             class="flex flex-start -mt-1 space-x-3 md:space-x-5 rtl:space-x-reverse"
@@ -31,8 +34,11 @@
           </div>
         </label>
 
-        <label class="flex border dark:border-slate-700 rounded p-5">
-          <Radio v-model="picked1" name="x" value="B" />
+        <label
+          :for="ids.addressB"
+          class="flex border dark:border-slate-700 rounded p-5"
+        >
+          <Radio :id="ids.addressB" v-model="picked1" name="x" value="B" />
           <div
             class="flex flex-start -mt-1 space-x-3 md:space-x-5 rtl:space-x-reverse"
           >
@@ -85,6 +91,10 @@ const toggleModal = () => {
 };
 
 const picked1 = ref("A");
+const ids = {
+  addressA: 'shipping-address-a',
+  addressB: 'shipping-address-b',
+};
 </script>
 
 <style></style>
