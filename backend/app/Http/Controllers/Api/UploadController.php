@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Jobs\MergeChunks;
 use App\Services\FileStorageService;
+use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -68,6 +69,9 @@ class UploadController extends Controller
     {
         $data = $request->validate([
             'filename' => 'required|string',
+            'task_id' => 'required|exists:tasks,id',
+            'field_key' => 'required|string',
+            'section_key' => 'required|string',
         ]);
 
         $tempPath = 'files/' . $data['filename'];
@@ -85,6 +89,12 @@ class UploadController extends Controller
         );
 
         $file = $storage->store($uploaded);
+
+        $task = Task::findOrFail($data['task_id']);
+        $task->attachments()->attach($file->id, [
+            'field_key' => $data['field_key'],
+            'section_key' => $data['section_key'],
+        ]);
 
         Storage::delete($tempPath);
 

@@ -57,7 +57,8 @@ Route::get('files/{file}/{variant?}', [FileController::class, 'download'])
 
 Route::prefix('uploads')->middleware(['auth:sanctum', EnsureTenantScope::class])->group(function () {
     Route::post('chunk', [UploadController::class, 'chunk'])->middleware('throttle:uploads');
-    Route::post('{uploadId}/finalize', [UploadController::class, 'finalize'])->middleware('throttle:uploads');
+    Route::post('{uploadId}/finalize', [UploadController::class, 'finalize'])
+        ->middleware(['throttle:uploads', Ability::class . ':tasks.attach.upload']);
     Route::delete('cleanup', [UploadController::class, 'cleanup'])->middleware('throttle:uploads');
 });
 

@@ -143,6 +143,7 @@
           v-if="formSchemaObj"
           v-model="previewModel"
           :schema="formSchemaObj"
+          :task-id="0"
         />
       </div>
     </form>

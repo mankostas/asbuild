@@ -27,6 +27,7 @@
         :key="appointmentTypeId"
         v-model="formData"
         :schema="currentSchemaNoAssignee"
+        :task-id="0"
       />
 
       <div class="pt-2">
