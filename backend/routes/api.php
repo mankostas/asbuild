@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Api\TaskWatcherController;
 use App\Http\Controllers\Api\TaskTypeController;
+use App\Http\Controllers\Api\TaskBoardController;
 use App\Http\Controllers\Api\ManualController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReportController;
@@ -102,6 +103,11 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::delete('tasks/{task}/subtasks/{subtask}', [TaskSubtaskController::class, 'destroy'])
         ->middleware(Ability::class . ':tasks.update')
         ->whereNumber('subtask');
+
+    Route::get('task-board', [TaskBoardController::class, 'index'])
+        ->middleware(Ability::class . ':tasks.view');
+    Route::patch('task-board/move', [TaskBoardController::class, 'move'])
+        ->middleware(Ability::class . ':tasks.update');
 
     Route::apiResource('task-types', TaskTypeController::class)
         ->only(['index', 'show'])

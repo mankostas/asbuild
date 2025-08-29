@@ -15,23 +15,23 @@
             aria-label="Drag to reorder"
           >⋮⋮</button>
           <input
-            type="checkbox"
             v-model="element.is_completed"
-            @change="save(element)"
+            type="checkbox"
             :aria-label="t('tasks.subtasks.title')"
+            @change="save(element)"
           />
           <input
             v-model="element.title"
-            @keyup.enter="save(element)"
-            @blur="save(element)"
-            :aria-label="t('tasks.subtasks.title')"
             class="flex-1 border rounded p-1"
+            :aria-label="t('tasks.subtasks.title')"
+            @blur="save(element)"
+            @keyup.enter="save(element)"
           />
           <button
-            @click="remove(element)"
-            @keyup.enter="remove(element)"
             class="text-red-600"
             aria-label="Delete subtask"
+            @click="remove(element)"
+            @keyup.enter="remove(element)"
           >✕</button>
         </div>
       </template>
@@ -39,16 +39,16 @@
     <div class="mt-2 flex items-center gap-2">
       <input
         v-model="newTitle"
-        @keyup.enter="add"
-        :aria-label="t('tasks.subtasks.add')"
         class="flex-1 border rounded p-1"
+        :aria-label="t('tasks.subtasks.add')"
         :placeholder="t('tasks.subtasks.add')"
+        @keyup.enter="add"
       />
       <button
-        @click="add"
-        @keyup.enter="add"
         class="btn btn-primary"
         :aria-label="t('tasks.subtasks.add')"
+        @click="add"
+        @keyup.enter="add"
       >{{ t('tasks.subtasks.add') }}</button>
     </div>
   </div>
