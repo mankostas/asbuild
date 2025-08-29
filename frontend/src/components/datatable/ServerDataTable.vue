@@ -11,12 +11,12 @@
     @on-sort-change="onSortChange"
     @on-search="onSearch"
   >
-    <template v-if="slots.actions" #table-row="props">
-      <span v-if="props.column.field === '__actions'">
-        <slot name="actions" v-bind="props" />
+    <template v-if="slots.actions" #table-row="slotProps">
+      <span v-if="slotProps.column.field === '__actions'">
+        <slot name="actions" v-bind="slotProps" />
       </span>
       <span v-else>
-        {{ props.formattedRow[props.column.field] }}
+        {{ slotProps.formattedRow[slotProps.column.field] }}
       </span>
     </template>
   </VueGoodTable>

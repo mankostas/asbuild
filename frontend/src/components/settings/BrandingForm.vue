@@ -1,28 +1,30 @@
 <template>
   <form class="space-y-4" @submit.prevent="save">
-    <Textinput v-model="form.name" label="Name" />
+    <span class="form-label">Name</span>
+    <Textinput v-model="form.name" aria-label="Name" />
     <div>
-      <label class="form-label" :for="ids.logo">Logo</label>
+      <span class="form-label">Logo</span>
       <div
         v-bind="getLogoRootProps()"
         class="border-dashed border-2 rounded-md p-6 text-center cursor-pointer"
       >
-        <input :id="ids.logo" v-bind="getLogoInputProps()" class="hidden" />
+        <input id="branding-logo" v-bind="getLogoInputProps()" class="hidden" aria-label="Logo" />
         <p v-if="!logoFile && !form.logo">Drop logo here or click to upload</p>
         <p v-else-if="logoFile">{{ logoFile.name }}</p>
         <img v-else :src="form.logo" alt="" class="mx-auto h-24" />
       </div>
     </div>
     <div>
-      <label class="form-label" :for="ids.logoDark">Logo (Dark)</label>
+      <span class="form-label">Logo (Dark)</span>
       <div
         v-bind="getLogoDarkRootProps()"
         class="border-dashed border-2 rounded-md p-6 text-center cursor-pointer"
       >
         <input
-          :id="ids.logoDark"
+          id="branding-logo-dark"
           v-bind="getLogoDarkInputProps()"
           class="hidden"
+          aria-label="Logo (Dark)"
         />
         <p v-if="!logoDarkFile && !form.logo_dark">Drop logo here or click to upload</p>
         <p v-else-if="logoDarkFile">{{ logoDarkFile.name }}</p>
@@ -30,42 +32,47 @@
       </div>
     </div>
     <div>
-      <label class="form-label" :for="ids.color">Primary Color</label>
+      <span class="form-label">Primary Color</span>
       <input
-        :id="ids.color"
+        id="branding-color"
         v-model="form.color"
         type="color"
         class="h-10 w-20 rounded border border-slate-200"
+        aria-label="Primary Color"
       />
     </div>
     <div>
-      <label class="form-label" :for="ids.secondaryColor">Secondary Color</label>
+      <span class="form-label">Secondary Color</span>
       <input
-        :id="ids.secondaryColor"
+        id="branding-secondary-color"
         v-model="form.secondary_color"
         type="color"
         class="h-10 w-20 rounded border border-slate-200"
+        aria-label="Secondary Color"
       />
     </div>
     <div>
-      <label class="form-label" :for="ids.colorDark">Primary Color (Dark)</label>
+      <span class="form-label">Primary Color (Dark)</span>
       <input
-        :id="ids.colorDark"
+        id="branding-color-dark"
         v-model="form.color_dark"
         type="color"
         class="h-10 w-20 rounded border border-slate-200"
+        aria-label="Primary Color (Dark)"
       />
     </div>
     <div>
-      <label class="form-label" :for="ids.secondaryColorDark">Secondary Color (Dark)</label>
+      <span class="form-label">Secondary Color (Dark)</span>
       <input
-        :id="ids.secondaryColorDark"
+        id="branding-secondary-color-dark"
         v-model="form.secondary_color_dark"
         type="color"
         class="h-10 w-20 rounded border border-slate-200"
+        aria-label="Secondary Color (Dark)"
       />
     </div>
-    <Textinput v-model="form.email_from" label="Email From" type="email" />
+    <span class="form-label">Email From</span>
+    <Textinput v-model="form.email_from" type="email" aria-label="Email From" />
     <Button type="submit" :isDisabled="!dirty" btnClass="btn-dark"
       >Save Branding</Button
     >
@@ -86,15 +93,6 @@ const initial = { ...store.branding } as Record<string, any>;
 const form = reactive({ ...initial });
 const logoFile = ref<File | null>(null);
 const logoDarkFile = ref<File | null>(null);
-const ids = {
-  logo: 'branding-logo',
-  logoDark: 'branding-logo-dark',
-  color: 'branding-color',
-  secondaryColor: 'branding-secondary-color',
-  colorDark: 'branding-color-dark',
-  secondaryColorDark: 'branding-secondary-color-dark',
-};
-
 function onDrop(files: File[]) {
   logoFile.value = files[0] || null;
 }

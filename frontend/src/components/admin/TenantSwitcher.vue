@@ -1,10 +1,11 @@
 <template>
   <div>
-    <label :for="ids.tenant" class="block mb-1 text-sm">Tenant</label>
+    <span class="block mb-1 text-sm">Tenant</span>
     <select
-      :id="ids.tenant"
+      id="tenant-switcher"
       v-model="selected"
       class="border rounded px-2 py-1 text-sm"
+      aria-label="Tenant"
       @change="onChange"
     >
       <option
@@ -25,8 +26,6 @@ import { useAuthStore } from '@/stores/auth';
 const tenantStore = useTenantStore();
 const authStore = useAuthStore();
 const selected = ref(tenantStore.currentTenantId);
-const ids = { tenant: 'tenant-switcher' };
-
 onMounted(async () => {
   if (!tenantStore.tenants.length) {
     await tenantStore.loadTenants();

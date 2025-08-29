@@ -9,13 +9,14 @@
         v-if="enableSearch && enableInput"
         class="flex items-center space-x-2 rtl:space-x-reverse"
       >
-        <label :for="ids.page" class="text-sm">Page</label>
+        <span class="text-sm">Page</span>
         <input
-          :id="ids.page"
+          id="pagination-page"
           v-model.number="input"
           class="form-control w-9 overflow-auto h-9"
           type="text"
           placeholder="0"
+          aria-label="Page"
         />
         <button
           type="button"
@@ -27,13 +28,14 @@
       </div>
 
       <div v-if="enableSearch && enableSelect" class="flex items-center">
-        <label :for="ids.select" class="text-sm">Page</label>
+        <span class="text-sm">Page</span>
         <Select
-          :id="ids.select"
+          id="pagination-select"
           v-model.number="input2"
           placeholder="Go"
           classInput=" w-[60px] h-9 "
           :options="options"
+          aria-label="Page"
           @change="changePage(input2)"
         />
 
@@ -186,10 +188,6 @@ export default defineComponent({
     return {
       input: "",
       input2: null,
-      ids: {
-        page: 'pagination-page',
-        select: 'pagination-select',
-      },
     };
   },
   computed: {

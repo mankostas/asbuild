@@ -4,19 +4,19 @@
       Menu layout
     </div>
     <div class="grid grid-cols-3 gap-3">
-      <div v-for="(item, i) in layouts" :key="i">
-        <label
-          :for="`menu_layout_id${i}`"
-          class="flex items-center text-sm text-slate-500 dark:text-slate-400 cursor-pointer"
-        >
-          <input
-            :id="`menu_layout_id${i}`"
-            v-model="layout"
-            class="hidden"
-            type="radio"
-            name="menulayout"
-            :value="item.value"
-          />
+        <div v-for="(item, i) in layouts" :key="i">
+          <label
+            :for="`menu_layout_id${i}`"
+            class="flex items-center text-sm text-slate-500 dark:text-slate-400 cursor-pointer"
+          >
+            <input
+              :id="`menu_layout_id${i}`"
+              v-model="layout"
+              class="hidden"
+              type="radio"
+              name="menulayout"
+              :value="item.value"
+            />
           <span
             :class="item.value === layout ? 'shadow-inset-4' : ''"
             class="h-4 w-4 bg-white rounded-full dark:bg-transparent border border-secondary-500 inline-block ltr:mr-3 rtl:ml-3 transition-all duration-150"
@@ -37,10 +37,11 @@
       </div>
       <div>
         <label
+          for="menu-collapse"
           :class="menucollaspse ? 'bg-primary-500' : 'bg-secondary-500'"
           class="relative inline-flex h-6 w-[46px] items-center rounded-full transition-all duration-150 cursor-pointer"
         >
-          <input v-model="menucollaspse" type="checkbox" class="hidden" />
+          <input id="menu-collapse" v-model="menucollaspse" type="checkbox" class="hidden" />
           <span
             :class="
               menucollaspse
@@ -61,10 +62,11 @@
       </div>
       <div>
         <label
+          for="menu-hidden"
           :class="menuHideen ? 'bg-primary-500' : 'bg-secondary-500'"
           class="relative inline-flex h-6 w-[46px] items-center rounded-full transition-all duration-150 cursor-pointer"
         >
-          <input v-model="menuHideen" type="checkbox" class="hidden" />
+          <input id="menu-hidden" v-model="menuHideen" type="checkbox" class="hidden" />
           <span
             :class="
               menuHideen

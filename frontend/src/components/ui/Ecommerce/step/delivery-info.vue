@@ -50,22 +50,20 @@
         <div
           class="space-x-0 sm:space-x-2 md:space-x-5 md:space-y-0 space-y-3 rtl:space-x-reverse md:flex justify-start lg:justify-end flex-1 md:text-base text-sm"
         >
-          <label
+          <div
             class="inline-flex items-center border border-slate-900 dark:border-slate-700 rounded py-3 lg:px-10 px-5 md:w-auto w-[200px]"
           >
-            <Radio v-model="picked1" name="x" value="A" checked />
-            <span class="text-slate-900 dark:text-slate-300">
-              Home Delivery
-            </span>
-          </label>
-          <label
+            <Radio v-model="picked1" name="x" value="A" aria-label="Home Delivery" />
+            <span class="text-slate-900 dark:text-slate-300">Home Delivery</span>
+          </div>
+          <button
+            type="button"
             class="inline-flex items-center border border-slate-900 dark:border-slate-700 rounded py-3 lg:px-10 px-5 md:w-auto w-[200px]"
+            @click="toggleModal"
           >
-            <Radio v-model="picked1" name="x" value="B" @click="toggleModal" />
-            <span class="text-slate-900 dark:text-slate-300">
-              Local Pickup
-            </span>
-          </label>
+            <Radio v-model="picked1" name="x" value="B" aria-label="Local Pickup" />
+            <span class="text-slate-900 dark:text-slate-300">Local Pickup</span>
+          </button>
         </div>
       </div>
     </div>

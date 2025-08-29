@@ -5,15 +5,15 @@
       showSuccessIcon ? 'is-valid' : ''
     } `"
   >
-    <label
+    <span
       v-if="label"
+      :id="`${inputId}-label`"
       :class="`${classLabel} inline-block input-label `"
-      :for="inputId"
     >
-      {{ label }}</label
+      {{ label }}</span
     >
     <div class="relative">
-      <slot :input-id="inputId"></slot>
+      <slot :input-id="inputId" :label-id="label ? `${inputId}-label` : null"></slot>
     </div>
 
     <p
