@@ -34,7 +34,7 @@
                       <img
                         class="h-full w-full object-cover"
                         :src="item.img"
-                        alt=""
+                        :alt="item.value || ''"
                       />
                     </div>
                     <p class="pt-2 uppercase text-sm md:text-base">

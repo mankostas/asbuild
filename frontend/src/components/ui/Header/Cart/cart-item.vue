@@ -2,7 +2,7 @@
   <div class="flex space-x-4 rtl:space-x-reverse pt-4">
     <div class="flex-none">
       <div class="md:w-20 md:h-20 w-14 h-14 bg-slate-200 rounded">
-        <img :src="props.item.img" class="w-full h-full object-cover p-3" />
+        <img :src="props.item.img" :alt="props.item?.title || ''" class="w-full h-full object-cover p-3" />
       </div>
     </div>
     <div class="flex-1 space-y-1 truncate">

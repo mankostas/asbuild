@@ -68,7 +68,7 @@
           <img
             :src="url"
             class="w-full object-cover h-full block rounded"
-            :alt="selectedFile?.name"
+            :alt="selectedFile?.name || ''"
           />
         </div>
 
@@ -84,7 +84,7 @@
             <img
               :src="url"
               class="object-cover w-full h-full rounded"
-              :alt="selectedFile?.name"
+              :alt="selectedFile?.name || ''"
             />
           </div>
         </div>

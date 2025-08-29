@@ -11,6 +11,7 @@
             <img
               class="h-full w-full object-contain transition-all duration-300 group-hover:scale-105"
               :src="product.img"
+              :alt="product?.title || ''"
             />
 
             <Badge

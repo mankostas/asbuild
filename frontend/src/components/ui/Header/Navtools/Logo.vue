@@ -3,12 +3,12 @@
     <img
       v-if="!themeSettingsStore.isDark"
       :src="branding.branding.logo || logoLight"
-      alt=""
+      :alt="alt || ''"
     />
     <img
       v-else
       :src="branding.branding.logo_dark || logoDark"
-      alt=""
+      :alt="alt || ''"
     />
   </router-link>
 </template>
@@ -20,4 +20,11 @@ import logoDark from '@/assets/images/logo/logo-white.svg';
 
 const themeSettingsStore = useThemeSettingsStore();
 const branding = useBrandingStore();
+const props = defineProps({
+  alt: {
+    type: String,
+    default: '',
+  },
+});
+const { alt } = props;
 </script>
