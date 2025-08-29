@@ -11,10 +11,10 @@ module.exports = {
     'eslint:recommended',
     'plugin:vue/vue3-recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:vue-a11y/recommended',
+    'plugin:vuejs-accessibility/recommended',
     'prettier',
   ],
-  plugins: ['vue', 'vue-a11y', '@typescript-eslint'],
+  plugins: ['vue', 'vuejs-accessibility', '@typescript-eslint'],
   rules: {
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
