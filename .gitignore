@@ -4,3 +4,4 @@ backend/.phpunit.result.cache
 frontend/test-results/
 laravelForReference/
 .env
+public/build/
