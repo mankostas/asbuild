@@ -11,6 +11,8 @@
       `"
       @mouseenter="$store.themeSettingsStore.isMouseHovered = true"
       @mouseleave="$store.themeSettingsStore.isMouseHovered = false"
+      @focusin="$store.themeSettingsStore.isMouseHovered = true"
+      @focusout="$store.themeSettingsStore.isMouseHovered = false"
     >
       <div
         :class="`logo-segment flex justify-between items-center bg-white dark:bg-slate-800 z-[9] py-6  sticky top-0   px-4  ${
@@ -71,11 +73,12 @@
             alt=""
           />
         </router-link>
-        <span
+        <button
           v-if="
             !$store.themeSettingsStore.sidebarCollasp ||
             $store.themeSettingsStore.isMouseHovered
           "
+          type="button"
           class="cursor-pointer text-slate-900 dark:text-white text-2xl"
           @click="
             $store.themeSettingsStore.sidebarCollasp =
@@ -92,7 +95,7 @@
                 : 'ring-2 ring-inset ring-offset-4 ring-black-900 dark:ring-slate-400 bg-slate-900 dark:bg-slate-400 dark:ring-offset-slate-700'
             "
           ></div>
-        </span>
+        </button>
       </div>
       <div
         class="h-[60px] absolute top-[80px] nav-shadow z-[1] w-full transition-all duration-200 pointer-events-none"

@@ -5,23 +5,24 @@
       :key="i"
       class="accordion shadow-base dark:shadow-none rounded-md"
     >
-      <div
-       :class="cn(
-          'flex justify-between cursor-pointer transition duration-150 font-medium w-full text-start text-base text-slate-600 dark:text-slate-300 px-8 py-4',
-          activeIndex === i ? 'bg-slate-50 dark:bg-slate-700 dark:bg-opacity-60 rounded-t-md' : 'bg-white dark:bg-slate-700 rounded-md'
-        )"
-        @click="activeIndex = activeIndex === i ? null : i"
-      >
-        {{ item.title }}
-
-        <span
+        <button
+         type="button"
          :class="cn(
-            'text-slate-900 dark:text-white text-[22px] transition-all duration-300 h-5',
-            activeIndex === i ? 'rotate-180 transform' : ''
+            'flex justify-between cursor-pointer transition duration-150 font-medium w-full text-start text-base text-slate-600 dark:text-slate-300 px-8 py-4',
+            activeIndex === i ? 'bg-slate-50 dark:bg-slate-700 dark:bg-opacity-60 rounded-t-md' : 'bg-white dark:bg-slate-700 rounded-md'
           )"
-          ><Icon icon="heroicons-outline:chevron-down"
-        /></span>
-      </div>
+          @click="activeIndex = activeIndex === i ? null : i"
+        >
+          {{ item.title }}
+
+          <span
+           :class="cn(
+              'text-slate-900 dark:text-white text-[22px] transition-all duration-300 h-5',
+              activeIndex === i ? 'rotate-180 transform' : ''
+            )"
+            ><Icon icon="heroicons-outline:chevron-down"
+          /></span>
+        </button>
       <Transition
         enter-active-class="submenu_enter-active"
         leave-active-class="submenu_leave-active"

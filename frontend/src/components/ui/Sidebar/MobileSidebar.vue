@@ -16,12 +16,13 @@
           alt=""
         />
       </router-link>
-      <span
-        class="cursor-pointer text-slate-900 dark:text-white text-2xl"
-        @click="toggleMsidebar"
+        <button
+          type="button"
+          class="cursor-pointer text-slate-900 dark:text-white text-2xl"
+          @click="toggleMsidebar"
         ><Icon icon="heroicons:x-mark"
-      /></span>
-    </div>
+        /></button>
+      </div>
 
     <perfect-scrollbar class="sidebar-menu px-4 h-[calc(100%-100px)]">
       <Navmenu :items="menuItems" />

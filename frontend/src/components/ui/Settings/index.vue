@@ -1,7 +1,8 @@
 <template>
   <div>
-    <span
+    <button
       v-if="!$store.themeSettingsStore.isOpenSettings"
+      type="button"
       class="fixed md:right-[-32px] right-0 top-1/2 z-[888] translate-y-1/2 bg-slate-800 text-slate-50 dark:bg-slate-700 dark:text-slate-300 cursor-pointer transform rotate-90 flex items-center text-sm font-medium px-2 py-2 shadow-deep rounded-b"
       @click="
         $store.themeSettingsStore.isOpenSettings =
@@ -13,7 +14,7 @@
         class="text-slate-50 text-lg animate-spin"
       />
       <span class="hidden md:inline-block ml-2">Settings</span>
-    </span>
+    </button>
     <Transition name="lefttranslate" @after-leave="persistSettings">
       <div
         v-show="$store.themeSettingsStore.isOpenSettings"
@@ -32,12 +33,13 @@
               >Customize & Preview in Real Time</span
             >
           </div>
-          <div
+          <button
+            type="button"
             class="cursor-pointer text-2xl text-slate-800 dark:text-slate-200"
             @click="$store.themeSettingsStore.isOpenSettings = false"
           >
             <Icon icon="heroicons-outline:x" />
-          </div>
+          </button>
         </header>
         <perfect-scrollbar class="h-[calc(100%-100px)] -mx-6 px-6">
           <div class="space-y-4">
@@ -62,7 +64,11 @@
       <div
         v-if="$store.themeSettingsStore.isOpenSettings"
         class="overlay bg-white bg-opacity-0 fixed inset-0 z-[999]"
+        role="button"
+        tabindex="0"
         @click="$store.themeSettingsStore.isOpenSettings = false"
+        @keydown.enter.prevent="$store.themeSettingsStore.isOpenSettings = false"
+        @keydown.space.prevent="$store.themeSettingsStore.isOpenSettings = false"
       ></div>
     </Transition>
   </div>

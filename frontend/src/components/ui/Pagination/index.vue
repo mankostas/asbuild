@@ -15,12 +15,13 @@
           type="text"
           placeholder="0"
         />
-        <div
+        <button
+          type="button"
           class="flex-0 cursor-pointer text-sm h-9 w-9 bg-slate-900 text-white flex items-center justify-center rounded"
           @click.prevent="changePage(input)"
         >
           Go
-        </div>
+        </button>
       </div>
 
       <div v-if="enableSearch && enableSelect" class="flex items-center">

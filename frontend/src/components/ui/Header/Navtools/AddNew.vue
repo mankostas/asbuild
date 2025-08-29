@@ -1,13 +1,15 @@
 <template>
   <Dropdown v-if="items.length" classMenuItems="w-[180px] top-[58px]">
-    <span
+    <button
+      type="button"
       class="lg:h-[32px] lg:w-[32px] lg:bg-slate-100 lg:dark:bg-slate-900 dark:text-white cursor-pointer rounded-full text-[20px] flex items-center justify-center"
     >
       <Icon icon="heroicons-outline:plus" />
-    </span>
+    </button>
     <template #menus>
       <MenuItem v-for="(item, i) in items" #default="{ active }" :key="i">
-        <div
+        <button
+          type="button"
           :class="[
             'px-4 py-2 text-sm flex items-center space-x-2 rtl:space-x-reverse cursor-pointer first:rounded-t last:rounded-b',
             active
@@ -18,7 +20,7 @@
         >
           <Icon :icon="item.icon" class="text-lg" />
           <span class="flex-1">{{ item.label }}</span>
-        </div>
+        </button>
       </MenuItem>
     </template>
   </Dropdown>
