@@ -10,13 +10,13 @@
       :class="`${classLabel}  ${
         horizontal ? 'flex-0 mr-6 md:w-[100px] w-[60px] break-words' : ''
       }  ltr:inline-block rtl:block  input-label `"
-      :for="name"
+      :for="inputId"
     >
       {{ label }}</label
     >
     <div class="relative" :class="horizontal ? 'flex-1' : ''">
       <textarea
-        :id="name"
+        :id="inputId"
         :name="name"
         :placeholder="placeholder"
         :class="`${classInput} input-control block w-full focus:outline-none pt-3 `"
@@ -26,7 +26,13 @@
         :disabled="disabled"
         :rows="rows"
         :validate="validate"
-        @input="$emit('update:modelValue', $event.target.value)"
+        @input="
+          ($event) => {
+            $emit('update:modelValue', $event.target.value);
+            $emit('input', $event);
+          }
+        "
+        @change="$emit('change', $event)"
       ></textarea>
 
       <div
@@ -76,12 +82,37 @@ export default {
     Icon,
   },
   props: {
-    placeholder: {
-      type: String,
-      default: "message",
+    modelValue: {
+      type: [String, Number, Boolean, Object, Array],
+      default: "",
     },
     label: {
       type: String,
+      default: "",
+    },
+    name: {
+      type: String,
+      default: "",
+    },
+    id: {
+      type: String,
+      default: "",
+    },
+    error: {
+      type: [String, Boolean],
+      default: "",
+    },
+    description: {
+      type: String,
+      default: "",
+    },
+    validate: {
+      type: [Array, String, Function],
+      default: () => [],
+    },
+    placeholder: {
+      type: String,
+      default: "message",
     },
     classLabel: {
       type: String,
@@ -91,18 +122,6 @@ export default {
       type: String,
       default: "classinput",
     },
-
-    name: {
-      type: String,
-    },
-    modelValue: {
-      type: String,
-      default: "",
-    },
-    error: {
-      type: String,
-    },
-
     isReadonly: {
       type: Boolean,
       default: false,
@@ -119,26 +138,20 @@ export default {
       type: Boolean,
       default: false,
     },
-    validate: {
-      type: String,
-    },
     msgTooltip: {
       type: Boolean,
       default: false,
     },
-    description: {
-      type: String,
-    },
   },
+  emits: ["update:modelValue", "input", "change"],
   data() {
     return {
-      types: this.type,
+      generatedId: `fld-${Math.random().toString(36).slice(2)}`,
     };
   },
-  methods: {
-    toggleType() {
-      // toggle the type of the input field
-      this.types = this.types === "text" ? "password" : "text";
+  computed: {
+    inputId() {
+      return this.id || this.generatedId;
     },
   },
 };

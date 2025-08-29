@@ -8,12 +8,12 @@
     <label
       v-if="label"
       :class="`${classLabel} inline-block input-label `"
-      :for="name"
+      :for="inputId"
     >
       {{ label }}</label
     >
     <div class="relative">
-      <slot></slot>
+      <slot :input-id="inputId"></slot>
     </div>
 
     <span
@@ -49,6 +49,7 @@ export default {
   props: {
     label: {
       type: String,
+      default: "",
     },
     classLabel: {
       type: String,
@@ -61,10 +62,15 @@ export default {
 
     name: {
       type: String,
+      default: "",
     },
-
-    error: {
+    id: {
       type: String,
+      default: "",
+    },
+    error: {
+      type: [String, Boolean],
+      default: "",
     },
 
     horizontal: {
@@ -72,7 +78,8 @@ export default {
       default: false,
     },
     validate: {
-      type: String,
+      type: [Array, String, Function],
+      default: () => [],
     },
     msgTooltip: {
       type: Boolean,
@@ -81,6 +88,17 @@ export default {
 
     description: {
       type: String,
+      default: "",
+    },
+  },
+  data() {
+    return {
+      generatedId: `fld-${Math.random().toString(36).slice(2)}`,
+    };
+  },
+  computed: {
+    inputId() {
+      return this.id || this.generatedId;
     },
   },
 };

@@ -8,25 +8,29 @@
     <label
       v-if="label"
       :class="`${classLabel} inline-block input-label `"
-      :for="name"
+      :for="inputId"
     >
       {{ label }}</label
     >
     <div class="relative">
       <div v-if="!$slots.default">
         <vSelect
-          :id="name"
+          :id="inputId"
           :name="name"
+          :modelValue="modelValue"
           :error="error"
           :readonly="isReadonly"
           :disabled="disabled"
           :validate="validate"
           :multiple="multiple"
           :options="options"
+          @update:modelValue="$emit('update:modelValue', $event)"
+          @input="$emit('input', $event)"
+          @change="$emit('change', $event)"
         >
         </vSelect>
       </div>
-      <slot></slot>
+      <slot :input-id="inputId"></slot>
       <div class="flex text-xl absolute right-[14px] top-1/2 -translate-y-1/2">
         <span v-if="error" class="text-danger-500">
           <Icon icon="heroicons-outline:information-circle" />
@@ -75,12 +79,37 @@ export default {
     Icon,
   },
   props: {
-    placeholder: {
-      type: String,
-      default: "Select Option",
+    modelValue: {
+      type: [String, Number, Boolean, Object, Array],
+      default: "",
     },
     label: {
       type: String,
+      default: "",
+    },
+    name: {
+      type: String,
+      default: "",
+    },
+    id: {
+      type: String,
+      default: "",
+    },
+    error: {
+      type: [String, Boolean],
+      default: "",
+    },
+    description: {
+      type: String,
+      default: "",
+    },
+    validate: {
+      type: [Array, String, Function],
+      default: () => [],
+    },
+    placeholder: {
+      type: String,
+      default: "Select Option",
     },
     classLabel: {
       type: String,
@@ -89,17 +118,6 @@ export default {
     classInput: {
       type: String,
       default: "classinput",
-    },
-
-    name: {
-      type: String,
-    },
-    modelValue: {
-      // type: String || Array,
-      default: "",
-    },
-    error: {
-      type: String,
     },
 
     isReadonly: {
@@ -114,16 +132,9 @@ export default {
       type: Boolean,
       default: false,
     },
-    validate: {
-      type: String,
-    },
     msgTooltip: {
       type: Boolean,
       default: false,
-    },
-
-    description: {
-      type: String,
     },
 
     multiple: {
@@ -132,6 +143,17 @@ export default {
     },
     options: {
       type: Array,
+    },
+  },
+  emits: ["update:modelValue", "input", "change"],
+  data() {
+    return {
+      generatedId: `fld-${Math.random().toString(36).slice(2)}`,
+    };
+  },
+  computed: {
+    inputId() {
+      return this.id || this.generatedId;
     },
   },
 };
