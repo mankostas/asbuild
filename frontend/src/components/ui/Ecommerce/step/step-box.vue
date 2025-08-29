@@ -23,8 +23,14 @@
 import Icon from "@/components/ui/Icon";
 
 const props = defineProps({
-  steps: Object,
-  stepNumber: Number,
+  steps: {
+    type: Object,
+    required: true,
+  },
+  stepNumber: {
+    type: Number,
+    required: true,
+  },
 });
 </script>
 

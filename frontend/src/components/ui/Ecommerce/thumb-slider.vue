@@ -87,8 +87,14 @@ const setThumbsSwiper = (swiper) => {
 const modules = [Navigation, Thumbs];
 
 const props = defineProps({
-  product: Object,
-  id: String,
+  product: {
+    type: Object,
+    required: true,
+  },
+  id: {
+    type: String,
+    default: "",
+  },
 });
 </script>
 

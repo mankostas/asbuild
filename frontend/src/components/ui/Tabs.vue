@@ -23,7 +23,13 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ modelValue: string; tabs: { id: string; label: string }[] }>()
+withDefaults(
+  defineProps<{ modelValue: string; tabs: { id: string; label: string }[] }>(),
+  {
+    modelValue: '',
+    tabs: () => [],
+  },
+)
 const emit = defineEmits(['update:modelValue'])
 function update(id: string) {
   emit('update:modelValue', id)

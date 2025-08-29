@@ -188,7 +188,9 @@ export default defineComponent({
     },
   },
 
-  setup(props) {
+  emits: ["close"],
+
+  setup(props, { emit }) {
     const isOpen = ref(props.activeModal);
 
     // open
@@ -198,6 +200,7 @@ export default defineComponent({
     // close
     const closeModal = () => {
       isOpen.value = false;
+      emit("close");
     };
 
     return { closeModal, openModal, isOpen };

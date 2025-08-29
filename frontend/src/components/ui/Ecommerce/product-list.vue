@@ -118,7 +118,10 @@ import { cartStore } from "@/store/cart";
 const cart = cartStore();
 
 const props = defineProps({
-  product: Object,
+  product: {
+    type: Object,
+    required: true,
+  },
 });
 </script>
 

@@ -138,9 +138,11 @@ export default defineComponent({
     },
     pageChanged: {
       type: Function,
+      default: null,
     },
     perPageChanged: {
       type: Function,
+      default: null,
     },
     current: {
       type: Number,
@@ -179,6 +181,7 @@ export default defineComponent({
       default: "justify-between",
     },
   },
+  emits: ["page-changed"],
   data() {
     return {
       input: "",
