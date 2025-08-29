@@ -4,7 +4,7 @@
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
     role="dialog"
     aria-modal="true"
-    @keydown.escape.prevent.stop="close"
+    tabindex="0"
   >
     <div
       ref="panel"
@@ -41,6 +41,18 @@ function trap(e: FocusEvent) {
   }
 }
 
-onMounted(() => document.addEventListener('focusin', trap));
-onUnmounted(() => document.removeEventListener('focusin', trap));
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    close();
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('focusin', trap);
+  document.addEventListener('keydown', handleKeydown);
+});
+onUnmounted(() => {
+  document.removeEventListener('focusin', trap);
+  document.removeEventListener('keydown', handleKeydown);
+});
 </script>
