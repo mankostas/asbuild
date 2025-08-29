@@ -635,6 +635,66 @@ paths:
       responses:
         '204':
           description: Marked read
+
+  /task-board:
+    get:
+      summary: Get tasks grouped by status
+      parameters:
+        - name: type_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Board columns
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        status:
+                          $ref: '#/components/schemas/TaskStatus'
+                        tasks:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/Task'
+                        meta:
+                          type: object
+                          properties:
+                            total:
+                              type: integer
+
+  /task-board/move:
+    patch:
+      summary: Move task on board
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [task_id, status_slug, index]
+              properties:
+                task_id:
+                  type: integer
+                status_slug:
+                  type: string
+                index:
+                  type: integer
+      responses:
+        '200':
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '422':
+          description: Invalid move
 components:
   schemas:
     Task:

@@ -83,6 +83,18 @@ export const routes = [
     },
   },
   {
+    path: '/tasks/board',
+    name: 'tasks.board',
+    component: () => import('@/views/tasks/TaskBoard.vue'),
+    meta: {
+      requiresAuth: true,
+      requiredAbilities: ['tasks.view', 'tasks.update'],
+      breadcrumb: 'routes.taskBoard',
+      title: 'Task Board',
+      layout: 'app',
+    },
+  },
+  {
     path: '/tasks/:id',
     name: 'tasks.details',
     component: () => import('@/views/tasks/TaskDetails.vue'),
