@@ -1,9 +1,11 @@
 <template>
+  <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -->
   <div
     v-if="open"
     class="fixed inset-0 z-50 flex items-start justify-center p-4"
     role="dialog"
     aria-modal="true"
+    tabindex="-1"
     @keydown.esc="emit('close')"
   >
     <button
@@ -15,17 +17,13 @@
       ref="panel"
       class="relative z-10 w-full max-w-md rounded-2xl bg-background p-4 shadow-lg"
     >
-      <label
-        for="command-palette-search"
-        class="sr-only"
-        >{{ t('commandPalette.placeholder') }}</label
-      >
       <input
         id="command-palette-search"
         ref="input"
         v-model="query"
         type="text"
         :placeholder="t('commandPalette.placeholder')"
+        :aria-label="t('commandPalette.placeholder')"
         class="mb-2 w-full rounded border border-foreground/20 bg-background px-3 py-2 focus-ring"
       />
       <ul class="max-h-60 overflow-auto">

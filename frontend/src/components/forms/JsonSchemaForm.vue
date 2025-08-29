@@ -1,15 +1,16 @@
 <template>
   <div v-if="schema && schema.properties" class="grid grid-cols-2 gap-4">
     <div v-for="(prop, name) in schema.properties" :key="name" :class="['mb-4', colSpanClass(prop)]">
-      <label :for="name" class="block font-medium mb-1">
+      <span class="block font-medium mb-1">
         {{ name }}<span v-if="isRequired(name)" class="text-red-600">*</span>
-      </label>
+      </span>
       <template v-if="prop.enum">
         <select
           :id="name"
           v-model="form[name]"
           class="border rounded p-2 w-full"
           :disabled="readonly"
+          :aria-label="name"
           @change="validateField(name)"
         >
           <option value="" disabled>Select...</option>
@@ -24,6 +25,7 @@
           type="text"
           class="border rounded p-2 w-full"
           :readonly="readonly"
+          :aria-label="name"
           @input="validateField(name)"
         />
         <input
@@ -33,6 +35,7 @@
           type="number"
           class="border rounded p-2 w-full"
           :readonly="readonly"
+          :aria-label="name"
           @input="validateField(name)"
         />
         <input
@@ -42,6 +45,7 @@
           type="date"
           class="border rounded p-2 w-full"
           :readonly="readonly"
+          :aria-label="name"
           @input="validateField(name)"
         />
         <input
@@ -51,6 +55,7 @@
           type="time"
           class="border rounded p-2 w-full"
           :readonly="readonly"
+          :aria-label="name"
           @input="validateField(name)"
         />
         <input
@@ -59,6 +64,7 @@
           v-model="form[name]"
           type="checkbox"
           :disabled="readonly"
+          :aria-label="name"
           @change="validateField(name)"
         />
         <AssigneePicker

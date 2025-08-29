@@ -5,15 +5,15 @@
       showSuccessIcon ? 'is-valid' : ''
     } `"
   >
-    <label
+    <span
       v-if="label"
+      :id="`${inputId}-label`"
       :class="`${classLabel} ${
         horizontal ? 'flex-0 mr-6 md:w-[100px] w-[60px] break-words' : ''
       }  ltr:inline-block rtl:block input-label `"
-      :for="inputId"
     >
       {{ label }}
-    </label>
+    </span>
     <div class="relative" :class="horizontal ? 'flex-1' : ''">
       <input
         v-if="!isMask"
@@ -27,6 +27,7 @@
         :value="modelValue"
         :readonly="isReadonly"
         :disabled="disabled"
+        :aria-labelledby="label ? `${inputId}-label` : null"
         @input="
           ($event) => {
             $emit('update:modelValue', $event.target.value);
@@ -46,6 +47,7 @@
         :disabled="disabled"
         :options="options"
         modelValue="modelValue"
+        :aria-labelledby="label ? `${inputId}-label` : null"
         @input="
           ($event) => {
             $emit('update:modelValue', $event.target.value);

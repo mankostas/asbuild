@@ -16,8 +16,8 @@
       />
       <div class="space-y-3">
         <div class="card border dark:border-slate-700 rounded-lg p-5">
-          <label class="flex gap-1 items-center cursor-pointer">
-            <Radio v-model="picked1" name="x" value="A" />
+          <div class="flex gap-1 items-center cursor-pointer">
+            <Radio v-model="picked1" name="x" value="A" aria-label="Mohakhali DOHS" />
             <div class="space-y-1">
               <p class="font-medium text-base rtl:text-right">Mohakhali DOHS</p>
               <p class="font-normal text-sm text-slate-500 flex items-center">
@@ -29,11 +29,11 @@
                 +880123456789
               </p>
             </div>
-          </label>
+          </div>
         </div>
         <div class="card border dark:border-slate-700 rounded-lg p-5">
-          <label class="flex gap-1 items-center cursor-pointer">
-            <Radio v-model="picked1" name="x" value="B" />
+          <div class="flex gap-1 items-center cursor-pointer">
+            <Radio v-model="picked1" name="x" value="B" aria-label="Mohakhali DOHS" />
             <div class="space-y-1">
               <p class="font-medium text-base rtl:text-right">Mohakhali DOHS</p>
               <p class="font-normal text-sm text-slate-500 flex items-center">
@@ -45,11 +45,11 @@
                 +880123456789
               </p>
             </div>
-          </label>
+          </div>
         </div>
         <div class="card border dark:border-slate-700 rounded-lg p-5">
-          <label class="flex gap-1 items-center cursor-pointer">
-            <Radio v-model="picked1" name="x" value="C" />
+          <div class="flex gap-1 items-center cursor-pointer">
+            <Radio v-model="picked1" name="x" value="C" aria-label="Mohakhali DOHS" />
             <div class="space-y-1">
               <p class="font-medium text-base rtl:text-right">Mohakhali DOHS</p>
               <p class="font-normal text-sm text-slate-500 flex items-center">
@@ -61,7 +61,7 @@
                 +880123456789
               </p>
             </div>
-          </label>
+          </div>
         </div>
       </div>
       <div class="col-span-12 flex justify-end">

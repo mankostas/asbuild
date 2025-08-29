@@ -11,68 +11,77 @@
       class="space-y-4 flex flex-col justify-between"
       @submit.prevent="submit"
     >
+      <span class="sr-only">Address</span>
       <Textarea
-        label="Address"
+        id="address"
         name="pn4"
         placeholder="Your Address"
         horizontal
+        aria-label="Address"
       />
       <div class="flex">
-        <p
+        <span
           class="flex-none flex-0 mr-6 md:w-[100px] break-words ltr:inline-block rtl:block input-label"
         >
           Country
-        </p>
+        </span>
         <div class="flex-1 w-full">
           <Select
             :options="options"
             placeholder="Select Your Country"
             classLabel="!w-[150px]"
+            aria-label="Country"
           />
         </div>
       </div>
       <div class="flex">
-        <p
+        <span
           class="flex-none flex-0 mr-6 md:w-[100px] break-words ltr:inline-block rtl:block input-label"
         >
           State
-        </p>
+        </span>
         <div class="flex-1 w-full">
           <Select
             :options="options"
             placeholder="Select Your State"
             classLabel="!w-[150px]"
+            aria-label="State"
           />
         </div>
       </div>
       <div class="flex">
-        <p
+        <span
           class="flex-none flex-0 mr-6 md:w-[100px] break-words ltr:inline-block rtl:block input-label"
         >
           City
-        </p>
+        </span>
         <div class="flex-1 w-full">
           <Select
             :options="options"
             placeholder="Select Your City"
             classLabel="!w-[150px]"
+            aria-label="City"
           />
         </div>
       </div>
 
+      <span class="sr-only">Postal Code</span>
       <InputGroup
+        id="postal-code"
         type="text"
-        label="Postal Code"
         name="ps-1"
         placeholder="Your Postal Code"
         horizontal
+        aria-label="Postal Code"
       />
+      <span class="sr-only">Phone No</span>
       <InputGroup
+        id="phone-no"
         type="text"
-        label="Phone No"
         name="ps-1"
         placeholder="+880"
         horizontal
+        aria-label="Phone No"
       />
 
       <div class="col-span-12 flex justify-end">

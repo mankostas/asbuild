@@ -77,12 +77,12 @@
           class="flex flex-wrap space-x-5 rtl:space-x-reverse"
         >
           <div
-            v-for="(url, index) in multipleurls"
+            v-for="(imgUrl, index) in multipleurls"
             :key="index"
             class="xl:w-1/5 md:w-1/3 w-1/2 rounded mt-6"
           >
             <img
-              :src="url"
+              :src="imgUrl"
               class="object-cover w-full h-full rounded"
               :alt="selectedFile?.name || ''"
             />

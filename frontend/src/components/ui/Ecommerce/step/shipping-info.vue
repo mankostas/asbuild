@@ -2,8 +2,8 @@
   <div>
     <div class="bg-white dark:bg-slate-800">
       <div class="rounded p-5 space-y-5">
-        <label class="flex border dark:border-slate-700 rounded p-5">
-          <Radio v-model="picked1" name="x" value="A" checked />
+        <div class="flex border dark:border-slate-700 rounded p-5">
+          <Radio v-model="picked1" name="x" value="A" checked aria-label="Address 1" />
 
           <div
             class="flex flex-start -mt-1 space-x-3 md:space-x-5 rtl:space-x-reverse"
@@ -29,10 +29,10 @@
               <p>9876543201</p>
             </div>
           </div>
-        </label>
+        </div>
 
-        <label class="flex border dark:border-slate-700 rounded p-5">
-          <Radio v-model="picked1" name="x" value="B" />
+        <div class="flex border dark:border-slate-700 rounded p-5">
+          <Radio v-model="picked1" name="x" value="B" aria-label="Address 2" />
           <div
             class="flex flex-start -mt-1 space-x-3 md:space-x-5 rtl:space-x-reverse"
           >
@@ -57,7 +57,7 @@
               <p>9876543201</p>
             </div>
           </div>
-        </label>
+        </div>
 
         <button
           class="w-full flex flex-col justify-center items-center font-normal text-slate-800 dark:text-slate-300 p-5 space-y-3 border dark:border-slate-700 rounded bg-slate-100 dark:bg-slate-800"

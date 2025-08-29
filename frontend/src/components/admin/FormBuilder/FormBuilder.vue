@@ -1,11 +1,12 @@
 <template>
   <div>
-    <label :for="ids.schema" class="block mb-2">Schema</label>
+    <span class="block mb-2">Schema</span>
     <textarea
-      :id="ids.schema"
+      id="formbuilder-schema"
       v-model="json"
       class="border p-2 w-full h-64"
       placeholder="Enter JSON schema"
+      aria-label="Schema"
     ></textarea>
     <div class="mt-2">
       <button class="bg-blue-600 text-white px-4 py-2" @click="emitSchema">
@@ -20,10 +21,6 @@ import { ref, watch } from 'vue';
 
 const props = defineProps<{ modelValue: any }>();
 const emit = defineEmits(['update:modelValue', 'save']);
-
-const ids = {
-  schema: 'formbuilder-schema',
-};
 
 const json = ref(JSON.stringify(props.modelValue || {}, null, 2));
 
