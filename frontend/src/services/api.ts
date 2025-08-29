@@ -83,10 +83,10 @@ api.interceptors.response.use(
     }
 
     if (status === 401) {
+      const auth = authGetter ? authGetter() : null;
       const isRefresh = config.url?.includes('/auth/refresh');
-      if (!isRefresh && !config._retry && authGetter) {
+      if (!isRefresh && !config._retry && auth) {
         config._retry = true;
-        const auth = authGetter();
         if (auth.refreshToken) {
           try {
             await auth.refresh();
@@ -96,8 +96,9 @@ api.interceptors.response.use(
           } catch (e) {}
         }
       }
-      notify.unauthorized();
-      const auth = authGetter ? authGetter() : null;
+      if (auth?.accessToken) {
+        notify.unauthorized();
+      }
       await auth?.logout?.(true);
       if (window.location.pathname !== '/auth/login') {
         const intent =
