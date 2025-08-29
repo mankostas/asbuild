@@ -37,10 +37,16 @@
       </div>
       <div>
         <label
+          :for="ids.collapse"
           :class="menucollaspse ? 'bg-primary-500' : 'bg-secondary-500'"
           class="relative inline-flex h-6 w-[46px] items-center rounded-full transition-all duration-150 cursor-pointer"
         >
-          <input v-model="menucollaspse" type="checkbox" class="hidden" />
+          <input
+            :id="ids.collapse"
+            v-model="menucollaspse"
+            type="checkbox"
+            class="hidden"
+          />
           <span
             :class="
               menucollaspse
@@ -61,10 +67,16 @@
       </div>
       <div>
         <label
+          :for="ids.hidden"
           :class="menuHideen ? 'bg-primary-500' : 'bg-secondary-500'"
           class="relative inline-flex h-6 w-[46px] items-center rounded-full transition-all duration-150 cursor-pointer"
         >
-          <input v-model="menuHideen" type="checkbox" class="hidden" />
+          <input
+            :id="ids.hidden"
+            v-model="menuHideen"
+            type="checkbox"
+            class="hidden"
+          />
           <span
             :class="
               menuHideen
@@ -95,6 +107,10 @@ export default {
           label: "Horizontal",
         },
       ],
+      ids: {
+        collapse: 'menu-collapsed',
+        hidden: 'menu-hidden',
+      },
     };
   },
   watch: {
