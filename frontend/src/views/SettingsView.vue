@@ -1,17 +1,17 @@
 <template>
   <div class="max-w-2xl mx-auto">
     <Tabs v-model="active" :tabs="tabs">
-      <template #default="{ active }">
-        <div v-if="active === 'profile'">
+      <template #default="{ active: slotActive }">
+        <div v-if="slotActive === 'profile'">
           <ProfileForm />
         </div>
-        <div v-else-if="active === 'branding'">
+        <div v-else-if="slotActive === 'branding'">
           <BrandingForm />
         </div>
-        <div v-else-if="active === 'footer'">
+        <div v-else-if="slotActive === 'footer'">
           <FooterForm />
         </div>
-        <div v-else-if="active === 'notifications'" class="space-y-4">
+        <div v-else-if="slotActive === 'notifications'" class="space-y-4">
           <div
             v-for="pref in prefs"
             :key="pref.category"
@@ -28,7 +28,7 @@
             >Save</Button
           >
         </div>
-        <div v-else-if="active === 'gdpr'" class="space-y-4">
+        <div v-else-if="slotActive === 'gdpr'" class="space-y-4">
           <router-link class="text-primary-500 underline" to="/gdpr"
             >Manage your data</router-link
           >
