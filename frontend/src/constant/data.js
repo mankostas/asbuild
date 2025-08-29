@@ -53,6 +53,7 @@ export const menuItems = [
     title: "Reports",
     icon: "heroicons-outline:chart-bar",
     link: "reports.kpis",
+    requiredAbilities: ["reports.view"],
     admin: true,
   },
   {
@@ -143,6 +144,7 @@ export const topMenu = [
     title: "Reports",
     icon: "heroicons-outline:chart-bar",
     link: "reports.kpis",
+    requiredAbilities: ["reports.view"],
     admin: true,
   },
   {

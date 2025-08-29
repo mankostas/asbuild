@@ -337,6 +337,7 @@ export const routes = [
       breadcrumb: 'routes.reports',
       title: 'Reports',
       layout: 'app',
+      requiredAbilities: ['reports.view'],
     },
   },
   {
@@ -350,6 +351,7 @@ export const routes = [
       title: 'Reports - KPIs',
       layout: 'app',
       groupParent: 'reports',
+      requiredAbilities: ['reports.view'],
     },
   },
   {
