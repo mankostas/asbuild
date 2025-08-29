@@ -5,3 +5,7 @@ frontend/test-results/
 laravelForReference/
 .env
 public/build/
+
+backend/.env
+frontend/.env
+frontend/dist/
