@@ -23,7 +23,8 @@
         role="button"
         tabindex="0"
         @click="$store.themeSettingsStore.mobielSidebar = false"
-        @keydown.enter="$store.themeSettingsStore.mobielSidebar = false"
+        @keydown.enter.prevent="$store.themeSettingsStore.mobielSidebar = false"
+        @keydown.space.prevent="$store.themeSettingsStore.mobielSidebar = false"
       ></div>
     </Transition>
     <!-- mobile sidebar -->

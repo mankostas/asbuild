@@ -6,7 +6,11 @@
     aria-modal="true"
     @keydown.esc="emit('close')"
   >
-    <div class="fixed inset-0 bg-black/50" @click="emit('close')"></div>
+    <button
+      type="button"
+      class="fixed inset-0 bg-black/50"
+      @click="emit('close')"
+    ></button>
     <div
       ref="panel"
       class="relative z-10 w-full max-w-md rounded-2xl bg-background p-4 shadow-lg"
@@ -22,14 +26,19 @@
         <li
           v-for="(a, i) in filtered"
           :key="a.id"
-          :class="[
-            'cursor-pointer rounded px-2 py-1',
-            i === index ? 'bg-foreground/10' : '',
-          ]"
-          @mouseenter="index = i"
-          @click="select(a)"
         >
-          {{ a.label }}
+          <button
+            type="button"
+            :class="[
+              'cursor-pointer rounded px-2 py-1',
+              i === index ? 'bg-foreground/10' : '',
+            ]"
+            @mouseenter="index = i"
+            @focusin="index = i"
+            @click="select(a)"
+          >
+            {{ a.label }}
+          </button>
         </li>
         <li v-if="!filtered.length" class="p-2 text-sm text-foreground/50">
           {{ t('commandPalette.empty') }}

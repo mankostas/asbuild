@@ -36,14 +36,15 @@
         {{ item.title }}
       </div>
       <!-- !!sub menu parent li !! -->
-      <div
-        v-else
-        class="menu-link"
-        :class="
-          activeSubmenu === i ? 'parent_active not-collapsed' : 'collapsed'
-        "
-        @click="toggleSubmenu(i)"
-      >
+        <button
+          v-else
+          type="button"
+          class="menu-link"
+          :class="
+            activeSubmenu === i ? 'parent_active not-collapsed' : 'collapsed'
+          "
+          @click="toggleSubmenu(i)"
+        >
         <div class="flex-1 flex items-start">
           <span v-show="item.icon" class="menu-icon">
             <Icon :icon="item.icon"
@@ -62,8 +63,8 @@
             <Icon icon="heroicons-outline:chevron-right" />
           </div>
         </div>
-      </div>
-      <Transition
+        </button>
+        <Transition
         enter-active-class="submenu_enter-active"
         leave-active-class="submenu_leave-active"
         @before-enter="beforeEnter"

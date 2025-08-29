@@ -22,7 +22,7 @@
     </div>
     <template #menus>
       <MenuItem v-for="(item, i) in ProfileMenu" #default="{ active }" :key="i">
-        <div
+        <button
           type="button"
           :class="
             active
@@ -38,7 +38,7 @@
           <div class="flex-1 text-sm">
             {{ item.label }}
           </div>
-        </div>
+        </button>
       </MenuItem>
     </template>
   </Dropdown>

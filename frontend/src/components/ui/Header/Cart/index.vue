@@ -20,12 +20,13 @@
               Total Price ${{ cart.totalPrice }}
             </span>
           </div>
-          <div
+          <button
+            type="button"
             class="cursor-pointer text-2xl text-slate-800 dark:text-slate-200"
             @click="toggleCartDrawer"
           >
             <Icon icon="heroicons-outline:x" />
-          </div>
+          </button>
         </header>
         <div
           class="divide-y divide-slate-200 dark:divide-slate-700 flex-1 flex flex-col"

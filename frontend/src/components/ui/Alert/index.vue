@@ -11,13 +11,14 @@
       <div class="flex-1">
         <slot></slot>
       </div>
-      <div
+      <button
         v-if="dismissible"
+        type="button"
         class="flex-0 text-2xl cursor-pointer"
         @click="destroy"
       >
         <Icon icon="heroicons-outline:x" />
-      </div>
+      </button>
     </div>
   </div>
 </template>
