@@ -9,7 +9,9 @@
         v-if="enableSearch && enableInput"
         class="flex items-center space-x-2 rtl:space-x-reverse"
       >
+        <label :for="ids.page" class="text-sm">Page</label>
         <input
+          :id="ids.page"
           v-model.number="input"
           class="form-control w-9 overflow-auto h-9"
           type="text"
@@ -28,6 +30,7 @@
         <Select
           v-model.number="input2"
           placeholder="Go"
+          label="Page"
           classInput=" w-[60px] h-9 "
           :options="options"
           @change="changePage(input2)"
@@ -180,6 +183,9 @@ export default defineComponent({
     return {
       input: "",
       input2: null,
+      ids: {
+        page: 'pagination-page',
+      },
     };
   },
   computed: {

@@ -2,7 +2,9 @@
   <div>
     <div class="flex items-center justify-between mb-4">
       <div>
+        <label :for="ids.scope" class="sr-only">Scope</label>
         <select
+          :id="ids.scope"
           v-model="scope"
           class="border rounded p-2"
         >
@@ -87,6 +89,7 @@ const tenantStore = useTenantStore();
 const tableKey = ref(0);
 const scope = ref(auth.isSuperAdmin ? 'all' : 'tenant');
 const assignRoleId = ref<number | null>(null);
+const ids = { scope: 'roles-scope' };
 
 const columns = [
   { label: 'ID', field: 'id', sortable: true },

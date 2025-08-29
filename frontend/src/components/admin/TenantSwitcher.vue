@@ -1,17 +1,21 @@
 <template>
-  <select
-    v-model="selected"
-    class="border rounded px-2 py-1 text-sm"
-    @change="onChange"
-  >
-    <option
-      v-for="t in tenantStore.tenants"
-      :key="t.id"
-      :value="t.id"
+  <div>
+    <label :for="ids.tenant" class="block mb-1 text-sm">Tenant</label>
+    <select
+      :id="ids.tenant"
+      v-model="selected"
+      class="border rounded px-2 py-1 text-sm"
+      @change="onChange"
     >
-      {{ t.name }}
-    </option>
-  </select>
+      <option
+        v-for="t in tenantStore.tenants"
+        :key="t.id"
+        :value="t.id"
+      >
+        {{ t.name }}
+      </option>
+    </select>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -21,6 +25,7 @@ import { useAuthStore } from '@/stores/auth';
 const tenantStore = useTenantStore();
 const authStore = useAuthStore();
 const selected = ref(tenantStore.currentTenantId);
+const ids = { tenant: 'tenant-switcher' };
 
 onMounted(async () => {
   if (!tenantStore.tenants.length) {

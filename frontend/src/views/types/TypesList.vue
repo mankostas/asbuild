@@ -1,15 +1,19 @@
 <template>
   <div>
       <div class="flex items-center justify-between mb-4">
-        <select
-          v-model="scope"
-          class="border rounded px-2 py-1"
-          @change="changeScope"
-        >
-          <option v-for="opt in scopeOptions" :key="opt.value" :value="opt.value">
-            {{ opt.label }}
-          </option>
-        </select>
+        <div>
+          <label :for="ids.scope" class="sr-only">Scope</label>
+          <select
+            :id="ids.scope"
+            v-model="scope"
+            class="border rounded px-2 py-1"
+            @change="changeScope"
+          >
+            <option v-for="opt in scopeOptions" :key="opt.value" :value="opt.value">
+              {{ opt.label }}
+            </option>
+          </select>
+        </div>
         <RouterLink
           v-if="can('types.create') || can('types.manage')"
           class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
@@ -85,6 +89,7 @@ const scope = ref<'tenant' | 'global' | 'all'>("tenant");
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
 const typesStore = useTypesStore();
+const ids = { scope: 'types-scope' };
 
 if (auth.isSuperAdmin) {
   scope.value = 'all';

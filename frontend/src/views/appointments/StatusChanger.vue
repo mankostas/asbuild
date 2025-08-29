@@ -4,6 +4,7 @@
       v-model="selected"
       :options="options"
       placeholder="Change status"
+      label="Status"
       classInput="min-w-[160px]"
     />
     <Button

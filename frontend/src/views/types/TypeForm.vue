@@ -42,16 +42,34 @@
                   >
                     <div class="flex items-center gap-2">
                       <span class="cursor-move handle text-gray-400">≡</span>
-                      <input v-model="element.name" class="border rounded p-1 w-32" placeholder="name" />
-                      <input v-model="element.label" class="border rounded p-1 w-32" placeholder="label" />
-                      <select v-model="element.typeKey" class="border rounded p-1">
+                      <input
+                        v-model="element.name"
+                        class="border rounded p-1 w-32"
+                        placeholder="name"
+                        aria-label="Field name"
+                      />
+                      <input
+                        v-model="element.label"
+                        class="border rounded p-1 w-32"
+                        placeholder="label"
+                        aria-label="Field label"
+                      />
+                      <select
+                        v-model="element.typeKey"
+                        class="border rounded p-1"
+                        aria-label="Field type"
+                      >
                         <option v-for="t in fieldTypes" :key="t.key" :value="t.key">{{ t.label }}</option>
                       </select>
                       <label class="flex items-center gap-1 text-sm">
                         <input v-model="element.required" type="checkbox" />
                         required
                       </label>
-                      <select v-model.number="element.cols" class="border rounded p-1 w-24">
+                      <select
+                        v-model.number="element.cols"
+                        class="border rounded p-1 w-24"
+                        aria-label="Column span"
+                      >
                         <option :value="2">Full</option>
                         <option :value="1">Half</option>
                       </select>

@@ -10,11 +10,26 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="p in prefs" :key="p.name" class="border-t">
+        <tr v-for="(p, i) in prefs" :key="p.name" class="border-t">
           <td class="p-2 capitalize">{{ p.name }}</td>
-          <td class="p-2"><input v-model="p.inapp" type="checkbox" /></td>
-          <td class="p-2"><input v-model="p.email" type="checkbox" /></td>
-          <td class="p-2"><input v-model="p.sms" type="checkbox" /></td>
+          <td class="p-2">
+            <label :for="`inapp-${i}`" class="sr-only"
+              >In-app for {{ p.name }}</label
+            >
+            <input :id="`inapp-${i}`" v-model="p.inapp" type="checkbox" />
+          </td>
+          <td class="p-2">
+            <label :for="`email-${i}`" class="sr-only"
+              >Email for {{ p.name }}</label
+            >
+            <input :id="`email-${i}`" v-model="p.email" type="checkbox" />
+          </td>
+          <td class="p-2">
+            <label :for="`sms-${i}`" class="sr-only"
+              >SMS for {{ p.name }}</label
+            >
+            <input :id="`sms-${i}`" v-model="p.sms" type="checkbox" />
+          </td>
         </tr>
       </tbody>
     </table>

@@ -4,13 +4,16 @@
       <Textinput v-model="form.name" label="Name" :error="errors.name" />
       <Textinput v-model="form.description" label="Description" :error="errors.description" />
       <VueSelect label="Employees">
-        <vSelect
-          v-model="selectedEmployees"
-          :options="employeeOptions"
-          :reduce="(e: any) => e.id"
-          label="name"
-          multiple
-        />
+        <template #default="{ inputId }">
+          <vSelect
+            :id="inputId"
+            v-model="selectedEmployees"
+            :options="employeeOptions"
+            :reduce="(e: any) => e.id"
+            label="name"
+            multiple
+          />
+        </template>
       </VueSelect>
       <Button
         type="submit"
