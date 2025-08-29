@@ -12,25 +12,25 @@
       </div>
     <div class="flex gap-4 mb-4">
       <div class="flex flex-col">
-        <label :for="ids.status" class="mb-1 text-sm">Status</label>
-        <select :id="ids.status" v-model="statusFilter" class="border rounded p-2">
+        <label for="appointments-status" class="mb-1 text-sm">Status</label>
+        <select id="appointments-status" v-model="statusFilter" class="border rounded p-2">
           <option value="">All Statuses</option>
           <option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
         </select>
       </div>
       <div class="flex flex-col">
-        <label :for="ids.start" class="mb-1 text-sm">Start Date</label>
+        <label for="appointments-start" class="mb-1 text-sm">Start Date</label>
         <input
-          :id="ids.start"
+          id="appointments-start"
           v-model="startDate"
           type="date"
           class="border rounded p-2"
         />
       </div>
       <div class="flex flex-col">
-        <label :for="ids.end" class="mb-1 text-sm">End Date</label>
+        <label for="appointments-end" class="mb-1 text-sm">End Date</label>
         <input
-          :id="ids.end"
+          id="appointments-end"
           v-model="endDate"
           type="date"
           class="border rounded p-2"
@@ -98,11 +98,6 @@ const statusFilter = ref('');
 const startDate = ref('');
 const endDate = ref('');
 const tableKey = ref(0);
-const ids = {
-  status: 'appointments-status',
-  start: 'appointments-start',
-  end: 'appointments-end',
-};
 
 const statusOptions = ref<string[]>([]);
 

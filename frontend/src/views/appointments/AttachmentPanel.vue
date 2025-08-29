@@ -1,8 +1,8 @@
 <template>
   <Card>
     <div class="mb-4">
-      <label :for="ids.file" class="block mb-1">Attachment</label>
-      <input :id="ids.file" type="file" @change="onFileChange" />
+      <label for="attachment-file" class="block mb-1">Attachment</label>
+      <input id="attachment-file" type="file" @change="onFileChange" />
     </div>
     <ul class="text-sm">
       <li v-for="att in attachments" :key="att.id">
@@ -20,7 +20,6 @@ import Card from '@/components/ui/Card/index.vue';
 
 const props = defineProps<{ appointmentId: number }>();
 const attachments = ref<any[]>([]);
-const ids = { file: 'attachment-file' };
 
 async function load() {
   const { data } = await api.get(`/appointments/${props.appointmentId}`);

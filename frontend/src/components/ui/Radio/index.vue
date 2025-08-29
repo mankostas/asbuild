@@ -1,21 +1,20 @@
 <template>
   <div>
-    <input
-      :id="inputId"
-      v-model="localValue"
-      type="radio"
-      class="hidden"
-      :disabled="disabled"
-      :name="name"
-      :value="value"
-      v-bind="$attrs"
-      @change="onChange"
-    />
     <label
-      class="flex items-center"
-      :for="inputId"
       :class="disabled ? ' cursor-not-allowed opacity-50' : 'cursor-pointer'"
+      class="flex items-center"
     >
+      <input
+        :id="inputId"
+        v-model="localValue"
+        type="radio"
+        class="hidden"
+        :disabled="disabled"
+        :name="name"
+        :value="value"
+        v-bind="$attrs"
+        @change="onChange"
+      />
       <span
         :class="
           localValue === value

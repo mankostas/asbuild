@@ -29,12 +29,13 @@
       classInput="h-[48px]"
     />
 
-    <label class="cursor-pointer flex items-start">
-      <input
-        type="checkbox"
-        class="hidden"
-        @change="() => (checkbox = !checkbox)"
-      />
+    <input
+      id="signup-accept"
+      type="checkbox"
+      class="hidden"
+      @change="() => (checkbox = !checkbox)"
+    />
+    <label for="signup-accept" class="cursor-pointer flex items-start">
       <span
         class="h-4 w-4 border rounded inline-flex mr-3 relative flex-none top-1 transition-all duration-150"
         :class="

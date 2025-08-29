@@ -27,15 +27,15 @@
       </div>
 
       <div v-if="enableSearch && enableSelect" class="flex items-center">
+        <label :for="ids.select" class="text-sm">Page</label>
         <Select
+          :id="ids.select"
           v-model.number="input2"
           placeholder="Go"
-          label="Page"
           classInput=" w-[60px] h-9 "
           :options="options"
           @change="changePage(input2)"
-        >
-        </Select>
+        />
 
         <span class="text-sm text-slate-500 inline-block ltr:ml-2 rtl:mr-2">
           of {{ perPage }} entries</span
@@ -188,6 +188,7 @@ export default defineComponent({
       input2: null,
       ids: {
         page: 'pagination-page',
+        select: 'pagination-select',
       },
     };
   },

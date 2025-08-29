@@ -9,6 +9,7 @@
       ${$store.themeSettingsStore.isMouseHovered ? 'sidebar-hovered' : ''}
 
       `"
+      tabindex="0"
       @mouseenter="$store.themeSettingsStore.isMouseHovered = true"
       @mouseleave="$store.themeSettingsStore.isMouseHovered = false"
       @focusin="$store.themeSettingsStore.isMouseHovered = true"
