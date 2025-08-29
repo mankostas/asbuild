@@ -16,6 +16,7 @@ class TaskType extends Model
         'statuses',
         'status_flow_json',
         'tenant_id',
+        'require_subtasks_complete',
     ];
 
     protected $casts = [
@@ -23,6 +24,7 @@ class TaskType extends Model
         'statuses' => 'array',
         'status_flow_json' => 'array',
         'tenant_id' => 'integer',
+        'require_subtasks_complete' => 'boolean',
     ];
 
     public function tasks(): HasMany

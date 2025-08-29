@@ -13,6 +13,9 @@ return new class extends Migration
             $table->unsignedBigInteger('task_id');
             $table->string('title');
             $table->boolean('is_completed')->default(false);
+            $table->unsignedBigInteger('assigned_user_id')->nullable();
+            $table->boolean('is_required')->default(false);
+            $table->unsignedInteger('position')->default(0);
             $table->timestamps();
         });
     }

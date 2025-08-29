@@ -35,6 +35,7 @@
     "appointmentDetail": "Appointment Detail",
     "appointmentCreate": "Create Appointment",
     "appointmentEdit": "Edit Appointment",
+    "taskDetail": "Task Detail",
     "manuals": "Manuals",
     "manualDetail": "Manual Detail",
     "manualCreate": "Upload Manual",
@@ -105,6 +106,10 @@
       "placeholder": "Add a comment",
       "mentions": "Mentions",
       "mentionUsers": "Mention users"
+    },
+    "subtasks": {
+      "title": "Subtasks",
+      "add": "Add subtask"
     }
   },
   "dashboard": {

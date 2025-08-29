@@ -35,6 +35,7 @@
     "appointmentDetail": "Λεπτομέρειες Ραντεβού",
     "appointmentCreate": "Δημιουργία Ραντεβού",
     "appointmentEdit": "Επεξεργασία Ραντεβού",
+    "taskDetail": "Λεπτομέρειες Εργασίας",
     "manuals": "Εγχειρίδια",
     "manualDetail": "Λεπτομέρειες Εγχειριδίου",
     "manualCreate": "Μεταφόρτωση Εγχειριδίου",
@@ -105,6 +106,10 @@
       "placeholder": "Προσθέστε σχόλιο",
       "mentions": "Αναφορές",
       "mentionUsers": "Αναφέρετε χρήστες"
+    },
+    "subtasks": {
+      "title": "Υποεργασίες",
+      "add": "Προσθήκη υποεργασίας"
     }
   },
   "dashboard": {

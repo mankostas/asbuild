@@ -79,6 +79,94 @@ paths:
                 $ref: '#/components/schemas/Task'
         '422':
           description: Invalid transition
+  /tasks/{id}/subtasks:
+    post:
+      summary: Create task subtask
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskSubtask'
+      responses:
+        '201':
+          description: Created subtask
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskSubtask'
+  /tasks/{id}/subtasks/{subtask}:
+    patch:
+      summary: Update task subtask
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: subtask
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskSubtask'
+      responses:
+        '200':
+          description: Updated subtask
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskSubtask'
+    delete:
+      summary: Delete task subtask
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: subtask
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted
+  /tasks/{id}/subtasks/reorder:
+    patch:
+      summary: Reorder subtasks
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Reordered
   /tasks/{id}/comments:
     get:
       summary: List task comments
@@ -493,6 +581,24 @@ components:
         created_at:
           type: string
           format: date-time
+    TaskSubtask:
+      type: object
+      properties:
+        id:
+          type: integer
+        task_id:
+          type: integer
+        title:
+          type: string
+        is_completed:
+          type: boolean
+        assigned_user_id:
+          type: integer
+          nullable: true
+        is_required:
+          type: boolean
+        position:
+          type: integer
     Role:
       type: object
       properties:
