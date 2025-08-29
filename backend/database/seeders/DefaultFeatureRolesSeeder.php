@@ -81,6 +81,20 @@ class DefaultFeatureRolesSeeder extends Seeder
                         'level' => 2,
                     ];
                     break;
+                case 'reports':
+                    $roles[] = [
+                        'slug' => 'reports_viewer',
+                        'name' => 'Reports Viewer',
+                        'abilities' => ['reports.view'],
+                        'level' => 3,
+                    ];
+                    $roles[] = [
+                        'slug' => 'reports_manager',
+                        'name' => 'Reports Manager',
+                        'abilities' => ['reports.manage'],
+                        'level' => 2,
+                    ];
+                    break;
                 case 'roles':
                     $roles[] = [
                         'slug' => 'roles_manager',
@@ -130,6 +144,13 @@ class DefaultFeatureRolesSeeder extends Seeder
                 json_decode($tenantRole->abilities, true) ?? [],
                 $tenant->allowedAbilities()
             )));
+
+            if (in_array('reports', $features, true)) {
+                $abilities = array_values(array_unique(array_merge($abilities, [
+                    'reports.view',
+                    'reports.manage',
+                ])));
+            }
 
             DB::table('roles')
                 ->where('id', $tenantRole->id)
