@@ -6,17 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class AppointmentComment extends Model
+class TaskComment extends Model
 {
     protected $fillable = [
-        'appointment_id',
+        'task_id',
         'user_id',
         'body',
     ];
 
-    public function appointment(): BelongsTo
+    public function task(): BelongsTo
     {
-        return $this->belongsTo(Appointment::class);
+        return $this->belongsTo(Task::class);
     }
 
     public function user(): BelongsTo
@@ -26,11 +26,11 @@ class AppointmentComment extends Model
 
     public function files(): BelongsToMany
     {
-        return $this->belongsToMany(File::class, 'appointment_comment_files');
+        return $this->belongsToMany(File::class, 'task_comment_files');
     }
 
     public function mentions(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'appointment_comment_mentions');
+        return $this->belongsToMany(User::class, 'task_comment_mentions');
     }
 }

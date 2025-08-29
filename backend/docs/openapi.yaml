@@ -3,36 +3,36 @@ info:
   title: Asbuild API
   version: '1.0'
 paths:
-  /appointments:
+  /tasks:
     get:
-      summary: List appointments
+      summary: List tasks
       responses:
         '200':
-          description: List of appointments
+          description: List of tasks
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Appointment'
+                  $ref: '#/components/schemas/Task'
     post:
-      summary: Create appointment
+      summary: Create task
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Appointment'
+              $ref: '#/components/schemas/Task'
       responses:
         '200':
-          description: Appointment created
+          description: Task created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Appointment'
-  /appointments/{id}:
+                $ref: '#/components/schemas/Task'
+  /tasks/{id}:
     patch:
-      summary: Update appointment
+      summary: Update task
       parameters:
         - name: id
           in: path
@@ -44,14 +44,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Appointment'
+              $ref: '#/components/schemas/Task'
       responses:
         '200':
-          description: Updated appointment
+          description: Updated task
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Appointment'
+                $ref: '#/components/schemas/Task'
   /roles:
     get:
       summary: List roles
@@ -230,9 +230,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Team'
-  /appointment-types:
+  /task-types:
     get:
-      summary: List appointment types
+      summary: List task types
       parameters:
         - name: scope
           in: query
@@ -250,10 +250,10 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Type'
-  /appointment-types/{id}/copy-to-tenant:
+                  $ref: '#/components/schemas/TaskType'
+  /task-types/{id}/copy-to-tenant:
     post:
-      summary: Copy appointment type to tenant
+      summary: Copy task type to tenant
       parameters:
         - name: id
           in: path
@@ -271,14 +271,14 @@ paths:
                   type: string
       responses:
         '200':
-          description: Appointment type
+          description: Task type
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Type'
-  /statuses:
+                $ref: '#/components/schemas/TaskType'
+  /task-statuses:
     get:
-      summary: List statuses
+      summary: List task statuses
       parameters:
         - name: scope
           in: query
@@ -290,14 +290,14 @@ paths:
             type: string
       responses:
         '200':
-          description: List of statuses
+          description: List of task statuses
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Status'
-  /statuses/{id}/copy-to-tenant:
+                  $ref: '#/components/schemas/TaskStatus'
+  /task-statuses/{id}/copy-to-tenant:
     post:
       summary: Copy status to tenant
       parameters:
@@ -321,7 +321,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Status'
+                $ref: '#/components/schemas/TaskStatus'
   /notifications:
     get:
       summary: List notifications
@@ -348,7 +348,7 @@ paths:
           description: Marked read
 components:
   schemas:
-    Appointment:
+    Task:
       type: object
       properties:
         id:
@@ -398,14 +398,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Employee'
-    Type:
+    TaskType:
       type: object
       properties:
         id:
           type: integer
         name:
           type: string
-    Status:
+    TaskStatus:
       type: object
       properties:
         id:

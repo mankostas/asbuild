@@ -76,7 +76,7 @@ class LookupRoutesTest extends TestCase
 
     public function test_super_admin_abilities_lookup_scopes_for_tenant_features(): void
     {
-        $this->tenant->update(['features' => ['appointments']]);
+        $this->tenant->update(['features' => ['tasks']]);
 
         $rootTenant = Tenant::create(['name' => 'Root']);
         $superRole = Role::create([
@@ -110,11 +110,11 @@ class LookupRoutesTest extends TestCase
             ->assertStatus(200)
             ->json();
 
-        $this->assertContains(['slug' => 'appointments', 'label' => 'Appointments'], $features);
+        $this->assertContains(['slug' => 'tasks', 'label' => 'Tasks'], $features);
         $this->assertContains(['slug' => 'roles', 'label' => 'Roles & Permissions'], $features);
-        $this->assertContains(['slug' => 'types', 'label' => 'Appointment Types'], $features);
+        $this->assertContains(['slug' => 'task_types', 'label' => 'Task Types'], $features);
         $this->assertContains(['slug' => 'teams', 'label' => 'Teams'], $features);
-        $this->assertContains(['slug' => 'statuses', 'label' => 'Statuses'], $features);
+        $this->assertContains(['slug' => 'task_statuses', 'label' => 'Task Statuses'], $features);
         $this->assertContains(['slug' => 'employees', 'label' => 'Employees'], $features);
         $this->assertContains(['slug' => 'themes', 'label' => 'Theme Customizer'], $features);
         $this->assertContains(['slug' => 'tenants', 'label' => 'Tenants'], $features);

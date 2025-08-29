@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class AppointmentType extends Model
+class TaskType extends Model
 {
     protected $fillable = [
         'name',
@@ -22,8 +22,8 @@ class AppointmentType extends Model
         'tenant_id' => 'integer',
     ];
 
-    public function appointments(): HasMany
+    public function tasks(): HasMany
     {
-        return $this->hasMany(Appointment::class);
+        return $this->hasMany(Task::class);
     }
 }

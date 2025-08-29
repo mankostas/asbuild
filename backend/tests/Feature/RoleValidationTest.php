@@ -16,7 +16,7 @@ class RoleValidationTest extends TestCase
 
     public function test_role_creation_rejects_unavailable_abilities(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['appointments']]);
+        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['tasks']]);
         $adminRole = Role::create([
             'name' => 'Admin',
             'slug' => 'admin',
@@ -38,7 +38,7 @@ class RoleValidationTest extends TestCase
         $payload = [
             'name' => 'Status Manager',
             'slug' => 'status_manager',
-            'abilities' => ['statuses.manage'],
+            'abilities' => ['task_statuses.manage'],
             'level' => 1,
         ];
 
@@ -46,11 +46,11 @@ class RoleValidationTest extends TestCase
             ->postJson('/api/roles', $payload)
             ->assertStatus(422);
 
-        $tenant->update(['features' => ['appointments', 'statuses']]);
+        $tenant->update(['features' => ['tasks', 'task_statuses']]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/roles', $payload)
             ->assertStatus(201)
-            ->assertJsonFragment(['abilities' => ['statuses.manage']]);
+            ->assertJsonFragment(['abilities' => ['task_statuses.manage']]);
     }
 }

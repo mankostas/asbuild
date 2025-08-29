@@ -8,13 +8,17 @@ return [
     'tenants.delete',
     'tenants.manage',
 
-    // Appointments
-    'appointments.view',
-    'appointments.create',
-    'appointments.update',
-    'appointments.delete',
-    'appointments.assign',
-    'appointments.manage',
+    // Tasks
+    'tasks.view',
+    'tasks.create',
+    'tasks.update',
+    'tasks.delete',
+    'tasks.assign',
+    'tasks.status.update',
+    'tasks.comment.create',
+    'tasks.attach.upload',
+    'tasks.board.view',
+    'tasks.list.view',
 
     // Notifications
     'notifications.view',
@@ -27,12 +31,8 @@ return [
     'roles.delete',
     'roles.manage',
 
-    // Appointment Types
-    'types.view',
-    'types.create',
-    'types.update',
-    'types.delete',
-    'types.manage',
+    // Task Types
+    'task_types.manage',
 
     // Teams
     'teams.view',
@@ -41,12 +41,8 @@ return [
     'teams.delete',
     'teams.manage',
 
-    // Statuses
-    'statuses.view',
-    'statuses.create',
-    'statuses.update',
-    'statuses.delete',
-    'statuses.manage',
+    // Task Statuses
+    'task_statuses.manage',
 
     // Employees
     'employees.view',
@@ -72,4 +68,3 @@ return [
     'reports.view',
     'reports.manage',
 ];
-

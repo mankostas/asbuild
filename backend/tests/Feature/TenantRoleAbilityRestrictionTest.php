@@ -16,7 +16,7 @@ class TenantRoleAbilityRestrictionTest extends TestCase
 
     public function test_tenant_features_limit_role_creation(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['appointments']]);
+        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['tasks']]);
 
         $adminRole = Role::create([
             'name' => 'Manager',
@@ -41,7 +41,7 @@ class TenantRoleAbilityRestrictionTest extends TestCase
         $payload = [
             'name' => 'Type Manager',
             'slug' => 'type_manager',
-            'abilities' => ['types.manage'],
+            'abilities' => ['task_types.manage'],
             'level' => 1,
         ];
 
@@ -49,12 +49,12 @@ class TenantRoleAbilityRestrictionTest extends TestCase
             ->postJson('/api/roles', $payload)
             ->assertStatus(422);
 
-        $tenant->update(['features' => ['appointments', 'types']]);
+        $tenant->update(['features' => ['tasks', 'task_types']]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/roles', $payload)
             ->assertStatus(201)
-            ->assertJsonFragment(['abilities' => ['types.manage']]);
+            ->assertJsonFragment(['abilities' => ['task_types.manage']]);
     }
 }
 

@@ -1,15 +1,19 @@
 <?php
 
 return [
-    'appointments' => [
-        'label' => 'Appointments',
+    'tasks' => [
+        'label' => 'Tasks',
         'abilities' => [
-            'appointments.view',
-            'appointments.create',
-            'appointments.update',
-            'appointments.delete',
-            'appointments.assign',
-            'appointments.manage',
+            'tasks.view',
+            'tasks.create',
+            'tasks.update',
+            'tasks.delete',
+            'tasks.assign',
+            'tasks.status.update',
+            'tasks.comment.create',
+            'tasks.attach.upload',
+            'tasks.board.view',
+            'tasks.list.view',
         ],
     ],
     'notifications' => [
@@ -33,14 +37,10 @@ return [
             'roles.manage',
         ],
     ],
-    'types' => [
-        'label' => 'Appointment Types',
+    'task_types' => [
+        'label' => 'Task Types',
         'abilities' => [
-            'types.view',
-            'types.create',
-            'types.update',
-            'types.delete',
-            'types.manage',
+            'task_types.manage',
         ],
     ],
     'teams' => [
@@ -53,14 +53,10 @@ return [
             'teams.manage',
         ],
     ],
-    'statuses' => [
-        'label' => 'Statuses',
+    'task_statuses' => [
+        'label' => 'Task Statuses',
         'abilities' => [
-            'statuses.view',
-            'statuses.create',
-            'statuses.update',
-            'statuses.delete',
-            'statuses.manage',
+            'task_statuses.manage',
         ],
     ],
     'employees' => [
@@ -105,5 +101,4 @@ return [
             'gdpr.delete',
         ],
     ],
-    // Additional features can be listed here as needed, e.g. 'reports', 'billing', 'employees', …
 ];

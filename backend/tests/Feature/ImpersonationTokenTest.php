@@ -14,7 +14,7 @@ class ImpersonationTokenTest extends TestCase
 
     public function test_impersonation_token_cannot_access_super_admin_routes(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['appointments']]);
+        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['tasks']]);
 
         $user = User::create([
             'name' => 'User',
@@ -32,7 +32,7 @@ class ImpersonationTokenTest extends TestCase
 
     public function test_impersonation_token_has_tenant_access(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['appointments']]);
+        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['tasks']]);
 
         $user = User::create([
             'name' => 'User',

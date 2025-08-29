@@ -1,12 +1,13 @@
 <?php
 
 return [
-    'appointments',
+    'tasks',
     'notifications',
     'reports',
     'billing',
     'roles',
-    'types',
+    'task_types',
+    'task_statuses',
     'teams',
     'employees',
     'themes',
