@@ -1,59 +1,61 @@
 <template>
-  <div
-    class="fromGroup relative"
-    :class="`${errorText ? 'has-error' : ''}  ${horizontal ? 'flex' : ''}  ${
-      showSuccessIcon ? 'is-valid' : ''
-    } `"
-  >
-    <label
-      v-if="label"
-      :class="`${classLabel} ${
-        horizontal ? 'flex-0 mr-6 md:w-[100px] w-[60px] break-words' : ''
-      }  ltr:inline-block rtl:block input-label `"
-      :for="inputId"
+    <div
+      class="fromGroup relative"
+      :class="`${errorText ? 'has-error' : ''}  ${horizontal ? 'flex' : ''}  ${
+        showSuccessIcon ? 'is-valid' : ''
+      } `"
     >
-      {{ label }}
-    </label>
-    <div class="relative" :class="horizontal ? 'flex-1' : ''">
-      <input
-        v-if="!isMask"
-        :id="inputId"
-        :type="types"
-        :name="name"
-        :placeholder="placeholder"
-        :class="`${classInput} input-control w-full block focus:outline-none h-[40px] ${
-          hasicon ? 'ltr:pr-10 rtl:pl-10' : ''
-        } `"
-        :value="modelValue"
-        :readonly="isReadonly"
-        :disabled="disabled"
-        @input="
-          ($event) => {
-            $emit('update:modelValue', $event.target.value);
-            $emit('input', $event);
-          }
-        "
-        @change="$emit('change', $event)"
-      />
-      <cleave
-        v-if="isMask"
-        :id="inputId"
-        :class="`${classInput} cleave input-control block w-full focus:outline-none h-[40px] `"
-        :name="name"
-        :placeholder="placeholder"
-        :value="modelValue"
-        :readonly="isReadonly"
-        :disabled="disabled"
-        :options="options"
-        modelValue="modelValue"
-        @input="
-          ($event) => {
-            $emit('update:modelValue', $event.target.value);
-            $emit('input', $event);
-          }
-        "
-        @change="$emit('change', $event)"
-      />
+      <span
+        v-if="label"
+        :id="`${inputId}-label`"
+        :class="`${classLabel} ${
+          horizontal ? 'flex-0 mr-6 md:w-[100px] w-[60px] break-words' : ''
+        }  ltr:inline-block rtl:block input-label `"
+      >
+        {{ label }}
+      </span>
+      <div class="relative" :class="horizontal ? 'flex-1' : ''">
+        <input
+          v-if="!isMask"
+          :id="inputId"
+          :type="types"
+          :name="name"
+          :placeholder="placeholder"
+          :class="`${classInput} input-control w-full block focus:outline-none h-[40px] ${
+            hasicon ? 'ltr:pr-10 rtl:pl-10' : ''
+          } `"
+          :value="modelValue"
+          :readonly="isReadonly"
+          :disabled="disabled"
+          :aria-labelledby="label ? `${inputId}-label` : null"
+          @input="
+            ($event) => {
+              $emit('update:modelValue', $event.target.value);
+              $emit('input', $event);
+            }
+          "
+          @change="$emit('change', $event)"
+        />
+        <cleave
+          v-if="isMask"
+          :id="inputId"
+          :class="`${classInput} cleave input-control block w-full focus:outline-none h-[40px] `"
+          :name="name"
+          :placeholder="placeholder"
+          :value="modelValue"
+          :readonly="isReadonly"
+          :disabled="disabled"
+          :options="options"
+          modelValue="modelValue"
+          :aria-labelledby="label ? `${inputId}-label` : null"
+          @input="
+            ($event) => {
+              $emit('update:modelValue', $event.target.value);
+              $emit('input', $event);
+            }
+          "
+          @change="$emit('change', $event)"
+        />
 
       <div
         class="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2 -translate-y-1/2"

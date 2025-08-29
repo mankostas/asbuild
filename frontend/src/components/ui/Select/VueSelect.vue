@@ -1,32 +1,33 @@
 <template>
-  <div
-    class="fromGroup relative"
-    :class="`${errorText ? 'has-error' : ''}  ${horizontal ? 'flex' : ''}  ${
-      showSuccessIcon ? 'is-valid' : ''
-    } `"
-  >
-    <label
-      v-if="label"
-      :class="`${classLabel} inline-block input-label `"
-      :for="inputId"
+    <div
+      class="fromGroup relative"
+      :class="`${errorText ? 'has-error' : ''}  ${horizontal ? 'flex' : ''}  ${
+        showSuccessIcon ? 'is-valid' : ''
+      } `"
     >
-      {{ label }}</label
-    >
-    <div class="relative">
-      <div v-if="!$slots.default">
-        <vSelect
-          :id="inputId"
-          :name="name"
-          :modelValue="modelValue"
-          :readonly="isReadonly"
-          :disabled="disabled"
-          :multiple="multiple"
-          :options="options"
-          @update:model-value="$emit('update:modelValue', $event)"
-          @input="$emit('input', $event)"
-          @change="$emit('change', $event)"
-        >
-        </vSelect>
+      <span
+        v-if="label"
+        :id="`${inputId}-label`"
+        :class="`${classLabel} inline-block input-label `"
+      >
+        {{ label }}</span
+      >
+      <div class="relative">
+        <div v-if="!$slots.default">
+          <vSelect
+            :id="inputId"
+            :name="name"
+            :modelValue="modelValue"
+            :readonly="isReadonly"
+            :disabled="disabled"
+            :multiple="multiple"
+            :options="options"
+            :aria-labelledby="label ? `${inputId}-label` : null"
+            @update:model-value="$emit('update:modelValue', $event)"
+            @input="$emit('input', $event)"
+            @change="$emit('change', $event)"
+          >
+          </vSelect>
       </div>
       <slot :input-id="inputId"></slot>
       <div class="flex text-xl absolute right-[14px] top-1/2 -translate-y-1/2">

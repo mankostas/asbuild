@@ -2,7 +2,7 @@
   <div class="mx-auto max-w-7xl space-y-8 p-6">
     <div class="flex justify-end mb-4">
       <div class="flex flex-wrap items-end gap-2">
-        <Select v-model="range" label="Range" class="w-40">
+        <Select v-model="range" label="Range" class="w-40" aria-label="Range">
           <option value="today">Today</option>
           <option value="7">Last 7 days</option>
           <option value="30">Last 30 days</option>
@@ -14,6 +14,7 @@
           type="date"
           label="From"
           class="w-40"
+          aria-label="From"
         />
         <Textinput
           v-if="range === 'custom'"
@@ -21,6 +22,7 @@
           type="date"
           label="To"
           class="w-40"
+          aria-label="To"
         />
         <Button @click="fetchData">Apply</Button>
         <Button variant="secondary" @click="exportCsv">Export CSV</Button>

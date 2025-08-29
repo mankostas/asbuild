@@ -1,36 +1,37 @@
 <template>
-  <div
-    class="fromGroup relative"
-    :class="`${errorText ? 'has-error' : ''}  ${horizontal ? 'flex' : ''}  ${
-      showSuccessIcon ? 'is-valid' : ''
-    } `"
-  >
-    <label
-      v-if="label"
-      :class="`${classLabel} inline-block input-label `"
-      :for="inputId"
+    <div
+      class="fromGroup relative"
+      :class="`${errorText ? 'has-error' : ''}  ${horizontal ? 'flex' : ''}  ${
+        showSuccessIcon ? 'is-valid' : ''
+      } `"
     >
-      {{ label }}</label
-    >
-    <div class="relative">
-      <select
-        :id="inputId"
-        :name="name"
-        :class="`${classInput} input-control block w-full focus:outline-none min-h-[40px] `"
-        :value="modelValue"
-        :readonly="isReadonly"
-        :disabled="disabled"
-        :formatter="formatter"
-        :size="size"
-        :multiple="multiple"
-        @input="
-          ($event) => {
-            $emit('update:modelValue', $event.target.value);
-            $emit('input', $event);
-          }
-        "
-        @change="$emit('change', $event)"
+      <span
+        v-if="label"
+        :id="`${inputId}-label`"
+        :class="`${classLabel} inline-block input-label `"
       >
+        {{ label }}</span
+      >
+      <div class="relative">
+        <select
+          :id="inputId"
+          :name="name"
+          :class="`${classInput} input-control block w-full focus:outline-none min-h-[40px] `"
+          :value="modelValue"
+          :readonly="isReadonly"
+          :disabled="disabled"
+          :formatter="formatter"
+          :size="size"
+          :multiple="multiple"
+          :aria-labelledby="label ? `${inputId}-label` : null"
+          @input="
+            ($event) => {
+              $emit('update:modelValue', $event.target.value);
+              $emit('input', $event);
+            }
+          "
+          @change="$emit('change', $event)"
+        >
         <option value="" disabled selected>{{ placeholder }}</option>
         <template v-if="!$slots.default && options">
           <option
