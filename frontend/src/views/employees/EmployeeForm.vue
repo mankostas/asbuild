@@ -1,10 +1,10 @@
 <template>
   <div v-if="canAccess">
-    <form @submit.prevent="submit" class="grid gap-4 max-w-lg">
-      <Textinput label="Name" v-model="form.name" />
-      <Textinput label="Email" type="email" v-model="form.email" />
-      <Textinput label="Phone" v-model="form.phone" />
-      <Textinput label="Address" v-model="form.address" />
+    <form class="grid gap-4 max-w-lg" @submit.prevent="submit">
+      <Textinput v-model="form.name" label="Name" />
+      <Textinput v-model="form.email" label="Email" type="email" />
+      <Textinput v-model="form.phone" label="Phone" />
+      <Textinput v-model="form.address" label="Address" />
       <VueSelect label="Roles">
         <vSelect v-model="form.roles" :options="roleOptions" multiple />
       </VueSelect>

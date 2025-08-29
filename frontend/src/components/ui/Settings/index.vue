@@ -1,12 +1,12 @@
 <template>
   <div>
     <span
-      v-if="!this.$store.themeSettingsStore.isOpenSettings"
-      @click="
-        this.$store.themeSettingsStore.isOpenSettings =
-          !this.$store.themeSettingsStore.isOpenSettings
-      "
+      v-if="!$store.themeSettingsStore.isOpenSettings"
       class="fixed md:right-[-32px] right-0 top-1/2 z-[888] translate-y-1/2 bg-slate-800 text-slate-50 dark:bg-slate-700 dark:text-slate-300 cursor-pointer transform rotate-90 flex items-center text-sm font-medium px-2 py-2 shadow-deep rounded-b"
+      @click="
+        $store.themeSettingsStore.isOpenSettings =
+          !$store.themeSettingsStore.isOpenSettings
+      "
     >
       <Icon
         icon="heroicons:cog-6-tooth"
@@ -16,7 +16,7 @@
     </span>
     <Transition name="lefttranslate" @after-leave="persistSettings">
       <div
-        v-show="this.$store.themeSettingsStore.isOpenSettings"
+        v-show="$store.themeSettingsStore.isOpenSettings"
         class="setting-wrapper fixed right-0 top-0 md:w-[400px] w-[300px] bg-white dark:bg-slate-800 h-screen z-[9999] px-6 md:pb-6 pb-[100px] shadow-base2 dark:shadow-base3 border border-gray-5002 dark:border-slate-700"
       >
         <header
@@ -34,7 +34,7 @@
           </div>
           <div
             class="cursor-pointer text-2xl text-slate-800 dark:text-slate-200"
-            @click="this.$store.themeSettingsStore.isOpenSettings = false"
+            @click="$store.themeSettingsStore.isOpenSettings = false"
           >
             <Icon icon="heroicons-outline:x" />
           </div>
@@ -60,9 +60,9 @@
     </Transition>
     <Transition name="overlay-fade">
       <div
-        v-if="this.$store.themeSettingsStore.isOpenSettings"
+        v-if="$store.themeSettingsStore.isOpenSettings"
         class="overlay bg-white bg-opacity-0 fixed inset-0 z-[999]"
-        @click="this.$store.themeSettingsStore.isOpenSettings = false"
+        @click="$store.themeSettingsStore.isOpenSettings = false"
       ></div>
     </Transition>
   </div>
@@ -77,7 +77,6 @@ import window from "@/mixins/window";
 import Theme from "./Tools/Theme";
 import Semidark from "./Tools/Semidark";
 export default {
-  mixins: [window],
   components: {
     Icon,
     Width,
@@ -87,6 +86,7 @@ export default {
     Footer,
     Semidark,
   },
+  mixins: [window],
   data() {
     return {};
   },

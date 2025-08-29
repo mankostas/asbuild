@@ -7,7 +7,7 @@
           :class="semidark ? 'bg-primary-500' : 'bg-secondary-500'"
           class="relative inline-flex h-6 w-[46px] items-center rounded-full transition-all duration-150 cursor-pointer"
         >
-          <input type="checkbox" v-model="semidark" class="hidden" />
+          <input v-model="semidark" type="checkbox" class="hidden" />
           <span
             :class="
               semidark

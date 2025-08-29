@@ -1,8 +1,8 @@
 <template>
   <div>
     <button
-      @click="openModal"
       class="flex items-center xl:text-sm text-lg xl:text-slate-400 text-slate-800 dark:text-slate-300 px-1 space-x-3 rtl:space-x-reverse"
+      @click="openModal"
     >
       <Icon icon="heroicons-outline:search" /><span
         class="xl:inline-block hidden"
@@ -13,8 +13,8 @@
   <TransitionRoot :show="isOpen" as="template">
     <Dialog
       as="div"
-      @close="closeModal"
       class="fixed inset-0 z-[9999] overflow-y-auto p-4 md:pt-[25vh] pt-20"
+      @close="closeModal"
     >
       <TransitionChild
         as="template"
@@ -78,10 +78,10 @@
 
                     <ComboboxOption
                       v-for="item in filteredsearchList"
-                      as="template"
                       :key="item.id"
+                      #default="{ active }"
+                      as="template"
                       :value="item"
-                      v-slot="{ active }"
                     >
                       <li
                         class="px-4 text-[15px] font-normal capitalize py-2"

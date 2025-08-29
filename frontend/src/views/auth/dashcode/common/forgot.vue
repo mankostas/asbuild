@@ -1,11 +1,11 @@
 <template>
-  <form @submit.prevent="onSubmit" class="space-y-4">
+  <form class="space-y-4" @submit.prevent="onSubmit">
     <Textinput
+      v-model="email"
       label="Email"
       type="email"
       placeholder="Type your email"
       name="emil"
-      v-model="email"
       :error="emailError"
       classInput="h-[48px]"
     />
@@ -23,11 +23,6 @@ import * as yup from "yup";
 export default {
   components: {
     Textinput,
-  },
-  data() {
-    return {
-      checkbox: false,
-    };
   },
   setup() {
     // Define a validation schema
@@ -50,6 +45,11 @@ export default {
       email,
       emailError,
       onSubmit,
+    };
+  },
+  data() {
+    return {
+      checkbox: false,
     };
   },
 };

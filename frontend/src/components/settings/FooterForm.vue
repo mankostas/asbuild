@@ -1,7 +1,7 @@
 <template>
-  <form @submit.prevent="save" class="space-y-4">
-    <Textinput label="Left Footer Text" v-model="form.left" />
-    <Textinput label="Right Footer Text" v-model="form.right" />
+  <form class="space-y-4" @submit.prevent="save">
+    <Textinput v-model="form.left" label="Left Footer Text" />
+    <Textinput v-model="form.right" label="Right Footer Text" />
     <Button type="submit" :isDisabled="!dirty" btnClass="btn-dark">Save Footer</Button>
   </form>
 </template>

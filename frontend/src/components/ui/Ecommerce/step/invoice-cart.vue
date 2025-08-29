@@ -116,7 +116,7 @@
                   class="bg-white divide-slate-100 dark:bg-slate-800 dark:divide-slate-700"
 
                 >
-                  <tr class="py-3" v-for="(item, index) in cart.getItems" :key="index">
+                  <tr v-for="(item, index) in cart.getItems" :key="index" class="py-3">
                     <td
                       class="table-td pt-3 flex items-center space-x-3 rtl:space-x-reverse pb-3 pl-0 rtl:pr-0 ltr:text-left ltr:last:text-right rtl:text-right rtl:last:text-left"
                     >

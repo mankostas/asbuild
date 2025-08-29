@@ -3,7 +3,7 @@
     <div class="bg-white dark:bg-slate-800">
       <div class="rounded p-5 space-y-5">
         <label class="flex border dark:border-slate-700 rounded p-5">
-          <Radio name="x" value="A" v-model="picked1" checked />
+          <Radio v-model="picked1" name="x" value="A" checked />
 
           <div
             class="flex flex-start -mt-1 space-x-3 md:space-x-5 rtl:space-x-reverse"
@@ -32,7 +32,7 @@
         </label>
 
         <label class="flex border dark:border-slate-700 rounded p-5">
-          <Radio name="x" value="B" v-model="picked1" />
+          <Radio v-model="picked1" name="x" value="B" />
           <div
             class="flex flex-start -mt-1 space-x-3 md:space-x-5 rtl:space-x-reverse"
           >
@@ -60,8 +60,8 @@
         </label>
 
         <button
-          @click="toggleModal"
           class="w-full flex flex-col justify-center items-center font-normal text-slate-800 dark:text-slate-300 p-5 space-y-3 border dark:border-slate-700 rounded bg-slate-100 dark:bg-slate-800"
+          @click="toggleModal"
         >
           <Icon icon="ic:round-plus" class="h-6 w-6" />
           <span>Add New Address</span>

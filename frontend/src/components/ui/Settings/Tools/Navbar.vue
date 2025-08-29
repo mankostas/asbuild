@@ -12,12 +12,12 @@
           class="text-slate-500 dark:text-slate-400 text-sm cursor-pointer flex items-center"
         >
           <input
+            :id="`navbar_type${i}`"
+            v-model="navType"
             class="hidden"
             type="radio"
             name="navType"
-            :id="`navbar_type${i}`"
             :value="item.value"
-            v-model="navType"
           />
           <span
             :class="item.value === navType ? 'shadow-inset-4' : ''"
@@ -57,10 +57,6 @@ export default {
     };
   },
 
-  mounted() {
-
-  },
-
   watch: {
     navType: {
       handler() {
@@ -68,6 +64,10 @@ export default {
       },
       immediate: true,
     },
+  },
+
+  mounted() {
+
   },
 };
 </script>

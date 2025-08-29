@@ -5,16 +5,16 @@
     :class="alertClass() + ' ' + customClass"
   >
     <div class="flex items-start space-x-3 rtl:space-x-reverse">
-      <div class="flex-0 text-[22px]" v-if="icon">
+      <div v-if="icon" class="flex-0 text-[22px]">
         <Icon :icon="icon" />
       </div>
       <div class="flex-1">
         <slot></slot>
       </div>
       <div
+        v-if="dismissible"
         class="flex-0 text-2xl cursor-pointer"
         @click="destroy"
-        v-if="dismissible"
       >
         <Icon icon="heroicons-outline:x" />
       </div>
@@ -24,10 +24,10 @@
 <script>
 import Icon from "@/components/Icon";
 export default {
+  name: "Alert",
   components: {
     Icon,
   },
-  name: "Alert",
   type: "primary-500",
 
   props: {

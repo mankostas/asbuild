@@ -11,20 +11,20 @@
           : ''
       "
     >
-      <router-link :to="{ name: item.link }" v-if="!item.child && !item.megamenu">
+      <router-link v-if="!item.child && !item.megamenu" :to="{ name: item.link }">
         <div class="flex flex-1 items-center space-x-[6px] rtl:space-x-reverse">
-          <span class="icon-box" v-if="item.icon">
+          <span v-if="item.icon" class="icon-box">
             <Icon :icon="item.icon" />
           </span>
-          <div class="text-box" v-if="item.title">{{ item.title }}</div>
+          <div v-if="item.title" class="text-box">{{ item.title }}</div>
         </div>
       </router-link>
-      <a href="javascript: void(0);" v-if="item.child || item.megamenu">
+      <a v-if="item.child || item.megamenu" href="javascript: void(0);">
         <div class="flex flex-1 items-center space-x-[6px] rtl:space-x-reverse">
-          <span class="icon-box" v-if="item.icon">
+          <span v-if="item.icon" class="icon-box">
             <Icon :icon="item.icon"
           /></span>
-          <div class="text-box" v-if="item.title">{{ item.title }}</div>
+          <div v-if="item.title" class="text-box">{{ item.title }}</div>
         </div>
         <div
           class="flex-none text-sm ltr:ml-3 rtl:mr-3 leading-[1] relative top-1"
@@ -32,24 +32,24 @@
           <Icon icon="heroicons-outline:chevron-down" />
         </div>
       </a>
-      <ul class="sub-menu" v-if="item.child">
+      <ul v-if="item.child" class="sub-menu">
         <li
           v-for="(childitem, index) in item.child"
           :key="index"
           :class="childitem.submenu ? 'menu-item-has-children' : ''"
         >
-          <router-link :to="{ name: childitem.childlink }" v-if="!childitem.submenu">
+          <router-link v-if="!childitem.submenu" :to="{ name: childitem.childlink }">
             <div class="flex space-x-2 items-start rtl:space-x-reverse">
               <Icon :icon="childitem.childicon" class="leading-[1] text-base" />
               <span class="leading-[1]">{{ childitem.childtitle }}</span>
             </div>
           </router-link>
 
-          <a href="javascript: void(0);" v-if="childitem.submenu">{{
+          <a v-if="childitem.submenu" href="javascript: void(0);">{{
             childitem.childtitle
           }}</a>
 
-          <ul class="sub-menu" v-if="childitem.submenu">
+          <ul v-if="childitem.submenu" class="sub-menu">
             <li
               v-for="(subitem, subindex) in childitem.submenu"
               :key="subindex"
@@ -62,7 +62,7 @@
           <!-- end sub menu -->
         </li>
       </ul>
-      <div class="rt-mega-menu" v-if="item.megamenu">
+      <div v-if="item.megamenu" class="rt-mega-menu">
         <div
           class="flex flex-wrap space-x-8 justify-between rtl:space-x-reverse"
         >
@@ -75,10 +75,10 @@
             </div>
             <router-link
               v-for="(ms_item, ms_i) in m_item.singleMegamenu"
-              :to="{ name: ms_item.m_childlink }"
               :key="ms_i"
+              #default="{ isActive }"
+              :to="{ name: ms_item.m_childlink }"
               class="flex items-center space-x-2 text-[15px] leading-6 rtl:space-x-reverse"
-              v-slot="{ isActive }"
             >
               <span
                 class="h-[6px] w-[6px] rounded-full border border-slate-600 dark:border-white inline-block flex-none"

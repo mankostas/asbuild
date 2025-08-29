@@ -1,11 +1,11 @@
 <template>
-  <form @submit.prevent="onSubmit" class="space-y-4">
+  <form class="space-y-4" @submit.prevent="onSubmit">
     <Textinput
+      v-model="password"
       label="Password"
       type="password"
       placeholder="8+ characters, 1 capitat letter "
       name="password"
-      v-model="password"
       :error="passwordError"
       hasicon
       classInput="h-[48px]"
@@ -24,11 +24,6 @@ import * as yup from "yup";
 export default {
   components: {
     Textinput,
-  },
-  data() {
-    return {
-      checkbox: false,
-    };
   },
   setup() {
     // Define a validation schema
@@ -52,6 +47,11 @@ export default {
       password,
       passwordError,
       onSubmit,
+    };
+  },
+  data() {
+    return {
+      checkbox: false,
     };
   },
 };

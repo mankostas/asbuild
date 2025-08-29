@@ -1,9 +1,9 @@
 <template>
   <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
     <div
-      class="rounded-md bg-white dark:bg-slate-700 h-full p-6 shadow-base"
       v-for="(item, i) in items"
       :key="i"
+      class="rounded-md bg-white dark:bg-slate-700 h-full p-6 shadow-base"
     >
       <div class="animate-pulse">
         <header class="flex justify-between items-center space-x-6">

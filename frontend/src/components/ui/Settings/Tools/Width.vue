@@ -10,12 +10,12 @@
           class="flex items-center text-sm text-slate-500 dark:text-slate-400 cursor-pointer"
         >
           <input
+            :id="`contentWidth_id${i}`"
+            v-model="contentWidth"
             class="hidden"
             type="radio"
             name="contentWidth"
-            :id="`contentWidth_id${i}`"
             :value="item.value"
-            v-model="contentWidth"
           />
           <span
             :class="item.value === contentWidth ? 'shadow-inset-4' : ''"
@@ -45,8 +45,6 @@ export default {
       ],
     };
   },
-  mounted() {
-  },
 
   watch: {
     contentWidth: {
@@ -67,6 +65,8 @@ export default {
       },
       immediate: true,
     },
+  },
+  mounted() {
   },
 };
 </script>

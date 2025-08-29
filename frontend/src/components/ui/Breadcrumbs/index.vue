@@ -10,7 +10,7 @@
     >
       {{ t(route.meta.breadcrumb as string) }}
     </h4>
-    <ul class="breadcrumbs" v-else>
+    <ul v-else class="breadcrumbs">
       <li class="text-primary-500">
         <RouterLink :to="{ name: 'dashboard' }" class="text-lg">
           <Icon icon="heroicons-outline:home" />
@@ -19,7 +19,7 @@
           <Icon icon="heroicons:chevron-right" />
         </span>
       </li>
-      <li class="text-primary-500" v-if="parentRoute">
+      <li v-if="parentRoute" class="text-primary-500">
         <RouterLink :to="{ name: parentRoute.name }" class="capitalize">
           {{ t(parentRoute.meta.breadcrumb as string) }}
         </RouterLink>

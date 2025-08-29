@@ -2,9 +2,9 @@
   <header :class="navbarTypeClass()">
     <div
       :class="`app-header md:px-6 px-[15px] dark:bg-slate-800 shadow-base dark:shadow-base3 bg-white dark:border-b dark:border-slate-700 dark:border-opacity-60 ${
-        this.$store.themeSettingsStore.navbarColor
+        $store.themeSettingsStore.navbarColor
       } ${
-        this.$store.themeSettingsStore.menuLayout === 'horizontal' &&
+        $store.themeSettingsStore.menuLayout === 'horizontal' &&
         window.width > 1280
           ? 'py-1'
           : 'md:py-6 py-3'
@@ -13,16 +13,16 @@
     >
       <div class="flex justify-between items-center h-full">
         <div
-          v-if="this.$store.themeSettingsStore.menuLayout === 'vertical'"
+          v-if="$store.themeSettingsStore.menuLayout === 'vertical'"
           class="flex items-center md:space-x-4 space-x-2 rtl:space-x-reverse"
         >
           <button
-            class="ltr:mr-5 rtl:ml-5 text-xl text-slate-900 dark:text-white"
             v-if="
-              this.$store.themeSettingsStore.sidebarCollasp &&
+              $store.themeSettingsStore.sidebarCollasp &&
               window.width > 1280
             "
-            @click="this.$store.themeSettingsStore.sidebarCollasp = false"
+            class="ltr:mr-5 rtl:ml-5 text-xl text-slate-900 dark:text-white"
+            @click="$store.themeSettingsStore.sidebarCollasp = false"
           >
             <Icon icon="akar-icons:arrow-right" />
           </button>
@@ -33,7 +33,7 @@
           <SearchModal />
         </div>
         <div
-          v-if="this.$store.themeSettingsStore.menuLayout === 'horizontal'"
+          v-if="$store.themeSettingsStore.menuLayout === 'horizontal'"
           class="flex items-center space-x-4 rtl:space-x-reverse"
         >
           <Logo v-if="window.width > 1280" />
@@ -42,7 +42,7 @@
         </div>
         <Mainnav
           v-if="
-            this.$store.themeSettingsStore.menuLayout === 'horizontal' &&
+            $store.themeSettingsStore.menuLayout === 'horizontal' &&
             window.width > 1280
           "
         />
@@ -78,7 +78,6 @@ import TenantSwitcher from "@/components/admin/TenantSwitcher.vue";
 import { useAuthStore } from "@/stores/auth";
 
 export default {
-  mixins: [window],
   components: {
     Profile,
     Notification,
@@ -93,6 +92,7 @@ export default {
     AddNew,
     TenantSwitcher,
   },
+  mixins: [window],
 
   setup() {
     const authStore = useAuthStore();

@@ -23,13 +23,13 @@
         <FullCalendar :options="calendarOptions" />
       </div>
     </div>
-    <Modal :activeModal="showCreate" @close="showCreate = false" title="Create Appointment">
+    <Modal :activeModal="showCreate" title="Create Appointment" @close="showCreate = false">
       <div class="flex justify-end space-x-3">
         <button class="btn btn-light" @click="showCreate = false">Cancel</button>
         <button class="btn btn-success" @click="create">Create</button>
       </div>
     </Modal>
-    <Modal :activeModal="showEvent" @close="showEvent = false" title="Appointment">
+    <Modal :activeModal="showEvent" title="Appointment" @close="showEvent = false">
       <div class="flex justify-end space-x-3">
         <button class="btn btn-light" @click="view">View</button>
         <button class="btn btn-success" @click="edit">Edit</button>

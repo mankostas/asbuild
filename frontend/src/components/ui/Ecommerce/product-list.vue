@@ -86,19 +86,19 @@
         </p>
         <div class="flex space-x-4 rtl:space-x-reverse md:max-w-[370px]">
           <CounterButton
-            :product="product"
             v-if="cart.getItems.find((item) => item.id == props.product.id)"
+            :product="product"
           />
 
           <Button
             :disabled="
               cart.getItems.find((item) => item.id == props.product.id)
             "
-            @click="cart.addToCart(product)"
             text="Add to Cart"
             icon="heroicons:shopping-bag"
             btnClass="btn-outline-dark w-full btn-sm font-medium hover:bg-slate-900 hover:text-white dark:hover:text-white dark:hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
             iconClass=" text-sm leading-none"
+            @click="cart.addToCart(product)"
           />
         </div>
       </div>

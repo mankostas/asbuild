@@ -1,14 +1,14 @@
 <template>
   <Modal
+    ref="modal1"
     :activeModal="activeModal"
     title="New Address"
     label="New"
     labelClass="btn-outline-dark"
-    ref="modal1"
   >
     <form
-      @submit.prevent="submit"
       class="space-y-4 flex flex-col justify-between"
+      @submit.prevent="submit"
     >
       <Textarea
         label="Address"

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button @click="onSelect" class="bg-blue-600 text-white px-2 py-1">Choose File</button>
+    <button class="bg-blue-600 text-white px-2 py-1" @click="onSelect">Choose File</button>
     <div v-if="progress">{{ progress }}%</div>
   </div>
 </template>

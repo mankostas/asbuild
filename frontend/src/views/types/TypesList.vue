@@ -3,8 +3,8 @@
       <div class="flex items-center justify-between mb-4">
         <select
           v-model="scope"
-          @change="changeScope"
           class="border rounded px-2 py-1"
+          @change="changeScope"
         >
           <option v-for="opt in scopeOptions" :key="opt.value" :value="opt.value">
             {{ opt.label }}

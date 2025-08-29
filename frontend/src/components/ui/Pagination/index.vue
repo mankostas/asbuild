@@ -1,13 +1,13 @@
 <template>
   <div class="md:flex md:space-y-0 space-y-5" :class="wrapperClass">
     <div
-      class="flex items-center space-x-4 rtl:space-x-reverse"
       v-if="enableSearch"
+      class="flex items-center space-x-4 rtl:space-x-reverse"
       :class="searchClasss"
     >
       <div
-        class="flex items-center space-x-2 rtl:space-x-reverse"
         v-if="enableSearch && enableInput"
+        class="flex items-center space-x-2 rtl:space-x-reverse"
       >
         <input
           v-model.number="input"
@@ -16,20 +16,20 @@
           placeholder="0"
         />
         <div
-          @click.prevent="changePage(input)"
           class="flex-0 cursor-pointer text-sm h-9 w-9 bg-slate-900 text-white flex items-center justify-center rounded"
+          @click.prevent="changePage(input)"
         >
           Go
         </div>
       </div>
 
-      <div class="flex items-center" v-if="enableSearch && enableSelect">
+      <div v-if="enableSearch && enableSelect" class="flex items-center">
         <Select
           v-model.number="input2"
-          @change="changePage(input2)"
           placeholder="Go"
           classInput=" w-[60px] h-9 "
           :options="options"
+          @change="changePage(input2)"
         >
         </Select>
 
@@ -43,25 +43,25 @@
         class="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180"
       >
         <button
-          @click.prevent="changePage(prevPage)"
           :disabled="current === 1"
           :class="current === 1 ? ' opacity-50 cursor-not-allowed' : ''"
+          @click.prevent="changePage(prevPage)"
         >
-          <Icon icon="heroicons-outline:chevron-left" v-if="!enableText" />
+          <Icon v-if="!enableText" icon="heroicons-outline:chevron-left" />
           <span v-if="enableText" class="text-sm inline-block rtl:-rotate-180"
             >Previous</span
           >
         </button>
       </li>
-      <li class="" v-if="hasFirst()">
+      <li v-if="hasFirst()" class="">
         <button @click.prevent="changePage(1)">
           <div>
             <span> 1 </span>
           </div>
         </button>
       </li>
-      <li class="text-slate-600 dark:text-slate-300" v-if="hasFirst()">...</li>
-      <li class="" v-for="(page, i) in pages" :key="i">
+      <li v-if="hasFirst()" class="text-slate-600 dark:text-slate-300">...</li>
+      <li v-for="(page, i) in pages" :key="i" class="">
         <button @click.prevent="changePage(page)">
           <div
             :class="{
@@ -73,8 +73,8 @@
           </div>
         </button>
       </li>
-      <li class="text-slate-600 dark:text-slate-300" v-if="hasLast()">...</li>
-      <li class="" v-if="hasLast()">
+      <li v-if="hasLast()" class="text-slate-600 dark:text-slate-300">...</li>
+      <li v-if="hasLast()" class="">
         <button @click.prevent="changePage(totalPages)">
           <div>
             <span> {{ totalPages }} </span>
@@ -85,13 +85,13 @@
         class="text-xl leading-4 text-slate-900 dark:text-white rtl:rotate-180"
       >
         <button
-          @click.prevent="changePage(nextPage)"
           :disabled="current === totalPages"
           :class="
             current === totalPages ? ' opacity-50 cursor-not-allowed' : ''
           "
+          @click.prevent="changePage(nextPage)"
         >
-          <Icon icon="heroicons-outline:chevron-right" v-if="!enableText" />
+          <Icon v-if="!enableText" icon="heroicons-outline:chevron-right" />
           <span v-if="enableText" class="text-sm rtl:-rotate-180 inline-block"
             >Next</span
           >
@@ -181,31 +181,6 @@ export default defineComponent({
       input2: null,
     };
   },
-  methods: {
-    hasFirst: function () {
-      return this.rangeStart !== 1;
-    },
-    hasLast: function () {
-      return this.rangeEnd < this.totalPages;
-    },
-    hasPrev: function () {
-      return this.current > 1;
-    },
-    hasNext: function () {
-      return this.current < this.totalPages;
-    },
-    changePage: function (page) {
-      if (page > 0 && page <= this.totalPages) {
-        this.$emit("page-changed", page);
-      }
-      if (this.pageChanged) {
-        this.pageChanged({ currentPage: page });
-      }
-    },
-    customPerPageChange(page) {
-      this.perPageChanged({ currentPerPage: page });
-    },
-  },
   computed: {
     pages: function () {
       var pages = [];
@@ -234,6 +209,31 @@ export default defineComponent({
     },
     prevPage: function () {
       return this.current - 1;
+    },
+  },
+  methods: {
+    hasFirst: function () {
+      return this.rangeStart !== 1;
+    },
+    hasLast: function () {
+      return this.rangeEnd < this.totalPages;
+    },
+    hasPrev: function () {
+      return this.current > 1;
+    },
+    hasNext: function () {
+      return this.current < this.totalPages;
+    },
+    changePage: function (page) {
+      if (page > 0 && page <= this.totalPages) {
+        this.$emit("page-changed", page);
+      }
+      if (this.pageChanged) {
+        this.pageChanged({ currentPage: page });
+      }
+    },
+    customPerPageChange(page) {
+      this.perPageChanged({ currentPerPage: page });
     },
   },
 });

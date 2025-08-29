@@ -74,8 +74,8 @@
                 </td>
                 <td class="table-td text-right md:p-5 py-3 px-3 dark:text-slate-300">
                   <button
-                    @click="cart.removeFromCart(item)"
                     class="text-lg inline-flex flex-col items-center justify-center h-8 w-8 rounded-full bg-gray-500-f7 dark:bg-slate-900 dark:text-slate-400 bg-slate-100 hover:bg-danger-500 hover:text-white dark:hover:bg-danger-500 dark:hover:text-white"
+                    @click="cart.removeFromCart(item)"
                   >
                     <Icon icon="heroicons:trash" />
                   </button>

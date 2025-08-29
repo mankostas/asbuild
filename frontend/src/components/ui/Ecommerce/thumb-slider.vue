@@ -26,7 +26,6 @@
 
   <div class="flex mt-6 space-x-3">
     <Swiper
-      @swiper="setThumbsSwiper"
       :loop="true"
       :spaceBetween="10"
       :slidesPerView="4"
@@ -34,6 +33,7 @@
       :watchSlidesProgress="true"
       :modules="modules"
       class="mySwiper"
+      @swiper="setThumbsSwiper"
     >
       <SwiperSlide
         v-for="(image, i) in images"

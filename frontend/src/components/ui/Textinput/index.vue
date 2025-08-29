@@ -16,6 +16,8 @@
     >
     <div class="relative" :class="horizontal ? 'flex-1' : ''">
       <input
+        v-if="!isMask"
+        :id="name"
         :type="types"
         :name="name"
         :placeholder="placeholder"
@@ -23,28 +25,26 @@
           hasicon ? 'ltr:pr-10 rtl:pl-10' : ''
         } `"
         :value="modelValue"
-        @input="$emit('update:modelValue', $event.target.value)"
         :error="error"
-        :id="name"
         :readonly="isReadonly"
         :disabled="disabled"
         :validate="validate"
-        v-if="!isMask"
+        @input="$emit('update:modelValue', $event.target.value)"
       />
       <cleave
+        v-if="isMask"
+        :id="name"
         :class="`${classInput} cleave input-control block w-full focus:outline-none h-[40px] `"
         :name="name"
         :placeholder="placeholder"
         :value="modelValue"
-        @input="$emit('update:modelValue', $event.target.value)"
         :error="error"
-        :id="name"
         :readonly="isReadonly"
         :disabled="disabled"
         :validate="validate"
         :options="options"
-        v-if="isMask"
         modelValue="modelValue"
+        @input="$emit('update:modelValue', $event.target.value)"
       />
 
       <div
@@ -52,11 +52,11 @@
       >
         <span
           v-if="hasicon"
-          @click="toggleType"
           class="cursor-pointer text-secondary-500"
+          @click="toggleType"
         >
-          <Icon icon="heroicons-outline:eye" v-if="types === 'password'" />
-          <Icon icon="heroicons-outline:eye-off" v-else />
+          <Icon v-if="types === 'password'" icon="heroicons-outline:eye" />
+          <Icon v-else icon="heroicons-outline:eye-off" />
         </span>
 
         <span v-if="error" class="text-danger-500">
@@ -90,8 +90,8 @@
       >{{ validate }}</span
     >
     <span
-      class="block text-secondary-500 font-light leading-4 text-xs mt-2"
       v-if="description"
+      class="block text-secondary-500 font-light leading-4 text-xs mt-2"
       >{{ description }}</span
     >
   </div>

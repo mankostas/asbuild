@@ -81,16 +81,16 @@ import logoWhite from "@/assets/images/logo/logo-white.svg";
 import logo from "@/assets/images/logo/logo.svg";
 
 export default {
+  components: {
+    Social,
+    Signup,
+  },
   data() {
     return {
       logoWhite,
       logo,
       pageBg,
     };
-  },
-  components: {
-    Social,
-    Signup,
   },
 };
 </script>

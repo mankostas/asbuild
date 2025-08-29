@@ -3,15 +3,15 @@
     <div class="filegroup">
       <label :for="name">
         <input
-          type="file"
-          @change="onChange"
-          class="bg-red-400 w-full hidden"
           :id="name"
+          type="file"
+          class="bg-red-400 w-full hidden"
           :name="name"
           :multiple="multiple"
           :preview="preview"
           :placeholder="placeholder"
           :label="label"
+          @change="onChange"
         />
         <div
           class="w-full h-[40px] file-control flex items-center"
@@ -49,8 +49,8 @@
               }}</span
             >
             <span
-              class="text-slate-400"
               v-if="placeholder && multipleurls.length === 0"
+              class="text-slate-400"
             >
               {{ placeholder }}</span
             >
@@ -73,8 +73,8 @@
         </div>
 
         <div
-          class="flex flex-wrap space-x-5 rtl:space-x-reverse"
           v-if="multipleurls.length > 0 && multiple && preview"
+          class="flex flex-wrap space-x-5 rtl:space-x-reverse"
         >
           <div
             v-for="(url, index) in multipleurls"

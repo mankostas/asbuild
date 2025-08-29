@@ -24,16 +24,16 @@
     `"
     >
       <span
-        class="flex-none input-group-addon"
         v-if="prepend || prependIcon || $slots.prepend"
+        class="flex-none input-group-addon"
       >
         <span
-          class="input-group-text inline-block h-full"
           v-if="prepend || prependIcon"
+          class="input-group-text inline-block h-full"
         >
-          {{ prepend }} <Icon :icon="prependIcon" v-if="prependIcon" />
+          {{ prepend }} <Icon v-if="prependIcon" :icon="prependIcon" />
         </span>
-        <span class="inline-block h-full prepend-slot" v-if="$slots.prepend">
+        <span v-if="$slots.prepend" class="inline-block h-full prepend-slot">
           <slot name="prepend"></slot>
         </span>
       </span>
@@ -43,37 +43,37 @@
           :class="`${error ? 'has-error' : ''}  ${validate ? 'is-valid' : ''}`"
         >
           <input
+            v-if="!isMask"
+            :id="name"
             :type="types"
             :name="name"
             :placeholder="placeholder"
             :class="`${classInput} input-group-control block w-full focus:outline-none h-[40px] `"
             :value="modelValue"
-            @input="$emit('update:modelValue', $event.target.value)"
             :error="error"
-            :id="name"
             :readonly="isReadonly"
             :disabled="disabled"
             :validate="validate"
-            v-if="!isMask"
+            @input="$emit('update:modelValue', $event.target.value)"
           />
           <cleave
+            v-if="isMask"
+            :id="name"
             :class="`${classInput} cleave input-group-control block w-full focus:outline-none h-[40px] `"
             :name="name"
             :placeholder="placeholder"
             :value="modelValue"
-            @input="$emit('update:modelValue', $event.target.value)"
             :error="error"
-            :id="name"
             :readonly="isReadonly"
             :disabled="disabled"
             :validate="validate"
             :options="options"
-            v-if="isMask"
             modelValue="modelValue"
+            @input="$emit('update:modelValue', $event.target.value)"
           />
           <div
-            class="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2 -translate-y-1/2"
             v-if="error || validate"
+            class="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2 -translate-y-1/2"
           >
             <span v-if="error" class="text-danger-500">
               <Icon icon="heroicons-outline:information-circle" />
@@ -86,16 +86,16 @@
         </div>
       </div>
       <span
-        class="flex-none input-group-addon right"
         v-if="append || appendIcon || $slots.append"
+        class="flex-none input-group-addon right"
       >
         <span
-          class="input-group-text inline-block h-full"
           v-if="append || appendIcon"
-          >{{ append }} <Icon :icon="appendIcon" v-if="appendIcon"
+          class="input-group-text inline-block h-full"
+          >{{ append }} <Icon v-if="appendIcon" :icon="appendIcon"
         /></span>
 
-        <span class="inline-block h-full append-slot" v-if="$slots.append">
+        <span v-if="$slots.append" class="inline-block h-full append-slot">
           <slot name="append"></slot>
         </span>
       </span>
@@ -121,8 +121,8 @@
       >{{ validate }}</span
     >
     <span
-      class="block text-slate-400 font-light leading-4 text-xs mt-2"
       v-if="description"
+      class="block text-slate-400 font-light leading-4 text-xs mt-2"
       >{{ description }}</span
     >
   </div>

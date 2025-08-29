@@ -15,8 +15,8 @@
         <option value="">All Statuses</option>
         <option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
       </select>
-      <input type="date" v-model="startDate" class="border rounded p-2" />
-      <input type="date" v-model="endDate" class="border rounded p-2" />
+      <input v-model="startDate" type="date" class="border rounded p-2" />
+      <input v-model="endDate" type="date" class="border rounded p-2" />
     </div>
     <DashcodeServerTable
       :key="tableKey"

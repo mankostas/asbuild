@@ -15,9 +15,9 @@
     <div class="relative">
       <div v-if="!$slots.default">
         <vSelect
+          :id="name"
           :name="name"
           :error="error"
-          :id="name"
           :readonly="isReadonly"
           :disabled="disabled"
           :validate="validate"
@@ -59,8 +59,8 @@
       >{{ validate }}</span
     >
     <span
-      class="block text-secondary-500 font-light leading-4 text-xs mt-2"
       v-if="description"
+      class="block text-secondary-500 font-light leading-4 text-xs mt-2"
       >{{ description }}</span
     >
   </div>

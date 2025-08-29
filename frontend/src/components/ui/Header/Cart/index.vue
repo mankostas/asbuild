@@ -1,8 +1,8 @@
 <template>
   <Transition>
     <div
-      class="setting-wrapper fixed ltr:right-0 rtl:left-0 top-0 md:w-[400px] w-[300px] bg-white dark:bg-slate-800 h-screen z-[9999] shadow-base2 dark:shadow-base3 border border-slate-200 dark:border-slate-700"
       v-if="themeSettingsStore.cartOpener"
+      class="setting-wrapper fixed ltr:right-0 rtl:left-0 top-0 md:w-[400px] w-[300px] bg-white dark:bg-slate-800 h-screen z-[9999] shadow-base2 dark:shadow-base3 border border-slate-200 dark:border-slate-700"
     >
       <div class="px-6 h-full overflow-y-auto flex flex-col">
         <header
@@ -31,8 +31,8 @@
           class="divide-y divide-slate-200 dark:divide-slate-700 flex-1 flex flex-col"
         >
           <div
-            class="divide-y divide-slate-200 dark:divide-slate-700 flex-1 flex flex-col space-y-6 pb-4"
             v-if="cart.getItems.length >= 1"
+            class="divide-y divide-slate-200 dark:divide-slate-700 flex-1 flex flex-col space-y-6 pb-4"
           >
             <template v-for="(item, index) in cart.getItems" :key="index">
               <CartItem :item="item" />
@@ -55,8 +55,8 @@
             <span>${{ cart.totalPrice }}</span>
           </div>
           <div
-            class="flex justify-between space-x-3 rtl:space-x-reverse"
             v-if="cart.getItems.length >= 1"
+            class="flex justify-between space-x-3 rtl:space-x-reverse"
           >
             <router-link to="/app/products"
               ><Button

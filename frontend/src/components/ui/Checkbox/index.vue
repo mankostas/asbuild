@@ -5,14 +5,14 @@
       :class="disabled ? ' cursor-not-allowed opacity-50' : 'cursor-pointer'"
     >
       <input
+        v-model="localValue"
         type="checkbox"
         class="hidden"
         :disabled="disabled"
         :name="name"
-        @change="onChange"
         :value="value"
-        v-model="localValue"
         v-bind="$attrs"
+        @change="onChange"
       />
 
       <span
@@ -24,15 +24,15 @@
         "
       >
         <img
+          v-if="ck"
           src="@/assets/images/icon/ck-white.svg"
           alt=""
           class="h-[10px] w-[10px] block m-auto"
-          v-if="ck"
         />
       </span>
       <span
-        class="text-slate-500 dark:text-slate-400 text-sm leading-6"
         v-if="label"
+        class="text-slate-500 dark:text-slate-400 text-sm leading-6"
       >
         {{ label }}
       </span>

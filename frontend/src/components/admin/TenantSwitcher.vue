@@ -1,8 +1,8 @@
 <template>
   <select
     v-model="selected"
-    @change="onChange"
     class="border rounded px-2 py-1 text-sm"
+    @change="onChange"
   >
     <option
       v-for="t in tenantStore.tenants"

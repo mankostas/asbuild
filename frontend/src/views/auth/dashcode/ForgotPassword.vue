@@ -5,16 +5,16 @@
         <div class="max-w-[520px] pt-20 ltr:pl-20 rtl:pr-20">
           <router-link to="/">
             <img
+              v-if="!$store.themeSettingsStore.isDark"
               src="@/assets/images/logo/logo.svg"
               alt=""
               class="mb-10"
-              v-if="!this.$store.themeSettingsStore.isDark"
             />
             <img
+              v-else
               src="@/assets/images/logo/logo-white.svg"
               alt=""
               class="mb-10"
-              v-else
             />
           </router-link>
 

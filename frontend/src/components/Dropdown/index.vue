@@ -19,8 +19,9 @@
         class="absolute ltr:right-0 rtl:left-0 origin-top-right rounded bg-white dark:bg-slate-800 dark:border dark:border-slate-700 shadow-dropdown z-[9999]"
       >
         <div v-if="!$slots.menus">
-          <MenuItem v-slot="{ active }" v-for="(item, i) in items" :key="i">
+          <MenuItem v-for="(item, i) in items" #default="{ active }" :key="i">
             <router-link
+              v-if="item.link"
               :class="`${
                 active
                   ? 'bg-slate-100 text-slate-900 dark:bg-slate-600 dark:text-slate-300 dark:bg-opacity-50'
@@ -31,9 +32,8 @@
                   : ''
               }`"
               :to="item.link"
-              v-if="item.link"
             >
-              <div class="flex items-center" v-if="item.icon">
+              <div v-if="item.icon" class="flex items-center">
                 <span class="block text-xl ltr:mr-3 rtl:ml-3">
                   <Icon :icon="item.icon"
                 /></span>
@@ -42,14 +42,14 @@
               <span v-else class="block text-sm">{{ item.label }}</span>
             </router-link>
             <span
+              v-else
               :class="`${active ? 'bg-slate-100 text-slate-800' : ''}  ${
                 item.hasDivider === true
                   ? 'border-t border-gray-500 dark:border-slate-700'
                   : ''
               }  block ${classItem}`"
-              v-else
             >
-              <div class="flex items-center" v-if="item.icon">
+              <div v-if="item.icon" class="flex items-center">
                 <span class="block text-xl ltr:mr-3 rtl:ml-3">
                   <Icon :icon="item.icon"
                 /></span>

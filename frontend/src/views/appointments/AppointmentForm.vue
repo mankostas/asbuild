@@ -1,6 +1,6 @@
 <template>
     <div v-if="canAccess">
-      <form @submit.prevent="submitForm" class="max-w-lg space-y-4">
+      <form class="max-w-lg space-y-4" @submit.prevent="submitForm">
       <VueSelect label="Type" :error="appointmentTypeError">
         <vSelect
           v-model="appointmentTypeId"

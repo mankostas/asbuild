@@ -1,5 +1,5 @@
 <template>
-  <div class="h-20 w-20 mx-auto" v-if="!isLoading">
+  <div v-if="!isLoading" class="h-20 w-20 mx-auto">
     <img src="@/assets/images/svg/loader.svg" alt="" />
   </div>
 </template>

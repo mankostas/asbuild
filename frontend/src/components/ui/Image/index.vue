@@ -1,9 +1,9 @@
 <template>
   <div class="relative" :class="parentClass">
     <img
+      v-if="src"
       :src="src"
       :alt="alt"
-      v-if="src"
       :class="imageClass"
       class="max-w-full block"
     />

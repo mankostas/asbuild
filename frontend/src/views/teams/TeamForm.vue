@@ -1,8 +1,8 @@
 <template>
   <div v-if="canAccess">
-    <form @submit.prevent="submit" class="grid gap-4 max-w-lg">
-      <Textinput label="Name" v-model="form.name" :error="errors.name" />
-      <Textinput label="Description" v-model="form.description" :error="errors.description" />
+    <form class="grid gap-4 max-w-lg" @submit.prevent="submit">
+      <Textinput v-model="form.name" label="Name" :error="errors.name" />
+      <Textinput v-model="form.description" label="Description" :error="errors.description" />
       <VueSelect label="Employees">
         <vSelect
           v-model="selectedEmployees"

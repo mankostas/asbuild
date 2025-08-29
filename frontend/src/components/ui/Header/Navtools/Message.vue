@@ -11,7 +11,7 @@
         >10</span
       >
     </span>
-    <template v-slot:menus>
+    <template #menus>
       <div
         class="flex justify-between px-4 py-4 border-b border-slate-100 dark:border-slate-600"
       >
@@ -28,8 +28,8 @@
       </div>
       <div class="divide-y divide-slate-100 dark:divide-slate-800">
         <MenuItem
-          v-slot="{ active }"
           v-for="(item, i) in message.slice(0, 3)"
+          #default="{ active }"
           :key="i"
         >
           <div
@@ -73,7 +73,7 @@
                   3 min ago
                 </div>
               </div>
-              <div class="flex-0" v-if="item.hasnotifaction">
+              <div v-if="item.hasnotifaction" class="flex-0">
                 <span
                   class="h-4 w-4 bg-danger-500 border border-white rounded-full text-[10px] flex items-center justify-center text-white"
                 >

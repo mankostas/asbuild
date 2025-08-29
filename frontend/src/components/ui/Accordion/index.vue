@@ -1,9 +1,9 @@
 <template>
   <div :class="parentClass">
     <div
-      class="accordion shadow-base dark:shadow-none rounded-md"
       v-for="(item, i) in items"
       :key="i"
+      class="accordion shadow-base dark:shadow-none rounded-md"
     >
       <div
        :class="cn(

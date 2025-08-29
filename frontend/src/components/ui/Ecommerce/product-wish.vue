@@ -64,8 +64,8 @@
       </p>
 
       <CounterButton
-        :product="product"
         v-if="cart.getItems.find((item) => item.id == props.product.id)"
+        :product="product"
       />
 
       <Button

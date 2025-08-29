@@ -16,17 +16,17 @@
     >
     <div class="relative" :class="horizontal ? 'flex-1' : ''">
       <textarea
+        :id="name"
         :name="name"
         :placeholder="placeholder"
         :class="`${classInput} input-control block w-full focus:outline-none pt-3 `"
         :value="modelValue"
-        @input="$emit('update:modelValue', $event.target.value)"
         :error="error"
-        :id="name"
         :readonly="isReadonly"
         :disabled="disabled"
         :rows="rows"
         :validate="validate"
+        @input="$emit('update:modelValue', $event.target.value)"
       ></textarea>
 
       <div
@@ -63,8 +63,8 @@
       >{{ validate }}</span
     >
     <span
-      class="block text-secondary-500 font-light leading-4 text-xs mt-2"
       v-if="description"
+      class="block text-secondary-500 font-light leading-4 text-xs mt-2"
       >{{ description }}</span
     >
   </div>

@@ -5,14 +5,14 @@
       :class="disabled ? ' cursor-not-allowed opacity-40' : 'cursor-pointer'"
     >
       <input
+        v-model="localValue"
         type="checkbox"
         class="hidden"
         :disabled="disabled"
         :name="name"
-        @change="onChange"
         :value="value"
-        v-model="localValue"
         v-bind="$attrs"
+        @change="onChange"
       />
       <div
         :class="ck ? activeClass : 'bg-secondary-500'"
@@ -25,7 +25,7 @@
         >
           <span v-if="!icon">on</span>
 
-          <Icon :icon="prevIcon" v-if="icon" />
+          <Icon v-if="icon" :icon="prevIcon" />
         </span>
         <span
           v-if="badge && !ck"
@@ -36,7 +36,7 @@
             <span v-if="!icon">Off</span>
           </Transition>
           <Transition>
-            <Icon :icon="nextIcon" v-if="icon" />
+            <Icon v-if="icon" :icon="nextIcon" />
           </Transition>
         </span>
 
@@ -51,8 +51,8 @@
       </div>
 
       <span
-        class="text-slate-500 dark:text-slate-400 text-sm leading-6"
         v-if="label"
+        class="text-slate-500 dark:text-slate-400 text-sm leading-6"
       >
         {{ label }}
       </span>
@@ -64,10 +64,10 @@ import Icon from "@/components/Icon";
 import { computed, defineComponent, ref } from "vue";
 export default defineComponent({
   name: "Checkbox",
-  inheritAttrs: false,
   components: {
     Icon,
   },
+  inheritAttrs: false,
   props: {
     label: {
       type: String,
