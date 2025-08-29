@@ -277,6 +277,7 @@ export const routes = [
     meta: {
       requiresAuth: true,
       requiredAbilities: ['branding.manage'],
+      requiredFeatures: ['branding'],
       breadcrumb: 'routes.branding',
       title: 'Branding',
       layout: 'app',
@@ -290,6 +291,7 @@ export const routes = [
     meta: {
       requiresAuth: true,
       requiredAbilities: ['branding.manage'],
+      requiredFeatures: ['branding'],
       breadcrumb: 'routes.footer',
       title: 'Footer',
       layout: 'app',
@@ -582,6 +584,13 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.requiredAbilities?.length && !auth.hasAny(to.meta.requiredAbilities)) {
+    return next('/');
+  }
+
+  if (
+    to.meta.requiredFeatures?.length &&
+    !to.meta.requiredFeatures.every((f) => auth.features.includes(f))
+  ) {
     return next('/');
   }
 

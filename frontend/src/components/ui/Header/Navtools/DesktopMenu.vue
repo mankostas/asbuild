@@ -116,7 +116,8 @@ export default {
         if (item.isHeadr) return false;
         if (item.admin && !auth.isSuperAdmin) return false;
         const req = item.requiredAbilities || [];
-        return auth.hasAny(req);
+        const features = item.requiredFeatures || [];
+        return auth.hasAny(req) && features.every((f) => auth.features.includes(f));
       });
     },
   },
