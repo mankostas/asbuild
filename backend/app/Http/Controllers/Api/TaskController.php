@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\TaskType;
+use App\Models\User;
 use App\Services\FormSchemaService;
 use App\Services\StatusFlowService;
 use App\Http\Resources\TaskResource;
@@ -51,7 +52,11 @@ class TaskController extends Controller
         $this->formSchemaService->mapAssignee($type->schema_json ?? [], $data);
 
         $task = Task::create($data);
-        $task->load('type', 'assignee');
+        $task->watchers()->firstOrCreate(['user_id' => $request->user()->id]);
+        if ($task->assignee_type === User::class && $task->assignee_id) {
+            $task->watchers()->firstOrCreate(['user_id' => $task->assignee_id]);
+        }
+        $task->load('type', 'assignee', 'watchers');
 
         return (new TaskResource($task))
             ->response()
@@ -61,7 +66,7 @@ class TaskController extends Controller
     public function show(Task $task)
     {
         $this->authorize('view', $task);
-        return new TaskResource($task->load('comments', 'type', 'assignee'));
+        return new TaskResource($task->load('comments', 'type', 'assignee', 'watchers'));
     }
 
     public function update(TaskUpsertRequest $request, Task $task)
@@ -78,8 +83,11 @@ class TaskController extends Controller
         $this->formSchemaService->mapAssignee($type->schema_json ?? [], $data);
         $task->fill($data);
         $task->save();
+        if ($task->assignee_type === User::class && $task->assignee_id) {
+            $task->watchers()->firstOrCreate(['user_id' => $task->assignee_id]);
+        }
 
-        return new TaskResource($task->load('comments', 'type', 'assignee'));
+        return new TaskResource($task->load('comments', 'type', 'assignee', 'watchers'));
     }
 
     public function destroy(Task $task)

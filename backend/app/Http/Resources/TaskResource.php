@@ -25,6 +25,10 @@ class TaskResource extends JsonResource
             $data['assignee'] = null;
         }
 
+        $data['is_watching'] = $this->relationLoaded('watchers')
+            ? $this->watchers->contains('user_id', $request->user()->id)
+            : false;
+
         return $this->formatDates($data);
     }
 }

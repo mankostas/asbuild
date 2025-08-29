@@ -19,6 +19,7 @@ return [
     'tasks.attach.upload',
     'tasks.board.view',
     'tasks.list.view',
+    'tasks.watch',
 
     // Notifications
     'notifications.view',

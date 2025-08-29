@@ -110,7 +110,9 @@
     "subtasks": {
       "title": "Subtasks",
       "add": "Add subtask"
-    }
+    },
+    "watch": "Watch",
+    "unwatch": "Unwatch"
   },
   "dashboard": {
     "messages": {

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TaskCommentController;
+use App\Http\Controllers\Api\TaskWatcherController;
 use App\Http\Controllers\Api\TaskTypeController;
 use App\Http\Controllers\Api\ManualController;
 use App\Http\Controllers\Api\NotificationController;
@@ -87,6 +88,10 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':tasks.status.update');
     Route::post('tasks/{task}/files', [FileController::class, 'attachToTask'])
         ->middleware(Ability::class . ':tasks.attach.upload');
+    Route::post('tasks/{task}/watch', [TaskWatcherController::class, 'store'])
+        ->middleware(Ability::class . ':tasks.watch');
+    Route::delete('tasks/{task}/watch', [TaskWatcherController::class, 'destroy'])
+        ->middleware(Ability::class . ':tasks.watch');
     Route::post('tasks/{task}/subtasks', [TaskSubtaskController::class, 'store'])
         ->middleware(Ability::class . ':tasks.update');
     Route::patch('tasks/{task}/subtasks/reorder', [TaskSubtaskController::class, 'reorder'])

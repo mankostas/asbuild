@@ -88,7 +88,7 @@ export const routes = [
     component: () => import('@/views/tasks/TaskDetails.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['tasks.view', 'tasks.manage'],
+      requiredAbilities: ['tasks.view', 'tasks.manage', 'tasks.watch'],
       breadcrumb: 'routes.taskDetail',
       title: 'Task Detail',
       layout: 'app',
