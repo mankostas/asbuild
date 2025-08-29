@@ -77,7 +77,7 @@
                 <span
                   class="h-4 w-4 bg-danger-500 border border-white rounded-full text-[10px] flex items-center justify-center text-white"
                 >
-                  {{ item.notification_count }}
+                  {{ $msg(item.notification_count) }}
                 </span>
               </div>
             </div>

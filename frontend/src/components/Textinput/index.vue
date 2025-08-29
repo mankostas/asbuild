@@ -89,7 +89,7 @@
           ? ' inline-block bg-danger-500 text-white text-[10px] px-2 py-1 rounded'
           : ' text-danger-500 block text-sm'
       "
-      >{{ error }}</span
+      >{{ $msg(error) }}</span
     >
     <span
       v-if="validate"
@@ -99,7 +99,7 @@
           ? ' inline-block bg-success-500 text-white text-[10px] px-2 py-1 rounded'
           : ' text-success-500 block text-sm'
       "
-      >{{ validate }}</span
+      >{{ $msg(validate) }}</span
     >
     <span
       v-if="description"
