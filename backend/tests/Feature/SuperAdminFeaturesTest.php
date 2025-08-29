@@ -10,11 +10,11 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
-class SuperAdminNotificationsFeatureTest extends TestCase
+class SuperAdminFeaturesTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_super_admin_has_notifications_feature_even_when_tenant_does_not(): void
+    public function test_super_admin_has_all_features_even_when_tenant_does_not(): void
     {
         $tenant = Tenant::create(['name' => 'Tenant', 'features' => []]);
 
@@ -40,7 +40,10 @@ class SuperAdminNotificationsFeatureTest extends TestCase
 
         $data = $this->getJson('/api/me')->assertStatus(200)->json();
 
+        $this->assertEqualsCanonicalizing(config('features'), $data['features']);
         $this->assertContains('notifications', $data['features']);
+        $this->assertContains('branding', $data['features']);
+        $this->assertContains('themes', $data['features']);
     }
 }
 
