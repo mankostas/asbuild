@@ -13,8 +13,10 @@ class BrandingSeeder extends Seeder
             ['tenant_id' => null],
             [
                 'name' => 'Default Brand',
-                'color' => '#000000',
+                'color' => '#4669fa',
+                'secondary_color' => '#A0AEC0',
                 'logo' => null,
+                'logo_dark' => null,
                 'email_from' => null,
                 'footer_left' => 'Default left footer',
                 'footer_right' => 'Default right footer',

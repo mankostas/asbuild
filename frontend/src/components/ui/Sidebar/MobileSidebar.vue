@@ -5,13 +5,13 @@
     <div class="logo-segment flex justify-between items-center px-4 py-6">
         <router-link :to="{ name: 'dashboard' }">
         <img
-          src="@/assets/images/logo/logo.svg"
+          :src="$store.brandingStore.branding.logo || logoLight"
           alt=""
           v-if="!this.$store.themeSettingsStore.isDark"
         />
 
         <img
-          src="@/assets/images/logo/logo-white.svg"
+          :src="$store.brandingStore.branding.logo_dark || logoDark"
           alt=""
           v-if="this.$store.themeSettingsStore.isDark"
         />
@@ -33,6 +33,8 @@ import { Icon } from "@iconify/vue";
 import { defineComponent } from "vue";
 import { menuItems } from "@/constant/data";
 import Navmenu from "./Navmenu";
+import logoLight from "@/assets/images/logo/logo.svg";
+import logoDark from "@/assets/images/logo/logo-white.svg";
 
 export default defineComponent({
   components: {
@@ -44,6 +46,8 @@ export default defineComponent({
       menuItems,
       openClass: "w-[248px]",
       closeClass: "w-[72px] close_sidebar",
+      logoLight,
+      logoDark,
     };
   },
   methods: {

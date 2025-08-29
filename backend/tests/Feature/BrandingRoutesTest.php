@@ -43,6 +43,9 @@ class BrandingRoutesTest extends TestCase
         $payload = [
             'name' => 'Brand',
             'color' => '#ffffff',
+            'secondary_color' => '#000000',
+            'logo' => 'logo.png',
+            'logo_dark' => 'logo-dark.png',
             'footer_left' => 'Left',
             'footer_right' => 'Right',
         ];
@@ -56,7 +59,9 @@ class BrandingRoutesTest extends TestCase
             ->getJson('/api/branding')
             ->assertStatus(200)
             ->assertJsonPath('footer_left', 'Left')
-            ->assertJsonPath('footer_right', 'Right');
+            ->assertJsonPath('footer_right', 'Right')
+            ->assertJsonPath('secondary_color', '#000000')
+            ->assertJsonPath('logo_dark', 'logo-dark.png');
     }
 
     public function test_client_admin_cannot_update_branding(): void
