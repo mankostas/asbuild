@@ -29,11 +29,10 @@ export default {
   components: {
     Icon,
   },
-  type: "primary-500",
-
   props: {
     type: {
       type: String,
+      default: "",
     },
     dismissible: {
       type: Boolean,
@@ -41,6 +40,7 @@ export default {
     },
     icon: {
       type: String,
+      default: "",
     },
     class: {
       type: String,

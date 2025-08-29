@@ -4,6 +4,7 @@
     :class="`${errorText ? 'has-error' : ''}  ${showSuccessIcon ? 'is-valid' : ''}`"
   >
     <label
+      :for="inputId"
       class="flex items-start"
       :class="disabled ? ' cursor-not-allowed opacity-40' : 'cursor-pointer'"
     >
@@ -108,7 +109,7 @@ export default defineComponent({
     active: { type: Boolean, default: false },
     disabled: { type: Boolean, default: false },
     activeClass: { type: String, default: "bg-slate-900 dark:bg-slate-900 " },
-    value: { type: null },
+    value: { type: null, default: "" },
     badge: { type: Boolean, default: false },
     icon: { type: Boolean, default: false },
     prevIcon: { type: String, default: "heroicons-outline:volume-up" },

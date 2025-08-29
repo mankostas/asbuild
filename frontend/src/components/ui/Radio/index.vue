@@ -4,6 +4,7 @@
     :class="`${errorText ? 'has-error' : ''}  ${showSuccessIcon ? 'is-valid' : ''}`"
   >
     <label
+      :for="inputId"
       :class="disabled ? ' cursor-not-allowed opacity-50' : 'cursor-pointer'"
       class="flex items-center"
     >
@@ -80,7 +81,7 @@ export default defineComponent({
     checked: { type: Boolean, default: false },
     disabled: { type: Boolean, default: false },
     activeClass: { type: String, default: "ring-slate-500 dark:ring-slate-400" },
-    value: { type: null },
+    value: { type: null, default: "" },
   },
   emits: ["update:modelValue", "input", "change"],
 

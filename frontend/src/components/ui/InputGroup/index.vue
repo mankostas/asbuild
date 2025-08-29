@@ -164,9 +164,11 @@ export default {
     },
     prepend: {
       type: String,
+      default: "",
     },
     append: {
       type: String,
+      default: "",
     },
     classLabel: {
       type: String,
@@ -202,9 +204,11 @@ export default {
     },
     prependIcon: {
       type: String,
+      default: "",
     },
     appendIcon: {
       type: String,
+      default: "",
     },
     merged: {
       type: Boolean,
