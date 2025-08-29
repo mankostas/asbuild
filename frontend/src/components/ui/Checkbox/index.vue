@@ -1,20 +1,21 @@
 <template>
   <div>
+    <input
+      v-model="localValue"
+      type="checkbox"
+      class="hidden"
+      :id="inputId"
+      :disabled="disabled"
+      :name="name"
+      :value="value"
+      v-bind="$attrs"
+      @change="onChange"
+    />
     <label
       class="flex items-center"
+      :for="inputId"
       :class="disabled ? ' cursor-not-allowed opacity-50' : 'cursor-pointer'"
     >
-      <input
-        v-model="localValue"
-        type="checkbox"
-        class="hidden"
-        :disabled="disabled"
-        :name="name"
-        :value="value"
-        v-bind="$attrs"
-        @change="onChange"
-      />
-
       <span
         class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex ltr:mr-3 rtl:ml-3 relative transition-all duration-150"
         :class="
@@ -46,8 +47,21 @@ export default defineComponent({
   name: "Checkbox",
   inheritAttrs: false,
   props: {
+    modelValue: {
+      type: [String, Number, Boolean, Object, Array],
+      default: "",
+    },
     label: {
       type: String,
+      default: "",
+    },
+    name: {
+      type: String,
+      default: "checkbox",
+    },
+    id: {
+      type: String,
+      default: "",
     },
     checked: {
       type: Boolean,
@@ -57,10 +71,6 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    name: {
-      type: String,
-      default: "checkbox",
-    },
     activeClass: {
       type: String,
       default:
@@ -69,24 +79,18 @@ export default defineComponent({
     value: {
       type: null,
     },
-    modelValue: {
-      type: null,
-    },
   },
-  emits: {
-    "update:modelValue": (newValue) => ({
-      modelValue: newValue,
-    }),
-    // use newValue
-    // "update:checked": (newValue) => true,
-  },
+  emits: ["update:modelValue", "input", "change"],
 
   setup(props, context) {
     const ck = ref(props.checked);
+    const uid = `fld-${Math.random().toString(36).slice(2)}`;
+    const inputId = computed(() => props.id || uid);
 
-    // on change event
-    const onChange = () => {
+    const onChange = (e) => {
       ck.value = !ck.value;
+      context.emit("change", e);
+      context.emit("input", e);
     };
 
     const localValue = computed({
@@ -94,7 +98,7 @@ export default defineComponent({
       set: (newValue) => context.emit("update:modelValue", newValue),
     });
 
-    return { localValue, ck, onChange };
+    return { localValue, ck, onChange, inputId };
   },
 });
 </script>

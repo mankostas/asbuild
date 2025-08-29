@@ -5,7 +5,7 @@
       :class="`${classLabel} ${
         horizontal ? 'flex-0 mr-6 md:w-[100px] w-[60px] break-words' : ''
       }  ltr:inline-block rtl:block  input-label `"
-      :for="name"
+      :for="inputId"
     >
       {{ label }}</label
     >
@@ -44,7 +44,7 @@
         >
           <input
             v-if="!isMask"
-            :id="name"
+            :id="inputId"
             :type="types"
             :name="name"
             :placeholder="placeholder"
@@ -54,11 +54,17 @@
             :readonly="isReadonly"
             :disabled="disabled"
             :validate="validate"
-            @input="$emit('update:modelValue', $event.target.value)"
+            @input="
+              ($event) => {
+                $emit('update:modelValue', $event.target.value);
+                $emit('input', $event);
+              }
+            "
+            @change="$emit('change', $event)"
           />
           <cleave
             v-if="isMask"
-            :id="name"
+            :id="inputId"
             :class="`${classInput} cleave input-group-control block w-full focus:outline-none h-[40px] `"
             :name="name"
             :placeholder="placeholder"
@@ -69,7 +75,13 @@
             :validate="validate"
             :options="options"
             modelValue="modelValue"
-            @input="$emit('update:modelValue', $event.target.value)"
+            @input="
+              ($event) => {
+                $emit('update:modelValue', $event.target.value);
+                $emit('input', $event);
+              }
+            "
+            @change="$emit('change', $event)"
           />
           <div
             v-if="error || validate"
@@ -133,17 +145,42 @@ import Cleave from "vue-cleave-component";
 export default {
   components: { Icon, Cleave },
   props: {
-    prepend: {
-      type: String,
+    modelValue: {
+      type: [String, Number, Boolean, Object, Array],
+      default: "",
     },
-    append: {
+    label: {
       type: String,
+      default: "",
+    },
+    name: {
+      type: String,
+      default: "",
+    },
+    id: {
+      type: String,
+      default: "",
+    },
+    error: {
+      type: [String, Boolean],
+      default: "",
+    },
+    description: {
+      type: String,
+      default: "",
+    },
+    validate: {
+      type: [Array, String, Function],
+      default: () => [],
     },
     placeholder: {
       type: String,
       default: "Search",
     },
-    label: {
+    prepend: {
+      type: String,
+    },
+    append: {
       type: String,
     },
     classLabel: {
@@ -157,17 +194,6 @@ export default {
     type: {
       type: String,
       default: "text",
-      //required: true,
-    },
-    name: {
-      type: String,
-    },
-    modelValue: {
-      type: String,
-      default: "",
-    },
-    error: {
-      type: String,
     },
     hasicon: {
       type: Boolean,
@@ -185,15 +211,9 @@ export default {
       type: Boolean,
       default: false,
     },
-    validate: {
-      type: String,
-    },
     msgTooltip: {
       type: Boolean,
       default: false,
-    },
-    description: {
-      type: String,
     },
     prependIcon: {
       type: String,
@@ -217,14 +237,20 @@ export default {
       }),
     },
   },
+  emits: ["update:modelValue", "input", "change"],
   data() {
     return {
       types: this.type,
+      generatedId: `fld-${Math.random().toString(36).slice(2)}`,
     };
+  },
+  computed: {
+    inputId() {
+      return this.id || this.generatedId;
+    },
   },
   methods: {
     toggleType() {
-      // toggle the type of the input field
       this.types = this.types === "text" ? "password" : "text";
     },
   },

@@ -8,13 +8,13 @@
     <label
       v-if="label"
       :class="`${classLabel} inline-block input-label `"
-      :for="name"
+      :for="inputId"
     >
       {{ label }}</label
     >
     <div class="relative">
       <select
-        :id="name"
+        :id="inputId"
         :name="name"
         :class="`${classInput} input-control block w-full focus:outline-none min-h-[40px] `"
         :value="modelValue"
@@ -25,7 +25,13 @@
         :formatter="formatter"
         :size="size"
         :multiple="multiple"
-        @input="$emit('update:modelValue', $event.target.value)"
+        @input="
+          ($event) => {
+            $emit('update:modelValue', $event.target.value);
+            $emit('input', $event);
+          }
+        "
+        @change="$emit('change', $event)"
       >
         <option value="" disabled selected>{{ placeholder }}</option>
         <template v-if="!$slots.default && options">
@@ -71,12 +77,37 @@
 <script>
 export default {
   props: {
-    placeholder: {
-      type: String,
-      default: "Select Option",
+    modelValue: {
+      type: [String, Number, Boolean, Object, Array],
+      default: "",
     },
     label: {
       type: String,
+      default: "",
+    },
+    name: {
+      type: String,
+      default: "",
+    },
+    id: {
+      type: String,
+      default: "",
+    },
+    error: {
+      type: [String, Boolean],
+      default: "",
+    },
+    description: {
+      type: String,
+      default: "",
+    },
+    validate: {
+      type: [Array, String, Function],
+      default: () => [],
+    },
+    placeholder: {
+      type: String,
+      default: "Select Option",
     },
     classLabel: {
       type: String,
@@ -86,18 +117,6 @@ export default {
       type: String,
       default: "classinput",
     },
-
-    name: {
-      type: String,
-    },
-    modelValue: {
-      // type: String || Array,
-      default: "",
-    },
-    error: {
-      type: String,
-    },
-
     isReadonly: {
       type: Boolean,
       default: false,
@@ -110,9 +129,6 @@ export default {
       type: Boolean,
       default: false,
     },
-    validate: {
-      type: String,
-    },
     msgTooltip: {
       type: Boolean,
       default: false,
@@ -120,9 +136,6 @@ export default {
     formatter: {
       type: Function,
       default: (value) => value,
-    },
-    description: {
-      type: String,
     },
     size: {
       type: String,
@@ -143,6 +156,17 @@ export default {
           label: "Select Option2",
         },
       ],
+    },
+  },
+  emits: ["update:modelValue", "input", "change"],
+  data() {
+    return {
+      generatedId: `fld-${Math.random().toString(36).slice(2)}`,
+    };
+  },
+  computed: {
+    inputId() {
+      return this.id || this.generatedId;
     },
   },
 };
