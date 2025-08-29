@@ -31,7 +31,7 @@
             externalQuery: searchTerm,
           }"
         >
-          <template v-slot:table-row="props">
+          <template #table-row="props">
             <span
               v-if="props.column.field == 'customer'"
               class="flex items-center"
@@ -99,7 +99,7 @@
                 <span class="text-xl dark:text-slate-400"
                   ><Icon icon="heroicons-outline:dots-vertical"
                 /></span>
-                <template v-slot:menus>
+                <template #menus>
                   <MenuItem v-for="(item, i) in actions" :key="i">
                     <div
                       :class="`

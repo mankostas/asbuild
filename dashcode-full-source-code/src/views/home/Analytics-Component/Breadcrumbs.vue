@@ -4,7 +4,7 @@
     <div
       class="flex sm:space-x-4 space-x-2 sm:justify-end items-center md:mb-6 mb-4 rtl:space-x-reverse"
     >
-      <VueTailwindDatePicker v-model="dateValue" v-slot="{ clear }">
+      <VueTailwindDatePicker v-model="dateValue" #default="{ clear }">
         <div>
           <div
             class="date-btn inline-flex btn btn-md whitespace-nowrap space-x-2 rtl:space-x-reverse cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900"
@@ -16,7 +16,7 @@
         </div>
       </VueTailwindDatePicker>
 
-      <VueTailwindDatePicker v-model="dateValue2" as-single v-slot="{ clear }">
+      <VueTailwindDatePicker v-model="dateValue2" as-single #default="{ clear }">
         <div>
           <div
             class="date-btn inline-flex btn btn-md whitespace-nowrap space-x-2 rtl:space-x-reverse cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-300 btn-md h-min text-sm font-normal text-slate-900"

@@ -11,7 +11,7 @@
         >10</span
       >
     </span>
-    <template v-slot:menus>
+    <template #menus>
       <div
         class="flex justify-between px-4 py-4 border-b border-slate-100 dark:border-slate-600"
       >
@@ -28,7 +28,7 @@
       </div>
       <div class="divide-y divide-slate-100 dark:divide-slate-800">
         <MenuItem
-          v-slot="{ active }"
+          #default="{ active }"
           v-for="(item, i) in message.slice(0, 3)"
           :key="i"
         >

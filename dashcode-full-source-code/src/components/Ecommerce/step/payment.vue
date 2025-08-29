@@ -136,7 +136,7 @@
             </ul>
 
             <InputGroup type="text" placeholder="Have coupon code? Apply here ">
-              <template v-slot:append>
+              <template #append>
                 <Button text="Go" btnClass="btn-dark dark:bg-slate-700 " />
               </template>
             </InputGroup>

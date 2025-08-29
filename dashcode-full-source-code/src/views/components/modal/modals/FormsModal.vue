@@ -25,7 +25,7 @@
           hasicon
         />
       </div>
-      <template v-slot:footer>
+      <template #footer>
         <Button
           text="Close"
           btnClass="btn-outline-dark "
@@ -107,7 +107,7 @@
         topping halvah. Cake sweet roll cake cheesecake cookie chocolate cake
         liquorice.
       </div>
-      <template v-slot:footer>
+      <template #footer>
         <Button
           text="Accept"
           btnClass="btn-dark "
@@ -185,7 +185,7 @@
         topping halvah. Cake sweet roll cake cheesecake cookie chocolate cake
         liquorice.
       </div>
-      <template v-slot:footer>
+      <template #footer>
         <Button
           text="Accept"
           btnClass="btn-dark "

@@ -7,7 +7,7 @@
         </div>
         <div class="mt-6 space-y-5">
           <div v-for="(item, i) in items" :key="i" class="mb-3">
-            <Disclosure v-slot="{ open }" >
+            <Disclosure #default="{ open }" >
               <DisclosureButton
                 class="bg-slate-50 dark:bg-slate-700 dark:bg-opacity-60 rounded-t-md flex justify-between cursor-pointer transition duration-150 font-medium w-full text-start text-base text-slate-600 dark:text-slate-300 px-8 py-4"
                 

@@ -155,7 +155,7 @@
                   class="text-lg inline-flex flex-col items-center justify-center h-8 w-8 rounded-full bg-gray-500-f7 dark:bg-slate-900 dark:text-slate-400"
                   ><Icon icon="heroicons-outline:dots-vertical"
                 /></span>
-                <template v-slot:menus>
+                <template #menus>
                   <MenuItem v-for="(item, i) in actions" :key="i">
                     <div
                       @click="item.doit"

@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-5">
     <InputGroup type="text">
-      <template v-slot:prepend>
+      <template #prepend>
         <Dropdown classMenuItems="left-0  w-[220px] top-[110%] ">
           <Button
             text="Action"
@@ -15,7 +15,7 @@
       </template>
     </InputGroup>
     <InputGroup type="text">
-      <template v-slot:prepend>
+      <template #prepend>
         <Dropdown classMenuItems="left-0  w-[220px] top-[110%] ">
           <button class="btn btn-outline-dark btn-sm">
             <span class="flex justify-between items-center">
@@ -29,7 +29,7 @@
           </button>
         </Dropdown>
       </template>
-      <template v-slot:append>
+      <template #append>
         <Dropdown classMenuItems="left-0  w-[220px] top-[110%] ">
           <Button
             text="Action"

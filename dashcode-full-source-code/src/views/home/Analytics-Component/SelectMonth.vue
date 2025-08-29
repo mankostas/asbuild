@@ -18,7 +18,7 @@
             class="absolute max-h-60 w-full overflow-auto border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded bg-white mt-1"
           >
             <ListboxOption
-              v-slot="{ active }"
+              #default="{ active }"
               v-for="item in months"
               :key="item.name"
               :value="item"

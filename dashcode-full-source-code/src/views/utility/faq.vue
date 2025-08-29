@@ -8,7 +8,7 @@
               <Tab
                 v-for="(item, i) in faqmenus"
                 :key="i"
-                v-slot="{ selected }"
+                #default="{ selected }"
                 as="template"
               >
                 <button

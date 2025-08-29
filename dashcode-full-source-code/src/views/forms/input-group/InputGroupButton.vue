@@ -1,15 +1,15 @@
 <template>
   <div class="space-y-5">
     <InputGroup type="text" placeholder="Button on right">
-      <template v-slot:append>
+      <template #append>
         <Button text="Go" btnClass="btn-outline-dark " />
       </template>
     </InputGroup>
     <InputGroup type="text" placeholder="Button on both side">
-      <template v-slot:prepend>
+      <template #prepend>
         <Button icon="heroicons-outline:search" btnClass="btn-outline-dark" />
       </template>
-      <template v-slot:append>
+      <template #append>
         <Button text="Search" btnClass="btn-outline-dark" />
       </template>
     </InputGroup>

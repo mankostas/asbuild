@@ -12,7 +12,7 @@
         enabled: false,
       }"
     >
-      <template v-slot:table-row="props">
+      <template #table-row="props">
         <div v-if="props.column.field == 'company'" class="flex items-center">
           <div class="flex-none">
             <div class="w-8 h-8 rounded-[100%] ltr:mr-3 rtl:ml-3">
