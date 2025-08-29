@@ -5,7 +5,8 @@
       name="ValidState"
       type="text"
       placeholder="Valid"
-      validate="This is valid state."
+      show-validation
+      success-message="This is valid state."
       msgTooltip
     />
     <Textinput
