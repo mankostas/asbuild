@@ -66,6 +66,7 @@ class FeatureAbilitiesTest extends TestCase
     {
         return [
             'gdpr' => ['gdpr', '/api/gdpr/consents', 'gdpr.view'],
+            'notifications' => ['notifications', '/api/notifications', 'notifications.view'],
             'roles' => ['roles', '/api/roles', 'roles.manage'],
             'types' => ['types', '/api/appointment-types', 'types.view'],
             'teams' => ['teams', '/api/teams', 'teams.view'],

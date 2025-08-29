@@ -12,6 +12,13 @@ return [
             'appointments.manage',
         ],
     ],
+    'notifications' => [
+        'label' => 'Notifications',
+        'abilities' => [
+            'notifications.view',
+            'notifications.manage',
+        ],
+    ],
     'roles' => [
         'label' => 'Roles & Permissions',
         'abilities' => [

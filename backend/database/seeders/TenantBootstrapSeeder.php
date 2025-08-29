@@ -29,7 +29,7 @@ class TenantBootstrapSeeder extends Seeder
             [
                 'name' => 'Acme Vet',
                 'quota_storage_mb' => 0,
-                'features' => json_encode(['appointments', 'themes']),
+                'features' => json_encode(['appointments', 'notifications', 'themes']),
                 'phone' => '555-123-4567',
                 'address' => '1 Pet Street',
                 'created_at' => now(),
