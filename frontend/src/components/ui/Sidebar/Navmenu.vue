@@ -138,12 +138,32 @@ export default {
   setup(props) {
     const auth = useAuthStore();
     const visibleItems = computed(() =>
-      props.items.filter((it) => {
-        if (it.admin && !auth.isSuperAdmin) return false;
-        const req = it.requiredAbilities || [];
-        const features = it.requiredFeatures || [];
-        return auth.hasAny(req) && features.every((f) => auth.features.includes(f));
-      }),
+      props.items
+        .map((it) => {
+          const child = it.child
+            ? it.child.filter((ci) => {
+                const req = ci.requiredAbilities || [];
+                const features = ci.requiredFeatures || [];
+                return (
+                  auth.hasAny(req) &&
+                  features.every((f) => auth.features.includes(f))
+                );
+              })
+            : null;
+          return { ...it, child };
+        })
+        .filter((it) => {
+          if (it.admin && !auth.isSuperAdmin) return false;
+          const req = it.requiredAbilities || [];
+          const features = it.requiredFeatures || [];
+          const allowed =
+            auth.hasAny(req) &&
+            features.every((f) => auth.features.includes(f));
+          if (it.child) {
+            return allowed && it.child.length > 0;
+          }
+          return allowed;
+        }),
     );
     return { visibleItems };
   },
