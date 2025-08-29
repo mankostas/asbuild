@@ -14,6 +14,8 @@ class Branding extends Model
         'name',
         'color',
         'secondary_color',
+        'color_dark',
+        'secondary_color_dark',
         'logo',
         'logo_dark',
         'email_from',

@@ -7,6 +7,8 @@ export const useBrandingStore = defineStore('branding', {
       name: 'Asbuild SPA',
       color: '#4669fa',
       secondary_color: '#A0AEC0',
+      color_dark: '#4669fa',
+      secondary_color_dark: '#A0AEC0',
       logo: '',
       logo_dark: '',
       email_from: '',
@@ -36,8 +38,13 @@ export const useBrandingStore = defineStore('branding', {
         const b = parseInt(clean.slice(4, 6), 16);
         document.documentElement.style.setProperty(name, `${r} ${g} ${b}`);
       };
-      setVar('--color-primary', this.branding.color);
-      setVar('--color-secondary', this.branding.secondary_color);
+      const isDark = document.body.classList.contains('dark');
+      const primary = isDark ? this.branding.color_dark : this.branding.color;
+      const secondary = isDark
+        ? this.branding.secondary_color_dark
+        : this.branding.secondary_color;
+      setVar('--color-primary', primary);
+      setVar('--color-secondary', secondary);
       if (this.branding.name) {
         document.title = this.branding.name;
       }
