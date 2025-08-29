@@ -9,13 +9,22 @@
         >
           {{ task.status.replace(/_/g, ' ') }}
         </span>
+        <Button
+          class="ml-auto"
+          :text="task.is_watching ? t('tasks.unwatch') : t('tasks.watch')"
+          btnClass="btn-outline-dark"
+          :aria-label="task.is_watching ? t('tasks.unwatch') : t('tasks.watch')"
+          @click="toggleWatch"
+        />
       </div>
       <ul class="text-sm mb-2">
         <li>Scheduled: {{ format(task.scheduled_at) || '—' }}</li>
+        <li>Due: {{ format(task.due_at) || '—' }}</li>
         <li>Started: {{ format(task.started_at) || '—' }}</li>
         <li>Completed: {{ format(task.completed_at) || '—' }}</li>
-        <li>SLA End: {{ format(task.sla_end_at) || '—' }}</li>
         <li>Assignee: {{ task.assignee?.label || '—' }}</li>
+        <li>Priority: {{ task.priority || '—' }}</li>
+        <li>SLA End: {{ format(task.sla_end_at) || '—' }}</li>
         <li>SLA: {{ slaStatus }}</li>
       </ul>
       <div class="mt-2">
@@ -61,12 +70,18 @@
             </div>
           </Card>
         </div>
+        <div v-else-if="active === 'subtasks'">
+          <Card>
+            <SubtaskList :task-id="task.id" />
+          </Card>
+        </div>
         <div v-else-if="active === 'comments'">
           <Card>
             <CommentsThread :comments="task.comments" class="mb-4" />
             <CommentEditor
               v-if="can('tasks.update') || can('tasks.manage')"
               :task-id="task.id"
+              allow-files
               @added="onCommentAdded"
             />
           </Card>
@@ -79,18 +94,21 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import Card from '@/components/ui/Card/index.vue';
 import Tabs from '@/components/ui/Tabs.vue';
 import Button from '@/components/ui/Button/index.vue';
 import CommentsThread from '@/components/comments/CommentsThread.vue';
 import CommentEditor from '@/components/comments/CommentEditor.vue';
+import SubtaskList from '@/components/tasks/SubtaskList.vue';
 import StatusChanger from './StatusChanger.vue';
 import { useTaskStatusesStore } from '@/stores/taskStatuses';
 import { formatDisplay, parseISO, toISO } from '@/utils/datetime';
 import { can } from '@/stores/auth';
 
 const route = useRoute();
+const { t } = useI18n();
 
 const task = ref<any>(null);
 const statusesStore = useTaskStatusesStore();
@@ -105,11 +123,12 @@ const statusClasses: Record<string, string> = {
   redo: 'bg-purple-100 text-purple-800',
 };
 
-const tabs = [
-  { id: 'details', label: 'Details' },
-  { id: 'photos', label: 'Photos' },
-  { id: 'comments', label: 'Comments' },
-];
+const tabs = computed(() => [
+  { id: 'details', label: t('tasks.tabs.details') },
+  { id: 'photos', label: t('tasks.tabs.photos') },
+  { id: 'subtasks', label: t('tasks.tabs.subtasks') },
+  { id: 'comments', label: t('tasks.tabs.comments') },
+]);
 const activeTab = ref('details');
 
 function format(date?: string) {
@@ -156,6 +175,17 @@ function onStatusChanged(id: number) {
   const found = statuses.value.find((s: any) => s.id === id);
   if (found && task.value) {
     task.value.status = found.name;
+  }
+}
+
+async function toggleWatch() {
+  if (!task.value) return;
+  if (task.value.is_watching) {
+    await api.delete(`/tasks/${task.value.id}/watch`);
+    task.value.is_watching = false;
+  } else {
+    await api.post(`/tasks/${task.value.id}/watch`);
+    task.value.is_watching = true;
   }
 }
 </script>
