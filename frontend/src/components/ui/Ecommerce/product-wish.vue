@@ -17,7 +17,7 @@
             <Badge
               class="font-normal bg-danger-600 text-white absolute ltr:left-2 rtl:right-2 top-3"
             >
-              {{ $msg(product.percent) }}
+              {{ product.percent }}
             </Badge>
           </div>
         </div></router-link

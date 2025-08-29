@@ -6,8 +6,8 @@
       class="border-b py-2 flex justify-between items-center"
     >
       <div>
-        <a v-if="n.link" :href="n.link" class="text-blue-600">{{ $msg(n.message) }}</a>
-        <span v-else>{{ $msg(n.message) }}</span>
+        <a v-if="n.link" :href="n.link" class="text-blue-600">{{ n.message }}</a>
+        <span v-else>{{ n.message }}</span>
       </div>
       <button
         v-if="!n.read_at"

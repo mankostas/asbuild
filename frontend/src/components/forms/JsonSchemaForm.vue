@@ -66,7 +66,7 @@
           v-model="form[name]"
         />
       </template>
-      <div v-if="errors[name]" class="text-red-600 text-sm mt-1">{{ $msg(errors[name]) }}</div>
+      <div v-if="errors[name]" class="text-red-600 text-sm mt-1">{{ errors[name] }}</div>
     </div>
   </div>
 </template>

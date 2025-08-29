@@ -48,10 +48,10 @@
       v-if="errorText"
       class="mt-1 text-danger-500 text-sm whitespace-pre-line"
     >
-      {{ $msg(errorText) }}
+      {{ errorText }}
     </p>
     <p v-if="successText" class="mt-1 text-success-500 text-sm">
-      {{ $msg(successText) }}
+      {{ successText }}
     </p>
     <span
       v-if="description"

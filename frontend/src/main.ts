@@ -25,7 +25,6 @@ import { VueQueryPlugin } from "@tanstack/vue-query";
 import { useThemeSettingsStore } from "./stores/themeSettings";
 import { useBrandingStore } from "./stores/branding";
 import VueDOMPurifyHTML from "vue-dompurify-html";
-import MessageTextPlugin from "@/plugins/messageText";
 
 const app = createApp(App)
   .use(stores)
@@ -42,8 +41,7 @@ const app = createApp(App)
   .use(VueApexCharts)
   .use(PerfectScrollbar)
   .use(VCalendar)
-  .use(VueDOMPurifyHTML)
-  .use(MessageTextPlugin);
+  .use(VueDOMPurifyHTML);
 
 app.use(VueQueryPlugin);
 

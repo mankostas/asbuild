@@ -2,7 +2,7 @@
   <div v-if="canAccess">
     <form class="max-w-md grid gap-4" @submit.prevent="onSubmit">
       <Textinput v-model="form.name" label="Name" />
-      <div v-if="errors.name" class="text-red-600 text-sm">{{ $msg(errors.name) }}</div>
+      <div v-if="errors.name" class="text-red-600 text-sm">{{ errors.name }}</div>
       <Textinput
         v-model.number="form.quota_storage_mb"
         label="Storage Quota (MB)"
@@ -11,14 +11,14 @@
       <Textinput v-model="form.phone" label="Phone" />
       <Textinput v-model="form.address" label="Address" />
       <Textinput v-if="!isEdit" v-model="form.user_name" label="Admin Name" />
-      <div v-if="!isEdit && errors.user_name" class="text-red-600 text-sm">{{ $msg(errors.user_name) }}</div>
+      <div v-if="!isEdit && errors.user_name" class="text-red-600 text-sm">{{ errors.user_name }}</div>
       <Textinput
         v-if="!isEdit"
         v-model="form.user_email"
         label="Admin Email"
         type="email"
       />
-      <div v-if="!isEdit && errors.user_email" class="text-red-600 text-sm">{{ $msg(errors.user_email) }}</div>
+      <div v-if="!isEdit && errors.user_email" class="text-red-600 text-sm">{{ errors.user_email }}</div>
       <VueSelect label="Features" :error="errors.features">
         <template #default="{ inputId }">
           <vSelect
@@ -30,7 +30,7 @@
           />
         </template>
       </VueSelect>
-      <div v-if="serverError" class="text-red-600 text-sm">{{ $msg(serverError) }}</div>
+      <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
       <Button type="submit" text="Save" btnClass="btn-dark" />
     </form>
   </div>
