@@ -1,13 +1,16 @@
 <template>
     <div>
-      <div class="flex gap-2 mb-4">
+      <div class="flex gap-2 mb-4 items-center">
+      <label :for="ids.search" class="text-sm">Search</label>
       <input
+        :id="ids.search"
         v-model="search"
         placeholder="Search"
         class="border p-2 flex-1"
         @input="onSearch"
       />
-      <select v-model="category" class="border p-2">
+      <label :for="ids.category" class="text-sm">Category</label>
+      <select :id="ids.category" v-model="category" class="border p-2">
         <option value="">All</option>
         <option v-for="c in categories" :key="c">{{ c }}</option>
       </select>
@@ -68,6 +71,7 @@ const category = ref('');
 const showFavorites = ref(false);
 const auth = useAuthStore();
 const isAdmin = computed(() => auth.user?.roles?.some((r: any) => r.name === 'ClientAdmin'));
+const ids = { search: 'manual-search', category: 'manual-category' };
 
 onMounted(async () => {
   await store.fetch();

@@ -6,7 +6,14 @@
       <Textinput v-model="form.phone" label="Phone" />
       <Textinput v-model="form.address" label="Address" />
       <VueSelect label="Roles">
-        <vSelect v-model="form.roles" :options="roleOptions" multiple />
+        <template #default="{ inputId }">
+          <vSelect
+            :id="inputId"
+            v-model="form.roles"
+            :options="roleOptions"
+            multiple
+          />
+        </template>
       </VueSelect>
       <Button
         type="submit"

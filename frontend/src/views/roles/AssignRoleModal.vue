@@ -28,21 +28,27 @@
               <h2 class="text-lg font-bold mb-4">Assign Role</h2>
               <form class="grid gap-4" @submit.prevent="onSubmit">
                 <VueSelect label="User">
-                  <vSelect
-                    v-model="userId"
-                    :options="users"
-                    :reduce="(u: any) => u.id"
-                    label="name"
-                    @search="searchUsers"
-                  />
+                  <template #default="{ inputId }">
+                    <vSelect
+                      :id="inputId"
+                      v-model="userId"
+                      :options="users"
+                      :reduce="(u: any) => u.id"
+                      label="name"
+                      @search="searchUsers"
+                    />
+                  </template>
                 </VueSelect>
                 <VueSelect v-if="auth.isSuperAdmin" label="Tenant">
-                  <vSelect
-                    v-model="tenantId"
-                    :options="tenantOptions"
-                    :reduce="(t: any) => t.id"
-                    label="name"
-                  />
+                  <template #default="{ inputId }">
+                    <vSelect
+                      :id="inputId"
+                      v-model="tenantId"
+                      :options="tenantOptions"
+                      :reduce="(t: any) => t.id"
+                      label="name"
+                    />
+                  </template>
                 </VueSelect>
                 <div class="flex justify-end gap-2 mt-4">
                   <button type="button" class="btn btn-outline-secondary" @click="emit('close')">Cancel</button>

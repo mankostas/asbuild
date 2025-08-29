@@ -20,12 +20,15 @@
       />
       <div v-if="!isEdit && errors.user_email" class="text-red-600 text-sm">{{ errors.user_email }}</div>
       <VueSelect label="Features" :error="errors.features">
-        <vSelect
-          v-model="form.features"
-          :options="featureOptions"
-          multiple
-          :reduce="(f: any) => f.value"
-        />
+        <template #default="{ inputId }">
+          <vSelect
+            :id="inputId"
+            v-model="form.features"
+            :options="featureOptions"
+            multiple
+            :reduce="(f: any) => f.value"
+          />
+        </template>
       </VueSelect>
       <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
       <Button type="submit" text="Save" btnClass="btn-dark" />

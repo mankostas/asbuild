@@ -1,22 +1,34 @@
 <template>
   <div>
     <div class="flex gap-4 mb-4">
-      <select v-model="statusId" class="border rounded p-2">
-        <option value="">All Statuses</option>
-        <option v-for="s in statusOptions" :key="s.id" :value="s.id">{{ s.name }}</option>
-      </select>
-      <select v-model="typeId" class="border rounded p-2">
-        <option value="">All Types</option>
-        <option v-for="t in typeOptions" :key="t.id" :value="t.id">{{ t.name }}</option>
-      </select>
-      <select v-model="teamId" class="border rounded p-2">
-        <option value="">All Teams</option>
-        <option v-for="t in teamOptions" :key="t.id" :value="t.id">{{ t.label || t.name }}</option>
-      </select>
-      <select v-model="employeeId" class="border rounded p-2">
-        <option value="">All Employees</option>
-        <option v-for="e in employeeOptions" :key="e.id" :value="e.id">{{ e.label || e.name }}</option>
-      </select>
+      <div class="flex flex-col">
+        <label :for="ids.status" class="mb-1 text-sm">Status</label>
+        <select :id="ids.status" v-model="statusId" class="border rounded p-2">
+          <option value="">All Statuses</option>
+          <option v-for="s in statusOptions" :key="s.id" :value="s.id">{{ s.name }}</option>
+        </select>
+      </div>
+      <div class="flex flex-col">
+        <label :for="ids.type" class="mb-1 text-sm">Type</label>
+        <select :id="ids.type" v-model="typeId" class="border rounded p-2">
+          <option value="">All Types</option>
+          <option v-for="t in typeOptions" :key="t.id" :value="t.id">{{ t.name }}</option>
+        </select>
+      </div>
+      <div class="flex flex-col">
+        <label :for="ids.team" class="mb-1 text-sm">Team</label>
+        <select :id="ids.team" v-model="teamId" class="border rounded p-2">
+          <option value="">All Teams</option>
+          <option v-for="t in teamOptions" :key="t.id" :value="t.id">{{ t.label || t.name }}</option>
+        </select>
+      </div>
+      <div class="flex flex-col">
+        <label :for="ids.employee" class="mb-1 text-sm">Employee</label>
+        <select :id="ids.employee" v-model="employeeId" class="border rounded p-2">
+          <option value="">All Employees</option>
+          <option v-for="e in employeeOptions" :key="e.id" :value="e.id">{{ e.label || e.name }}</option>
+        </select>
+      </div>
     </div>
     <div class="card">
       <div class="dashcode-calender">
@@ -72,6 +84,12 @@ const statusId = ref('');
 const typeId = ref('');
 const teamId = ref('');
 const employeeId = ref('');
+const ids = {
+  status: 'calendar-status',
+  type: 'calendar-type',
+  team: 'calendar-team',
+  employee: 'calendar-employee',
+};
 
 onMounted(async () => {
   statusOptions.value = await statusStore.fetch('tenant');

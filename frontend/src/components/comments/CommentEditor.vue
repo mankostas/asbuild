@@ -1,18 +1,27 @@
 <template>
   <div class="flex flex-col gap-2">
-    <Textarea v-model="body" :rows="3" placeholder="Add a comment" />
-    <VueSelect class="w-full">
-      <vSelect
-        v-model="selectedMentions"
-        :options="employees"
-        label="name"
-        multiple
-        placeholder="Mention users"
-      />
+    <Textarea
+      v-model="body"
+      :rows="3"
+      label="Comment"
+      placeholder="Add a comment"
+    />
+    <VueSelect class="w-full" label="Mentions">
+      <template #default="{ inputId }">
+        <vSelect
+          :id="inputId"
+          v-model="selectedMentions"
+          :options="employees"
+          label="name"
+          multiple
+          placeholder="Mention users"
+        />
+      </template>
     </VueSelect>
     <Textinput
       v-if="allowFiles"
       v-model="fileIds"
+      label="File IDs"
       placeholder="File IDs comma separated"
     />
     <Button text="Comment" @click="submit" />

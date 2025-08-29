@@ -24,12 +24,15 @@
       </div>
       <div v-if="auth.isSuperAdmin">
         <VueSelect label="Tenant" :error="errors.tenant_id">
-          <vSelect
-            v-model="tenantId"
-            :options="tenantOptions"
-            :reduce="(t: any) => t.id"
-            label="name"
-          />
+          <template #default="{ inputId }">
+            <vSelect
+              :id="inputId"
+              v-model="tenantId"
+              :options="tenantOptions"
+              :reduce="(t: any) => t.id"
+              label="name"
+            />
+          </template>
         </VueSelect>
       </div>
       <VueSelect
@@ -37,13 +40,16 @@
         label="Abilities"
         :error="errors.abilities"
       >
-        <vSelect
-          v-model="abilities"
-          :options="abilityOptions"
-          multiple
-          label="label"
-          :reduce="(a: any) => a.value"
-        />
+        <template #default="{ inputId }">
+          <vSelect
+            :id="inputId"
+            v-model="abilities"
+            :options="abilityOptions"
+            multiple
+            label="label"
+            :reduce="(a: any) => a.value"
+          />
+        </template>
       </VueSelect>
       <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
       <button
