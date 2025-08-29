@@ -12,8 +12,8 @@
       }  ltr:inline-block rtl:block input-label `"
       :for="inputId"
     >
-      {{ label }}</label
-    >
+      {{ label }}
+    </label>
     <div class="relative" :class="horizontal ? 'flex-1' : ''">
       <input
         v-if="!isMask"
@@ -58,14 +58,17 @@
       <div
         class="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2 -translate-y-1/2"
       >
-        <span
+        <button
           v-if="hasicon"
+          type="button"
           class="cursor-pointer text-secondary-500"
           @click="toggleType"
+          @keydown.enter.prevent="toggleType"
+          @keydown.space.prevent="toggleType"
         >
           <Icon v-if="types === 'password'" icon="heroicons-outline:eye" />
           <Icon v-else icon="heroicons-outline:eye-off" />
-        </span>
+        </button>
 
         <span v-if="errorText" class="text-danger-500">
           <Icon icon="heroicons-outline:information-circle" />
