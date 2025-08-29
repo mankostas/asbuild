@@ -109,5 +109,15 @@ describe('auth store', () => {
     expect(logoutSpy).toHaveBeenCalled();
     expect(window.location.href).toBe('/auth/login?redirect=%2Fdashboard');
   });
+
+  it('does not show unauthorized notification when not authenticated', async () => {
+    mock.onGet('/protected').reply(401);
+    const { default: notify } = await import('../src/plugins/notify');
+    const notifySpy = vi.spyOn(notify, 'unauthorized');
+
+    await api.get('/protected').catch(() => {});
+
+    expect(notifySpy).not.toHaveBeenCalled();
+  });
 });
 
