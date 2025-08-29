@@ -28,6 +28,8 @@ Route::middleware(['api','tenant'])->get('/health', function () {
     return response()->json(['status' => 'ok', 'tenant' => config('tenant.branding')]);
 });
 
+Route::middleware(['api','tenant'])->get('branding', [BrandingController::class, 'show']);
+
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login'])
         ->middleware('throttle:auth')
@@ -168,7 +170,6 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::post('employees/{employee}', [EmployeeController::class, 'update'])
         ->middleware(Ability::class . ':employees.manage');
 
-    Route::get('branding', [BrandingController::class, 'show']);
     Route::put('branding', [BrandingController::class, 'update'])
         ->middleware(Ability::class . ':branding.manage');
     Route::put('settings/profile', [SettingsController::class, 'updateProfile']);
