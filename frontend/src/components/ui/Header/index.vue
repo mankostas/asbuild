@@ -78,6 +78,7 @@ import TenantSwitcher from "@/components/admin/TenantSwitcher.vue";
 import { useAuthStore } from "@/stores/auth";
 
 export default {
+  name: "Header",
   components: {
     Profile,
     Notification,
