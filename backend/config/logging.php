@@ -1,6 +1,6 @@
 <?php
 
-use Monolog\Formatter\JsonFormatter;
+use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 
 return [
@@ -19,7 +19,10 @@ return [
             'with' => [
                 'stream' => 'php://stderr',
             ],
-            'formatter' => JsonFormatter::class,
+            'formatter' => LineFormatter::class,
+            'formatter_with' => [
+                'includeStacktraces' => true,
+            ],
             'level' => env('LOG_LEVEL', 'debug'),
         ],
 
