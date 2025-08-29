@@ -121,7 +121,22 @@
       "add": "Add subtask"
     },
     "watch": "Watch",
-    "unwatch": "Unwatch"
+    "unwatch": "Unwatch",
+    "unassigned": "Unassigned",
+    "noTeam": "No team"
+  },
+  "board": {
+    "swimlane": "Swimlane",
+    "none": "None",
+    "assignee": "Assignee",
+    "team": "Team",
+    "assignMe": "Assign to me",
+    "changeStatus": "Change status",
+    "addComment": "Add comment",
+    "moveLeft": "Move left",
+    "moveRight": "Move right",
+    "addCommentPrompt": "Enter comment",
+    "errorMove": "Cannot move task"
   },
   "dashboard": {
     "messages": {
