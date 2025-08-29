@@ -75,11 +75,13 @@ export const menuItems = [
         childtitle: "Branding",
         childlink: "settings.branding",
         requiredAbilities: ["branding.manage"],
+        requiredFeatures: ["branding"],
       },
       {
         childtitle: "Footer",
         childlink: "settings.footer",
         requiredAbilities: ["branding.manage"],
+        requiredFeatures: ["branding"],
       },
       {
         childtitle: "GDPR",
@@ -153,6 +155,7 @@ export const topMenu = [
     link: "settings.branding",
     admin: true,
     requiredAbilities: ["branding.manage"],
+    requiredFeatures: ["branding"],
   },
   {
     title: "Footer",
@@ -160,6 +163,7 @@ export const topMenu = [
     link: "settings.footer",
     admin: true,
     requiredAbilities: ["branding.manage"],
+    requiredFeatures: ["branding"],
   },
   {
     title: "GDPR",

@@ -141,7 +141,8 @@ export default {
       props.items.filter((it) => {
         if (it.admin && !auth.isSuperAdmin) return false;
         const req = it.requiredAbilities || [];
-        return auth.hasAny(req);
+        const features = it.requiredFeatures || [];
+        return auth.hasAny(req) && features.every((f) => auth.features.includes(f));
       }),
     );
     return { visibleItems };

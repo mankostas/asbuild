@@ -21,7 +21,7 @@ const route = useRoute();
 
 const tabs = computed(() => {
   const t = [{ id: '/settings/profile', label: 'Profile' }];
-  if (auth.can('branding.manage')) {
+  if (auth.can('branding.manage') && auth.features.includes('branding')) {
     t.push({ id: '/settings/branding', label: 'Branding' });
     t.push({ id: '/settings/footer', label: 'Footer' });
   }
