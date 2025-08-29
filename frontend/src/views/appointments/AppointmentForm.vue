@@ -60,7 +60,7 @@ import { useField, useForm } from 'vee-validate';
 import * as yup from 'yup';
 import vSelect from 'vue-select';
 import { useNotify } from '@/plugins/notify';
-import AssigneePicker from '@/components/appointments/AssigneePicker.vue';
+import AssigneePicker from '@/components/tasks/AssigneePicker.vue';
 import { toISO } from '@/utils/datetime';
 import { can } from '@/stores/auth';
 

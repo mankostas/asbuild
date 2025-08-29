@@ -45,7 +45,7 @@ class TaskController extends Controller
         }
         $data['status'] = $type && $type->statuses ? array_key_first($type->statuses) : Task::STATUS_DRAFT;
         $this->validateAgainstSchema($type, $data['form_data'] ?? []);
-        $this->formSchemaService->mapAssignee($type->form_schema ?? [], $data);
+        $this->formSchemaService->mapAssignee($type->schema_json ?? [], $data);
 
         $task = Task::create($data);
         $task->load('type', 'assignee');
@@ -84,7 +84,7 @@ class TaskController extends Controller
         $typeId = $data['task_type_id'] ?? $task->task_type_id;
         $type = $typeId ? TaskType::find($typeId) : $task->type;
         $this->validateAgainstSchema($type, $data['form_data'] ?? $task->form_data ?? []);
-        $this->formSchemaService->mapAssignee($type->form_schema ?? [], $data);
+        $this->formSchemaService->mapAssignee($type->schema_json ?? [], $data);
 
         unset($data['status']);
         $task->fill($data);
@@ -102,12 +102,13 @@ class TaskController extends Controller
 
     protected function validateAgainstSchema(?TaskType $type, array $data): void
     {
-        if (! $type || ! $type->form_schema) {
+        if (! $type || ! $type->schema_json) {
             return;
         }
 
-        $schema = $type->form_schema;
-        $required = $schema['required'] ?? [];
+        $required = collect($type->schema_json['sections'] ?? [])
+            ->flatMap(fn ($s) => collect($s['fields'] ?? [])->filter(fn ($f) => $f['required'] ?? false))
+            ->map(fn ($f) => $f['key']);
         foreach ($required as $field) {
             if (! array_key_exists($field, $data)) {
                 throw ValidationException::withMessages([

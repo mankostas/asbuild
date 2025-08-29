@@ -5,19 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property array|null $schema_json Schema definition
+ */
 class TaskType extends Model
 {
     protected $fillable = [
         'name',
-        'form_schema',
-        'fields_summary',
+        'schema_json',
         'statuses',
         'tenant_id',
     ];
 
     protected $casts = [
-        'form_schema' => 'array',
-        'fields_summary' => 'array',
+        'schema_json' => 'array',
         'statuses' => 'array',
         'tenant_id' => 'integer',
     ];
