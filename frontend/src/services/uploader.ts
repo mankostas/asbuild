@@ -5,6 +5,7 @@ export interface UploadOptions {
   onProgress?: (percent: number) => void;
   fieldKey?: string;
   sectionKey?: string;
+  taskId?: number;
 }
 
 export const DEFAULT_CHUNK_SIZE = 1024 * 1024; // 1MB default, backend allows up to 5MB
@@ -42,6 +43,7 @@ export async function uploadFile(file: File, options: UploadOptions = {}) {
 
   const { data } = await api.post(`/uploads/${uploadId}/finalize`, {
     filename: file.name,
+    task_id: options.taskId,
     field_key: options.fieldKey,
     section_key: options.sectionKey,
   });

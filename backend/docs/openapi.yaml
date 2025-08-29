@@ -198,6 +198,44 @@ paths:
       responses:
         '204':
           description: Deleted
+  /uploads/{uploadId}/finalize:
+    post:
+      summary: Finalize upload
+      parameters:
+        - name: uploadId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: string
+                task_id:
+                  type: integer
+                field_key:
+                  type: string
+                section_key:
+                  type: string
+      responses:
+        '200':
+          description: Uploaded file info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  file_id:
+                    type: integer
+                  name:
+                    type: string
+                  variants:
+                    type: object
   /roles/{roleId}/assign:
     post:
       summary: Assign user to role

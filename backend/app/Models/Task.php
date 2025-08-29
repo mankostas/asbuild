@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\File;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Task extends Model
@@ -90,5 +92,22 @@ class Task extends Model
     public function subtasks(): HasMany
     {
         return $this->hasMany(TaskSubtask::class);
+    }
+
+    public function attachments(): BelongsToMany
+    {
+        return $this->belongsToMany(File::class, 'task_attachments')
+            ->withPivot('field_key', 'section_key')
+            ->withTimestamps();
+    }
+
+    public function attachmentsByField(string $fieldKey): BelongsToMany
+    {
+        return $this->attachments()->wherePivot('field_key', $fieldKey);
+    }
+
+    public function attachmentsBySection(string $sectionKey): BelongsToMany
+    {
+        return $this->attachments()->wherePivot('section_key', $sectionKey);
     }
 }

@@ -6,6 +6,7 @@
       :section="section"
       :form="form"
       :errors="errors"
+      :task-id="taskId"
       :readonly="readonly"
       @update="onUpdate"
       @error="onError"
@@ -17,7 +18,7 @@
 import { reactive, watch } from 'vue';
 import SectionCard from '@/components/tasks/SectionCard.vue';
 
-const props = defineProps<{ schema: any; modelValue: any; readonly?: boolean }>();
+const props = defineProps<{ schema: any; modelValue: any; taskId: number; readonly?: boolean }>();
 const emit = defineEmits<{ (e: 'update:modelValue', value: any): void }>();
 
 const form = reactive<any>({ ...props.modelValue });

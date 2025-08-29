@@ -350,6 +350,57 @@ export interface paths {
         };
         trace?: never;
     };
+    "/uploads/{uploadId}/finalize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Finalize upload */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    uploadId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        filename?: string;
+                        task_id?: number;
+                        field_key?: string;
+                        section_key?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Uploaded file info */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            file_id?: number;
+                            name?: string;
+                            variants?: Record<string, never>;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/roles/{roleId}/assign": {
         parameters: {
             query?: never;

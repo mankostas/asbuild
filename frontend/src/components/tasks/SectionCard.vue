@@ -80,6 +80,7 @@
           v-if="photo.type === 'photo_single'"
           :photo="photo"
           :section-key="section.key"
+          :task-id="taskId"
           :model-value="local[photo.key]"
           @update:modelValue="(v) => updatePhoto(photo.key, v)"
         />
@@ -87,6 +88,7 @@
           v-else
           :photo="photo"
           :section-key="section.key"
+          :task-id="taskId"
           :model-value="local[photo.key]"
           @update:modelValue="(v) => updatePhoto(photo.key, v)"
         />
@@ -101,7 +103,7 @@ import AssigneePicker from '@/components/tasks/AssigneePicker.vue';
 import PhotoField from '@/components/tasks/PhotoField.vue';
 import PhotoRepeater from '@/components/tasks/PhotoRepeater.vue';
 
-const props = defineProps<{ section: any; form: any; errors: Record<string, string>; readonly?: boolean }>();
+const props = defineProps<{ section: any; form: any; errors: Record<string, string>; taskId: number; readonly?: boolean }>();
 const emit = defineEmits<{ (e: 'update', payload: { key: string; value: any }): void; (e: 'error', payload: { key: string; msg: string }): void }>();
 
 const local = reactive<any>(props.form);
