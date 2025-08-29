@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import api from "@/services/api";
 import { useAuthStore } from "./auth";
+import { useBrandingStore } from "./branding";
 
 const safeSetItem = (key, value) => {
   try {
@@ -96,6 +97,9 @@ export const useThemeSettingsStore = defineStore("themeSettings", {
       this.theme = this.theme === "dark" ? "light" : "dark";
       document.body.classList.add(this.theme);
       safeSetItem("theme", this.theme);
+      try {
+        useBrandingStore().applyTheme();
+      } catch (e) {}
     },
 
     toggleSettings() {

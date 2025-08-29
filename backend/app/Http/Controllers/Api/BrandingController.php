@@ -23,7 +23,11 @@ class BrandingController extends Controller
         $data = $request->validate([
             'name' => 'nullable|string',
             'color' => 'nullable|string',
+            'color_dark' => 'nullable|string',
+            'secondary_color' => 'nullable|string',
+            'secondary_color_dark' => 'nullable|string',
             'logo' => 'nullable|string',
+            'logo_dark' => 'nullable|string',
             'email_from' => 'nullable|email',
             'footer_left' => 'nullable|string',
             'footer_right' => 'nullable|string',
