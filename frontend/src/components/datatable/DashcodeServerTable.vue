@@ -23,33 +23,44 @@
             class="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
           >
             <tr>
-              <th
-                v-for="col in tableColumns"
-                :key="col.field"
-                class="table-th cursor-pointer select-none"
-                @click="col.sortable !== false ? toggleSort(col.field) : null"
-              >
-                <div class="flex items-center">
-                  <span>{{ col.label }}</span>
-                  <span v-if="col.sortable !== false" class="ml-1">
-                    <Icon
-                      v-if="sort && sort.field === col.field && sort.type === 'asc'"
-                      icon="heroicons-outline:chevron-up"
-                      class="w-4 h-4"
-                    />
-                    <Icon
-                      v-else-if="sort && sort.field === col.field && sort.type === 'desc'"
-                      icon="heroicons-outline:chevron-down"
-                      class="w-4 h-4"
-                    />
-                    <Icon
-                      v-else
-                      icon="heroicons-outline:chevron-up-down"
-                      class="w-4 h-4 opacity-50"
-                    />
-                  </span>
-                </div>
-              </th>
+              <template v-for="col in tableColumns">
+                <th
+                  v-if="col.sortable !== false"
+                  :key="col.field"
+                  class="table-th select-none cursor-pointer"
+                  role="button"
+                  tabindex="0"
+                  @click="toggleSort(col.field)"
+                  @keydown.enter.prevent="toggleSort(col.field)"
+                  @keydown.space.prevent="toggleSort(col.field)"
+                >
+                  <div class="flex items-center">
+                    <span>{{ col.label }}</span>
+                    <span class="ml-1">
+                      <Icon
+                        v-if="sort && sort.field === col.field && sort.type === 'asc'"
+                        icon="heroicons-outline:chevron-up"
+                        class="w-4 h-4"
+                      />
+                      <Icon
+                        v-else-if="sort && sort.field === col.field && sort.type === 'desc'"
+                        icon="heroicons-outline:chevron-down"
+                        class="w-4 h-4"
+                      />
+                      <Icon
+                        v-else
+                        icon="heroicons-outline:chevron-up-down"
+                        class="w-4 h-4 opacity-50"
+                      />
+                    </span>
+                  </div>
+                </th>
+                <th v-else :key="col.field" class="table-th select-none">
+                  <div class="flex items-center">
+                    <span>{{ col.label }}</span>
+                  </div>
+                </th>
+              </template>
             </tr>
           </thead>
           <tbody
