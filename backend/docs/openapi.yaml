@@ -79,6 +79,29 @@ paths:
                 $ref: '#/components/schemas/Task'
         '422':
           description: Invalid transition
+  /tasks/{id}/watch:
+    post:
+      summary: Watch task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Watching task
+    delete:
+      summary: Unwatch task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Not watching
   /tasks/{id}/subtasks:
     post:
       summary: Create task subtask
@@ -565,6 +588,8 @@ components:
           format: date-time
         assignee:
           $ref: '#/components/schemas/Employee'
+        is_watching:
+          type: boolean
     TaskComment:
       type: object
       properties:

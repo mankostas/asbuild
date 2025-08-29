@@ -57,6 +57,7 @@ class TaskCommentController extends Controller
         if ($mentions->isNotEmpty()) {
             $comment->mentions()->attach($mentions->pluck('id'));
             $mentions->each(function ($user) use ($task) {
+                $task->watchers()->firstOrCreate(['user_id' => $user->id]);
                 app(Notifier::class)->send(
                     $user,
                     'comment',
@@ -106,6 +107,7 @@ class TaskCommentController extends Controller
         $comment->mentions()->sync($mentions->pluck('id'));
         if ($mentions->isNotEmpty()) {
             $mentions->each(function ($user) use ($comment) {
+                $comment->task->watchers()->firstOrCreate(['user_id' => $user->id]);
                 app(Notifier::class)->send(
                     $user,
                     'comment',
