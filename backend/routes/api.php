@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\LookupController;
 use App\Http\Controllers\Api\CalendarController;
 use App\Http\Controllers\Api\BrandingController;
+use App\Http\Controllers\Api\TaskSubtaskController;
 use App\Http\Middleware\EnsureTenantScope;
 use App\Http\Middleware\Ability;
 use Illuminate\Http\Request;
@@ -86,6 +87,16 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':tasks.status.update');
     Route::post('tasks/{task}/files', [FileController::class, 'attachToTask'])
         ->middleware(Ability::class . ':tasks.attach.upload');
+    Route::post('tasks/{task}/subtasks', [TaskSubtaskController::class, 'store'])
+        ->middleware(Ability::class . ':tasks.update');
+    Route::patch('tasks/{task}/subtasks/reorder', [TaskSubtaskController::class, 'reorder'])
+        ->middleware(Ability::class . ':tasks.update');
+    Route::patch('tasks/{task}/subtasks/{subtask}', [TaskSubtaskController::class, 'update'])
+        ->middleware(Ability::class . ':tasks.update')
+        ->whereNumber('subtask');
+    Route::delete('tasks/{task}/subtasks/{subtask}', [TaskSubtaskController::class, 'destroy'])
+        ->middleware(Ability::class . ':tasks.update')
+        ->whereNumber('subtask');
 
     Route::apiResource('task-types', TaskTypeController::class)
         ->only(['index', 'show'])

@@ -98,7 +98,8 @@ class StatusFlowService
             }
         }
 
-        if ($task->subtasks()->where('is_completed', false)->exists()) {
+        if ($type->require_subtasks_complete &&
+            $task->subtasks()->where('is_required', true)->where('is_completed', false)->exists()) {
             return 'subtasks_incomplete';
         }
 
