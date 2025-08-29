@@ -124,10 +124,15 @@ class AuthController extends Controller
 
         $tenant = Tenant::current() ?? Tenant::find($user->tenant_id);
 
+        $features = $tenant?->features ?? [];
+        if ($user->isSuperAdmin() && ! in_array('notifications', $features)) {
+            $features[] = 'notifications';
+        }
+
         return response()->json([
             'user' => $user,
             'abilities' => $this->abilitiesFor($user),
-            'features' => $tenant?->features ?? [],
+            'features' => $features,
         ]);
     }
 
