@@ -65,7 +65,7 @@
                 :key="col.field"
                 class="table-td"
               >
-                <span v-if="col.html" v-html="row[col.field]" />
+                <span v-if="col.html" v-dompurify-html="row[col.field]" />
                 <span v-else>{{ row[col.field] }}</span>
               </td>
               <td v-if="hasActions" class="table-td">
