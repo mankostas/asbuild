@@ -77,7 +77,24 @@
     },
     "filters": {
       "global": "Search tasks",
-      "statusPlaceholder": "Select statuses"
+      "statusPlaceholder": "Select statuses",
+      "toggle": "Filters",
+      "status": "Status",
+      "type": "Type",
+      "assignee": "Assignee/Team",
+      "priority": "Priority",
+      "dueFrom": "Due From",
+      "dueTo": "Due To",
+      "hasPhotos": "Has photos",
+      "mine": "Mine",
+      "allStatuses": "All statuses",
+      "allTypes": "All types",
+      "allPriorities": "All priorities",
+      "savedViews": "Saved views",
+      "savedViewsPlaceholder": "Saved views",
+      "saveView": "Save View",
+      "saveViewPrompt": "View name",
+      "selectStatus": "Select status"
     },
     "messages": {
       "created": "Task created",

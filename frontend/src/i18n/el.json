@@ -77,7 +77,24 @@
     },
     "filters": {
       "global": "Αναζήτηση εργασιών",
-      "statusPlaceholder": "Επιλογή καταστάσεων"
+      "statusPlaceholder": "Επιλογή καταστάσεων",
+      "toggle": "Φίλτρα",
+      "status": "Κατάσταση",
+      "type": "Τύπος",
+      "assignee": "Υπεύθυνος/Ομάδα",
+      "priority": "Προτεραιότητα",
+      "dueFrom": "Προθεσμία από",
+      "dueTo": "Προθεσμία έως",
+      "hasPhotos": "Με φωτογραφίες",
+      "mine": "Δικές μου",
+      "allStatuses": "Όλες οι καταστάσεις",
+      "allTypes": "Όλοι οι τύποι",
+      "allPriorities": "Όλες οι προτεραιότητες",
+      "savedViews": "Αποθηκευμένες προβολές",
+      "savedViewsPlaceholder": "Αποθηκευμένες προβολές",
+      "saveView": "Αποθήκευση προβολής",
+      "saveViewPrompt": "Όνομα προβολής",
+      "selectStatus": "Επιλογή κατάστασης"
     },
     "messages": {
       "created": "Η εργασία δημιουργήθηκε",
