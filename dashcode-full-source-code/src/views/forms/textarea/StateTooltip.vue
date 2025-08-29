@@ -4,7 +4,8 @@
       label="Valid State"
       name="ValidState"
       placeholder="Valid"
-      validate="This is valid state."
+      show-validation
+      success-message="This is valid state."
       msgTooltip
     />
     <Textarea
