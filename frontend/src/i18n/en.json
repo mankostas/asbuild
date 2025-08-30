@@ -17,7 +17,8 @@
     "retry": "Retry",
     "add": "Add",
     "select": "Select",
-    "close": "Close"
+    "close": "Close",
+    "chooseFile": "Choose File"
   },
   "messages": {
     "helloToast": "Hello from toast"
