@@ -26,6 +26,9 @@
   "messages": {
     "helloToast": "Γεια από το τοστ"
   },
+  "common": {
+    "select": "Επιλέξτε..."
+  },
   "a11y": {
     "skipToContent": "Μετάβαση στο περιεχόμενο",
     "language": "Γλώσσα",
@@ -46,6 +49,9 @@
   },
   "profile": {
     "settings": "Ρυθμίσεις"
+  },
+  "version": {
+    "fallback": "v{n}"
   },
   "Version": "Έκδοση",
   "Section": "Ενότητα",
@@ -232,7 +238,10 @@
     "event": "Συμβάν",
     "status": "Κατάσταση",
     "team": "Ομάδα",
-    "enabled": "Ενεργό"
+    "enabled": "Ενεργό",
+    "events": {
+      "statusChanged": "Αλλαγή κατάστασης"
+    }
   },
   "dashboard": {
     "messages": {
@@ -261,6 +270,10 @@
     "canvas": "Καμβάς",
     "preview": "Προεπισκόπηση",
     "inspector": "Επιθεωρητής"
+  },
+  "inspector": {
+    "basics": "Βασικά",
+    "validation": "Επικύρωση"
   },
   "validation": {
     "regex": "Πρότυπο",

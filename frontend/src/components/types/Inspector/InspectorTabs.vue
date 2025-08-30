@@ -132,7 +132,7 @@ const props = withDefaults(
 const { t, locale } = useI18n();
 const auth = useAuthStore();
 const tabs = computed(() => {
-  const tbs = ['Basics', 'Validation'];
+  const tbs = [t('inspector.basics'), t('inspector.validation')];
   if (auth.isSuperAdmin || props.roleOptions.length) tbs.push(t('roles.label'));
   return tbs;
 });
