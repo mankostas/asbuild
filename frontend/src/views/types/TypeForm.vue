@@ -4,9 +4,22 @@
       <header class="builder-header flex items-center justify-between px-4 py-2 shadow">
         <h1 class="text-lg font-semibold">{{ isEdit ? t('routes.taskTypeEdit') : t('routes.taskTypeCreate') }}</h1>
         <div class="flex items-center gap-3">
-          <span class="text-xs px-2 py-1 border rounded" aria-label="Version">v1</span>
-            <label class="flex items-center gap-1" for="previewToggle">
-              <input id="previewToggle" v-model="showPreview" type="checkbox" aria-label="Toggle preview" />
+          <div>
+            <label for="versionSelect" class="sr-only">{{ t('Version') }}</label>
+            <select
+              v-if="versions.length"
+              id="versionSelect"
+              v-model="selectedVersionId"
+              @change="onVersionChange"
+              class="text-xs px-2 py-1 border rounded"
+              :aria-label="t('Version')"
+            >
+              <option v-for="v in versions" :key="v.id" :value="v.id">v{{ v.semver }}</option>
+            </select>
+            <span v-else class="text-xs px-2 py-1 border rounded" :aria-label="t('Version')">v1</span>
+          </div>
+          <label class="flex items-center gap-1" for="previewToggle">
+            <input id="previewToggle" v-model="showPreview" type="checkbox" aria-label="Toggle preview" />
             <span>{{ t('Preview') }}</span>
           </label>
           <button type="submit" class="px-3 py-1 bg-indigo-600 text-white rounded" aria-label="Save">{{ t('Save') }}</button>
@@ -42,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
@@ -52,11 +65,13 @@ import InspectorTabs from '@/components/types/Inspector/InspectorTabs.vue';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
 import { can } from '@/stores/auth';
 import api from '@/services/api';
+import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
 import '@/styles/types-builder.css';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const versionsStore = useTaskTypeVersionsStore();
 
 interface Field {
   id: number;
@@ -84,6 +99,8 @@ const sections = ref<Section[]>([]);
 const selected = ref<Field | null>(null);
 const showPreview = ref(false);
 const previewData = ref<Record<string, any>>({});
+const versions = ref<any[]>([]);
+const selectedVersionId = ref<number | null>(null);
 
 const fieldTypes = [
   { key: 'text', label: 'Text', group: 'Inputs' },
@@ -107,6 +124,17 @@ const canAccess = computed(() =>
     : can('task_types.create') || can('task_types.manage'),
 );
 
+onMounted(async () => {
+  if (isEdit.value) {
+    const list = await versionsStore.list(Number(route.params.id));
+    versions.value = list;
+    if (list.length) {
+      selectedVersionId.value = list[0].id;
+      loadVersion(list[0]);
+    }
+  }
+});
+
 function addSection() {
   sections.value.push({
     id: Date.now() + Math.random(),
@@ -115,6 +143,32 @@ function addSection() {
     fields: [],
     photos: [],
   });
+}
+
+function loadVersion(v: any) {
+  const schema = v.schema_json || { sections: [] };
+  sections.value = (schema.sections || []).map((s: any, idx: number) => ({
+    id: idx + 1,
+    key: s.key,
+    label: s.label,
+    fields: (s.fields || []).map((f: any, fid: number) => ({
+      id: fid + 1,
+      name: f.key,
+      label: f.label,
+      typeKey: f.type,
+      cols: f['x-cols'] || 2,
+      validations: f.validations || {},
+      fields: f.fields || undefined,
+    })),
+    photos: [],
+  }));
+}
+
+function onVersionChange() {
+  const v = versions.value.find((vv) => vv.id === selectedVersionId.value);
+  if (v) {
+    loadVersion(v);
+  }
 }
 
 function removeSection(index: number) {
