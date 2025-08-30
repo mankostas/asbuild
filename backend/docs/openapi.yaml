@@ -598,6 +598,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TaskType'
+  /task-types/validate:
+    post:
+      summary: Validate task type schema and data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                schema_json:
+                  type: object
+                form_data:
+                  type: object
+      responses:
+        '200':
+          description: OK
+        '422':
+          description: Validation errors
   /task-types/{id}/validate:
     post:
       summary: Validate task type schema and data

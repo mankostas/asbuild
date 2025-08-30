@@ -125,6 +125,21 @@ class TaskTypeController extends Controller
             ->setStatusCode(201);
     }
 
+    public function validateSchema(Request $request)
+    {
+        $this->ensureAdmin($request);
+
+        $data = $request->validate([
+            'schema_json' => 'required|array',
+            'form_data' => 'array',
+        ]);
+
+        $this->formSchemaService->validate($data['schema_json']);
+        $this->formSchemaService->validateData($data['schema_json'], $data['form_data'] ?? []);
+
+        return response()->json(['message' => 'ok']);
+    }
+
     public function previewValidate(Request $request, TaskType $taskType)
     {
         $this->ensureAdmin($request);
