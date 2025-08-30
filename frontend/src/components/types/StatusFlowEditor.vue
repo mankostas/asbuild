@@ -67,7 +67,7 @@
         <VueSelect
           id="transition-from"
           v-model="transitionForm.from"
-          :options="statusOptions"
+          :options="transitionOptions"
           :label="t('types.workflow.from')"
           class="w-40"
           classLabel="sr-only"
@@ -77,7 +77,7 @@
         <VueSelect
           id="transition-to"
           v-model="transitionForm.to"
-          :options="statusOptions"
+          :options="transitionOptions"
           :label="t('types.workflow.to')"
           class="w-40"
           classLabel="sr-only"
@@ -167,7 +167,7 @@
         <VueSelect
           id="status-select"
           v-model="newStatus"
-          :options="statusOptions"
+          :options="addStatusOptions"
           :label="t('types.workflow.addStatus')"
           classLabel="sr-only"
           :placeholder="t('actions.select')"
@@ -246,15 +246,22 @@ const liveMessage = ref('');
 
 onMounted(async () => {
   const res = await api.get('/task-statuses');
-  allStatuses.value = res.data;
+  allStatuses.value = res.data.data;
 });
 
 const remainingStatuses = computed(() =>
   allStatuses.value.filter((s) => !localStatuses.value.includes(s.slug))
 );
 
-const statusOptions = computed(() =>
+const addStatusOptions = computed(() =>
   remainingStatuses.value.map((s) => ({ value: s.slug, label: s.name }))
+);
+
+const transitionOptions = computed(() =>
+  localStatuses.value.map((slug) => ({
+    value: slug,
+    label: allStatuses.value.find((s) => s.slug === slug)?.name || slug,
+  }))
 );
 
 function displayName(slug: string) {
