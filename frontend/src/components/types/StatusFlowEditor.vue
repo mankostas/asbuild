@@ -33,74 +33,55 @@
           </li>
         </template>
       </draggable>
-      <div v-if="addingStatus" class="flex items-center gap-2">
-        <Select
-          id="status-select"
-          v-model="newStatus"
-          :options="statusOptions"
-          :label="t('types.workflow.addStatus')"
-          class="w-40"
-          classLabel="sr-only"
-        />
-        <Button
-          type="button"
-          btnClass="btn-primary text-xs px-3 py-1"
-          :disabled="!newStatus"
-          :aria-label="t('actions.add')"
-          @click="confirmAddStatus"
-        >
-          {{ t('actions.add') }}
-        </Button>
-        <Button
-          type="button"
-          btnClass="btn-outline-secondary text-xs px-3 py-1"
-          :aria-label="t('actions.cancel')"
-          @click="cancelAddStatus"
-        >
-          {{ t('actions.cancel') }}
-        </Button>
-      </div>
-      <Button
-        v-else-if="editable"
-        type="button"
-        btnClass="btn-primary text-xs px-3 py-1"
-        :aria-label="t('types.workflow.addStatus')"
-        @click="startAddStatus"
-      >
-        {{ t('types.workflow.addStatus') }}
-      </Button>
+      <Dropdown v-if="editable">
+        <template #default>
+          <Button
+            type="button"
+            btnClass="btn-primary text-xs px-3 py-1 flex items-center gap-1"
+            :aria-label="t('actions.add')"
+          >
+            {{ t('actions.add') }}
+            <Icon icon="heroicons-outline:chevron-down" />
+          </Button>
+        </template>
+        <template #menus>
+          <MenuItem #default="{ active }">
+            <button type="button" :class="menuItemClass(active)" @click="openAddStatusModal">
+              {{ t('types.workflow.addStatus') }}
+            </button>
+          </MenuItem>
+          <MenuItem #default="{ active }">
+            <button type="button" :class="menuItemClass(active)" @click="openTransitionForm">
+              {{ t('types.workflow.addTransition') }}
+            </button>
+          </MenuItem>
+        </template>
+      </Dropdown>
     </div>
     <span class="sr-only" aria-live="assertive">{{ liveMessage }}</span>
     <div>
       <div class="flex items-center justify-between mb-2">
         <h3 class="text-sm font-medium">{{ t('types.workflow.transitions') }}</h3>
-        <Button
-          v-if="editable"
-          type="button"
-          btnClass="btn-outline-primary text-xs px-3 py-1"
-          :aria-label="t('types.workflow.addTransition')"
-          @click="openTransitionForm"
-        >
-          {{ t('types.workflow.addTransition') }}
-        </Button>
       </div>
       <div v-if="showTransitionForm" class="flex flex-wrap items-center gap-2 mb-2">
-        <Select
+        <VueSelect
           id="transition-from"
           v-model="transitionForm.from"
           :options="statusOptions"
           :label="t('types.workflow.from')"
           class="w-40"
           classLabel="sr-only"
+          :placeholder="t('actions.select')"
         />
         <span aria-hidden="true">→</span>
-        <Select
+        <VueSelect
           id="transition-to"
           v-model="transitionForm.to"
           :options="statusOptions"
           :label="t('types.workflow.to')"
           class="w-40"
           classLabel="sr-only"
+          :placeholder="t('actions.select')"
         />
         <Button
           type="button"
@@ -180,19 +161,53 @@
         </table>
       </div>
     </div>
+    <Modal :open="showAddStatusModal" @close="closeAddStatusModal">
+      <template #header>{{ t('types.workflow.addStatus') }}</template>
+      <template #body>
+        <VueSelect
+          id="status-select"
+          v-model="newStatus"
+          :options="statusOptions"
+          :label="t('types.workflow.addStatus')"
+          classLabel="sr-only"
+          :placeholder="t('actions.select')"
+        />
+      </template>
+      <template #footer>
+        <Button
+          type="button"
+          btnClass="btn-primary text-xs px-3 py-1"
+          :disabled="!newStatus"
+          :aria-label="t('actions.add')"
+          @click="confirmAddStatus"
+        >
+          {{ t('actions.add') }}
+        </Button>
+        <Button
+          type="button"
+          btnClass="btn-outline-secondary text-xs px-3 py-1"
+          :aria-label="t('actions.cancel')"
+          @click="closeAddStatusModal"
+        >
+          {{ t('actions.cancel') }}
+        </Button>
+      </template>
+    </Modal>
   </Card>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
 import api from '@/services/api';
 import Card from '@/components/ui/Card/index.vue';
 import Badge from '@/components/ui/Badge/index.vue';
 import Button from '@/components/ui/Button/index.vue';
-import Select from '@/components/ui/Select/index.vue';
 import Dropdown from '@/components/ui/Dropdown/index.vue';
+import Modal from '@/components/ui/Modal/Modal.vue';
+import VueSelect from '@/components/ui/Select/VueSelect.vue';
+import Icon from '@/components/ui/Icon/index.vue';
 import { MenuItem } from '@headlessui/vue';
 import { useAuthStore, can } from '@/stores/auth';
 
@@ -225,7 +240,7 @@ watch(
 
 const allStatuses = ref<StatusOption[]>([]);
 const newStatus = ref('');
-const addingStatus = ref(false);
+const showAddStatusModal = ref(false);
 const grabbedIndex = ref<number | null>(null);
 const liveMessage = ref('');
 
@@ -246,15 +261,11 @@ function displayName(slug: string) {
   return allStatuses.value.find((s) => s.slug === slug)?.name || slug;
 }
 
-function startAddStatus() {
-  addingStatus.value = true;
-  nextTick(() => {
-    const el = document.getElementById('status-select');
-    el?.focus();
-  });
+function openAddStatusModal() {
+  showAddStatusModal.value = true;
 }
-function cancelAddStatus() {
-  addingStatus.value = false;
+function closeAddStatusModal() {
+  showAddStatusModal.value = false;
   newStatus.value = '';
 }
 function confirmAddStatus() {
@@ -262,7 +273,7 @@ function confirmAddStatus() {
     localStatuses.value.push(newStatus.value);
     emitStatuses();
   }
-  cancelAddStatus();
+  closeAddStatusModal();
 }
 function removeStatus(slug: string) {
   localStatuses.value = localStatuses.value.filter((s) => s !== slug);

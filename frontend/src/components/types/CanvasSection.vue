@@ -51,6 +51,32 @@
         </Card>
       </template>
     </draggable>
+    <div class="p-2">
+      <Dropdown>
+        <template #default>
+          <Button
+            type="button"
+            btnClass="btn-primary text-xs px-2 py-1 flex items-center gap-1"
+            :aria-label="t('actions.add')"
+          >
+            {{ t('actions.add') }}
+            <Icon icon="heroicons-outline:chevron-down" />
+          </Button>
+        </template>
+        <template #menus>
+          <MenuItem #default="{ active }">
+            <button type="button" :class="menuItemClass(active)" @click="$emit('add-field')">
+              {{ t('actions.addField') }}
+            </button>
+          </MenuItem>
+          <MenuItem #default="{ active }">
+            <button type="button" :class="menuItemClass(active)" @click="$emit('add-section')">
+              {{ t('actions.addSection') }}
+            </button>
+          </MenuItem>
+        </template>
+      </Dropdown>
+    </div>
   </Card>
 </template>
 
@@ -62,14 +88,30 @@ import Icon from '@/components/ui/Icon/index.vue';
 import Textinput from '@/components/ui/Textinput/index.vue';
 import Button from '@/components/ui/Button/index.vue';
 import Card from '@/components/ui/Card/index.vue';
+import Dropdown from '@/components/ui/Dropdown/index.vue';
+import { MenuItem } from '@headlessui/vue';
 
 defineProps<{ section: any }>();
-defineEmits<{ (e: 'remove'): void; (e: 'select', field: any): void }>();
+defineEmits<{
+  (e: 'remove'): void;
+  (e: 'select', field: any): void;
+  (e: 'add-field'): void;
+  (e: 'add-section'): void;
+}>();
 const { t, locale } = useI18n();
 
 const noop = () => {};
 
 function resolveI18n(val: any) {
   return resolveI18nUtil(val, locale.value);
+}
+
+function menuItemClass(active: boolean) {
+  return (
+    (active
+      ? 'bg-slate-100 dark:bg-slate-600 dark:bg-opacity-50'
+      : 'text-slate-600 dark:text-slate-300') +
+    ' block w-full text-left px-4 py-2'
+  );
 }
 </script>
