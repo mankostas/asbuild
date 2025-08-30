@@ -156,6 +156,9 @@ interface Field {
   placeholder?: I18nString;
   help?: I18nString;
   validations: Record<string, any>;
+  logic: any[];
+  roles: { view: string[]; edit: string[] };
+  data: { default: any; enum: string[] };
 }
 
 interface Section {
@@ -264,9 +267,26 @@ function loadVersion(v: any) {
       fields: f.fields || undefined,
       placeholder: typeof f.placeholder === 'string' ? { en: f.placeholder, el: f.placeholder } : (f.placeholder || { en: '', el: '' }),
       help: typeof f.help === 'string' ? { en: f.help, el: f.help } : (f.help || { en: '', el: '' }),
+      logic: [],
+      roles: f['x-roles'] || { view: [], edit: [] },
+      data: { default: f.default ?? '', enum: f.enum || [] },
     })),
     photos: [],
   }));
+  const fieldMap: Record<string, any> = {};
+  sections.value.forEach((s) => s.fields.forEach((f) => (fieldMap[f.name] = f)));
+  (schema.logic || []).forEach((rule: any) => {
+    const fld = fieldMap[rule.if?.field];
+    if (fld) {
+      fld.logic.push({
+        if: rule.if,
+        then: (rule.then || []).map((a: any) => ({
+          type: a.show ? 'show' : 'require',
+          target: a.show ?? a.require,
+        })),
+      });
+    }
+  });
   statuses.value = Object.keys(v.statuses || {});
   if (Array.isArray(v.status_flow_json)) {
     statusFlow.value = v.status_flow_json;
@@ -313,6 +333,9 @@ function onAddField(type: any) {
     fields: type.key === 'repeater' ? [] : undefined,
     placeholder: { en: '', el: '' },
     help: { en: '', el: '' },
+    logic: [],
+    roles: { view: [], edit: [] },
+    data: { default: '', enum: [] },
   });
 }
 
@@ -321,6 +344,14 @@ function selectField(field: Field) {
 }
 
 function onSubmit() {
+  const logicRules = sections.value.flatMap((s) =>
+    s.fields.flatMap((f) =>
+      (f.logic || []).map((r) => ({
+        if: r.if,
+        then: r.then.map((a: any) => ({ [a.type]: a.target })),
+      })),
+    ),
+  );
   const payload = {
     name: name.value,
     tenant_id: tenantId.value || undefined,
@@ -337,8 +368,12 @@ function onSubmit() {
           placeholder: f.placeholder,
           help: f.help,
           fields: f.fields,
+          default: f.data.default || undefined,
+          enum: f.data.enum.length ? f.data.enum : undefined,
+          'x-roles': f.roles,
         })),
       })),
+      ...(logicRules.length ? { logic: logicRules } : {}),
     }),
     statuses: JSON.stringify(statuses.value.reduce((acc: any, s) => ({ ...acc, [s]: [] }), {})),
     status_flow_json: JSON.stringify(statusFlow.value),
@@ -380,7 +415,30 @@ const previewSchema = computed(() => ({
       placeholder: f.placeholder,
       help: f.help,
       fields: f.fields,
+      default: f.data.default || undefined,
+      enum: f.data.enum.length ? f.data.enum : undefined,
+      'x-roles': f.roles,
     })),
   })),
+  ...(sections.value
+    .flatMap((s) =>
+      s.fields.flatMap((f) =>
+        (f.logic || []).map((r) => ({
+          if: r.if,
+          then: r.then.map((a: any) => ({ [a.type]: a.target })),
+        })),
+      ),
+    ).length
+    ? {
+        logic: sections.value.flatMap((s) =>
+          s.fields.flatMap((f) =>
+            (f.logic || []).map((r) => ({
+              if: r.if,
+              then: r.then.map((a: any) => ({ [a.type]: a.target })),
+            })),
+          ),
+        ),
+      }
+    : {}),
 }));
 </script>
