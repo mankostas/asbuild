@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class TaskStatus extends Model
 {
@@ -14,6 +15,15 @@ class TaskStatus extends Model
         'position',
         'color',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $status): void {
+            if (empty($status->slug)) {
+                $status->slug = Str::snake($status->name);
+            }
+        });
+    }
 
     public function tasks(): HasMany
     {
