@@ -11,9 +11,10 @@
           {{ tr(field.label) }}
         </div>
         <div v-else-if="isVisible(field.key)" :class="colClass(field)">
-          <span class="block font-medium mb-1">
+          <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -->
+          <label :for="field.key" class="block font-medium mb-1">
             {{ tr(field.label) }}<span v-if="isRequired(field)" class="text-red-600">*</span>
-          </span>
+          </label>
           <input
             v-if="isText(field.type)"
             :id="field.key"
@@ -152,7 +153,7 @@
                 v-if="files[field.key].preview"
                 :src="files[field.key].preview"
                 class="w-32 h-32 object-cover"
-                alt=""
+                :alt="tr(field.label)"
               />
               <span v-else>{{ files[field.key].name }}</span>
               <button
