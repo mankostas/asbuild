@@ -63,7 +63,7 @@ class StatusFlowServiceTest extends TestCase
             'schema_json' => [
                 'sections' => [
                     ['fields' => [
-                        ['key' => 'after_photo', 'type' => 'photo', 'required' => true],
+                        ['key' => 'after_photo', 'type' => 'photo_single', 'required' => true],
                     ]],
                 ],
             ],
@@ -81,12 +81,39 @@ class StatusFlowServiceTest extends TestCase
         $this->assertSame('missing_photo', $service->checkConstraints($task, 'completed'));
     }
 
+    public function test_detects_missing_repeater(): void
+    {
+        $type = TaskType::create([
+            'name' => 'Type',
+            'tenant_id' => 1,
+            'schema_json' => [
+                'sections' => [
+                    ['fields' => [
+                        ['key' => 'items', 'type' => 'repeater', 'required' => true],
+                    ]],
+                ],
+            ],
+        ]);
+
+        $task = Task::create([
+            'tenant_id' => 1,
+            'user_id' => 1,
+            'task_type_id' => $type->id,
+            'status' => 'in_progress',
+            'form_data' => ['items' => []],
+        ]);
+
+        $service = new StatusFlowService();
+        $this->assertSame('missing_field', $service->checkConstraints($task, 'completed'));
+    }
+
     public function test_detects_incomplete_subtasks(): void
     {
         $type = TaskType::create([
             'name' => 'Type',
             'tenant_id' => 1,
             'schema_json' => [],
+            'require_subtasks_complete' => true,
         ]);
 
         $task = Task::create([
@@ -96,7 +123,7 @@ class StatusFlowServiceTest extends TestCase
             'status' => 'in_progress',
         ]);
 
-        TaskSubtask::create(['task_id' => $task->id, 'title' => 'S', 'is_completed' => false]);
+        TaskSubtask::create(['task_id' => $task->id, 'title' => 'S', 'is_completed' => false, 'is_required' => true]);
 
         $service = new StatusFlowService();
         $this->assertSame('subtasks_incomplete', $service->checkConstraints($task, 'completed'));
