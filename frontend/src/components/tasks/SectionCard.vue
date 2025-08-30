@@ -51,6 +51,32 @@
           >
             <option v-for="opt in field.enum" :key="opt" :value="opt">{{ opt }}</option>
           </select>
+          <RadioGroup
+            v-else-if="field.type === 'radio'"
+            v-model="local[field.key]"
+            :name="field.key"
+            :options="field.enum"
+            :readonly="readonly"
+            :aria-label="field.label"
+            @update:modelValue="() => emitUpdate(field)"
+          />
+          <CheckboxGroup
+            v-else-if="field.type === 'checkbox'"
+            v-model="local[field.key]"
+            :name="field.key"
+            :options="field.enum"
+            :readonly="readonly"
+            :aria-label="field.label"
+            @update:modelValue="() => emitUpdate(field)"
+          />
+          <ChipsInput
+            v-else-if="field.type === 'chips'"
+            v-model="local[field.key]"
+            :options="field.enum"
+            :readonly="readonly"
+            :aria-label="field.label"
+            @update:modelValue="() => emitUpdate(field)"
+          />
           <input
             v-else-if="field.type === 'boolean'"
             :id="field.key"
@@ -102,6 +128,9 @@ import { reactive } from 'vue';
 import AssigneePicker from '@/components/tasks/AssigneePicker.vue';
 import PhotoField from '@/components/tasks/PhotoField.vue';
 import PhotoRepeater from '@/components/tasks/PhotoRepeater.vue';
+import ChipsInput from '@/components/fields/ChipsInput.vue';
+import RadioGroup from '@/components/fields/RadioGroup.vue';
+import CheckboxGroup from '@/components/fields/CheckboxGroup.vue';
 
 const props = defineProps<{ section: any; form: any; errors: Record<string, string>; taskId: number; readonly?: boolean }>();
 const emit = defineEmits<{ (e: 'update', payload: { key: string; value: any }): void; (e: 'error', payload: { key: string; msg: string }): void }>();
@@ -113,7 +142,7 @@ function colClass(field: any) {
 }
 
 function isText(type: string) {
-  return ['text', 'number', 'date', 'time', 'datetime'].includes(type);
+  return ['text', 'number', 'date', 'time', 'datetime', 'email', 'phone', 'url'].includes(type);
 }
 
 function inputType(type: string) {
@@ -121,6 +150,9 @@ function inputType(type: string) {
   if (type === 'date') return 'date';
   if (type === 'time') return 'time';
   if (type === 'datetime') return 'datetime-local';
+  if (type === 'email') return 'email';
+  if (type === 'phone') return 'tel';
+  if (type === 'url') return 'url';
   return 'text';
 }
 
