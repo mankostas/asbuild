@@ -63,9 +63,10 @@ onMounted(async () => {
     await tenantStore.loadTenants();
   }
   if (isEdit.value) {
-    const { data } = await api.get(`/task-statuses/${route.params.id}`);
+    const res = await api.get(`/task-statuses/${route.params.id}`);
+    const data = res.data;
     name.value = data.name;
-    tenantId.value = data.tenant_id || '';
+    tenantId.value = data.tenant_id ?? '';
   }
 });
 
@@ -78,7 +79,7 @@ const onSubmit = handleSubmit(async () => {
   if (!canSubmit.value) return;
   const payload: any = { name: name.value };
   if (auth.isSuperAdmin) {
-    payload.tenant_id = tenantId.value || undefined;
+    payload.tenant_id = tenantId.value === '' ? null : tenantId.value;
   }
   try {
     if (isEdit.value) {

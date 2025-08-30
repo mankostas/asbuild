@@ -73,9 +73,9 @@ class TaskStatusController extends Controller
         $data = $request->validated();
 
         if ($request->user()->hasRole('SuperAdmin')) {
-            if (array_key_exists('tenant_id', $data)) {
-                $data['tenant_id'] = $data['tenant_id'];
-            }
+            $data['tenant_id'] = array_key_exists('tenant_id', $data)
+                ? $data['tenant_id']
+                : $taskStatus->tenant_id;
         } else {
             $data['tenant_id'] = $request->user()->tenant_id;
         }

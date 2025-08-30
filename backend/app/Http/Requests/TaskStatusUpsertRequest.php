@@ -15,7 +15,7 @@ class TaskStatusUpsertRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'tenant_id' => ['sometimes', 'integer'],
+            'tenant_id' => ['sometimes', 'nullable', 'integer'],
         ];
     }
 
