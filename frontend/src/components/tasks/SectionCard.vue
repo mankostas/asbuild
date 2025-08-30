@@ -18,6 +18,34 @@
             :aria-label="field.label"
             @input="emitUpdate(field)"
           />
+          <DateInput
+            v-else-if="field.type === 'date'"
+            v-model="local[field.key]"
+            :readonly="readonly"
+            :aria-label="field.label"
+            @update:modelValue="() => emitUpdate(field)"
+          />
+          <TimeInput
+            v-else-if="field.type === 'time'"
+            v-model="local[field.key]"
+            :readonly="readonly"
+            :aria-label="field.label"
+            @update:modelValue="() => emitUpdate(field)"
+          />
+          <DateTimeInput
+            v-else-if="field.type === 'datetime'"
+            v-model="local[field.key]"
+            :readonly="readonly"
+            :aria-label="field.label"
+            @update:modelValue="() => emitUpdate(field)"
+          />
+          <DurationInput
+            v-else-if="field.type === 'duration'"
+            v-model="local[field.key]"
+            :readonly="readonly"
+            :aria-label="field.label"
+            @update:modelValue="() => emitUpdate(field)"
+          />
           <textarea
             v-else-if="field.type === 'textarea'"
             :id="field.key"
@@ -131,6 +159,10 @@ import PhotoRepeater from '@/components/tasks/PhotoRepeater.vue';
 import ChipsInput from '@/components/fields/ChipsInput.vue';
 import RadioGroup from '@/components/fields/RadioGroup.vue';
 import CheckboxGroup from '@/components/fields/CheckboxGroup.vue';
+import DateInput from '@/components/fields/DateInput.vue';
+import TimeInput from '@/components/fields/TimeInput.vue';
+import DateTimeInput from '@/components/fields/DateTimeInput.vue';
+import DurationInput from '@/components/fields/DurationInput.vue';
 
 const props = defineProps<{ section: any; form: any; errors: Record<string, string>; taskId: number; readonly?: boolean }>();
 const emit = defineEmits<{ (e: 'update', payload: { key: string; value: any }): void; (e: 'error', payload: { key: string; msg: string }): void }>();
@@ -142,14 +174,11 @@ function colClass(field: any) {
 }
 
 function isText(type: string) {
-  return ['text', 'number', 'date', 'time', 'datetime', 'email', 'phone', 'url'].includes(type);
+  return ['text', 'number', 'email', 'phone', 'url'].includes(type);
 }
 
 function inputType(type: string) {
   if (type === 'number') return 'number';
-  if (type === 'date') return 'date';
-  if (type === 'time') return 'time';
-  if (type === 'datetime') return 'datetime-local';
   if (type === 'email') return 'email';
   if (type === 'phone') return 'tel';
   if (type === 'url') return 'url';

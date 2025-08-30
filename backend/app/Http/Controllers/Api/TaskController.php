@@ -181,5 +181,7 @@ class TaskController extends Controller
                 ]);
             }
         }
+
+        $this->formSchemaService->validateData($type->schema_json, $data);
     }
 }
