@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Task;
 use App\Models\TaskType;
+use App\Services\ComputeService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -73,5 +74,27 @@ class TaskUpsertRequest extends FormRequest
             'array' => 'The :attribute must be an array.',
             'string' => 'The :attribute must be a string.',
         ];
+    }
+
+    public function validated($key = null, $default = null)
+    {
+        $data = parent::validated($key, $default);
+        $typeId = $data['task_type_id'] ?? $this->route('task')?->task_type_id;
+        if (! $typeId || ! isset($data['form_data'])) {
+            return $data;
+        }
+        $type = TaskType::find($typeId);
+        if (! $type || ! $type->schema_json) {
+            return $data;
+        }
+        $fields = collect($type->schema_json['sections'] ?? [])
+            ->flatMap(fn ($s) => $s['fields'] ?? []);
+        $compute = app(ComputeService::class);
+        foreach ($fields as $field) {
+            if (($field['type'] ?? '') === 'computed' && isset($field['expr'], $field['key'])) {
+                $data['form_data'][$field['key']] = $compute->evaluate($field['expr'], $data['form_data']);
+            }
+        }
+        return $data;
     }
 }
