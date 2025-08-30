@@ -31,7 +31,8 @@
     "language": "Γλώσσα",
     "dragToReorder": "Σύρετε για αναδιάταξη",
     "removeSection": "Αφαίρεση ενότητας",
-    "enableAutomation": "Ενεργοποίηση αυτοματοποίησης"
+    "enableAutomation": "Ενεργοποίηση αυτοματοποίησης",
+    "movedToPosition": "Μετακινήθηκε στη θέση {pos}"
   },
   "commandPalette": {
     "title": "Παλέτα εντολών",
@@ -188,7 +189,13 @@
     "workflow": {
       "title": "Ροή εργασίας",
       "addStatus": "Προσθήκη κατάστασης",
-      "transitions": "Μεταβάσεις"
+      "transitions": "Μεταβάσεις",
+      "addTransition": "Προσθήκη μετάβασης",
+      "from": "Από",
+      "to": "Προς",
+      "condition": "Συνθήκη",
+      "noCondition": "Πάντα",
+      "transition": "Μετάβαση"
     },
     "form": {
       "name": "Όνομα",
