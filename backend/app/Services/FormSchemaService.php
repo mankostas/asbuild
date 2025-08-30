@@ -11,7 +11,7 @@ class FormSchemaService
      *
      * Schema keys:
      *  sections[]: { key, label, fields[], allow_subtasks }
-     *  fields[]: { key, label, type: text|textarea|number|date|time|datetime|boolean|select|multiselect|assignee|file|photo_single|photo_repeater|repeater, required, enum?, x-cols?, fields? }
+     *  fields[]: { key, label, type: text|textarea|number|date|time|datetime|email|phone|url|boolean|select|multiselect|radio|checkbox|chips|assignee|file|photo_single|photo_repeater|repeater, required, enum?, x-cols?, fields? }
      */
     public function validate(array $schema): void
     {
@@ -35,15 +35,15 @@ class FormSchemaService
 
     protected function validateField(array $field): void
     {
-        $allowed = ['text','textarea','number','date','time','datetime','boolean','select','multiselect','assignee','file','photo_single','photo_repeater','repeater'];
+        $allowed = ['text','textarea','number','date','time','datetime','email','phone','url','boolean','select','multiselect','radio','checkbox','chips','assignee','file','photo_single','photo_repeater','repeater'];
         if (! isset($field['key'], $field['label']) || ! in_array($field['type'] ?? '', $allowed, true)) {
             throw ValidationException::withMessages([
                 'schema_json' => 'invalid field',
             ]);
         }
-        if (in_array($field['type'], ['select','multiselect'], true) && ! is_array($field['enum'] ?? null)) {
+        if (in_array($field['type'], ['select','multiselect','radio','checkbox','chips'], true) && ! is_array($field['enum'] ?? null)) {
             throw ValidationException::withMessages([
-                'schema_json' => 'enum required for select types',
+                'schema_json' => 'enum required for choice types',
             ]);
         }
         if ($field['type'] === 'repeater') {
