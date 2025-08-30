@@ -32,6 +32,80 @@
             />
           </label>
         </div>
+      <div v-else-if="active === 'Validation'" class="space-y-2">
+        <label class="block text-sm" for="valRegex">
+          <span class="block mb-1">{{ t('validation.regex') }}</span>
+          <input
+            id="valRegex"
+            v-model="validations.regex"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Regex pattern"
+          />
+        </label>
+        <label class="block text-sm" for="valMin">
+          <span class="block mb-1">{{ t('validation.min') }}</span>
+          <input
+            id="valMin"
+            type="number"
+            v-model.number="validations.min"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Minimum"
+          />
+        </label>
+        <label class="block text-sm" for="valMax">
+          <span class="block mb-1">{{ t('validation.max') }}</span>
+          <input
+            id="valMax"
+            type="number"
+            v-model.number="validations.max"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Maximum"
+          />
+        </label>
+        <label class="block text-sm" for="valLenMin">
+          <span class="block mb-1">{{ t('validation.lengthMin') }}</span>
+          <input
+            id="valLenMin"
+            type="number"
+            v-model.number="validations.lengthMin"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Min length"
+          />
+        </label>
+        <label class="block text-sm" for="valLenMax">
+          <span class="block mb-1">{{ t('validation.lengthMax') }}</span>
+          <input
+            id="valLenMax"
+            type="number"
+            v-model.number="validations.lengthMax"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Max length"
+          />
+        </label>
+        <label class="block text-sm" for="valMime">
+          <span class="block mb-1">{{ t('validation.mime') }}</span>
+          <input
+            id="valMime"
+            v-model="mimeString"
+            class="w-full border rounded px-2 py-1"
+            aria-label="MIME types"
+          />
+        </label>
+        <label class="block text-sm" for="valSize">
+          <span class="block mb-1">{{ t('validation.size') }}</span>
+          <input
+            id="valSize"
+            type="number"
+            v-model.number="validations.size"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Max size"
+          />
+        </label>
+        <label class="inline-flex items-center gap-1" for="valUnique">
+          <input id="valUnique" type="checkbox" v-model="validations.unique" aria-label="Unique" />
+          <span>{{ t('validation.unique') }}</span>
+        </label>
+      </div>
       <div v-else class="text-sm text-gray-500" tabindex="0">{{ t('Not implemented') }}</div>
     </div>
     <div v-else class="text-sm text-gray-500">{{ t('Select a field') }}</div>
@@ -53,10 +127,21 @@ const label = computed({
     if (props.selected) props.selected.label = val;
   },
 });
+const validations = computed(() => {
+  if (!props.selected) return {} as any;
+  if (!props.selected.validations) props.selected.validations = {};
+  return props.selected.validations;
+});
 const required = computed({
-  get: () => props.selected?.required ?? false,
+  get: () => validations.value.required ?? false,
   set: (val: boolean) => {
-    if (props.selected) props.selected.required = val;
+    validations.value.required = val;
+  },
+});
+const mimeString = computed({
+  get: () => (validations.value.mime ? validations.value.mime.join(',') : ''),
+  set: (val: string) => {
+    validations.value.mime = val ? val.split(',').map((s) => s.trim()) : [];
   },
 });
 </script>

@@ -164,5 +164,16 @@
     "chart": {
       "trend": "Trend"
     }
+  },
+  "validation": {
+    "regex": "Pattern",
+    "min": "Minimum",
+    "max": "Maximum",
+    "lengthMin": "Min Length",
+    "lengthMax": "Max Length",
+    "mime": "MIME Types",
+    "size": "Max Size",
+    "unique": "Unique",
+    "required": "Required"
   }
 }

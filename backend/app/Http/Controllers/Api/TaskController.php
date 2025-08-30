@@ -87,7 +87,7 @@ class TaskController extends Controller
             $type = TaskType::find($data['task_type_id']);
         }
         $data['status'] = $type && $type->statuses ? array_key_first($type->statuses) : Task::STATUS_DRAFT;
-        $this->validateAgainstSchema($type, $data['form_data'] ?? []);
+        $this->validateAgainstSchema($type, $data['form_data'] ?? [], null);
         $this->formSchemaService->mapAssignee($type->schema_json ?? [], $data);
         $this->formSchemaService->mapReviewer($type->schema_json ?? [], $data);
         if (isset($data['form_data'])) {
@@ -122,7 +122,7 @@ class TaskController extends Controller
 
         $typeId = $data['task_type_id'] ?? $task->task_type_id;
         $type = $typeId ? TaskType::find($typeId) : $task->type;
-        $this->validateAgainstSchema($type, $data['form_data'] ?? $task->form_data ?? []);
+        $this->validateAgainstSchema($type, $data['form_data'] ?? $task->form_data ?? [], $task);
         $this->formSchemaService->mapAssignee($type->schema_json ?? [], $data);
         $this->formSchemaService->mapReviewer($type->schema_json ?? [], $data);
         if (isset($data['form_data'])) {
@@ -173,20 +173,37 @@ class TaskController extends Controller
         return new TaskResource($task->load('type', 'assignee'));
     }
 
-    protected function validateAgainstSchema(?TaskType $type, array $data): void
+    protected function validateAgainstSchema(?TaskType $type, array $data, ?Task $task = null): void
     {
         if (! $type || ! $type->schema_json) {
             return;
         }
 
-        $required = collect($type->schema_json['sections'] ?? [])
-            ->flatMap(fn ($s) => collect($s['fields'] ?? [])->filter(fn ($f) => $f['required'] ?? false))
-            ->map(fn ($f) => $f['key']);
-        foreach ($required as $field) {
-            if (! array_key_exists($field, $data)) {
+        $fields = collect($type->schema_json['sections'] ?? [])
+            ->flatMap(fn ($s) => $s['fields'] ?? []);
+
+        foreach ($fields as $field) {
+            $key = $field['key'] ?? null;
+            if (! $key) {
+                continue;
+            }
+            $rules = $field['validations'] ?? [];
+            if (($rules['required'] ?? false) && ! array_key_exists($key, $data)) {
                 throw ValidationException::withMessages([
-                    "form_data.$field" => 'required',
+                    "form_data.$key" => 'required',
                 ]);
+            }
+            if (($rules['unique'] ?? false) && array_key_exists($key, $data)) {
+                $query = Task::where('task_type_id', $type->id)
+                    ->where('form_data->'.$key, $data[$key]);
+                if ($task) {
+                    $query->where('id', '!=', $task->id);
+                }
+                if ($query->exists()) {
+                    throw ValidationException::withMessages([
+                        "form_data.$key" => 'unique',
+                    ]);
+                }
             }
         }
 
