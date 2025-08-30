@@ -189,7 +189,7 @@ const fieldTypes = [
   { key: 'date', label: 'Date', schema: { type: 'string', format: 'date' } },
   { key: 'time', label: 'Time', schema: { type: 'string', format: 'time' } },
   { key: 'boolean', label: 'Checkbox', schema: { type: 'boolean' } },
-  { key: 'assignee', label: 'Assignee', schema: { type: 'object', 'x-control': 'assignee' } },
+  { key: 'assignee', label: 'Assignee', schema: { type: 'object', kind: 'assignee' } },
 ];
 
 const isEdit = computed(() => route.name === 'taskTypes.edit');
@@ -223,13 +223,30 @@ function removeField(index: number) {
 const formSchemaObj = computed(() => {
   const properties: Record<string, any> = {};
   const required: string[] = [];
-  fields.value.forEach((f) => {
+  const fieldsArr = fields.value.map((f) => {
     const def = fieldTypes.find((ft) => ft.key === f.typeKey);
-    if (!def) return;
-    properties[f.name] = { title: f.label, ...def.schema, 'x-cols': f.cols };
+    properties[f.name] = {
+      title: f.label,
+      type: def?.schema?.type || 'string',
+      ...def?.schema,
+      'x-cols': f.cols,
+    };
     if (f.required) required.push(f.name);
+    return {
+      key: f.name,
+      label: f.label,
+      type: f.typeKey,
+      required: f.required,
+      'x-cols': f.cols,
+    };
   });
-  const schema: any = { type: 'object', properties };
+  const schema: any = {
+    type: 'object',
+    properties,
+    sections: [
+      { key: 'main', label: 'Main', fields: fieldsArr, photos: [] },
+    ],
+  };
   if (required.length) schema.required = required;
   return schema;
 });
