@@ -106,6 +106,95 @@
           <span>{{ t('validation.unique') }}</span>
         </label>
       </div>
+      <div v-else-if="active === 'Logic'" class="space-y-2">
+        <div v-for="(rule, rIdx) in logicRules" :key="rIdx" class="space-y-2 border p-2 rounded">
+          <label class="block text-sm" :for="`logicField${rIdx}`">
+            <span class="block mb-1">{{ t('Condition field') }}</span>
+            <input
+              :id="`logicField${rIdx}`"
+              v-model="rule.if.field"
+              class="w-full border rounded px-2 py-1"
+              aria-label="Logic field"
+            />
+          </label>
+          <label class="block text-sm" :for="`logicEq${rIdx}`">
+            <span class="block mb-1">{{ t('Equals') }}</span>
+            <input
+              :id="`logicEq${rIdx}`"
+              v-model="rule.if.eq"
+              class="w-full border rounded px-2 py-1"
+              aria-label="Logic equals"
+            />
+          </label>
+          <div v-for="(action, aIdx) in rule.then" :key="aIdx" class="flex items-center gap-1">
+            <select
+              v-model="action.type"
+              class="border rounded px-2 py-1 text-sm"
+              aria-label="Logic action"
+            >
+              <option value="show">{{ t('Show') }}</option>
+              <option value="require">{{ t('Require') }}</option>
+            </select>
+            <input
+              v-model="action.target"
+              class="flex-1 border rounded px-2 py-1"
+              aria-label="Logic target"
+            />
+            <button
+              type="button"
+              class="text-red-600"
+              aria-label="Remove action"
+              @click="removeLogicAction(rule, aIdx)"
+            >
+              ✕
+            </button>
+          </div>
+          <button
+            type="button"
+            class="text-sm px-2 py-1 border rounded"
+            aria-label="Add action"
+            @click="addLogicAction(rule)"
+          >
+            {{ t('Add action') }}
+          </button>
+          <button
+            type="button"
+            class="text-sm text-red-600"
+            aria-label="Remove rule"
+            @click="removeLogicRule(rIdx)"
+          >
+            {{ t('Remove rule') }}
+          </button>
+        </div>
+        <button
+          type="button"
+          class="px-2 py-1 border rounded"
+          aria-label="Add rule"
+          @click="addLogicRule"
+        >
+          {{ t('Add rule') }}
+        </button>
+      </div>
+      <div v-else-if="active === 'Roles'" class="space-y-2">
+        <label class="block text-sm" for="rolesView">
+          <span class="block mb-1">{{ t('View roles') }}</span>
+          <input
+            id="rolesView"
+            v-model="viewRoles"
+            class="w-full border rounded px-2 py-1"
+            aria-label="View roles"
+          />
+        </label>
+        <label class="block text-sm" for="rolesEdit">
+          <span class="block mb-1">{{ t('Edit roles') }}</span>
+          <input
+            id="rolesEdit"
+            v-model="editRoles"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Edit roles"
+          />
+        </label>
+      </div>
       <div v-else-if="active === 'i18n'" class="space-y-2">
         <label class="block text-sm" for="i18nLabelEl">
           <span class="block mb-1">{{ t('Label') }} EL</span>
@@ -162,6 +251,26 @@
           />
         </label>
       </div>
+      <div v-else-if="active === 'Data'" class="space-y-2">
+        <label class="block text-sm" for="dataDefault">
+          <span class="block mb-1">{{ t('Default value') }}</span>
+          <input
+            id="dataDefault"
+            v-model="dataObj.default"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Default value"
+          />
+        </label>
+        <label class="block text-sm" for="dataOptions">
+          <span class="block mb-1">{{ t('Options') }}</span>
+          <input
+            id="dataOptions"
+            v-model="optionsString"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Options"
+          />
+        </label>
+      </div>
       <div v-else class="text-sm text-gray-500" tabindex="0">{{ t('Not implemented') }}</div>
     </div>
     <div v-else class="text-sm text-gray-500">{{ t('Select a field') }}</div>
@@ -190,6 +299,9 @@ watch(
       val.label ||= { en: '', el: '' };
       val.placeholder ||= { en: '', el: '' };
       val.help ||= { en: '', el: '' };
+      val.logic ||= [];
+      val.roles ||= { view: [], edit: [] };
+      val.data ||= { default: '', enum: [] };
     }
   },
   { immediate: true },
@@ -209,6 +321,51 @@ const mimeString = computed({
   get: () => (validations.value.mime ? validations.value.mime.join(',') : ''),
   set: (val: string) => {
     validations.value.mime = val ? val.split(',').map((s) => s.trim()) : [];
+  },
+});
+
+const logicRules = computed(() => {
+  if (!props.selected) return [] as any[];
+  return props.selected.logic;
+});
+function addLogicRule() {
+  logicRules.value.push({ if: { field: '', eq: '' }, then: [] });
+}
+function removeLogicRule(idx: number) {
+  logicRules.value.splice(idx, 1);
+}
+function addLogicAction(rule: any) {
+  rule.then.push({ type: 'show', target: '' });
+}
+function removeLogicAction(rule: any, idx: number) {
+  rule.then.splice(idx, 1);
+}
+
+const roles = computed(() => {
+  if (!props.selected) return { view: [], edit: [] } as any;
+  return props.selected.roles;
+});
+const viewRoles = computed({
+  get: () => roles.value.view.join(','),
+  set: (val: string) => {
+    roles.value.view = val ? val.split(',').map((s) => s.trim()) : [];
+  },
+});
+const editRoles = computed({
+  get: () => roles.value.edit.join(','),
+  set: (val: string) => {
+    roles.value.edit = val ? val.split(',').map((s) => s.trim()) : [];
+  },
+});
+
+const dataObj = computed(() => {
+  if (!props.selected) return { default: '', enum: [] } as any;
+  return props.selected.data;
+});
+const optionsString = computed({
+  get: () => (dataObj.value.enum ? dataObj.value.enum.join(',') : ''),
+  set: (val: string) => {
+    dataObj.value.enum = val ? val.split(',').map((s) => s.trim()) : [];
   },
 });
 </script>
