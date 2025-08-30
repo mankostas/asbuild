@@ -74,6 +74,32 @@
               </FromGroup>
             </div>
           </TabPanel>
+          <TabPanel v-if="roleOptions.length">
+            <div class="space-y-2">
+              <FromGroup #default="{ inputId, labelId }" :label="t('roles.view')">
+                <div :id="inputId" :aria-labelledby="labelId" class="flex flex-col gap-1">
+                  <Checkbox
+                    v-for="r in roleOptions"
+                    :key="r.id"
+                    v-model="roles.view"
+                    :value="r.slug"
+                    :label="r.name"
+                  />
+                </div>
+              </FromGroup>
+              <FromGroup #default="{ inputId, labelId }" :label="t('roles.edit')">
+                <div :id="inputId" :aria-labelledby="labelId" class="flex flex-col gap-1">
+                  <Checkbox
+                    v-for="r in roleOptions"
+                    :key="r.id"
+                    v-model="roles.edit"
+                    :value="r.slug"
+                    :label="r.name"
+                  />
+                </div>
+              </FromGroup>
+            </div>
+          </TabPanel>
         </template>
       </UiTabs>
     </div>
@@ -90,6 +116,7 @@ import { Tab, TabPanel } from '@headlessui/vue';
 import Textinput from '@/components/ui/Textinput/index.vue';
 import Switch from '@/components/ui/Switch/index.vue';
 import FromGroup from '@/components/ui/FromGroup/index.vue';
+import Checkbox from '@/components/ui/Checkbox/index.vue';
 
 interface RoleOption {
   id: number;
@@ -102,7 +129,11 @@ const props = withDefaults(
   { roleOptions: () => [] },
 );
 const { t, locale } = useI18n();
-const tabs = ['Basics', 'Validation'];
+const tabs = computed(() => {
+  const tbs = ['Basics', 'Validation'];
+  if (props.roleOptions.length) tbs.push(t('roles.label'));
+  return tbs;
+});
 
 const label = computed({
   get: () => props.selected?.label?.[locale.value] ?? '',
@@ -112,10 +143,14 @@ const label = computed({
 });
 
 const validations = computed(() => props.selected?.validations ?? {});
+const roles = computed(() => props.selected?.roles ?? { view: [], edit: [] });
 watch(
   () => props.selected,
   (val) => {
-    if (val && !val.validations) val.validations = {};
+    if (val) {
+      if (!val.validations) val.validations = {};
+      if (!val.roles) val.roles = { view: ['super_admin'], edit: ['super_admin'] };
+    }
   },
   { immediate: true },
 );

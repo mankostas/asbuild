@@ -251,8 +251,12 @@
     "placeholder": "Placeholder",
     "help": "Help",
     "reorderHint": "Use Alt+Arrow keys to reorder"
-  }
-  ,
+  },
+  "roles": {
+    "label": "Roles",
+    "view": "View roles",
+    "edit": "Edit roles"
+  },
   "templates": {
     "title": "Templates",
     "export": "Export JSON",

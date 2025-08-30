@@ -25,11 +25,29 @@
 
 <script setup lang="ts">
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from '@headlessui/vue';
+import { ref, watch } from 'vue';
 
 interface Props {
   open: boolean;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 defineEmits(['close']);
+
+const scrollY = ref(0);
+
+watch(
+  () => props.open,
+  (isOpen) => {
+    if (isOpen) {
+      scrollY.value = window.scrollY;
+      document.body.style.top = `-${scrollY.value}px`;
+      document.body.style.position = 'fixed';
+    } else {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      window.scrollTo(0, scrollY.value);
+    }
+  },
+);
 </script>
