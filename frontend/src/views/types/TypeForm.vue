@@ -27,73 +27,294 @@
         </div>
 
         <div class="mb-4">
-          <h3 class="font-medium mb-2">Form Fields</h3>
-          <div class="flex gap-4">
-            <div class="w-1/3">
-              <h4 class="text-sm font-semibold mb-2">Add Field</h4>
-              <ul>
-                <li v-for="t in fieldTypes" :key="t.key">
-                  <button
-                    type="button"
-                    class="w-full mb-2 px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded"
-                    @click="addField(t)"
-                  >
-                    {{ t.label }}
-                  </button>
-                </li>
-              </ul>
+          <h3 class="font-medium mb-2">Sections</h3>
+          <div
+            v-for="(section, sIdx) in sections"
+            :key="section.id"
+            class="mb-6 border rounded p-4"
+          >
+            <div class="flex items-center gap-2 mb-4">
+              <input
+                v-model="section.key"
+                class="border rounded p-1 w-32"
+                placeholder="key"
+                aria-label="Section key"
+              />
+              <input
+                v-model="section.label"
+                class="border rounded p-1 w-32"
+                placeholder="label"
+                aria-label="Section label"
+              />
+              <button
+                type="button"
+                class="text-red-500"
+                @click="removeSection(sIdx)"
+              >
+                ✕
+              </button>
             </div>
-            <div class="flex-1">
-              <h4 class="text-sm font-semibold mb-2">Layout</h4>
-              <draggable v-model="fields" item-key="id" class="flex flex-col gap-2" handle=".handle">
-                <template #item="{ element, index }">
-                  <div
-                    class="p-3 bg-white border rounded flex items-center justify-between"
+            <div class="mb-4">
+              <h4 class="text-sm font-semibold mb-2">Fields</h4>
+              <div class="flex gap-4">
+                <div class="w-1/3">
+                  <h5 class="text-sm font-semibold mb-2">Add Field</h5>
+                  <ul>
+                    <li v-for="t in fieldTypes" :key="t.key">
+                      <button
+                        type="button"
+                        class="w-full mb-2 px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded"
+                        @click="addField(section, t)"
+                      >
+                        {{ t.label }}
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+                <div class="flex-1">
+                  <h5 class="text-sm font-semibold mb-2">Layout</h5>
+                  <draggable
+                    v-model="section.fields"
+                    item-key="id"
+                    class="flex flex-col gap-2"
+                    handle=".handle"
                   >
-                    <div class="flex items-center gap-2">
-                      <span class="cursor-move handle text-gray-400">≡</span>
-                      <input
-                        v-model="element.name"
-                        class="border rounded p-1 w-32"
-                        placeholder="name"
-                        aria-label="Field name"
-                      />
-                      <input
-                        v-model="element.label"
-                        class="border rounded p-1 w-32"
-                        placeholder="label"
-                        aria-label="Field label"
-                      />
-                      <select
-                        v-model="element.typeKey"
-                        class="border rounded p-1"
-                        aria-label="Field type"
+                    <template #item="{ element, index }">
+                      <div
+                        class="p-3 bg-white border rounded flex flex-col gap-2"
                       >
-                        <option v-for="t in fieldTypes" :key="t.key" :value="t.key">{{ t.label }}</option>
-                      </select>
-                      <div class="flex items-center gap-1 text-sm">
-                        <input
-                          v-model="element.required"
-                          type="checkbox"
-                          aria-label="required"
-                        />
-                        <span>required</span>
+                        <div class="flex items-center gap-2 justify-between">
+                          <div class="flex items-center gap-2">
+                            <span class="cursor-move handle text-gray-400">≡</span>
+                            <input
+                              v-model="element.name"
+                              class="border rounded p-1 w-32"
+                              placeholder="name"
+                              aria-label="Field name"
+                            />
+                            <input
+                              v-model="element.label"
+                              class="border rounded p-1 w-32"
+                              placeholder="label"
+                              aria-label="Field label"
+                            />
+                            <select
+                              v-model="element.typeKey"
+                              class="border rounded p-1"
+                              aria-label="Field type"
+                            >
+                              <option
+                                v-for="t in fieldTypes"
+                                :key="t.key"
+                                :value="t.key"
+                              >
+                                {{ t.label }}
+                              </option>
+                            </select>
+                            <div
+                              v-if="element.typeKey !== 'repeater'"
+                              class="flex items-center gap-1 text-sm"
+                            >
+                              <input
+                                v-model="element.required"
+                                type="checkbox"
+                                aria-label="required"
+                              />
+                              <span>required</span>
+                            </div>
+                            <select
+                              v-if="element.typeKey !== 'repeater'"
+                              v-model.number="element.cols"
+                              class="border rounded p-1 w-24"
+                              aria-label="Column span"
+                            >
+                              <option :value="2">Full</option>
+                              <option :value="1">Half</option>
+                            </select>
+                          </div>
+                          <button
+                            type="button"
+                            class="text-red-500"
+                            @click="removeField(section, index)"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <div
+                          v-if="element.typeKey === 'repeater'"
+                          class="ml-6 mt-2"
+                        >
+                          <div class="flex gap-4">
+                            <div class="w-1/3">
+                              <h5 class="text-sm font-semibold mb-2">Add Field</h5>
+                              <ul>
+                                <li
+                                  v-for="t in fieldTypes.filter((ft) => ft.key !== 'repeater')"
+                                  :key="t.key"
+                                >
+                                  <button
+                                    type="button"
+                                    class="w-full mb-2 px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded"
+                                    @click="addSubField(element, t)"
+                                  >
+                                    {{ t.label }}
+                                  </button>
+                                </li>
+                              </ul>
+                            </div>
+                            <div class="flex-1">
+                              <h5 class="text-sm font-semibold mb-2">Fields</h5>
+                              <draggable
+                                v-model="element.fields"
+                                item-key="id"
+                                class="flex flex-col gap-2"
+                                handle=".handle"
+                              >
+                                <template #item="{ element: sub, index: sindex }">
+                                  <div
+                                    class="p-3 bg-white border rounded flex items-center justify-between"
+                                  >
+                                    <div class="flex items-center gap-2">
+                                      <span class="cursor-move handle text-gray-400">≡</span>
+                                      <input
+                                        v-model="sub.name"
+                                        class="border rounded p-1 w-32"
+                                        placeholder="name"
+                                        aria-label="Subfield name"
+                                      />
+                                      <input
+                                        v-model="sub.label"
+                                        class="border rounded p-1 w-32"
+                                        placeholder="label"
+                                        aria-label="Subfield label"
+                                      />
+                                      <select
+                                        v-model="sub.typeKey"
+                                        class="border rounded p-1"
+                                        aria-label="Subfield type"
+                                      >
+                                        <option
+                                          v-for="t in fieldTypes.filter((ft) => ft.key !== 'repeater')"
+                                          :key="t.key"
+                                          :value="t.key"
+                                        >
+                                          {{ t.label }}
+                                        </option>
+                                      </select>
+                                      <div class="flex items-center gap-1 text-sm">
+                                        <input
+                                          v-model="sub.required"
+                                          type="checkbox"
+                                          aria-label="required"
+                                        />
+                                        <span>required</span>
+                                      </div>
+                                      <select
+                                        v-model.number="sub.cols"
+                                        class="border rounded p-1 w-24"
+                                        aria-label="Column span"
+                                      >
+                                        <option :value="2">Full</option>
+                                        <option :value="1">Half</option>
+                                      </select>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      class="text-red-500"
+                                      @click="removeSubField(element, sindex)"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                </template>
+                              </draggable>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <select
-                        v-model.number="element.cols"
-                        class="border rounded p-1 w-24"
-                        aria-label="Column span"
+                    </template>
+                  </draggable>
+                </div>
+              </div>
+            </div>
+            <div class="mb-4">
+              <h4 class="text-sm font-semibold mb-2">Photos</h4>
+              <div class="flex gap-4">
+                <div class="w-1/3">
+                  <h5 class="text-sm font-semibold mb-2">Add Photo</h5>
+                  <ul>
+                    <li v-for="p in photoTypes" :key="p.key">
+                      <button
+                        type="button"
+                        class="w-full mb-2 px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded"
+                        @click="addPhoto(section, p)"
                       >
-                        <option :value="2">Full</option>
-                        <option :value="1">Half</option>
-                      </select>
-                    </div>
-                    <button type="button" class="text-red-500" @click="removeField(index)">✕</button>
-                  </div>
-                </template>
-              </draggable>
+                        {{ p.label }}
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+                <div class="flex-1">
+                  <h5 class="text-sm font-semibold mb-2">Layout</h5>
+                  <draggable
+                    v-model="section.photos"
+                    item-key="id"
+                    class="flex flex-col gap-2"
+                    handle=".handle"
+                  >
+                    <template #item="{ element, index }">
+                      <div
+                        class="p-3 bg-white border rounded flex items-center justify-between"
+                      >
+                        <div class="flex items-center gap-2">
+                          <span class="cursor-move handle text-gray-400">≡</span>
+                          <input
+                            v-model="element.name"
+                            class="border rounded p-1 w-32"
+                            placeholder="name"
+                            aria-label="Photo name"
+                          />
+                          <input
+                            v-model="element.label"
+                            class="border rounded p-1 w-32"
+                            placeholder="label"
+                            aria-label="Photo label"
+                          />
+                          <select
+                            v-model="element.typeKey"
+                            class="border rounded p-1"
+                            aria-label="Photo type"
+                          >
+                            <option
+                              v-for="p in photoTypes"
+                              :key="p.key"
+                              :value="p.key"
+                            >
+                              {{ p.label }}
+                            </option>
+                          </select>
+                        </div>
+                        <button
+                          type="button"
+                          class="text-red-500"
+                          @click="removePhoto(section, index)"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </template>
+                  </draggable>
+                </div>
+              </div>
             </div>
           </div>
+          <button
+            type="button"
+            class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded"
+            @click="addSection"
+          >
+            Add Section
+          </button>
         </div>
 
         <div class="mb-4">
@@ -167,6 +388,22 @@ interface Field {
   typeKey: string;
   required: boolean;
   cols: number;
+  fields?: Field[];
+}
+
+interface Photo {
+  id: number;
+  name: string;
+  label: string;
+  typeKey: string;
+}
+
+interface Section {
+  id: number;
+  key: string;
+  label: string;
+  fields: Field[];
+  photos: Photo[];
 }
 
 const route = useRoute();
@@ -175,7 +412,15 @@ const auth = useAuthStore();
 const tenantStore = useTenantStore();
 
 const name = ref('');
-const fields = ref<Field[]>([]);
+const sections = ref<Section[]>([
+  {
+    id: Date.now(),
+    key: 'main',
+    label: 'Main',
+    fields: [],
+    photos: [],
+  },
+]);
 const previewModel = ref<any>({});
 const serverError = ref('');
 const allStatuses = ref<any[]>([]);
@@ -190,6 +435,12 @@ const fieldTypes = [
   { key: 'time', label: 'Time', schema: { type: 'string', format: 'time' } },
   { key: 'boolean', label: 'Checkbox', schema: { type: 'boolean' } },
   { key: 'assignee', label: 'Assignee', schema: { type: 'object', kind: 'assignee' } },
+  { key: 'repeater', label: 'Repeater', schema: { type: 'array' } },
+];
+
+const photoTypes = [
+  { key: 'photo_single', label: 'Photo' },
+  { key: 'photo_repeater', label: 'Photo Repeater' },
 ];
 
 const isEdit = computed(() => route.name === 'taskTypes.edit');
@@ -205,10 +456,41 @@ const availableStatuses = computed(() =>
   ),
 );
 
-function addField(t: any) {
-  fields.value.push({
+function addSection() {
+  sections.value.push({
     id: Date.now() + Math.random(),
-    name: `field${fields.value.length + 1}`,
+    key: `section${sections.value.length + 1}`,
+    label: `Section ${sections.value.length + 1}`,
+    fields: [],
+    photos: [],
+  });
+}
+
+function removeSection(index: number) {
+  sections.value.splice(index, 1);
+}
+
+function addField(section: Section, t: any) {
+  section.fields.push({
+    id: Date.now() + Math.random(),
+    name: `field${section.fields.length + 1}`,
+    label: t.label,
+    typeKey: t.key,
+    required: false,
+    cols: 2,
+    fields: t.key === 'repeater' ? [] : undefined,
+  });
+}
+
+function removeField(section: Section, index: number) {
+  section.fields.splice(index, 1);
+}
+
+function addSubField(field: Field, t: any) {
+  if (!field.fields) field.fields = [];
+  field.fields.push({
+    id: Date.now() + Math.random(),
+    name: `sub${field.fields.length + 1}`,
     label: t.label,
     typeKey: t.key,
     required: false,
@@ -216,56 +498,73 @@ function addField(t: any) {
   });
 }
 
-function removeField(index: number) {
-  fields.value.splice(index, 1);
+function removeSubField(field: Field, index: number) {
+  field.fields?.splice(index, 1);
 }
 
-const formSchemaObj = computed(() => {
-  const properties: Record<string, any> = {};
-  const required: string[] = [];
-  const fieldsArr: any[] = [];
-
-  fields.value.forEach((f) => {
-    const def = fieldTypes.find((ft) => ft.key === f.typeKey);
-    if (!def) return;
-    properties[f.name] = {
-      title: f.label,
-      type: def.schema?.type || 'string',
-      ...(def.schema || {}),
-      'x-cols': f.cols,
-    };
-    if (f.required) required.push(f.name);
-    fieldsArr.push({
-      key: f.name,
-      label: f.label,
-      type: f.typeKey,
-      required: f.required,
-      'x-cols': f.cols,
-    });
+function addPhoto(section: Section, p: any) {
+  section.photos.push({
+    id: Date.now() + Math.random(),
+    name: `photo${section.photos.length + 1}`,
+    label: p.label,
+    typeKey: p.key,
   });
-  const schema: any = {
-    type: 'object',
-    properties,
-    sections: [
-      { key: 'main', label: 'Main', fields: fieldsArr, photos: [] },
-    ],
-  };
-  if (required.length) schema.required = required;
-  return schema;
-});
+}
 
-const fieldsSummaryObj = computed(() =>
-  fields.value.map((f) => ({
-    name: f.name,
+function removePhoto(section: Section, index: number) {
+  section.photos.splice(index, 1);
+}
+
+function mapField(f: Field): any {
+  const obj: any = {
+    key: f.name,
     label: f.label,
     type: f.typeKey,
     required: f.required,
-    cols: f.cols,
-  })),
-);
+    'x-cols': f.cols,
+  };
+  if (f.typeKey === 'repeater') {
+    obj.fields = (f.fields || []).map(mapField);
+  }
+  return obj;
+}
+
+const formSchemaObj = computed(() => {
+  return {
+    sections: sections.value.map((s) => ({
+      key: s.key,
+      label: s.label,
+      fields: s.fields.map(mapField),
+      photos: s.photos.map((p) => ({
+        key: p.name,
+        label: p.label,
+        type: p.typeKey,
+      })),
+    })),
+  };
+});
+
+const fieldsSummaryObj = computed(() => {
+  const arr: any[] = [];
+  sections.value.forEach((s) => {
+    s.fields.forEach((f) => {
+      arr.push({
+        name: f.name,
+        label: f.label,
+        type: f.typeKey,
+        required: f.required,
+        cols: f.cols,
+      });
+    });
+    s.photos.forEach((p) => {
+      arr.push({ name: p.name, label: p.label, type: p.typeKey });
+    });
+  });
+  return arr;
+});
 
 watch(
-  fields,
+  sections,
   () => {
     previewModel.value = {};
   },
@@ -282,36 +581,28 @@ onMounted(async () => {
     const { data } = await api.get(`/task-types/${route.params.id}`);
     name.value = data.name;
     tenantId.value = data.tenant_id || '';
-    if (data.fields_summary) {
-      let summary = data.fields_summary;
-      if (typeof summary === 'string') {
+    if (data.form_schema) {
+      let schema = data.form_schema;
+      if (typeof schema === 'string') {
         try {
-          summary = JSON.parse(summary);
+          schema = JSON.parse(schema);
         } catch {
-          summary = null;
+          schema = null;
         }
       }
-      if (Array.isArray(summary)) {
-        fields.value = summary.map((f: any) => ({
+      if (schema && Array.isArray(schema.sections)) {
+        sections.value = schema.sections.map((s: any) => ({
           id: Date.now() + Math.random(),
-          name: f.name || `field${fields.value.length + 1}`,
-          label: f.label || f.name || 'Field',
-          typeKey: f.type || 'text',
-          required: !!f.required,
-          cols: f.cols || 2,
-        }));
-      } else if (summary && typeof summary === 'object') {
-        fields.value = Object.keys(summary).map((key) => {
-          const f = (summary as any)[key];
-          return {
+          key: s.key || `section${sections.value.length + 1}`,
+          label: s.label || s.key || 'Section',
+          fields: (s.fields || []).map(mapFieldFromSchema),
+          photos: (s.photos || []).map((p: any) => ({
             id: Date.now() + Math.random(),
-            name: key,
-            label: f.label || key,
-            typeKey: f.type || 'text',
-            required: !!f.required,
-            cols: f.cols || 2,
-          };
-        });
+            name: p.key,
+            label: p.label || p.key,
+            typeKey: p.type || 'photo_single',
+          })),
+        }));
       }
     }
     if (data.statuses) {
@@ -331,8 +622,24 @@ onMounted(async () => {
   }
 });
 
+function mapFieldFromSchema(f: any): Field {
+  return {
+    id: Date.now() + Math.random(),
+    name: f.key,
+    label: f.label || f.key,
+    typeKey: f.type || 'text',
+    required: !!f.required,
+    cols: f['x-cols'] || 2,
+    fields: (f.fields || []).map(mapFieldFromSchema),
+  };
+}
+
 const canSubmit = computed(() => {
-  return !!name.value && fields.value.length > 0;
+  return (
+    !!name.value &&
+    sections.value.length > 0 &&
+    sections.value.some((s) => s.fields.length || s.photos.length)
+  );
 });
 
 const onSubmit = handleSubmit(async () => {
