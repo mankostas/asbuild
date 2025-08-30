@@ -56,8 +56,8 @@
         <span class="block font-medium mb-1">Position</span>
         <input
           id="position"
-          type="number"
           v-model.number="position"
+          type="number"
           class="border rounded p-2 w-full"
           aria-label="Position"
         />
@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api, { extractFormErrors } from '@/services/api';
 import { useAuthStore, can } from '@/stores/auth';
@@ -106,18 +106,32 @@ async function loadTenantsIfNeeded() {
   }
 }
 
-onMounted(async () => {
+async function loadStatus() {
   await loadTenantsIfNeeded();
   if (isEdit.value) {
     const res = await api.get(`/task-statuses/${route.params.id}`);
-    const data = res.data;
+    const data = res.data.data || res.data; // handle resource-wrapped and plain responses
     name.value = data.name;
-    slug.value = data.slug;
+    slug.value = data.slug || '';
     color.value = data.color || '';
     position.value = data.position || 0;
     tenantId.value = data.tenant_id ? String(data.tenant_id) : '';
+  } else {
+    name.value = '';
+    slug.value = '';
+    color.value = '';
+    position.value = 0;
+    tenantId.value = '';
   }
-});
+}
+
+watch(
+  () => route.fullPath,
+  () => {
+    loadStatus();
+  },
+  { immediate: true },
+);
 
 watch(
   () => auth.isSuperAdmin,
