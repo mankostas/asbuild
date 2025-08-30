@@ -217,6 +217,11 @@
     "tablet": "Tablet",
     "desktop": "Επιτραπέζιο"
   },
+  "builder": {
+    "canvas": "Καμβάς",
+    "preview": "Προεπισκόπηση",
+    "inspector": "Επιθεωρητής"
+  },
   "validation": {
     "regex": "Πρότυπο",
     "min": "Ελάχιστο",

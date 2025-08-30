@@ -82,4 +82,10 @@ class TaskTypeBuilderTest extends TestCase
             ->assertJsonPath('data.abilities_json.read', true)
             ->assertJsonPath('data.abilities_json.delete', false);
     }
+
+    public function test_builder_requires_auth(): void
+    {
+        $this->postJson('/api/task-types', [])
+            ->assertUnauthorized();
+    }
 }
