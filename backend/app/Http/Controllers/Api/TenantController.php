@@ -47,7 +47,7 @@ class TenantController extends Controller
             $tenant = Tenant::create([
                 'name' => $data['name'],
                 'quota_storage_mb' => $data['quota_storage_mb'] ?? null,
-                'features' => $data['features'] ?? ['appointments'],
+                'features' => $data['features'] ?? ['tasks'],
                 'phone' => $data['phone'] ?? null,
                 'address' => $data['address'] ?? null,
             ]);

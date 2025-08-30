@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Appointment;
+use App\Models\Task;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -21,7 +21,7 @@ class CalendarController extends Controller
             'status_id' => 'nullable|string',
         ]);
 
-        $query = Appointment::where('tenant_id', $request->user()->tenant_id)
+        $query = Task::where('tenant_id', $request->user()->tenant_id)
             ->with(['type', 'assignee'])
             ->whereBetween('scheduled_at', [$data['start'], $data['end']]);
 
@@ -36,23 +36,23 @@ class CalendarController extends Controller
         }
 
         if ($request->filled('type_id')) {
-            $query->where('appointment_type_id', $request->query('type_id'));
+            $query->where('task_type_id', $request->query('type_id'));
         }
 
         if ($request->filled('status_id')) {
             $query->where('status', $request->query('status_id'));
         }
 
-        $events = $query->get()->map(function ($a) {
+        $events = $query->get()->map(function ($t) {
             return [
-                'id' => $a->id,
-                'title' => $a->title ?? $a->type->name ?? 'Appointment ' . $a->id,
-                'start' => $a->scheduled_at,
-                'end' => $a->sla_end_at ?? $a->scheduled_at,
+                'id' => $t->id,
+                'title' => $t->title ?? $t->type->name ?? 'Task ' . $t->id,
+                'start' => $t->scheduled_at,
+                'end' => $t->sla_end_at ?? $t->scheduled_at,
                 'extendedProps' => [
-                    'status' => $a->status,
-                    'type' => $a->type->name ?? null,
-                    'assignee' => $a->assignee->name ?? null,
+                    'status' => $t->status,
+                    'type' => $t->type->name ?? null,
+                    'assignee' => $t->assignee->name ?? null,
                 ],
             ];
         });

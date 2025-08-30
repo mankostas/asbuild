@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Appointment;
 use App\Models\Manual;
+use App\Models\Task;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +45,7 @@ class ReportController extends Controller
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
 
-        $base = Appointment::where('tenant_id', $tenantId)
+        $base = Task::where('tenant_id', $tenantId)
             ->whereNotNull('completed_at')
             ->whereBetween('completed_at', [$range['from'], $range['to']]);
 
@@ -71,7 +71,7 @@ class ReportController extends Controller
             ['label' => 'Failed Uploads', 'value' => $failedUploads],
         ];
 
-        $chartData = Appointment::where('tenant_id', $tenantId)
+        $chartData = Task::where('tenant_id', $tenantId)
             ->whereNotNull('completed_at')
             ->whereBetween('completed_at', [$range['from'], $range['to']])
             ->select(DB::raw('DATE(completed_at) as date'), DB::raw('count(*) as count'))
@@ -83,11 +83,11 @@ class ReportController extends Controller
         return response()->json([
             'kpis' => $kpis,
             'chart' => [
-                'title' => 'Completed Appointments',
+                'title' => 'Completed Tasks',
                 'type' => 'line',
                 'series' => [
                     [
-                        'label' => 'Appointments',
+                        'label' => 'Tasks',
                         'data' => $chartData,
                     ],
                 ],
@@ -101,7 +101,7 @@ class ReportController extends Controller
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
 
-        $base = Appointment::where('tenant_id', $tenantId)
+        $base = Task::where('tenant_id', $tenantId)
             ->whereNotNull('completed_at')
             ->whereBetween('completed_at', [$range['from'], $range['to']]);
 
@@ -149,7 +149,7 @@ class ReportController extends Controller
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
 
-        $appointments = Appointment::where('tenant_id', $tenantId)
+        $tasks = Task::where('tenant_id', $tenantId)
             ->whereNotNull('completed_at')
             ->whereBetween('completed_at', [$range['from'], $range['to']])
             ->get();
@@ -159,10 +159,10 @@ class ReportController extends Controller
             'Content-Disposition' => 'attachment; filename="report.csv"',
         ];
 
-        $callback = function () use ($appointments) {
+        $callback = function () use ($tasks) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, ['ID', 'Started At', 'Completed At', 'SLA End', 'On Time', 'Duration Minutes']);
-            foreach ($appointments as $a) {
+            foreach ($tasks as $a) {
                 $duration = ($a->started_at && $a->completed_at)
                     ? $a->completed_at->diffInMinutes($a->started_at)
                     : null;

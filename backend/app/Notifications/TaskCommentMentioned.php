@@ -2,16 +2,16 @@
 
 namespace App\Notifications;
 
-use App\Models\AppointmentComment;
+use App\Models\TaskComment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class AppointmentCommentMentioned extends Notification
+class TaskCommentMentioned extends Notification
 {
     use Queueable;
 
-    public function __construct(public AppointmentComment $comment)
+    public function __construct(public TaskComment $comment)
     {
     }
 
@@ -23,14 +23,14 @@ class AppointmentCommentMentioned extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->line('You were mentioned in an appointment comment.')
-            ->action('View Appointment', url('/appointments/' . $this->comment->appointment_id));
+            ->line('You were mentioned in a task comment.')
+            ->action('View Task', url('/tasks/' . $this->comment->task_id));
     }
 
     public function toArray(object $notifiable): array
     {
         return [
-            'appointment_id' => $this->comment->appointment_id,
+            'task_id' => $this->comment->task_id,
             'comment_id' => $this->comment->id,
         ];
     }
