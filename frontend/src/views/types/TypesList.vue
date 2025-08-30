@@ -14,14 +14,23 @@
             </option>
           </select>
         </div>
-        <RouterLink
-          v-if="can('task_types.create') || can('task_types.manage')"
-          class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-          :to="{ name: 'taskTypes.create' }"
-        >
-          <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
-          Add Type
-        </RouterLink>
+        <div class="flex gap-2">
+          <button
+            class="bg-gray-200 px-4 py-2 rounded"
+            aria-label="Templates"
+            @click="templatesOpen = true"
+          >
+            Templates
+          </button>
+          <RouterLink
+            v-if="can('task_types.create') || can('task_types.manage')"
+            class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
+            :to="{ name: 'taskTypes.create' }"
+          >
+            <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
+            Add Type
+          </RouterLink>
+        </div>
       </div>
     <DashcodeServerTable
       :key="tableKey"
@@ -68,6 +77,12 @@
         </div>
       </template>
     </DashcodeServerTable>
+    <TemplatesDrawer
+      :open="templatesOpen"
+      :types="all"
+      @close="templatesOpen = false"
+      @imported="onImported"
+    />
   </div>
 </template>
 
@@ -81,6 +96,7 @@ import api from '@/services/api';
 import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
 import { useTaskTypesStore } from '@/stores/taskTypes';
+import TemplatesDrawer from '@/components/types/TemplatesDrawer.vue';
 
 const router = useRouter();
 const tableKey = ref(0);
@@ -89,6 +105,7 @@ const scope = ref<'tenant' | 'global' | 'all'>("tenant");
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
 const typesStore = useTaskTypesStore();
+const templatesOpen = ref(false);
 
 if (auth.isSuperAdmin) {
   scope.value = 'all';
@@ -180,6 +197,12 @@ async function copy(id: number) {
   }
   await typesStore.copyToTenant(id, tenantId);
   all.value = [];
+  reload();
+}
+
+function onImported() {
+  all.value = [];
+  templatesOpen.value = false;
   reload();
 }
 </script>

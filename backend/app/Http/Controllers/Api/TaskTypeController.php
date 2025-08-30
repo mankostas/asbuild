@@ -143,4 +143,37 @@ class TaskTypeController extends Controller
 
         return response()->json(['message' => 'ok']);
     }
+
+    public function export(Request $request, TaskType $taskType)
+    {
+        $this->ensureAdmin($request);
+
+        if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
+            abort(403);
+        }
+
+        return response()->json($taskType->toArray());
+    }
+
+    public function import(Request $request)
+    {
+        $this->ensureAdmin($request);
+
+        $data = $request->validate([
+            'name' => 'required|string',
+            'schema_json' => 'array',
+        ]);
+
+        if (isset($data['schema_json'])) {
+            $this->formSchemaService->validate($data['schema_json']);
+        }
+
+        $data['tenant_id'] = $request->user()->hasRole('SuperAdmin')
+            ? ($data['tenant_id'] ?? null)
+            : $request->user()->tenant_id;
+
+        $type = TaskType::create($data);
+
+        return (new TaskTypeResource($type))->response()->setStatusCode(201);
+    }
 }

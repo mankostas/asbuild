@@ -557,6 +557,38 @@ paths:
       responses:
         '200':
           description: Task type
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskType'
+  /task-types/{id}/export:
+    post:
+      summary: Export task type
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Task type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskType'
+  /task-types/import:
+    post:
+      summary: Import task type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskType'
+      responses:
+        '201':
+          description: Task type
           content:
             application/json:
               schema:

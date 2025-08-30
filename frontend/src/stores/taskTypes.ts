@@ -20,5 +20,13 @@ export const useTaskTypesStore = defineStore('taskTypes', {
       const { data } = await api.post(`/task-types/${id}/copy-to-tenant`, payload);
       return data;
     },
+    async export(id: number) {
+      const { data } = await api.post(`/task-types/${id}/export`);
+      return data;
+    },
+    async import(payload: any) {
+      const { data } = await api.post('/task-types/import', payload);
+      return data;
+    },
   },
 });
