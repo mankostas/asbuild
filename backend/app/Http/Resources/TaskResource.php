@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Team;
+use App\Services\FormSchemaService;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Concerns\FormatsDateTimes;
 
@@ -42,6 +43,15 @@ class TaskResource extends JsonResource
         $data['is_watching'] = $this->relationLoaded('watchers')
             ? $this->watchers->contains('user_id', $request->user()->id)
             : false;
+
+        if ($this->type && $this->type->schema_json) {
+            $service = app(FormSchemaService::class);
+            $data['form_data'] = $service->filterDataForRoles(
+                $this->type->schema_json,
+                $data['form_data'] ?? [],
+                $request->user()
+            );
+        }
 
         return $this->formatDates($data);
     }

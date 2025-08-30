@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use Illuminate\Validation\ValidationException;
 
 class FormSchemaService
@@ -362,6 +363,103 @@ class FormSchemaService
 
         $payload['reviewer_id'] = $id;
         unset($payload[$key]);
+    }
+
+    /**
+     * Filter schema fields based on user roles.
+     */
+    public function filterSchemaForRoles(array $schema, User $user): array
+    {
+        $roles = $this->userRoles($user);
+        $defaults = $schema['roles'] ?? [];
+
+        $sections = [];
+        foreach ($schema['sections'] ?? [] as $section) {
+            $fields = [];
+            foreach ($section['fields'] ?? [] as $field) {
+                $access = $this->resolveAccess($field['roles'] ?? [], $defaults, $roles);
+                if ($access === 'hidden') {
+                    continue;
+                }
+                if ($access === 'read') {
+                    $field['readOnly'] = true;
+                }
+                $fields[] = $field;
+            }
+            if ($fields) {
+                $section['fields'] = $fields;
+                $sections[] = $section;
+            }
+        }
+
+        $schema['sections'] = $sections;
+        return $schema;
+    }
+
+    /**
+     * Filter data payload removing hidden fields.
+     */
+    public function filterDataForRoles(array $schema, array $data, User $user): array
+    {
+        $roles = $this->userRoles($user);
+        $defaults = $schema['roles'] ?? [];
+
+        foreach ($schema['sections'] ?? [] as $section) {
+            foreach ($section['fields'] ?? [] as $field) {
+                $key = $field['key'] ?? null;
+                if (! $key) {
+                    continue;
+                }
+                $access = $this->resolveAccess($field['roles'] ?? [], $defaults, $roles);
+                if ($access === 'hidden') {
+                    unset($data[$key]);
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Ensure user cannot edit read-only or hidden fields.
+     */
+    public function assertCanEdit(array $schema, array $data, User $user): void
+    {
+        $roles = $this->userRoles($user);
+        $defaults = $schema['roles'] ?? [];
+
+        foreach ($schema['sections'] ?? [] as $section) {
+            foreach ($section['fields'] ?? [] as $field) {
+                $key = $field['key'] ?? null;
+                if (! $key || ! array_key_exists($key, $data)) {
+                    continue;
+                }
+                $access = $this->resolveAccess($field['roles'] ?? [], $defaults, $roles);
+                if ($access !== 'edit') {
+                    throw ValidationException::withMessages([
+                        "form_data.$key" => 'forbidden',
+                    ]);
+                }
+            }
+        }
+    }
+
+    protected function resolveAccess(array $fieldRoles, array $schemaRoles, array $userRoles): string
+    {
+        foreach ($userRoles as $role) {
+            if (isset($fieldRoles[$role])) {
+                return $fieldRoles[$role];
+            }
+            if (isset($schemaRoles[$role])) {
+                return $schemaRoles[$role];
+            }
+        }
+        return 'edit';
+    }
+
+    protected function userRoles(User $user): array
+    {
+        return $user->roles->pluck('slug')->toArray();
     }
 
     /**
