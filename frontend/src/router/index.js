@@ -112,7 +112,7 @@ export const routes = [
     component: () => import('@/views/types/TypeForm.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['task_types.view'],
+      requiredAbilities: ['task_types.create'],
       abilities: ['task_types.manage', 'task_type_versions.manage', 'task_sla_policies.manage', 'task_automations.manage', 'task_field_snippets.manage'],
       breadcrumb: 'routes.taskTypeCreate',
       title: 'Create Task Type',
