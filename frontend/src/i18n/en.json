@@ -93,7 +93,7 @@
       "toggle": "Filters",
       "status": "Status",
       "type": "Type",
-      "assignee": "Assignee/Team",
+      "assignee": "Assignee",
       "priority": "Priority",
       "dueFrom": "Due From",
       "dueTo": "Due To",

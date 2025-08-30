@@ -67,7 +67,7 @@ interface Task {
   priority?: number | null;
   due_at?: string | null;
   sla_chip?: string | null;
-  assignee?: { id: number; name: string; team?: { name: string } };
+  assignee?: { id: number; name: string };
 }
 
 interface Column {
@@ -90,7 +90,7 @@ function grouped(tasks: Task[]) {
     const key =
       swimlane.value === 'assignee'
         ? task.assignee?.name || t('tasks.unassigned')
-        : task.assignee?.team?.name || t('tasks.noTeam');
+        : t('tasks.noTeam');
     (groups[key] ||= []).push(task);
   });
   return groups;

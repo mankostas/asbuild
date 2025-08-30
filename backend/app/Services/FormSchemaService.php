@@ -284,7 +284,7 @@ class FormSchemaService
     }
 
     /**
-     * Map assignee data from payload to assignee_type and assignee_id.
+     * Map assignee data from payload to assigned_user_id.
      */
     public function mapAssignee(array $schema, array &$payload): void
     {
@@ -301,18 +301,8 @@ class FormSchemaService
             return;
         }
 
-        $kind = $payload[$key]['kind'] ?? null;
-        $id = $payload[$key]['id'] ?? null;
-
-        if ($kind === 'team') {
-            $payload['assignee_type'] = \App\Models\Team::class;
-        } elseif ($kind === 'employee') {
-            $payload['assignee_type'] = \App\Models\User::class;
-        } else {
-            throw ValidationException::withMessages([
-                'assignee.kind' => 'invalid',
-            ]);
-        }
+        $value = $payload[$key];
+        $id = is_array($value) ? ($value['id'] ?? null) : $value;
 
         if (! $id) {
             throw ValidationException::withMessages([
@@ -320,7 +310,7 @@ class FormSchemaService
             ]);
         }
 
-        $payload['assignee_id'] = $id;
+        $payload['assigned_user_id'] = $id;
         unset($payload[$key]);
     }
 

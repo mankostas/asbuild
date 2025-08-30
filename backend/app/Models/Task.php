@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\App;
 use App\Models\TaskSlaEvent;
 use App\Models\TaskAutomation;
@@ -32,8 +31,7 @@ class Task extends Model
         'form_data',
         'task_type_id',
         'task_type_version_id',
-        'assignee_type',
-        'assignee_id',
+        'assigned_user_id',
         'title',
         'description',
         'priority',
@@ -89,9 +87,9 @@ class Task extends Model
         return $this->belongsTo(TaskStatus::class, 'status_slug', 'slug');
     }
 
-    public function assignee(): MorphTo
+    public function assignee(): BelongsTo
     {
-        return $this->morphTo();
+        return $this->belongsTo(User::class, 'assigned_user_id');
     }
 
     public function watchers(): HasMany

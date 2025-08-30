@@ -19,10 +19,6 @@ paths:
           in: query
           schema:
             type: integer
-        - name: team
-          in: query
-          schema:
-            type: integer
         - name: priority
           in: query
           schema:

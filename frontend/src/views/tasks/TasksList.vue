@@ -202,7 +202,7 @@ const auth = useAuthStore();
 const showFilters = ref(false);
 const statusFilter = ref('');
 const typeFilter = ref('');
-const assigneeFilter = ref<any | null>(null);
+const assigneeFilter = ref<{ id: number } | null>(null);
 const priorityFilter = ref('');
 const dueStart = ref('');
 const dueEnd = ref('');
@@ -344,10 +344,7 @@ async function fetchTasks({ page, perPage, sort, search }: any) {
   }
   if (assigneeFilter.value) {
     rows = rows.filter(
-      (r) =>
-        r.assignee &&
-        r.assignee.id === assigneeFilter.value.id &&
-        r.assignee.kind === assigneeFilter.value.kind,
+      (r) => r.assignee && r.assignee.id === assigneeFilter.value.id,
     );
   }
   if (priorityFilter.value) {

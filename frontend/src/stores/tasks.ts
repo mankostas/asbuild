@@ -10,9 +10,8 @@ export const useTasksStore = defineStore('tasks', {
     normalize(payload: any) {
       if (payload.assignee) {
         payload.assignee = {
-          kind: payload.assignee.kind,
           id: payload.assignee.id,
-          label: payload.assignee.label,
+          name: payload.assignee.name,
         };
       }
       return payload;
@@ -21,7 +20,6 @@ export const useTasksStore = defineStore('tasks', {
       const data = { ...payload };
       if (payload.assignee) {
         data.assignee = {
-          kind: payload.assignee.kind,
           id: payload.assignee.id,
         };
       }

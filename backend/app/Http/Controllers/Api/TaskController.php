@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\TaskType;
-use App\Models\User;
-use App\Models\Team;
 use App\Services\FormSchemaService;
 use App\Services\StatusFlowService;
 use App\Http\Resources\TaskResource;
@@ -40,11 +38,7 @@ class TaskController extends Controller
         }
 
         if ($assignee = $request->query('assignee')) {
-            $base->where('assignee_type', User::class)->where('assignee_id', $assignee);
-        }
-
-        if ($team = $request->query('team')) {
-            $base->where('assignee_type', Team::class)->where('assignee_id', $team);
+            $base->where('assigned_user_id', $assignee);
         }
 
         if ($priority = $request->query('priority')) {
@@ -64,7 +58,7 @@ class TaskController extends Controller
         }
 
         if ($request->boolean('mine')) {
-            $base->where('assignee_type', User::class)->where('assignee_id', $request->user()->id);
+            $base->where('assigned_user_id', $request->user()->id);
         }
 
         $result = $this->listQuery($base, $request, [], ['created_at', 'due_at', 'priority', 'board_position']);
@@ -101,8 +95,8 @@ class TaskController extends Controller
 
         $task = Task::create($data);
         $task->watchers()->firstOrCreate(['user_id' => $request->user()->id]);
-        if ($task->assignee_type === User::class && $task->assignee_id) {
-            $task->watchers()->firstOrCreate(['user_id' => $task->assignee_id]);
+        if ($task->assigned_user_id) {
+            $task->watchers()->firstOrCreate(['user_id' => $task->assigned_user_id]);
         }
         $task->load('type', 'typeVersion', 'assignee', 'watchers');
 
@@ -139,8 +133,8 @@ class TaskController extends Controller
         }
         $task->fill($data);
         $task->save();
-        if ($task->assignee_type === User::class && $task->assignee_id) {
-            $task->watchers()->firstOrCreate(['user_id' => $task->assignee_id]);
+        if ($task->assigned_user_id) {
+            $task->watchers()->firstOrCreate(['user_id' => $task->assigned_user_id]);
         }
 
         return new TaskResource($task->load('comments', 'type', 'typeVersion', 'assignee', 'watchers'));

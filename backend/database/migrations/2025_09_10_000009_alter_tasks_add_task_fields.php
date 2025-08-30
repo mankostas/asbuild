@@ -34,11 +34,9 @@ return new class extends Migration
                 if (! Schema::hasColumn('tasks', 'board_position')) {
                     $table->integer('board_position')->nullable();
                 }
-                if (! Schema::hasColumn('tasks', 'assignee_type')) {
-                    $table->string('assignee_type')->nullable();
-                }
-                if (! Schema::hasColumn('tasks', 'assignee_id')) {
-                    $table->unsignedBigInteger('assignee_id')->nullable();
+                if (! Schema::hasColumn('tasks', 'assigned_user_id')) {
+                    $table->unsignedBigInteger('assigned_user_id')->nullable();
+                    $table->index('assigned_user_id');
                 }
             });
         }
@@ -57,8 +55,7 @@ return new class extends Migration
                     'reporter_user_id',
                     'status_slug',
                     'board_position',
-                    'assignee_type',
-                    'assignee_id',
+                    'assigned_user_id',
                 ] as $column) {
                     if (Schema::hasColumn('tasks', $column)) {
                         $table->dropColumn($column);

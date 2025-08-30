@@ -69,7 +69,7 @@ interface Task {
   priority?: number | null;
   due_at?: string | null;
   sla_chip?: string | null;
-  assignee?: { id: number; name: string; team?: { name: string } };
+  assignee?: { id: number; name: string };
 }
 
 interface Column {
@@ -125,7 +125,7 @@ function formatDate(d: string) {
 
 async function assignMe() {
   try {
-    await api.patch(`/tasks/${props.task.id}`, { assignee_id: auth.user.id });
+    await api.patch(`/tasks/${props.task.id}`, { assigned_user_id: auth.user.id });
     emit('assigned', { ...props.task, assignee: { id: auth.user.id, name: auth.user.name } });
   } catch {
     notify.error(t('tasks.messages.error'));

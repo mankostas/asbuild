@@ -47,8 +47,7 @@ class TaskListFiltersTest extends TestCase
             'user_id' => $user->id,
             'task_type_id' => $type->id,
             'status_slug' => $status->slug,
-            'assignee_type' => User::class,
-            'assignee_id' => $user->id,
+            'assigned_user_id' => $user->id,
             'priority' => 1,
             'due_at' => '2025-01-10',
         ]);
@@ -65,8 +64,7 @@ class TaskListFiltersTest extends TestCase
             'user_id' => $user->id,
             'task_type_id' => $type->id,
             'status_slug' => 'closed',
-            'assignee_type' => User::class,
-            'assignee_id' => $user->id,
+            'assigned_user_id' => $user->id,
             'priority' => 2,
             'due_at' => '2025-02-10',
         ]);
