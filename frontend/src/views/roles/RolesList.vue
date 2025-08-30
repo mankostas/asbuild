@@ -14,7 +14,7 @@
         </select>
       </div>
       <RouterLink
-        v-if="can('roles.create') || can('roles.manage')"
+        v-if="hasAny(['roles.create', 'roles.manage'])"
         class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
         :to="{ name: 'roles.create' }"
       >
@@ -28,12 +28,12 @@
       :fetcher="fetchRoles"
     >
       <template
-        v-if="can('roles.update') || can('roles.delete') || can('roles.manage')"
+        v-if="hasAny(['roles.update', 'roles.delete', 'roles.manage'])"
         #actions="{ row }"
       >
         <div v-if="row.name !== 'SuperAdmin'" class="flex gap-2">
           <button
-            v-if="can('roles.update') || can('roles.manage')"
+            v-if="hasAny(['roles.update', 'roles.manage'])"
             class="text-blue-600"
             title="Edit"
             @click="edit(row.id)"
@@ -41,7 +41,7 @@
             <Icon icon="heroicons-outline:pencil-square" class="w-5 h-5" />
           </button>
           <button
-            v-if="can('roles.delete') || can('roles.manage')"
+            v-if="hasAny(['roles.delete', 'roles.manage'])"
             class="text-red-600"
             title="Delete"
             @click="remove(row.id)"
@@ -76,7 +76,7 @@ import Swal from 'sweetalert2';
 import Icon from '@/components/ui/Icon';
 import { useNotify } from '@/plugins/notify';
 import { useRolesStore } from '@/stores/roles';
-import { useAuthStore, can } from '@/stores/auth';
+import { useAuthStore, can, hasAny } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
 import AssignRoleModal from './AssignRoleModal.vue';
 
