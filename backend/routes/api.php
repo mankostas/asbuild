@@ -174,6 +174,14 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':task_types.manage')
         ->name('task-types.validate');
 
+    Route::post('task-types/{task_type}/export', [TaskTypeController::class, 'export'])
+        ->middleware(Ability::class . ':task_types.manage')
+        ->name('task-types.export');
+
+    Route::post('task-types/import', [TaskTypeController::class, 'import'])
+        ->middleware(Ability::class . ':task_types.manage')
+        ->name('task-types.import');
+
     Route::post('roles', [RoleController::class, 'store'])
         ->middleware(Ability::class . ':roles.manage')
         ->name('roles.store');
