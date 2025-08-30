@@ -289,7 +289,7 @@ onMounted(async () => {
       if (id) {
         try {
           const { data } = await api.get('/roles', { params: { tenant_id: id } });
-          tenantRoles.value = data;
+          tenantRoles.value = data.data ?? data;
         } catch {
           tenantRoles.value = [];
         }
