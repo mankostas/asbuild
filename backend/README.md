@@ -6,7 +6,7 @@ This demo application is multi-tenant. Requests include the tenant context via t
 
 Teams group employees within a tenant. Users are attached to teams through the `team_employee` pivot table and gain role abilities via `role_user` records. When creating resources that support assignment, include an `assignee` field in the payload. The backend maps `{ kind: 'team' | 'employee', id: number }` to `assignee_type` and `assignee_id` fields.
 
-Run the tenant bootstrap seeder to populate a sample tenant with roles, a team, users, and default appointment types and statuses:
+Run the tenant bootstrap seeder to populate a sample tenant with roles, a team, users, and default task types and statuses:
 
 ```bash
 php artisan migrate:fresh --seed --seeder=TenantBootstrapSeeder

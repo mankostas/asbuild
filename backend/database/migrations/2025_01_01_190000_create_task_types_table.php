@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('appointment_types', function (Blueprint $table) {
+        Schema::create('task_types', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->json('form_schema')->nullable();
@@ -16,24 +16,24 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::table('appointments', function (Blueprint $table) {
-            $table->unsignedBigInteger('appointment_type_id')->nullable()->after('tenant_id');
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->unsignedBigInteger('task_type_id')->nullable()->after('tenant_id');
             $table->json('form_data')->nullable()->after('kau_notes');
-            $table->foreign('appointment_type_id')
+            $table->foreign('task_type_id')
                 ->references('id')
-                ->on('appointment_types')
+                ->on('task_types')
                 ->nullOnDelete();
         });
     }
 
     public function down(): void
     {
-        Schema::table('appointments', function (Blueprint $table) {
-            $table->dropForeign(['appointment_type_id']);
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->dropForeign(['task_type_id']);
             $table->dropColumn('form_data');
-            $table->dropColumn('appointment_type_id');
+            $table->dropColumn('task_type_id');
         });
 
-        Schema::dropIfExists('appointment_types');
+        Schema::dropIfExists('task_types');
     }
 };

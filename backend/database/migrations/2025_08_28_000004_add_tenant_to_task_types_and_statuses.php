@@ -8,11 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (Schema::hasTable('appointment_types') && ! Schema::hasColumn('appointment_types', 'tenant_id')) {
-            Schema::table('appointment_types', function (Blueprint $table) {
+        if (Schema::hasTable('task_types') && ! Schema::hasColumn('task_types', 'tenant_id')) {
+            Schema::table('task_types', function (Blueprint $table) {
                 $table->unsignedBigInteger('tenant_id')->nullable()->after('id');
-                $table->index('tenant_id', 'appointment_types_tenant_id_index');
-                $table->unique(['tenant_id', 'name'], 'appointment_types_tenant_id_name_unique');
+                $table->index('tenant_id', 'task_types_tenant_id_index');
+                $table->unique(['tenant_id', 'name'], 'task_types_tenant_id_name_unique');
             });
         }
 
@@ -27,10 +27,10 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (Schema::hasTable('appointment_types') && Schema::hasColumn('appointment_types', 'tenant_id')) {
-            Schema::table('appointment_types', function (Blueprint $table) {
-                $table->dropUnique('appointment_types_tenant_id_name_unique');
-                $table->dropIndex('appointment_types_tenant_id_index');
+        if (Schema::hasTable('task_types') && Schema::hasColumn('task_types', 'tenant_id')) {
+            Schema::table('task_types', function (Blueprint $table) {
+                $table->dropUnique('task_types_tenant_id_name_unique');
+                $table->dropIndex('task_types_tenant_id_index');
                 $table->dropColumn('tenant_id');
             });
         }
