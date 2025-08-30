@@ -18,10 +18,11 @@
               scope="col"
               class="px-4 py-2 text-center"
             >
-              <Tooltip :content="t(`permissions.tooltip.${ability.key}`)" theme="light">
+              <Tooltip theme="light">
                 <template #button>
                   <span>{{ ability.label }}</span>
                 </template>
+                {{ t(`permissions.tooltip.${ability.key}`) }}
               </Tooltip>
             </th>
           </tr>
