@@ -35,7 +35,7 @@ class FormSchemaService
 
     protected function validateField(array $field): void
     {
-        $allowed = ['text','textarea','number','date','time','datetime','duration','email','phone','url','boolean','select','multiselect','radio','checkbox','chips','assignee','file','photo_single','photo_repeater','repeater'];
+        $allowed = ['text','textarea','number','date','time','datetime','duration','email','phone','url','boolean','select','multiselect','radio','checkbox','chips','assignee','reviewer','file','photo_single','photo_repeater','repeater','richtext','markdown','divider','headline'];
         if (! isset($field['key'], $field['label']) || ! in_array($field['type'] ?? '', $allowed, true)) {
             throw ValidationException::withMessages([
                 'schema_json' => 'invalid field',
@@ -178,5 +178,67 @@ class FormSchemaService
 
         $payload['assignee_id'] = $id;
         unset($payload[$key]);
+    }
+
+    /**
+     * Map reviewer data from payload to reviewer_type and reviewer_id.
+     */
+    public function mapReviewer(array $schema, array &$payload): void
+    {
+        $fields = collect($schema['sections'] ?? [])
+            ->flatMap(fn ($s) => $s['fields'] ?? []);
+        $reviewerField = $fields->first(fn ($field) => ($field['type'] ?? null) === 'reviewer');
+
+        if (! $reviewerField) {
+            return;
+        }
+
+        $key = $reviewerField['key'];
+        if (! isset($payload[$key])) {
+            return;
+        }
+
+        $kind = $payload[$key]['kind'] ?? null;
+        $id = $payload[$key]['id'] ?? null;
+
+        if ($kind === 'team') {
+            $payload['reviewer_type'] = \App\Models\Team::class;
+        } elseif ($kind === 'employee') {
+            $payload['reviewer_type'] = \App\Models\User::class;
+        } else {
+            throw ValidationException::withMessages([
+                'reviewer.kind' => 'invalid',
+            ]);
+        }
+
+        if (! $id) {
+            throw ValidationException::withMessages([
+                'reviewer.id' => 'required',
+            ]);
+        }
+
+        $payload['reviewer_id'] = $id;
+        unset($payload[$key]);
+    }
+
+    /**
+     * Sanitize rich text fields in the given data array.
+     */
+    public function sanitizeRichText(array $schema, array &$data): void
+    {
+        $fields = collect($schema['sections'] ?? [])
+            ->flatMap(fn ($s) => $s['fields'] ?? [])
+            ->filter(fn ($f) => ($f['type'] ?? null) === 'richtext');
+
+        foreach ($fields as $field) {
+            $key = $field['key'];
+            if (! isset($data[$key]) || ! is_string($data[$key])) {
+                continue;
+            }
+            $data[$key] = strip_tags(
+                $data[$key],
+                '<p><br><b><i><strong><em><ul><ol><li><h1><h2><h3><h4><h5><h6><a>'
+            );
+        }
     }
 }
