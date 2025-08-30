@@ -268,6 +268,7 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
             Route::get('overview', [ReportController::class, 'overview']);
             Route::get('kpis', [ReportController::class, 'kpis']);
             Route::get('materials', [ReportController::class, 'materials']);
+            Route::get('tasks/overview', [ReportController::class, 'tasksOverview']);
             Route::get('export', [ReportController::class, 'export'])
                 ->middleware(Ability::class . ':reports.manage');
         });

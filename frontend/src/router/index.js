@@ -82,6 +82,18 @@ export const routes = [
     },
   },
   {
+    path: '/tasks/reports',
+    name: 'tasks.reports',
+    component: () => import('@/views/tasks/ReportsView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiredAbilities: ['reports.view'],
+      breadcrumb: 'routes.taskReports',
+      title: 'Task Reports',
+      layout: 'app',
+    },
+  },
+  {
     path: '/task-types',
     name: 'taskTypes.list',
     component: () => import('@/views/types/TypesList.vue'),
