@@ -129,26 +129,30 @@
             <template #header>
               <div class="flex items-center justify-between">
                 <h3 class="text-sm font-medium">{{ t('builder.canvas') }}</h3>
-                <div class="flex gap-2">
-                  <Button
-                    v-if="auth.isSuperAdmin || can('task_types.manage')"
-                    type="button"
-                    btnClass="btn-outline-primary text-xs"
-                    :aria-label="t('actions.add')"
-                    @click="addSection"
-                  >
-                    {{ t('Section') }}
-                  </Button>
-                  <Button
-                    v-if="auth.isSuperAdmin || can('task_types.manage')"
-                    type="button"
-                    btnClass="btn-outline-primary text-xs"
-                    :aria-label="t('actions.add')"
-                    @click="paletteOpen = true"
-                  >
-                    Field
-                  </Button>
-                </div>
+                <Dropdown v-if="auth.isSuperAdmin || can('task_types.manage')">
+                  <template #default>
+                    <Button
+                      type="button"
+                      btnClass="btn-primary text-xs flex items-center gap-1"
+                      :aria-label="t('actions.add')"
+                    >
+                      {{ t('actions.add') }}
+                      <Icon icon="heroicons-outline:chevron-down" />
+                    </Button>
+                  </template>
+                  <template #menus>
+                    <MenuItem #default="{ active }">
+                      <button type="button" :class="menuItemClass(active)" @click="addSection">
+                        {{ t('actions.addSection') }}
+                      </button>
+                    </MenuItem>
+                    <MenuItem #default="{ active }">
+                      <button type="button" :class="menuItemClass(active)" @click="paletteOpen = true">
+                        {{ t('actions.addField') }}
+                      </button>
+                    </MenuItem>
+                  </template>
+                </Dropdown>
               </div>
             </template>
             <p id="reorderHint" class="sr-only">{{ t('fields.reorderHint') }}</p>
@@ -160,6 +164,8 @@
                     :section="element"
                     @remove="removeSection(index)"
                     @select="selectField"
+                    @add-field="paletteOpen = true"
+                    @add-section="addSection"
                   />
                 </template>
               </draggable>
@@ -209,24 +215,33 @@
             <template #panel>
               <TabPanel>
                 <div class="mt-4">
-                  <Button
+                  <Dropdown
                     v-if="auth.isSuperAdmin || can('task_types.manage')"
-                    type="button"
-                    btnClass="btn-outline-primary text-xs mb-4"
-                    :aria-label="t('actions.add')"
-                    @click="addSection"
+                    class="mb-4"
                   >
-                    {{ t('Section') }}
-                  </Button>
-                  <Button
-                    v-if="auth.isSuperAdmin || can('task_types.manage')"
-                    type="button"
-                    btnClass="btn-outline-primary text-xs mb-4 ml-2"
-                    :aria-label="t('actions.add')"
-                    @click="paletteOpen = true"
-                  >
-                    Field
-                  </Button>
+                    <template #default>
+                      <Button
+                        type="button"
+                        btnClass="btn-primary text-xs flex items-center gap-1"
+                        :aria-label="t('actions.add')"
+                      >
+                        {{ t('actions.add') }}
+                        <Icon icon="heroicons-outline:chevron-down" />
+                      </Button>
+                    </template>
+                    <template #menus>
+                      <MenuItem #default="{ active }">
+                        <button type="button" :class="menuItemClass(active)" @click="addSection">
+                          {{ t('actions.addSection') }}
+                        </button>
+                      </MenuItem>
+                      <MenuItem #default="{ active }">
+                        <button type="button" :class="menuItemClass(active)" @click="paletteOpen = true">
+                          {{ t('actions.addField') }}
+                        </button>
+                      </MenuItem>
+                    </template>
+                  </Dropdown>
                   <p id="reorderHintMobile" class="sr-only">{{ t('fields.reorderHint') }}</p>
                   <div aria-describedby="reorderHintMobile">
                     <draggable v-model="sections" item-key="id" handle=".handle" class="space-y-4">
@@ -236,6 +251,8 @@
                           :section="element"
                           @remove="removeSection(index)"
                           @select="selectField"
+                          @add-field="paletteOpen = true"
+                          @add-section="addSection"
                         />
                       </template>
                     </draggable>
@@ -296,7 +313,9 @@ import UiTabs from '@/components/ui/Tabs/index.vue';
 import Drawer from '@/components/ui/Drawer/index.vue';
 import FieldPalette from '@/components/types/FieldPalette.vue';
 import TypeMetaBar from '@/components/types/TypeMetaBar.vue';
-import { Tab, TabPanel } from '@headlessui/vue';
+import Dropdown from '@/components/ui/Dropdown/index.vue';
+import Icon from '@/components/ui/Icon/index.vue';
+import { Tab, TabPanel, MenuItem } from '@headlessui/vue';
 import { can, useAuthStore } from '@/stores/auth';
 import api from '@/services/api';
 import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
@@ -720,4 +739,13 @@ const previewSchema = computed(() => ({
       }
     : {}),
 }));
+
+function menuItemClass(active: boolean) {
+  return (
+    (active
+      ? 'bg-slate-100 dark:bg-slate-600 dark:bg-opacity-50'
+      : 'text-slate-600 dark:text-slate-300') +
+    ' block w-full text-left px-4 py-2'
+  );
+}
 </script>
