@@ -18,9 +18,16 @@
               scope="col"
               class="px-4 py-2 text-center"
             >
-              <Tooltip theme="light">
+              <Tooltip theme="light" trigger="mouseenter focus click">
                 <template #button>
-                  <span>{{ ability.label }}</span>
+                  <span class="inline-flex items-center gap-1 cursor-help">
+                    {{ ability.label }}
+                    <Icon
+                      icon="heroicons-outline:question-mark-circle"
+                      class="w-4 h-4"
+                      aria-hidden="true"
+                    />
+                  </span>
                 </template>
                 {{ t(`permissions.tooltip.${ability.key}`) }}
               </Tooltip>
@@ -77,6 +84,7 @@ import { useI18n } from 'vue-i18n';
 import Card from '@/components/ui/Card/index.vue';
 import Switch from '@/components/ui/Switch/index.vue';
 import Tooltip from '@/components/ui/Tooltip/index.vue';
+import Icon from '@/components/Icon';
 
 interface Role {
   id: number;
