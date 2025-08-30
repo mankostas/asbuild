@@ -2,7 +2,7 @@
     <div>
       <div class="flex items-center justify-end mb-4">
         <RouterLink
-          v-if="can('tasks.create') || can('tasks.manage')"
+          v-if="hasAny(['tasks.create', 'tasks.manage'])"
           class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
           :to="{ name: 'tasks.create' }"
         >
@@ -143,7 +143,7 @@
             <Icon icon="heroicons-outline:eye" class="w-5 h-5" />
           </button>
           <button
-            v-if="can('tasks.update') || can('tasks.manage')"
+            v-if="hasAny(['tasks.update', 'tasks.manage'])"
             class="text-blue-600"
             title="Edit"
             aria-label="Edit"
@@ -153,7 +153,7 @@
             <Icon icon="heroicons-outline:pencil-square" class="w-5 h-5" />
           </button>
           <button
-            v-if="can('tasks.delete') || can('tasks.manage')"
+            v-if="hasAny(['tasks.delete', 'tasks.manage'])"
             class="text-red-600"
             title="Delete"
             aria-label="Delete"
@@ -162,7 +162,7 @@
           >
             <Icon icon="heroicons-outline:trash" class="w-5 h-5" />
           </button>
-          <template v-if="can('tasks.update') || can('tasks.manage')">
+          <template v-if="hasAny(['tasks.update', 'tasks.manage'])">
             <button
               v-for="s in getChangeActions(row)"
               :key="s"
@@ -191,7 +191,7 @@ import { useNotify } from '@/plugins/notify';
 import Icon from '@/components/ui/Icon';
 import Swal from 'sweetalert2';
 import { parseISO, formatDisplay } from '@/utils/datetime';
-import { can, useAuthStore } from '@/stores/auth';
+import { hasAny, useAuthStore } from '@/stores/auth';
 import AssigneePicker from '@/components/tasks/AssigneePicker.vue';
 
 const router = useRouter();
@@ -319,7 +319,7 @@ async function applyBulkStatus() {
   for (const id of selected.value) {
     const row = all.value.find((r) => r.id === id);
     if (!row) continue;
-    if (!(can('tasks.update') || can('tasks.manage'))) continue;
+    if (!hasAny(['tasks.update', 'tasks.manage'])) continue;
     if (!getChangeActions(row).includes(bulkStatus.value)) continue;
     await api.post(`/tasks/${id}/status`, { status: bulkStatus.value });
     row.status = bulkStatus.value;
