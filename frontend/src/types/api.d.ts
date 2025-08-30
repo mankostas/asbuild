@@ -1017,7 +1017,7 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        schema_json?: Record<string, never>;
+                        schema_json: Record<string, never>;
                         form_data?: Record<string, never>;
                     };
                 };
@@ -1028,7 +1028,11 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": {
+                            message?: string;
+                        };
+                    };
                 };
                 /** @description Validation errors */
                 422: {
