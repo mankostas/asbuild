@@ -698,13 +698,23 @@ function runValidation() {
     validationErrors.value = feErrors;
     return;
   }
+  const url = isEdit.value
+    ? `/task-types/${route.params.id}/validate`
+    : '/task-types/validate';
   api
-    .post(`/task-types/${route.params.id}/validate`, {
+    .post(url, {
       schema_json: previewSchema.value,
       form_data: previewData.value,
     })
     .catch((err) => {
       validationErrors.value = err.response?.data?.errors || { error: 'validation failed' };
+      const first = Object.keys(validationErrors.value)[0];
+      if (first) {
+        const el = formRef.value?.$el?.querySelector(
+          `[name="${first}"]`,
+        ) as HTMLElement | null;
+        el?.focus();
+      }
     });
 }
 

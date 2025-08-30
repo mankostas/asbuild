@@ -22,4 +22,9 @@ class TaskTypePolicy extends TenantOwnedPolicy
     {
         return Gate::allows('task_types.manage') && parent::delete($user, $type);
     }
+
+    public function validate(User $user): bool
+    {
+        return Gate::allows('task_types.create') || Gate::allows('task_types.manage');
+    }
 }
