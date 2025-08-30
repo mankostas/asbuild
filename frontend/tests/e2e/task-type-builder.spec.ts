@@ -6,3 +6,8 @@ test('builder shows Canvas, Preview and Inspector tabs', async () => {
   expect(tabs).toContain('Preview');
   expect(tabs).toContain('Inspector');
 });
+
+test('abilities include core actions', async () => {
+  const abilities = ['Read', 'Edit', 'Delete', 'Export', 'Assign', 'Transition'];
+  abilities.forEach((a) => expect(abilities).toContain(a));
+});

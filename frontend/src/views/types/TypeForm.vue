@@ -96,29 +96,20 @@
         </div>
       </header>
       <div class="grid grid-cols-2 gap-4 p-4 border-b">
-        <label class="block text-sm" for="typeName">
-          <span class="mb-1 block">{{ t('Name') }}</span>
-          <input
-            id="typeName"
-            v-model="name"
-            class="w-full rounded border px-2 py-1"
-            aria-label="Type name"
-          />
-        </label>
-        <label class="block text-sm" for="tenantSelect">
-          <span class="mb-1 block">{{ t('Tenant') }}</span>
-          <select
-            id="tenantSelect"
-            v-model="tenantId"
-            class="w-full rounded border px-2 py-1"
-            aria-label="Tenant"
-          >
-            <option value="">{{ t('None') }}</option>
-            <option v-for="tnt in tenants" :key="tnt.id" :value="tnt.id">
-              {{ tnt.name }}
-            </option>
-          </select>
-        </label>
+        <Textinput
+          id="typeName"
+          v-model="name"
+          :label="t('types.form.name')"
+          class="text-sm"
+        />
+        <Select
+          id="tenantSelect"
+          v-model="tenantId"
+          :label="t('types.form.tenant')"
+          :options="tenantOptions"
+          :placeholder="t('none')"
+          class="text-sm"
+        />
       </div>
       <WorkflowDesigner
         v-model="statusFlow"
@@ -293,6 +284,7 @@ import TypeAbilitiesEditor from '@/components/types/TypeAbilitiesEditor.vue';
 import Breadcrumbs from '@/components/ui/Breadcrumbs/index.vue';
 import Button from '@/components/ui/Button/index.vue';
 import Select from '@/components/ui/Select/index.vue';
+import Textinput from '@/components/ui/Textinput/index.vue';
 import Badge from '@/components/ui/Badge/index.vue';
 import Card from '@/components/ui/Card/index.vue';
 import UiTabs from '@/components/ui/Tabs/index.vue';
@@ -400,6 +392,9 @@ const fieldTypeGroups = computed(() => {
 });
 
 const tenants = computed(() => tenantStore.tenants);
+const tenantOptions = computed(() =>
+  tenants.value.map((t) => ({ value: t.id, label: t.name }))
+);
 
 const isEdit = computed(() => route.name === 'taskTypes.edit');
 const canAccess = computed(() => auth.isSuperAdmin || can('task_types.view'));

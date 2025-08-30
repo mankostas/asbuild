@@ -2,20 +2,13 @@
   <div>
     <h2 class="text-lg font-semibold mb-2">{{ t('abilities.title') }}</h2>
     <div class="grid grid-cols-2 gap-2">
-      <label
+      <Switch
         v-for="(label, key) in abilityLabels"
+        :id="`ability-${key}`"
         :key="key"
-        class="flex items-center gap-1"
-        :for="`ability-${key}`"
-      >
-        <input
-          :id="`ability-${key}`"
-          v-model="localAbilities[key]"
-          type="checkbox"
-          :aria-label="label"
-        />
-        <span>{{ label }}</span>
-      </label>
+        v-model="localAbilities[key]"
+        :label="label"
+      />
     </div>
   </div>
 </template>
@@ -23,6 +16,7 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import Switch from '@/components/ui/Switch/index.vue';
 
 interface Abilities {
   read: boolean;
