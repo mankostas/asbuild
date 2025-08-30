@@ -254,7 +254,7 @@ watch(
 
 onMounted(async () => {
   const { data: statusData } = await api.get('/task-statuses');
-  allStatuses.value = statusData;
+  allStatuses.value = statusData.data;
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
   }
