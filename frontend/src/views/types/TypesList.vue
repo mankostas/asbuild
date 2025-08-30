@@ -16,6 +16,7 @@
         </div>
         <div class="flex gap-2">
           <button
+            v-if="can('task_field_snippets.manage')"
             class="bg-gray-200 px-4 py-2 rounded"
             aria-label="Templates"
             @click="templatesOpen = true"
@@ -78,6 +79,7 @@
       </template>
     </DashcodeServerTable>
     <TemplatesDrawer
+      v-if="can('task_field_snippets.manage')"
       :open="templatesOpen"
       :types="all"
       @close="templatesOpen = false"
