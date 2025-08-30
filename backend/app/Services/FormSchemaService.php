@@ -10,9 +10,8 @@ class FormSchemaService
      * Validate the task type schema structure.
      *
      * Schema keys:
-     *  sections[]: { key, label, fields[], photos[], allow_subtasks }
-     *  fields[]: { key, label, type: text|textarea|number|date|time|datetime|boolean|select|multiselect|assignee|file, required, enum?, x-cols? }
-     *  photos[]: { key, label, type: photo_single|photo_repeater }
+     *  sections[]: { key, label, fields[], allow_subtasks }
+     *  fields[]: { key, label, type: text|textarea|number|date|time|datetime|boolean|select|multiselect|assignee|file|photo_single|photo_repeater|repeater, required, enum?, x-cols?, fields? }
      */
     public function validate(array $schema): void
     {
@@ -31,15 +30,12 @@ class FormSchemaService
             foreach ($section['fields'] ?? [] as $field) {
                 $this->validateField($field);
             }
-            foreach ($section['photos'] ?? [] as $photo) {
-                $this->validatePhoto($photo);
-            }
         }
     }
 
     protected function validateField(array $field): void
     {
-        $allowed = ['text','textarea','number','date','time','datetime','boolean','select','multiselect','assignee','file'];
+        $allowed = ['text','textarea','number','date','time','datetime','boolean','select','multiselect','assignee','file','photo_single','photo_repeater','repeater'];
         if (! isset($field['key'], $field['label']) || ! in_array($field['type'] ?? '', $allowed, true)) {
             throw ValidationException::withMessages([
                 'schema_json' => 'invalid field',
@@ -50,15 +46,15 @@ class FormSchemaService
                 'schema_json' => 'enum required for select types',
             ]);
         }
-    }
-
-    protected function validatePhoto(array $photo): void
-    {
-        $allowed = ['photo_single','photo_repeater'];
-        if (! isset($photo['key'], $photo['label']) || ! in_array($photo['type'] ?? '', $allowed, true)) {
-            throw ValidationException::withMessages([
-                'schema_json' => 'invalid photo',
-            ]);
+        if ($field['type'] === 'repeater') {
+            if (! is_array($field['fields'] ?? null)) {
+                throw ValidationException::withMessages([
+                    'schema_json' => 'repeater fields invalid',
+                ]);
+            }
+            foreach ($field['fields'] as $sub) {
+                $this->validateField($sub);
+            }
         }
     }
 

@@ -92,7 +92,7 @@ class StatusFlowService
                     return 'missing_photo';
                 }
             } else {
-                if ($value === null || $value === '') {
+                if ($value === null || $value === '' || (is_array($value) && count($value) === 0)) {
                     return 'missing_field';
                 }
             }
