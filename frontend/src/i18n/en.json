@@ -217,6 +217,11 @@
     "tablet": "Tablet",
     "desktop": "Desktop"
   },
+  "builder": {
+    "canvas": "Canvas",
+    "preview": "Preview",
+    "inspector": "Inspector"
+  },
   "validation": {
     "regex": "Pattern",
     "min": "Minimum",

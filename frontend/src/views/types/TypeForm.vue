@@ -60,14 +60,6 @@
           />
           <Button
             type="button"
-            :aria-label="t('preview.title')"
-            :btnClass="`${showPreview ? 'btn-primary' : 'btn-outline-primary'} text-xs px-3 py-1`"
-            @click="togglePreview"
-          >
-            {{ t('preview.title') }}
-          </Button>
-          <Button
-            type="button"
             :aria-label="t('actions.duplicate')"
             btnClass="btn-outline-primary text-xs px-3 py-1"
             @click="duplicateVersion"
@@ -140,50 +132,136 @@
         class="p-4 border-b"
       />
       <TypeAbilitiesEditor v-model="abilities" class="p-4 border-b" />
-      <div class="flex h-[calc(100vh-3rem)]">
-        <aside class="w-1/5 border-r overflow-y-auto">
-          <FieldPalette :groups="paletteGroups" @select="onAddField" />
-        </aside>
-        <main class="flex-1 overflow-y-auto p-4">
-            <button
-              type="button"
-              class="mb-4 px-2 py-1 border rounded"
-              aria-label="Add section"
-              @click="addSection"
-            >+
-              {{ t('Section') }}</button>
-          <p id="reorderHint" class="sr-only">{{ t('fields.reorderHint') }}</p>
-          <div aria-describedby="reorderHint">
-            <draggable v-model="sections" item-key="id" handle=".handle" class="space-y-4">
-              <template #item="{ element, index }">
-                <CanvasSection :section="element" @remove="removeSection(index)" @select="selectField" />
-              </template>
-            </draggable>
-          </div>
-        </main>
-        <aside class="w-1/4 border-l overflow-y-auto p-4">
-          <InspectorTabs :selected="selected" :role-options="tenantRoles" />
-        </aside>
-      </div>
-      <div v-if="showPreview" class="builder-preview p-4 border-t">
-          <div class="flex items-center gap-2 mb-2">
-            <Button
-              type="button"
-              :aria-label="t('preview.runValidation')"
-              btnClass="btn-primary text-xs px-2 py-1"
-              @click="runValidation"
-            >
-              {{ t('preview.runValidation') }}
-            </Button>
-          </div>
-          <div :class="[{ dark: previewTheme === 'dark' }, viewportClass]" class="border p-2 overflow-auto">
-            <JsonSchemaForm ref="formRef" v-model="previewData" :schema="previewSchema" :task-id="0" />
-          </div>
-          <div v-if="Object.keys(validationErrors).length" class="mt-2 text-red-600" role="alert" aria-live="assertive">
-            <ul>
-              <li v-for="(msg, key) in validationErrors" :key="key">{{ key }}: {{ msg }}</li>
-            </ul>
-          </div>
+      <div class="h-[calc(100vh-3rem)] p-4">
+        <div class="hidden lg:grid grid-cols-3 gap-4 h-full">
+          <Card class="overflow-y-auto">
+            <template #header>
+              <div class="flex items-center justify-between">
+                <h3 class="text-sm font-medium">{{ t('builder.canvas') }}</h3>
+                <div class="flex gap-2">
+                  <Button
+                    type="button"
+                    btnClass="btn-outline-primary text-xs"
+                    :aria-label="t('actions.add')"
+                    @click="addSection"
+                  >
+                    {{ t('Section') }}
+                  </Button>
+                  <Button
+                    type="button"
+                    btnClass="btn-outline-primary text-xs"
+                    :aria-label="t('actions.add')"
+                    @click="onAddField(fieldTypes[0])"
+                  >
+                    Field
+                  </Button>
+                </div>
+              </div>
+            </template>
+            <p id="reorderHint" class="sr-only">{{ t('fields.reorderHint') }}</p>
+            <div aria-describedby="reorderHint" class="p-4">
+              <draggable v-model="sections" item-key="id" handle=".handle" class="space-y-4">
+                <template #item="{ element, index }">
+                  <CanvasSection :section="element" @remove="removeSection(index)" @select="selectField" />
+                </template>
+              </draggable>
+            </div>
+          </Card>
+          <Card class="overflow-y-auto">
+            <template #header>
+              <h3 class="text-sm font-medium">{{ t('builder.preview') }}</h3>
+            </template>
+            <div class="p-4">
+              <div class="flex items-center gap-2 mb-2">
+                <Button
+                  type="button"
+                  :aria-label="t('preview.runValidation')"
+                  btnClass="btn-primary text-xs px-2 py-1"
+                  @click="runValidation"
+                >
+                  {{ t('preview.runValidation') }}
+                </Button>
+              </div>
+              <div :class="[{ dark: previewTheme === 'dark' }, viewportClass]" class="border p-2 overflow-auto">
+                <JsonSchemaForm ref="formRef" v-model="previewData" :schema="previewSchema" :task-id="0" />
+              </div>
+              <div v-if="Object.keys(validationErrors).length" class="mt-2 text-red-600" role="alert" aria-live="assertive">
+                <ul>
+                  <li v-for="(msg, key) in validationErrors" :key="key">{{ key }}: {{ msg }}</li>
+                </ul>
+              </div>
+            </div>
+          </Card>
+          <Card class="overflow-y-auto">
+            <template #header>
+              <h3 class="text-sm font-medium">{{ t('builder.inspector') }}</h3>
+            </template>
+            <div class="p-4">
+              <InspectorTabs :selected="selected" :role-options="tenantRoles" />
+            </div>
+          </Card>
+        </div>
+        <div class="lg:hidden">
+          <UiTabs>
+            <template #list>
+              <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.canvas') }}</Tab>
+              <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.preview') }}</Tab>
+              <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.inspector') }}</Tab>
+            </template>
+            <template #panel>
+              <TabPanel>
+                <div class="mt-4">
+                  <Button
+                    type="button"
+                    btnClass="btn-outline-primary text-xs mb-4"
+                    :aria-label="t('actions.add')"
+                    @click="addSection"
+                  >
+                    {{ t('Section') }}
+                  </Button>
+                  <Button
+                    type="button"
+                    btnClass="btn-outline-primary text-xs mb-4 ml-2"
+                    :aria-label="t('actions.add')"
+                    @click="onAddField(fieldTypes[0])"
+                  >
+                    Field
+                  </Button>
+                  <p id="reorderHintMobile" class="sr-only">{{ t('fields.reorderHint') }}</p>
+                  <div aria-describedby="reorderHintMobile">
+                    <draggable v-model="sections" item-key="id" handle=".handle" class="space-y-4">
+                      <template #item="{ element, index }">
+                        <CanvasSection :section="element" @remove="removeSection(index)" @select="selectField" />
+                      </template>
+                    </draggable>
+                  </div>
+                </div>
+              </TabPanel>
+              <TabPanel>
+                <div class="p-2">
+                  <div class="flex items-center gap-2 mb-2">
+                    <Button
+                      type="button"
+                      :aria-label="t('preview.runValidation')"
+                      btnClass="btn-primary text-xs px-2 py-1"
+                      @click="runValidation"
+                    >
+                      {{ t('preview.runValidation') }}
+                    </Button>
+                  </div>
+                  <div :class="[{ dark: previewTheme === 'dark' }, viewportClass]" class="border p-2 overflow-auto">
+                    <JsonSchemaForm ref="formRef" v-model="previewData" :schema="previewSchema" :task-id="0" />
+                  </div>
+                </div>
+              </TabPanel>
+              <TabPanel>
+                <div class="p-2">
+                  <InspectorTabs :selected="selected" :role-options="tenantRoles" />
+                </div>
+              </TabPanel>
+            </template>
+          </UiTabs>
+        </div>
       </div>
     </form>
   </div>
@@ -194,7 +272,6 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
-import FieldPalette from '@/components/types/FieldPalette.vue';
 import CanvasSection from '@/components/types/CanvasSection.vue';
 import InspectorTabs from '@/components/types/Inspector/InspectorTabs.vue';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
@@ -206,6 +283,9 @@ import Breadcrumbs from '@/components/ui/Breadcrumbs/index.vue';
 import Button from '@/components/ui/Button/index.vue';
 import Select from '@/components/ui/Select/index.vue';
 import Badge from '@/components/ui/Badge/index.vue';
+import Card from '@/components/ui/Card/index.vue';
+import UiTabs from '@/components/ui/Tabs/index.vue';
+import { Tab, TabPanel } from '@headlessui/vue';
 import { can } from '@/stores/auth';
 import api from '@/services/api';
 import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
@@ -246,7 +326,6 @@ const name = ref('');
 const tenantId = ref<number | ''>('');
 const sections = ref<Section[]>([]);
 const selected = ref<Field | null>(null);
-const showPreview = ref(false);
 const previewData = ref<Record<string, any>>({});
 const previewLang = ref<'el' | 'en'>('el');
 const previewTheme = ref<'light' | 'dark'>('light');
@@ -295,11 +374,6 @@ const fieldTypes = [
   { key: 'assignee', label: 'Assignee', group: 'People' },
   { key: 'repeater', label: 'Repeater', group: 'Content' },
 ];
-
-const paletteGroups = computed(() => {
-  const groups = ['Inputs', 'Choices', 'Dates', 'People', 'Files', 'Content', 'Calculated'];
-  return groups.map((g) => ({ label: g, items: fieldTypes.filter((f) => f.group === g) }));
-});
 
 const tenants = computed(() => tenantStore.tenants);
 
@@ -437,10 +511,6 @@ function onVersionChange() {
   if (v) {
     loadVersion(v);
   }
-}
-
-function togglePreview() {
-  showPreview.value = !showPreview.value;
 }
 
 async function duplicateVersion() {

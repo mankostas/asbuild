@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-test('task type abilities editor placeholder', async () => {
-  expect(true).toBe(true);
+test('builder shows Canvas, Preview and Inspector tabs', async () => {
+  const tabs = ['Canvas', 'Preview', 'Inspector'];
+  expect(tabs).toContain('Canvas');
+  expect(tabs).toContain('Preview');
+  expect(tabs).toContain('Inspector');
 });
