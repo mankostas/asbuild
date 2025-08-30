@@ -280,8 +280,16 @@ onMounted(async () => {
     name.value = data.name;
     tenantId.value = data.tenant_id || '';
     if (data.fields_summary) {
-      if (Array.isArray(data.fields_summary)) {
-        fields.value = data.fields_summary.map((f: any) => ({
+      let summary = data.fields_summary;
+      if (typeof summary === 'string') {
+        try {
+          summary = JSON.parse(summary);
+        } catch {
+          summary = null;
+        }
+      }
+      if (Array.isArray(summary)) {
+        fields.value = summary.map((f: any) => ({
           id: Date.now() + Math.random(),
           name: f.name || `field${fields.value.length + 1}`,
           label: f.label || f.name || 'Field',
@@ -289,9 +297,9 @@ onMounted(async () => {
           required: !!f.required,
           cols: f.cols || 2,
         }));
-      } else if (typeof data.fields_summary === 'object') {
-        fields.value = Object.keys(data.fields_summary).map((key) => {
-          const f = (data.fields_summary as any)[key];
+      } else if (summary && typeof summary === 'object') {
+        fields.value = Object.keys(summary).map((key) => {
+          const f = (summary as any)[key];
           return {
             id: Date.now() + Math.random(),
             name: key,
@@ -304,7 +312,15 @@ onMounted(async () => {
       }
     }
     if (data.statuses) {
-      const order = parseStatusOrder(data.statuses);
+      let statuses = data.statuses;
+      if (typeof statuses === 'string') {
+        try {
+          statuses = JSON.parse(statuses);
+        } catch {
+          statuses = null;
+        }
+      }
+      const order = parseStatusOrder(statuses || {});
       selectedStatuses.value = order
         .map((n: string) => allStatuses.value.find((s: any) => s.name === n))
         .filter(Boolean);
