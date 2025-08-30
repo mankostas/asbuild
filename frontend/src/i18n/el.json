@@ -13,6 +13,8 @@
     "save": "Αποθήκευση",
     "publish": "Δημοσίευση",
     "duplicate": "Αντιγραφή",
+    "addSection": "Προσθήκη ενότητας",
+    "addField": "Προσθήκη πεδίου",
     "cancel": "Ακύρωση",
     "retry": "Επανάληψη",
     "add": "Προσθήκη",
@@ -25,7 +27,10 @@
   },
   "a11y": {
     "skipToContent": "Μετάβαση στο περιεχόμενο",
-    "language": "Γλώσσα"
+    "language": "Γλώσσα",
+    "dragToReorder": "Σύρετε για αναδιάταξη",
+    "removeSection": "Αφαίρεση ενότητας",
+    "enableAutomation": "Ενεργοποίηση αυτοματοποίησης"
   },
   "commandPalette": {
     "title": "Παλέτα εντολών",
@@ -40,6 +45,8 @@
   "profile": {
     "settings": "Ρυθμίσεις"
   },
+  "Version": "Έκδοση",
+  "Section": "Ενότητα",
   "routes": {
     "dashboard": "Πίνακας ελέγχου",
     "tasks": "Εργασίες",
@@ -215,6 +222,7 @@
     "title": "Προεπισκόπηση",
     "runValidation": "Εκτέλεση Ελέγχου",
     "language": "Γλώσσα",
+    "version": "Έκδοση",
     "theme": "Θέμα",
     "viewport": "Προβολή",
     "light": "Φωτεινό",
