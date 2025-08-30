@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Models\File;
 use App\Models\Manual;
-use App\Models\AppointmentPhoto;
 use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -46,8 +45,8 @@ class StorageCleanupJob implements ShouldQueue
     protected function usedFileIds(): array
     {
         return Manual::pluck('file_id')
-            ->merge(AppointmentPhoto::pluck('file_id'))
-            ->merge(DB::table('appointment_comment_files')->pluck('file_id'))
+            ->merge(DB::table('task_attachments')->pluck('file_id'))
+            ->merge(DB::table('task_comment_files')->pluck('file_id'))
             ->unique()
             ->all();
     }
@@ -56,17 +55,18 @@ class StorageCleanupJob implements ShouldQueue
     {
         $manualIds = Manual::where('tenant_id', $tenantId)->pluck('file_id');
 
-        $photoIds = AppointmentPhoto::whereHas('appointment', function ($q) use ($tenantId) {
-            $q->where('tenant_id', $tenantId);
-        })->pluck('file_id');
+        $attachmentIds = DB::table('task_attachments')
+            ->join('tasks', 'task_attachments.task_id', '=', 'tasks.id')
+            ->where('tasks.tenant_id', $tenantId)
+            ->pluck('task_attachments.file_id');
 
-        $commentIds = DB::table('appointment_comment_files')
-            ->join('appointment_comments', 'appointment_comment_files.appointment_comment_id', '=', 'appointment_comments.id')
-            ->join('appointments', 'appointment_comments.appointment_id', '=', 'appointments.id')
-            ->where('appointments.tenant_id', $tenantId)
-            ->pluck('appointment_comment_files.file_id');
+        $commentIds = DB::table('task_comment_files')
+            ->join('task_comments', 'task_comment_files.task_comment_id', '=', 'task_comments.id')
+            ->join('tasks', 'task_comments.task_id', '=', 'tasks.id')
+            ->where('tasks.tenant_id', $tenantId)
+            ->pluck('task_comment_files.file_id');
 
-        return $manualIds->merge($photoIds)->merge($commentIds)->unique()->all();
+        return $manualIds->merge($attachmentIds)->merge($commentIds)->unique()->all();
     }
 
     protected function deleteFile(File $file): void

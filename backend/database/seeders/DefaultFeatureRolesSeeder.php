@@ -17,7 +17,7 @@ class DefaultFeatureRolesSeeder extends Seeder
 
         foreach ($features as $feature) {
             switch ($feature) {
-                case 'appointments':
+                case 'tasks':
                 case 'notifications':
                 case 'types':
                 case 'teams':
