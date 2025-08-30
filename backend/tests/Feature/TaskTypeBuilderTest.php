@@ -83,6 +83,43 @@ class TaskTypeBuilderTest extends TestCase
             ->assertJsonPath('data.abilities_json.delete', false);
     }
 
+    public function test_store_task_type_with_role_permissions(): void
+    {
+        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $role = Role::create(['name' => 'Admin', 'slug' => 'admin', 'tenant_id' => $tenant->id, 'abilities' => ['task_types.manage'], 'level' => 1]);
+        $user = User::create([
+            'name' => 'U',
+            'email' => 'u3@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
+        Sanctum::actingAs($user);
+
+        $payload = [
+            'name' => 'With Role Permissions',
+            'schema_json' => json_encode(['sections' => []]),
+            'statuses' => json_encode([]),
+            'abilities_json' => json_encode([
+                'admin' => [
+                    'read' => true,
+                    'edit' => false,
+                    'delete' => false,
+                    'export' => false,
+                    'assign' => false,
+                ],
+            ]),
+        ];
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson('/api/task-types', $payload)
+            ->assertCreated()
+            ->assertJsonPath('data.abilities_json.admin.read', true)
+            ->assertJsonPath('data.abilities_json.admin.edit', false);
+    }
+
     public function test_builder_requires_auth(): void
     {
         $this->postJson('/api/task-types', [])

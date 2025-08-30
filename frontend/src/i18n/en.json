@@ -94,6 +94,15 @@
     "assign": "Assign",
     "transition": "Transition"
   },
+  "permissions": {
+    "tooltip": {
+      "read": "Allow viewing tasks of this type",
+      "edit": "Allow editing tasks of this type",
+      "delete": "Allow deleting tasks of this type",
+      "export": "Allow exporting tasks of this type",
+      "assign": "Allow assigning tasks of this type"
+    }
+  },
   "tasks": {
     "new": "New Task",
     "edit": "Edit Task",
