@@ -1,0 +1,63 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Role;
+use App\Models\Task;
+use App\Models\Tenant;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\Sanctum;
+use Tests\TestCase;
+
+class UploadFinalizeTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_finalize_stores_file_and_binds_task_metadata(): void
+    {
+        Storage::fake('local');
+        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $role = Role::create([
+            'name' => 'User',
+            'slug' => 'user',
+            'tenant_id' => $tenant->id,
+            'abilities' => ['tasks.attach.upload'],
+            'level' => 1,
+        ]);
+        $user = User::create([
+            'name' => 'U',
+            'email' => 'u@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
+        Sanctum::actingAs($user);
+
+        $task = Task::create(['tenant_id' => $tenant->id, 'user_id' => $user->id]);
+
+        $file = UploadedFile::fake()->image('final.jpg', 10, 10)->size(10);
+        Storage::put('files/final.jpg', file_get_contents($file->getRealPath()));
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson('/api/uploads/xyz/finalize', [
+                'filename' => 'final.jpg',
+                'task_id' => $task->id,
+                'field_key' => 'photo',
+                'section_key' => 'sec1',
+            ])
+            ->assertOk()
+            ->assertJsonStructure(['file_id', 'name']);
+
+        $this->assertDatabaseHas('task_attachments', [
+            'task_id' => $task->id,
+            'field_key' => 'photo',
+            'section_key' => 'sec1',
+        ]);
+    }
+}
