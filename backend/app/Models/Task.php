@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\App;
+use App\Models\TaskSlaEvent;
 
 class Task extends Model
 {
@@ -116,5 +118,17 @@ class Task extends Model
     public function attachmentsBySection(string $sectionKey): BelongsToMany
     {
         return $this->attachments()->wherePivot('section_key', $sectionKey);
+    }
+
+    public function slaEvents(): HasMany
+    {
+        return $this->hasMany(TaskSlaEvent::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (Task $task) {
+            App::make(\App\Services\TaskSlaService::class)->apply($task);
+        });
     }
 }

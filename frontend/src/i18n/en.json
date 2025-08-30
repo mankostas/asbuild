@@ -164,6 +164,13 @@
       "transitions": "Transitions"
     }
   },
+  "slaPolicies": {
+    "title": "SLA Policies",
+    "priority": "Priority",
+    "responseWithin": "Response within (mins)",
+    "resolveWithin": "Resolve within (mins)",
+    "calendar": "Calendar JSON"
+  },
   "dashboard": {
     "messages": {
       "loadFailed": "Failed to load dashboard data.",

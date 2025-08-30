@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\LookupController;
 use App\Http\Controllers\Api\CalendarController;
 use App\Http\Controllers\Api\BrandingController;
 use App\Http\Controllers\Api\TaskSubtaskController;
+use App\Http\Controllers\Api\TaskSlaPolicyController;
 use App\Http\Middleware\EnsureTenantScope;
 use App\Http\Middleware\Ability;
 use Illuminate\Http\Request;
@@ -121,6 +122,17 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':task_type_versions.manage');
     Route::post('task-type-versions/{task_type_version}/deprecate', [TaskTypeVersionController::class, 'deprecate'])
         ->middleware(Ability::class . ':task_type_versions.manage');
+
+    Route::get('task-types/{task_type}/sla-policies', [TaskSlaPolicyController::class, 'index'])
+        ->middleware(Ability::class . ':task_sla_policies.manage');
+    Route::post('task-types/{task_type}/sla-policies', [TaskSlaPolicyController::class, 'store'])
+        ->middleware(Ability::class . ':task_sla_policies.manage');
+    Route::put('task-types/{task_type}/sla-policies/{task_sla_policy}', [TaskSlaPolicyController::class, 'update'])
+        ->middleware(Ability::class . ':task_sla_policies.manage')
+        ->whereNumber('task_sla_policy');
+    Route::delete('task-types/{task_type}/sla-policies/{task_sla_policy}', [TaskSlaPolicyController::class, 'destroy'])
+        ->middleware(Ability::class . ':task_sla_policies.manage')
+        ->whereNumber('task_sla_policy');
     Route::apiResource('roles', RoleController::class)
         ->only(['index', 'show'])
         ->middleware(Ability::class . ':roles.view');

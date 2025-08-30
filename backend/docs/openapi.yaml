@@ -630,6 +630,106 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TaskTypeVersion'
+
+  /task-types/{task_type}/sla-policies:
+    get:
+      summary: List SLA policies
+      parameters:
+        - name: task_type
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Policies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TaskSlaPolicy'
+    post:
+      summary: Create SLA policy
+      parameters:
+        - name: task_type
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskSlaPolicy'
+      responses:
+        '201':
+          description: Policy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TaskSlaPolicy'
+
+  /task-types/{task_type}/sla-policies/{id}:
+    put:
+      summary: Update SLA policy
+      parameters:
+        - name: task_type
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskSlaPolicy'
+      responses:
+        '200':
+          description: Policy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TaskSlaPolicy'
+    delete:
+      summary: Delete SLA policy
+      parameters:
+        - name: task_type
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
   /task-statuses:
     get:
       summary: List task statuses
@@ -818,6 +918,23 @@ components:
         created_at:
           type: string
           format: date-time
+
+    TaskSlaPolicy:
+      type: object
+      properties:
+        id:
+          type: integer
+        priority:
+          type: string
+        response_within_mins:
+          type: integer
+          nullable: true
+        resolve_within_mins:
+          type: integer
+          nullable: true
+        calendar_json:
+          type: object
+          nullable: true
     TaskSubtask:
       type: object
       properties:
