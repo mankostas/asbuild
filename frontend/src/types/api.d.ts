@@ -595,10 +595,10 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        filename?: string;
-                        task_id?: number;
-                        field_key?: string;
-                        section_key?: string;
+                        filename: string;
+                        task_id: number;
+                        field_key: string;
+                        section_key: string;
                     };
                 };
             };
