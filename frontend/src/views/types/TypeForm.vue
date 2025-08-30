@@ -170,7 +170,19 @@
           </Button>
         </Card>
       </template>
+      <Card
+        v-if="!tenantId"
+        class="p-4 border-b flex flex-col items-center text-center gap-2"
+      >
+        <Icon
+          icon="heroicons-outline:information-circle"
+          class="w-6 h-6 text-slate-400"
+          aria-hidden="true"
+        />
+        <p class="text-sm">{{ t('types.selectTenantToSetPermissions') }}</p>
+      </Card>
       <PermissionsMatrix
+        v-else
         v-model="permissions"
         :roles="tenantRoles"
         :can-manage="canManage"

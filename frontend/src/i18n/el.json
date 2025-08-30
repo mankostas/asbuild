@@ -213,7 +213,8 @@
       "search": "Αναζήτηση"
     },
     "saveToConfigureSLA": "Αποθηκεύστε για να ρυθμίσετε τις Πολιτικές SLA",
-    "saveToConfigureAutomations": "Αποθηκεύστε για να ρυθμίσετε Αυτοματισμούς"
+    "saveToConfigureAutomations": "Αποθηκεύστε για να ρυθμίσετε Αυτοματισμούς",
+    "selectTenantToSetPermissions": "Επιλέξτε μισθωτή για να ορίσετε δικαιώματα"
   },
   "slaPolicies": {
     "title": "Πολιτικές SLA",
