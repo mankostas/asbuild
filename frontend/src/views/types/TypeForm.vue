@@ -364,7 +364,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
@@ -772,6 +772,10 @@ function runValidation() {
   const feErrors = formRef.value?.errors || {};
   if (Object.keys(feErrors).length) {
     validationErrors.value = feErrors;
+    const first = Object.keys(validationErrors.value)[0];
+    if (first) {
+      nextTick(() => document.getElementById(first)?.focus());
+    }
     return;
   }
   const url = isEdit.value
@@ -786,10 +790,7 @@ function runValidation() {
       validationErrors.value = err.response?.data?.errors || { error: 'validation failed' };
       const first = Object.keys(validationErrors.value)[0];
       if (first) {
-        const el = formRef.value?.$el?.querySelector(
-          `[name="${first}"]`,
-        ) as HTMLElement | null;
-        el?.focus();
+        nextTick(() => document.getElementById(first)?.focus());
       }
     });
 }
