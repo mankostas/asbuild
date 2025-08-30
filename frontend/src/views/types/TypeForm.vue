@@ -116,16 +116,60 @@
         v-model:statuses="statuses"
         class="p-4 border-b"
       />
-      <SLAPolicyEditor
-        v-if="isEdit && (auth.isSuperAdmin || can('task_sla_policies.manage'))"
-        :task-type-id="Number(route.params.id)"
-        class="p-4 border-b"
-      />
-      <AutomationsEditor
-        v-if="isEdit && (auth.isSuperAdmin || can('task_automations.manage'))"
-        :task-type-id="Number(route.params.id)"
-        class="p-4 border-b"
-      />
+      <template v-if="auth.isSuperAdmin || can('task_sla_policies.manage')">
+        <SLAPolicyEditor
+          v-if="isEdit"
+          :task-type-id="Number(route.params.id)"
+          class="p-4 border-b"
+        />
+        <Card
+          v-else
+          class="p-4 border-b flex flex-col items-center text-center gap-2"
+        >
+          <Icon
+            icon="heroicons-outline:information-circle"
+            class="w-6 h-6 text-slate-400"
+            aria-hidden="true"
+          />
+          <p class="text-sm">{{ t('types.saveToConfigureSLA') }}</p>
+          <Button
+            v-if="auth.isSuperAdmin || can('task_types.manage')"
+            type="submit"
+            :aria-label="t('actions.save')"
+            btnClass="btn-primary text-xs px-3 py-1"
+            :disabled="!isFormValid"
+          >
+            {{ t('actions.save') }}
+          </Button>
+        </Card>
+      </template>
+      <template v-if="auth.isSuperAdmin || can('task_automations.manage')">
+        <AutomationsEditor
+          v-if="isEdit"
+          :task-type-id="Number(route.params.id)"
+          class="p-4 border-b"
+        />
+        <Card
+          v-else
+          class="p-4 border-b flex flex-col items-center text-center gap-2"
+        >
+          <Icon
+            icon="heroicons-outline:information-circle"
+            class="w-6 h-6 text-slate-400"
+            aria-hidden="true"
+          />
+          <p class="text-sm">{{ t('types.saveToConfigureAutomations') }}</p>
+          <Button
+            v-if="auth.isSuperAdmin || can('task_types.manage')"
+            type="submit"
+            :aria-label="t('actions.save')"
+            btnClass="btn-primary text-xs px-3 py-1"
+            :disabled="!isFormValid"
+          >
+            {{ t('actions.save') }}
+          </Button>
+        </Card>
+      </template>
       <PermissionsMatrix
         v-model="permissions"
         :roles="tenantRoles"
@@ -408,6 +452,7 @@ const statusFlow = ref<[string, string][]>([]);
 const permissions = ref<Record<string, Permission>>({});
 const tenantRoles = ref<any[]>([]);
 const canManage = computed(() => auth.isSuperAdmin || can('task_types.manage'));
+const isFormValid = computed(() => name.value.trim().length > 0 && tenantId.value !== '');
 
 const fieldTypes = [
   { key: 'text', label: 'Text', group: 'Inputs' },

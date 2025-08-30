@@ -211,7 +211,9 @@
       "name": "Name",
       "tenant": "Tenant",
       "search": "Search"
-    }
+    },
+    "saveToConfigureSLA": "Save to configure SLA policies",
+    "saveToConfigureAutomations": "Save to configure automations"
   },
   "slaPolicies": {
     "title": "SLA Policies",

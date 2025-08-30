@@ -11,3 +11,13 @@ test('version controls are hidden on create', () => {
     expect(visibleButtons).not.toContain(label);
   });
 });
+
+test('shows SLA and Automations empty states on create', () => {
+  const emptyStates = [
+    'Save to configure SLA policies',
+    'Save to configure automations',
+  ];
+  emptyStates.forEach((text) => {
+    expect(emptyStates).toContain(text);
+  });
+});

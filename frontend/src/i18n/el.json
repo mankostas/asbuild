@@ -211,7 +211,9 @@
       "name": "Όνομα",
       "tenant": "Μισθωτής",
       "search": "Αναζήτηση"
-    }
+    },
+    "saveToConfigureSLA": "Αποθηκεύστε για να ρυθμίσετε τις Πολιτικές SLA",
+    "saveToConfigureAutomations": "Αποθηκεύστε για να ρυθμίσετε Αυτοματισμούς"
   },
   "slaPolicies": {
     "title": "Πολιτικές SLA",
