@@ -56,4 +56,41 @@ class TaskTypeSchemaTest extends TestCase
             }
         }
     }
+
+    public function test_lookup_requires_source(): void
+    {
+        $service = new FormSchemaService();
+        $schema = [
+            'sections' => [
+                [
+                    'key' => 'main',
+                    'label' => 'Main',
+                    'fields' => [
+                        ['key' => 'l1', 'label' => 'L1', 'type' => 'lookup'],
+                    ],
+                ],
+            ],
+        ];
+        $this->expectException(ValidationException::class);
+        $service->validate($schema);
+    }
+
+    public function test_computed_references_must_exist(): void
+    {
+        $service = new FormSchemaService();
+        $schema = [
+            'sections' => [
+                [
+                    'key' => 'main',
+                    'label' => 'Main',
+                    'fields' => [
+                        ['key' => 'a', 'label' => 'A', 'type' => 'number'],
+                        ['key' => 'c', 'label' => 'C', 'type' => 'computed', 'expr' => 'a + b'],
+                    ],
+                ],
+            ],
+        ];
+        $this->expectException(ValidationException::class);
+        $service->validate($schema);
+    }
 }

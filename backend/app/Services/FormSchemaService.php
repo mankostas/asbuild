@@ -20,7 +20,7 @@ class FormSchemaService
                 'schema_json' => 'sections missing',
             ]);
         }
-
+        $allKeys = [];
         foreach ($schema['sections'] as $section) {
             if (! isset($section['key'], $section['label'])) {
                 throw ValidationException::withMessages([
@@ -28,14 +28,21 @@ class FormSchemaService
                 ]);
             }
             foreach ($section['fields'] ?? [] as $field) {
-                $this->validateField($field);
+                if (isset($field['key'])) {
+                    $allKeys[] = $field['key'];
+                }
+            }
+        }
+        foreach ($schema['sections'] as $section) {
+            foreach ($section['fields'] ?? [] as $field) {
+                $this->validateField($field, $allKeys);
             }
         }
     }
 
-    protected function validateField(array $field): void
+    protected function validateField(array $field, array $allKeys): void
     {
-        $allowed = ['text','textarea','number','date','time','datetime','duration','email','phone','url','boolean','select','multiselect','radio','checkbox','chips','assignee','reviewer','file','photo_single','photo_repeater','repeater','richtext','markdown','divider','headline'];
+        $allowed = ['text','textarea','number','date','time','datetime','duration','email','phone','url','boolean','select','multiselect','radio','checkbox','chips','assignee','reviewer','file','photo_single','photo_repeater','repeater','richtext','markdown','divider','headline','lookup','computed','signature','location','rating','priority','status'];
         if (! isset($field['key'], $field['label']) || ! in_array($field['type'] ?? '', $allowed, true)) {
             throw ValidationException::withMessages([
                 'schema_json' => 'invalid field',
@@ -46,6 +53,26 @@ class FormSchemaService
                 'schema_json' => 'enum required for choice types',
             ]);
         }
+        if ($field['type'] === 'lookup' && ! (isset($field['endpoint']) || isset($field['view']))) {
+            throw ValidationException::withMessages([
+                'schema_json' => 'lookup config invalid',
+            ]);
+        }
+        if ($field['type'] === 'computed') {
+            if (! is_string($field['expr'] ?? null)) {
+                throw ValidationException::withMessages([
+                    'schema_json' => 'computed expression required',
+                ]);
+            }
+            preg_match_all('/[A-Za-z_][A-Za-z0-9_.]*/', $field['expr'], $m);
+            foreach ($m[0] as $ref) {
+                if (! in_array($ref, $allKeys, true)) {
+                    throw ValidationException::withMessages([
+                        'schema_json' => "unknown field reference $ref",
+                    ]);
+                }
+            }
+        }
         if ($field['type'] === 'repeater') {
             if (! is_array($field['fields'] ?? null)) {
                 throw ValidationException::withMessages([
@@ -53,7 +80,7 @@ class FormSchemaService
                 ]);
             }
             foreach ($field['fields'] as $sub) {
-                $this->validateField($sub);
+                $this->validateField($sub, $allKeys);
             }
         }
     }
