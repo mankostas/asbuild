@@ -59,7 +59,7 @@
             classInput="text-xs"
           />
           <Button
-            v-if="can('task_types.manage') && can('task_type_versions.manage')"
+            v-if="auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage'))"
             type="button"
             :aria-label="t('actions.duplicate')"
             btnClass="btn-outline-primary text-xs px-3 py-1"
@@ -68,7 +68,7 @@
             {{ t('actions.duplicate') }}
           </Button>
           <Button
-            v-if="can('task_types.manage') && can('task_type_versions.manage')"
+            v-if="auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage'))"
             type="button"
             :aria-label="t('actions.publish')"
             btnClass="btn-outline-primary text-xs px-3 py-1"
@@ -77,7 +77,7 @@
             {{ t('actions.publish') }}
           </Button>
           <Button
-            v-if="can('task_types.manage') && can('task_type_versions.manage')"
+            v-if="auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage'))"
             type="button"
             :aria-label="t('actions.delete')"
             btnClass="btn-outline-danger text-xs px-3 py-1"
@@ -86,7 +86,7 @@
             {{ t('actions.delete') }}
           </Button>
           <Button
-            v-if="can('task_types.manage')"
+            v-if="auth.isSuperAdmin || can('task_types.manage')"
             type="submit"
             :aria-label="t('actions.save')"
             btnClass="btn-primary text-xs px-3 py-1"
@@ -126,12 +126,12 @@
         class="p-4 border-b"
       />
       <SLAPolicyEditor
-        v-if="isEdit && can('task_sla_policies.manage')"
+        v-if="isEdit && (auth.isSuperAdmin || can('task_sla_policies.manage'))"
         :task-type-id="Number(route.params.id)"
         class="p-4 border-b"
       />
       <AutomationsEditor
-        v-if="isEdit && can('task_automations.manage')"
+        v-if="isEdit && (auth.isSuperAdmin || can('task_automations.manage'))"
         :task-type-id="Number(route.params.id)"
         class="p-4 border-b"
       />
@@ -144,7 +144,7 @@
                 <h3 class="text-sm font-medium">{{ t('builder.canvas') }}</h3>
                 <div class="flex gap-2">
                   <Button
-                    v-if="can('task_types.manage')"
+                    v-if="auth.isSuperAdmin || can('task_types.manage')"
                     type="button"
                     btnClass="btn-outline-primary text-xs"
                     :aria-label="t('actions.add')"
@@ -153,7 +153,7 @@
                     {{ t('Section') }}
                   </Button>
                   <Button
-                    v-if="can('task_types.manage')"
+                    v-if="auth.isSuperAdmin || can('task_types.manage')"
                     type="button"
                     btnClass="btn-outline-primary text-xs"
                     :aria-label="t('actions.add')"
@@ -218,7 +218,7 @@
               <TabPanel>
                 <div class="mt-4">
                   <Button
-                    v-if="can('task_types.manage')"
+                    v-if="auth.isSuperAdmin || can('task_types.manage')"
                     type="button"
                     btnClass="btn-outline-primary text-xs mb-4"
                     :aria-label="t('actions.add')"
@@ -227,7 +227,7 @@
                     {{ t('Section') }}
                   </Button>
                   <Button
-                    v-if="can('task_types.manage')"
+                    v-if="auth.isSuperAdmin || can('task_types.manage')"
                     type="button"
                     btnClass="btn-outline-primary text-xs mb-4 ml-2"
                     :aria-label="t('actions.add')"
@@ -299,7 +299,7 @@ import UiTabs from '@/components/ui/Tabs/index.vue';
 import Drawer from '@/components/ui/Drawer/index.vue';
 import FieldPalette from '@/components/types/FieldPalette.vue';
 import { Tab, TabPanel } from '@headlessui/vue';
-import { can } from '@/stores/auth';
+import { can, useAuthStore } from '@/stores/auth';
 import api from '@/services/api';
 import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
 import { useTenantStore } from '@/stores/tenant';
@@ -311,6 +311,7 @@ const route = useRoute();
 const router = useRouter();
 const versionsStore = useTaskTypeVersionsStore();
 const tenantStore = useTenantStore();
+const auth = useAuthStore();
 
 interface Field {
   id: number;
@@ -401,7 +402,7 @@ const fieldTypeGroups = computed(() => {
 const tenants = computed(() => tenantStore.tenants);
 
 const isEdit = computed(() => route.name === 'taskTypes.edit');
-const canAccess = computed(() => can('task_types.view'));
+const canAccess = computed(() => auth.isSuperAdmin || can('task_types.view'));
 
 watch(previewLang, (lang) => {
   locale.value = lang;
@@ -439,8 +440,8 @@ onMounted(async () => {
       if (oldId !== undefined && id !== oldId) {
         sections.value.forEach((s) =>
           s.fields.forEach((f) => {
-            f.roles.view = [];
-            f.roles.edit = [];
+            f.roles.view = ['super_admin'];
+            f.roles.edit = ['super_admin'];
           }),
         );
       }
@@ -485,7 +486,7 @@ function loadVersion(v: any) {
       placeholder: typeof f.placeholder === 'string' ? { en: f.placeholder, el: f.placeholder } : (f.placeholder || { en: '', el: '' }),
       help: typeof f.help === 'string' ? { en: f.help, el: f.help } : (f.help || { en: '', el: '' }),
       logic: [],
-      roles: f['x-roles'] || { view: [], edit: [] },
+      roles: f['x-roles'] || { view: ['super_admin'], edit: ['super_admin'] },
       data: { default: f.default ?? '', enum: f.enum || [] },
     })),
     photos: [],
@@ -571,7 +572,7 @@ function onAddField(type: any) {
     placeholder: { en: '', el: '' },
     help: { en: '', el: '' },
     logic: [],
-    roles: { view: [], edit: [] },
+    roles: { view: ['super_admin'], edit: ['super_admin'] },
     data: { default: '', enum: [] },
   };
   section.fields.push(field);
