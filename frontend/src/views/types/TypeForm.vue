@@ -29,6 +29,31 @@
           <button type="submit" class="px-3 py-1 bg-indigo-600 text-white rounded" aria-label="Save">{{ t('Save') }}</button>
         </div>
       </header>
+      <div class="grid grid-cols-2 gap-4 p-4 border-b">
+        <label class="block text-sm" for="typeName">
+          <span class="mb-1 block">{{ t('Name') }}</span>
+          <input
+            id="typeName"
+            v-model="name"
+            class="w-full rounded border px-2 py-1"
+            aria-label="Type name"
+          />
+        </label>
+        <label class="block text-sm" for="tenantSelect">
+          <span class="mb-1 block">{{ t('Tenant') }}</span>
+          <select
+            id="tenantSelect"
+            v-model="tenantId"
+            class="w-full rounded border px-2 py-1"
+            aria-label="Tenant"
+          >
+            <option value="">{{ t('None') }}</option>
+            <option v-for="tnt in tenants" :key="tnt.id" :value="tnt.id">
+              {{ tnt.name }}
+            </option>
+          </select>
+        </label>
+      </div>
       <WorkflowDesigner
         v-model="statusFlow"
         v-model:statuses="statuses"
@@ -67,7 +92,7 @@
           </div>
         </main>
         <aside class="w-1/4 border-l overflow-y-auto p-4">
-          <InspectorTabs :selected="selected" />
+          <InspectorTabs :selected="selected" :role-options="tenantRoles" />
         </aside>
       </div>
       <div v-if="showPreview" class="builder-preview p-4 border-t">
@@ -138,6 +163,7 @@ import TypeAbilitiesEditor from '@/components/types/TypeAbilitiesEditor.vue';
 import { can } from '@/stores/auth';
 import api from '@/services/api';
 import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
+import { useTenantStore } from '@/stores/tenant';
 import '@/styles/types-builder.css';
 import type { I18nString } from '@/utils/i18n';
 
@@ -145,6 +171,7 @@ const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const versionsStore = useTaskTypeVersionsStore();
+const tenantStore = useTenantStore();
 
 interface Field {
   id: number;
@@ -156,6 +183,9 @@ interface Field {
   placeholder?: I18nString;
   help?: I18nString;
   validations: Record<string, any>;
+  logic: any[];
+  roles: { view: string[]; edit: string[] };
+  data: { default: any; enum: string[] };
 }
 
 interface Section {
@@ -189,6 +219,7 @@ const abilities = ref({
   assign: true,
   transition: true,
 });
+const tenantRoles = ref<any[]>([]);
 
 const fieldTypes = [
   { key: 'text', label: 'Text', group: 'Inputs' },
@@ -204,6 +235,8 @@ const paletteGroups = computed(() => {
   const groups = ['Inputs', 'Choices', 'Dates', 'People', 'Files', 'Content', 'Calculated'];
   return groups.map((g) => ({ label: g, items: fieldTypes.filter((f) => f.group === g) }));
 });
+
+const tenants = computed(() => tenantStore.tenants);
 
 const isEdit = computed(() => route.name === 'taskTypes.edit');
 const canAccess = computed(() =>
@@ -228,7 +261,11 @@ const viewportClass = computed(() => {
 });
 
 onMounted(async () => {
+  await tenantStore.loadTenants({ per_page: 100 });
   if (isEdit.value) {
+    const { data: typeData } = await api.get(`/task-types/${route.params.id}`);
+    name.value = typeData.name || '';
+    tenantId.value = typeData.tenant_id || '';
     const list = await versionsStore.list(Number(route.params.id));
     versions.value = list;
     if (list.length) {
@@ -237,6 +274,23 @@ onMounted(async () => {
     }
   }
 });
+
+watch(
+  tenantId,
+  async (id) => {
+    if (id) {
+      try {
+        const { data } = await api.get('/roles', { params: { tenant_id: id } });
+        tenantRoles.value = data;
+      } catch {
+        tenantRoles.value = [];
+      }
+    } else {
+      tenantRoles.value = [];
+    }
+  },
+  { immediate: true },
+);
 
 function addSection() {
   sections.value.push({
@@ -264,9 +318,26 @@ function loadVersion(v: any) {
       fields: f.fields || undefined,
       placeholder: typeof f.placeholder === 'string' ? { en: f.placeholder, el: f.placeholder } : (f.placeholder || { en: '', el: '' }),
       help: typeof f.help === 'string' ? { en: f.help, el: f.help } : (f.help || { en: '', el: '' }),
+      logic: [],
+      roles: f['x-roles'] || { view: [], edit: [] },
+      data: { default: f.default ?? '', enum: f.enum || [] },
     })),
     photos: [],
   }));
+  const fieldMap: Record<string, any> = {};
+  sections.value.forEach((s) => s.fields.forEach((f) => (fieldMap[f.name] = f)));
+  (schema.logic || []).forEach((rule: any) => {
+    const fld = fieldMap[rule.if?.field];
+    if (fld) {
+      fld.logic.push({
+        if: rule.if,
+        then: (rule.then || []).map((a: any) => ({
+          type: a.show ? 'show' : 'require',
+          target: a.show ?? a.require,
+        })),
+      });
+    }
+  });
   statuses.value = Object.keys(v.statuses || {});
   if (Array.isArray(v.status_flow_json)) {
     statusFlow.value = v.status_flow_json;
@@ -313,6 +384,9 @@ function onAddField(type: any) {
     fields: type.key === 'repeater' ? [] : undefined,
     placeholder: { en: '', el: '' },
     help: { en: '', el: '' },
+    logic: [],
+    roles: { view: [], edit: [] },
+    data: { default: '', enum: [] },
   });
 }
 
@@ -321,6 +395,14 @@ function selectField(field: Field) {
 }
 
 function onSubmit() {
+  const logicRules = sections.value.flatMap((s) =>
+    s.fields.flatMap((f) =>
+      (f.logic || []).map((r) => ({
+        if: r.if,
+        then: r.then.map((a: any) => ({ [a.type]: a.target })),
+      })),
+    ),
+  );
   const payload = {
     name: name.value,
     tenant_id: tenantId.value || undefined,
@@ -337,8 +419,12 @@ function onSubmit() {
           placeholder: f.placeholder,
           help: f.help,
           fields: f.fields,
+          default: f.data.default || undefined,
+          enum: f.data.enum.length ? f.data.enum : undefined,
+          'x-roles': f.roles,
         })),
       })),
+      ...(logicRules.length ? { logic: logicRules } : {}),
     }),
     statuses: JSON.stringify(statuses.value.reduce((acc: any, s) => ({ ...acc, [s]: [] }), {})),
     status_flow_json: JSON.stringify(statusFlow.value),
@@ -380,7 +466,30 @@ const previewSchema = computed(() => ({
       placeholder: f.placeholder,
       help: f.help,
       fields: f.fields,
+      default: f.data.default || undefined,
+      enum: f.data.enum.length ? f.data.enum : undefined,
+      'x-roles': f.roles,
     })),
   })),
+  ...(sections.value
+    .flatMap((s) =>
+      s.fields.flatMap((f) =>
+        (f.logic || []).map((r) => ({
+          if: r.if,
+          then: r.then.map((a: any) => ({ [a.type]: a.target })),
+        })),
+      ),
+    ).length
+    ? {
+        logic: sections.value.flatMap((s) =>
+          s.fields.flatMap((f) =>
+            (f.logic || []).map((r) => ({
+              if: r.if,
+              then: r.then.map((a: any) => ({ [a.type]: a.target })),
+            })),
+          ),
+        ),
+      }
+    : {}),
 }));
 </script>
