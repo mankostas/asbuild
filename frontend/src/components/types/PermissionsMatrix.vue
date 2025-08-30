@@ -98,6 +98,7 @@ interface Permission {
   delete: boolean;
   export: boolean;
   assign: boolean;
+  transition: boolean;
 }
 
 const props = defineProps<{
@@ -108,7 +109,14 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
 
-const localPermissions = reactive<Record<string, Permission>>({ ...props.modelValue });
+const localPermissions = reactive<Record<string, Permission>>(
+  Object.fromEntries(
+    Object.entries(props.modelValue).map(([k, v]) => [
+      k,
+      { transition: false, ...v } as Permission,
+    ]),
+  ),
+);
 
 watch(
   () => props.roles,
@@ -121,7 +129,10 @@ watch(
           delete: false,
           export: false,
           assign: false,
+          transition: false,
         };
+      } else if (localPermissions[r.slug].transition === undefined) {
+        localPermissions[r.slug].transition = false;
       }
     });
   },
@@ -132,7 +143,7 @@ watch(
   () => props.modelValue,
   (val) => {
     Object.keys(val).forEach((k) => {
-      localPermissions[k] = { ...val[k] };
+      localPermissions[k] = { transition: false, ...val[k] } as Permission;
     });
   },
   { deep: true },
@@ -152,5 +163,6 @@ const abilityList = [
   { key: 'delete', label: t('abilities.delete') },
   { key: 'export', label: t('abilities.export') },
   { key: 'assign', label: t('abilities.assign') },
+  { key: 'transition', label: t('abilities.transition') },
 ];
 </script>

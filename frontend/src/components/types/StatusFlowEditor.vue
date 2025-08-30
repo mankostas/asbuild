@@ -161,7 +161,12 @@
         </table>
       </div>
     </div>
-    <Modal :open="showAddStatusModal" @close="closeAddStatusModal">
+    <Modal
+      :open="showAddStatusModal"
+      :title="t('types.workflow.addStatus')"
+      :label="t('types.workflow.addStatus')"
+      @close="closeAddStatusModal"
+    >
       <template #header>{{ t('types.workflow.addStatus') }}</template>
       <template #body>
         <VueSelect

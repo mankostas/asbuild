@@ -359,6 +359,7 @@ interface Permission {
   delete: boolean;
   export: boolean;
   assign: boolean;
+  transition: boolean;
 }
 
 const name = ref('');
@@ -494,7 +495,10 @@ onMounted(async () => {
                 delete: false,
                 export: false,
                 assign: false,
+                transition: false,
               };
+            } else if (permissions.value[r.slug].transition === undefined) {
+              permissions.value[r.slug].transition = false;
             }
           });
         } catch {
@@ -574,7 +578,10 @@ function loadVersion(v: any) {
         delete: false,
         export: false,
         assign: false,
+        transition: false,
       };
+    } else if (permissions.value[r.slug].transition === undefined) {
+      permissions.value[r.slug].transition = false;
     }
   });
 }
