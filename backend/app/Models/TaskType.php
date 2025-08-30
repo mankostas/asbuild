@@ -44,4 +44,9 @@ class TaskType extends Model
     {
         return $this->belongsTo(TaskTypeVersion::class, 'current_version_id');
     }
+
+    public function slaPolicies(): HasMany
+    {
+        return $this->hasMany(TaskSlaPolicy::class);
+    }
 }

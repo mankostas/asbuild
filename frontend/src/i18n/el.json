@@ -164,6 +164,13 @@
       "transitions": "Μεταβάσεις"
     }
   },
+  "slaPolicies": {
+    "title": "Πολιτικές SLA",
+    "priority": "Προτεραιότητα",
+    "responseWithin": "Απόκριση εντός (λεπτά)",
+    "resolveWithin": "Επίλυση εντός (λεπτά)",
+    "calendar": "Ημερολόγιο JSON"
+  },
   "dashboard": {
     "messages": {
       "loadFailed": "Αποτυχία φόρτωσης δεδομένων πίνακα.",

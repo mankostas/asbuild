@@ -1068,6 +1068,144 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/task-types/{task_type}/sla-policies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List SLA policies */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    task_type: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Policies */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data?: components["schemas"]["TaskSlaPolicy"][];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Create SLA policy */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    task_type: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TaskSlaPolicy"];
+                };
+            };
+            responses: {
+                /** @description Policy */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data?: components["schemas"]["TaskSlaPolicy"];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/task-types/{task_type}/sla-policies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update SLA policy */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    task_type: number;
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TaskSlaPolicy"];
+                };
+            };
+            responses: {
+                /** @description Policy */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data?: components["schemas"]["TaskSlaPolicy"];
+                        };
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** Delete SLA policy */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    task_type: number;
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Deleted */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message?: string;
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/task-statuses": {
         parameters: {
             query?: never;
@@ -1351,6 +1489,13 @@ export interface components {
             mentions?: components["schemas"]["Employee"][];
             /** Format: date-time */
             created_at?: string;
+        };
+        TaskSlaPolicy: {
+            id?: number;
+            priority?: string;
+            response_within_mins?: number | null;
+            resolve_within_mins?: number | null;
+            calendar_json?: Record<string, never> | null;
         };
         TaskSubtask: {
             id?: number;

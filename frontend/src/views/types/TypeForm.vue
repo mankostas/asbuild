@@ -30,6 +30,11 @@
         v-model:statuses="statuses"
         class="p-4 border-b"
       />
+      <SLAPolicyEditor
+        v-if="isEdit"
+        :task-type-id="Number(route.params.id)"
+        class="p-4 border-b"
+      />
       <div class="flex h-[calc(100vh-3rem)]">
         <aside class="w-1/5 border-r overflow-y-auto">
           <FieldPalette :groups="paletteGroups" @select="onAddField" />
@@ -69,6 +74,7 @@ import CanvasSection from '@/components/types/CanvasSection.vue';
 import InspectorTabs from '@/components/types/Inspector/InspectorTabs.vue';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
 import WorkflowDesigner from '@/components/types/WorkflowDesigner.vue';
+import SLAPolicyEditor from '@/components/types/SLAPolicyEditor.vue';
 import { can } from '@/stores/auth';
 import api from '@/services/api';
 import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
