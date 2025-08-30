@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Services\FormSchemaService;
 
 /**
  * @property array|null $schema_json Schema definition
@@ -55,5 +57,14 @@ class TaskType extends Model
     public function automations(): HasMany
     {
         return $this->hasMany(TaskAutomation::class);
+    }
+
+    protected function schemaJson(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => app(FormSchemaService::class)->normalizeSchema(
+                is_array($value) ? $value : (json_decode($value ?: '[]', true) ?? [])
+            ),
+        );
     }
 }

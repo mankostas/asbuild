@@ -1,18 +1,18 @@
 <!-- eslint-disable vue/v-on-event-hyphenation -->
 <template>
   <div class="mb-6">
-    <h3 class="font-medium mb-2">{{ section.label }}</h3>
+    <h3 class="font-medium mb-2">{{ tr(section.label) }}</h3>
     <div class="grid grid-cols-2 gap-4">
       <template v-for="field in section.fields" :key="field.key">
         <div v-if="isVisible(field.key) && field.type === 'divider'" class="col-span-2">
           <hr />
         </div>
         <div v-else-if="isVisible(field.key) && field.type === 'headline'" class="col-span-2 font-bold">
-          {{ field.label }}
+          {{ tr(field.label) }}
         </div>
         <div v-else-if="isVisible(field.key)" :class="colClass(field)">
           <span class="block font-medium mb-1">
-            {{ field.label }}<span v-if="isRequired(field)" class="text-red-600">*</span>
+            {{ tr(field.label) }}<span v-if="isRequired(field)" class="text-red-600">*</span>
           </span>
           <input
             v-if="isText(field.type)"
@@ -21,35 +21,36 @@
             :type="inputType(field.type)"
             class="border rounded p-2 w-full"
             :readonly="readonly"
-            :aria-label="field.label"
+            :aria-label="tr(field.label)"
+            :placeholder="tr(field.placeholder)"
             @input="emitUpdate(field)"
           />
           <DateInput
             v-else-if="field.type === 'date'"
             v-model="local[field.key]"
             :readonly="readonly"
-            :aria-label="field.label"
+            :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
           />
           <TimeInput
             v-else-if="field.type === 'time'"
             v-model="local[field.key]"
             :readonly="readonly"
-            :aria-label="field.label"
+            :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
           />
           <DateTimeInput
             v-else-if="field.type === 'datetime'"
             v-model="local[field.key]"
             :readonly="readonly"
-            :aria-label="field.label"
+            :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
           />
           <DurationInput
             v-else-if="field.type === 'duration'"
             v-model="local[field.key]"
             :readonly="readonly"
-            :aria-label="field.label"
+            :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
           />
           <textarea
@@ -58,7 +59,8 @@
             v-model="local[field.key]"
             class="border rounded p-2 w-full"
             :readonly="readonly"
-            :aria-label="field.label"
+            :aria-label="tr(field.label)"
+            :placeholder="tr(field.placeholder)"
             @input="emitUpdate(field)"
           />
           <select
@@ -67,7 +69,7 @@
             v-model="local[field.key]"
             class="border rounded p-2 w-full"
             :disabled="readonly"
-            :aria-label="field.label"
+            :aria-label="tr(field.label)"
             @change="emitUpdate(field)"
           >
             <option value="" disabled>Select...</option>
@@ -80,7 +82,7 @@
             multiple
             class="border rounded p-2 w-full"
             :disabled="readonly"
-            :aria-label="field.label"
+            :aria-label="tr(field.label)"
             @change="emitUpdate(field)"
           >
             <option v-for="opt in field.enum" :key="opt" :value="opt">{{ opt }}</option>
@@ -91,7 +93,7 @@
             :name="field.key"
             :options="field.enum"
             :readonly="readonly"
-            :aria-label="field.label"
+            :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
           />
           <CheckboxGroup
@@ -100,7 +102,7 @@
             :name="field.key"
             :options="field.enum"
             :readonly="readonly"
-            :aria-label="field.label"
+            :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
           />
           <ChipsInput
@@ -108,7 +110,7 @@
             v-model="local[field.key]"
             :options="field.enum"
             :readonly="readonly"
-            :aria-label="field.label"
+            :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
           />
           <input
@@ -117,7 +119,7 @@
             v-model="local[field.key]"
             type="checkbox"
             :disabled="readonly"
-            :aria-label="field.label"
+            :aria-label="tr(field.label)"
             @change="emitUpdate(field)"
           />
           <AssigneePicker
@@ -134,14 +136,14 @@
             v-else-if="field.type === 'richtext'"
             v-model="local[field.key]"
             :readonly="readonly"
-            :aria-label="field.label"
+            :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
           />
           <MarkdownInput
             v-else-if="field.type === 'markdown'"
             v-model="local[field.key]"
             :readonly="readonly"
-            :aria-label="field.label"
+            :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
           />
           <div v-else-if="field.type === 'file'">
@@ -168,11 +170,12 @@
               v-if="!files[field.key]"
               :id="field.key"
               type="file"
-              :aria-label="field.label"
+              :aria-label="tr(field.label)"
               @change="onFile(field, $event)"
             />
           </div>
-          <div v-if="errors[field.key]" class="text-red-600 text-sm mt-1">{{ errors[field.key] }}</div>
+          <p v-if="field.help" class="text-xs text-gray-500">{{ tr(field.help) }}</p>
+          <div v-if="errors[field.key]" class="text-red-600 text-sm mt-1" role="alert">{{ errors[field.key] }}</div>
         </div>
       </template>
       <template v-for="photo in section.photos" :key="photo.key">
@@ -215,13 +218,18 @@ import DurationInput from '@/components/fields/DurationInput.vue';
 import { uploadFile } from '@/services/uploader';
 import { useI18n } from 'vue-i18n';
 import { validate as runValidators } from '@/utils/validators';
+import { resolveI18n } from '@/utils/i18n';
 
 const props = defineProps<{ section: any; form: any; errors: Record<string, string>; taskId: number; readonly?: boolean; visible: Set<string>; required: Set<string>; showTargets: Set<string> }>();
 const emit = defineEmits<{ (e: 'update', payload: { key: string; value: any }): void; (e: 'error', payload: { key: string; msg: string }): void }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const local = reactive<any>(props.form);
 const files = reactive<Record<string, { preview: string | null; name: string } | null>>({});
+
+function tr(val: any) {
+  return resolveI18n(val, locale.value);
+}
 
 function colClass(field: any) {
   return field['x-cols'] === 1 ? 'col-span-1' : 'col-span-2';

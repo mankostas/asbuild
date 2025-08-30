@@ -106,6 +106,62 @@
           <span>{{ t('validation.unique') }}</span>
         </label>
       </div>
+      <div v-else-if="active === 'i18n'" class="space-y-2">
+        <label class="block text-sm" for="i18nLabelEl">
+          <span class="block mb-1">{{ t('Label') }} EL</span>
+          <input
+            id="i18nLabelEl"
+            v-model="selected!.label.el"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Label Greek"
+          />
+        </label>
+        <label class="block text-sm" for="i18nLabelEn">
+          <span class="block mb-1">{{ t('Label') }} EN</span>
+          <input
+            id="i18nLabelEn"
+            v-model="selected!.label.en"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Label English"
+          />
+        </label>
+        <label class="block text-sm" for="i18nPhEl">
+          <span class="block mb-1">{{ t('fields.placeholder') }} EL</span>
+          <input
+            id="i18nPhEl"
+            v-model="selected!.placeholder.el"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Placeholder Greek"
+          />
+        </label>
+        <label class="block text-sm" for="i18nPhEn">
+          <span class="block mb-1">{{ t('fields.placeholder') }} EN</span>
+          <input
+            id="i18nPhEn"
+            v-model="selected!.placeholder.en"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Placeholder English"
+          />
+        </label>
+        <label class="block text-sm" for="i18nHelpEl">
+          <span class="block mb-1">{{ t('fields.help') }} EL</span>
+          <input
+            id="i18nHelpEl"
+            v-model="selected!.help.el"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Help Greek"
+          />
+        </label>
+        <label class="block text-sm" for="i18nHelpEn">
+          <span class="block mb-1">{{ t('fields.help') }} EN</span>
+          <input
+            id="i18nHelpEn"
+            v-model="selected!.help.en"
+            class="w-full border rounded px-2 py-1"
+            aria-label="Help English"
+          />
+        </label>
+      </div>
       <div v-else class="text-sm text-gray-500" tabindex="0">{{ t('Not implemented') }}</div>
     </div>
     <div v-else class="text-sm text-gray-500">{{ t('Select a field') }}</div>
@@ -114,19 +170,30 @@
 
 <script setup lang="ts">
 /* eslint-disable vue/no-mutating-props */
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{ selected: any | null }>();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const tabs = ['Basics', 'Validation', 'Logic', 'Roles', 'i18n', 'Data'];
 const active = ref('Basics');
 const label = computed({
-  get: () => props.selected?.label ?? '',
+  get: () => props.selected?.label?.[locale.value] ?? '',
   set: (val: string) => {
-    if (props.selected) props.selected.label = val;
+    if (props.selected) props.selected.label[locale.value] = val;
   },
 });
+watch(
+  () => props.selected,
+  (val) => {
+    if (val) {
+      val.label ||= { en: '', el: '' };
+      val.placeholder ||= { en: '', el: '' };
+      val.help ||= { en: '', el: '' };
+    }
+  },
+  { immediate: true },
+);
 const validations = computed(() => {
   if (!props.selected) return {} as any;
   if (!props.selected.validations) props.selected.validations = {};

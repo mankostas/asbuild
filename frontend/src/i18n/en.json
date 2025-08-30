@@ -220,5 +220,10 @@
     "size": "Max Size",
     "unique": "Unique",
     "required": "Required"
+  },
+  "fields": {
+    "placeholder": "Placeholder",
+    "help": "Help",
+    "reorderHint": "Use Alt+Arrow keys to reorder"
   }
 }

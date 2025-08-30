@@ -1857,6 +1857,7 @@ export interface components {
         TaskType: {
             id?: number;
             name?: string;
+            /** @description Form schema. Text fields support string or {en,el} objects. */
             schema_json?: Record<string, never> | null;
             statuses?: {
                 [key: string]: string[];
@@ -1869,6 +1870,7 @@ export interface components {
             id?: number;
             task_type_id?: number;
             semver?: string;
+            /** @description Form schema. Text fields support string or {en,el} objects. */
             schema_json?: Record<string, never> | null;
             statuses?: Record<string, never> | null;
             status_flow_json?: Record<string, never> | null;
