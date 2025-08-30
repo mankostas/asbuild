@@ -99,7 +99,8 @@ export const routes = [
     component: () => import('@/views/types/TypesList.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['task_types.view', 'task_types.manage'],
+      requiredAbilities: ['task_types.view'],
+      abilities: ['task_types.manage', 'task_field_snippets.manage'],
       breadcrumb: 'routes.taskTypes',
       title: 'Task Types',
       layout: 'app',
@@ -111,7 +112,8 @@ export const routes = [
     component: () => import('@/views/types/TypeForm.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['task_types.create', 'task_types.manage', 'task_type_versions.manage', 'task_sla_policies.manage', 'task_automations.manage'],
+      requiredAbilities: ['task_types.view'],
+      abilities: ['task_types.manage', 'task_type_versions.manage', 'task_sla_policies.manage', 'task_automations.manage'],
       breadcrumb: 'routes.taskTypeCreate',
       title: 'Create Task Type',
       layout: 'app',
@@ -124,7 +126,8 @@ export const routes = [
     component: () => import('@/views/types/TypeForm.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['task_types.update', 'task_types.manage', 'task_type_versions.manage', 'task_sla_policies.manage', 'task_automations.manage'],
+      requiredAbilities: ['task_types.view'],
+      abilities: ['task_types.manage', 'task_type_versions.manage', 'task_sla_policies.manage', 'task_automations.manage'],
       breadcrumb: 'routes.taskTypeEdit',
       title: 'Edit Task Type',
       layout: 'app',

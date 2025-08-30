@@ -16,7 +16,7 @@ export const menuItems = [
     title: "Task Types",
     icon: "heroicons-outline:tag",
     link: "taskTypes.list",
-    requiredAbilities: ["task_types.view", "task_types.manage"],
+    requiredAbilities: ["task_types.view"],
   },
   {
     title: "Teams",
@@ -107,7 +107,7 @@ export const topMenu = [
     title: "Task Types",
     icon: "heroicons-outline:tag",
     link: "taskTypes.list",
-    requiredAbilities: ["task_types.view", "task_types.manage"],
+    requiredAbilities: ["task_types.view"],
   },
   {
     title: "Teams",

@@ -1,5 +1,5 @@
 <template>
-  <Drawer :open="open" @close="close">
+  <Drawer v-if="can('task_field_snippets.manage')" :open="open" @close="close">
     <div class="w-full max-w-md p-4 space-y-6">
       <h2 class="text-lg font-bold">{{ t('templates.title') }}</h2>
       <div>
@@ -41,6 +41,7 @@ import Drawer from '@/components/ui/Drawer/index.vue';
 import Select from '@/components/ui/Select/index.vue';
 import Button from '@/components/ui/Button/index.vue';
 import Fileinput from '@/components/ui/Fileinput/index.vue';
+import { can } from '@/stores/auth';
 import { useTaskTypesStore } from '@/stores/taskTypes';
 
 interface Props {

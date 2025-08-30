@@ -59,6 +59,7 @@
             classInput="text-xs"
           />
           <Button
+            v-if="can('task_types.manage') && can('task_type_versions.manage')"
             type="button"
             :aria-label="t('actions.duplicate')"
             btnClass="btn-outline-primary text-xs px-3 py-1"
@@ -67,6 +68,7 @@
             {{ t('actions.duplicate') }}
           </Button>
           <Button
+            v-if="can('task_types.manage') && can('task_type_versions.manage')"
             type="button"
             :aria-label="t('actions.publish')"
             btnClass="btn-outline-primary text-xs px-3 py-1"
@@ -75,6 +77,7 @@
             {{ t('actions.publish') }}
           </Button>
           <Button
+            v-if="can('task_types.manage') && can('task_type_versions.manage')"
             type="button"
             :aria-label="t('actions.delete')"
             btnClass="btn-outline-danger text-xs px-3 py-1"
@@ -83,6 +86,7 @@
             {{ t('actions.delete') }}
           </Button>
           <Button
+            v-if="can('task_types.manage')"
             type="submit"
             :aria-label="t('actions.save')"
             btnClass="btn-primary text-xs px-3 py-1"
@@ -122,12 +126,12 @@
         class="p-4 border-b"
       />
       <SLAPolicyEditor
-        v-if="isEdit"
+        v-if="isEdit && can('task_sla_policies.manage')"
         :task-type-id="Number(route.params.id)"
         class="p-4 border-b"
       />
       <AutomationsEditor
-        v-if="isEdit"
+        v-if="isEdit && can('task_automations.manage')"
         :task-type-id="Number(route.params.id)"
         class="p-4 border-b"
       />
@@ -140,6 +144,7 @@
                 <h3 class="text-sm font-medium">{{ t('builder.canvas') }}</h3>
                 <div class="flex gap-2">
                   <Button
+                    v-if="can('task_types.manage')"
                     type="button"
                     btnClass="btn-outline-primary text-xs"
                     :aria-label="t('actions.add')"
@@ -148,6 +153,7 @@
                     {{ t('Section') }}
                   </Button>
                   <Button
+                    v-if="can('task_types.manage')"
                     type="button"
                     btnClass="btn-outline-primary text-xs"
                     :aria-label="t('actions.add')"
@@ -212,6 +218,7 @@
               <TabPanel>
                 <div class="mt-4">
                   <Button
+                    v-if="can('task_types.manage')"
                     type="button"
                     btnClass="btn-outline-primary text-xs mb-4"
                     :aria-label="t('actions.add')"
@@ -220,6 +227,7 @@
                     {{ t('Section') }}
                   </Button>
                   <Button
+                    v-if="can('task_types.manage')"
                     type="button"
                     btnClass="btn-outline-primary text-xs mb-4 ml-2"
                     :aria-label="t('actions.add')"
@@ -378,11 +386,7 @@ const fieldTypes = [
 const tenants = computed(() => tenantStore.tenants);
 
 const isEdit = computed(() => route.name === 'taskTypes.edit');
-const canAccess = computed(() =>
-  isEdit.value
-    ? can('task_types.update') || can('task_types.manage')
-    : can('task_types.create') || can('task_types.manage'),
-);
+const canAccess = computed(() => can('task_types.view'));
 
 watch(previewLang, (lang) => {
   locale.value = lang;
