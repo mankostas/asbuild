@@ -179,6 +179,8 @@ class TaskController extends Controller
             return;
         }
 
+        $this->formSchemaService->assertCanEdit($type->schema_json, $data, auth()->user());
+
         $fields = collect($type->schema_json['sections'] ?? [])
             ->flatMap(fn ($s) => $s['fields'] ?? []);
         $logic = $this->formSchemaService->evaluateLogic($type->schema_json, $data);
