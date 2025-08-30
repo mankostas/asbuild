@@ -13,6 +13,8 @@
     "save": "Save",
     "publish": "Publish",
     "duplicate": "Duplicate",
+    "addSection": "Add Section",
+    "addField": "Add Field",
     "cancel": "Cancel",
     "retry": "Retry",
     "add": "Add",
@@ -25,7 +27,10 @@
   },
   "a11y": {
     "skipToContent": "Skip to content",
-    "language": "Language"
+    "language": "Language",
+    "dragToReorder": "Drag to reorder",
+    "removeSection": "Remove section",
+    "enableAutomation": "Enable automation"
   },
   "commandPalette": {
     "title": "Command palette",
@@ -40,6 +45,8 @@
   "profile": {
     "settings": "Settings"
   },
+  "Version": "Version",
+  "Section": "Section",
   "routes": {
     "dashboard": "Dashboard",
     "tasks": "Tasks",
@@ -215,6 +222,7 @@
     "title": "Preview",
     "runValidation": "Run Validation",
     "language": "Language",
+    "version": "Version",
     "theme": "Theme",
     "viewport": "Viewport",
     "light": "Light",
