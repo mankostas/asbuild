@@ -35,7 +35,7 @@ class FormSchemaService
 
     protected function validateField(array $field): void
     {
-        $allowed = ['text','textarea','number','date','time','datetime','email','phone','url','boolean','select','multiselect','radio','checkbox','chips','assignee','file','photo_single','photo_repeater','repeater'];
+        $allowed = ['text','textarea','number','date','time','datetime','duration','email','phone','url','boolean','select','multiselect','radio','checkbox','chips','assignee','file','photo_single','photo_repeater','repeater'];
         if (! isset($field['key'], $field['label']) || ! in_array($field['type'] ?? '', $allowed, true)) {
             throw ValidationException::withMessages([
                 'schema_json' => 'invalid field',
@@ -56,6 +56,87 @@ class FormSchemaService
                 $this->validateField($sub);
             }
         }
+    }
+
+    /**
+     * Validate data payload against schema types.
+     */
+    public function validateData(array $schema, array $data): void
+    {
+        $fields = collect($schema['sections'] ?? [])
+            ->flatMap(fn ($s) => $s['fields'] ?? []);
+
+        foreach ($fields as $field) {
+            $key = $field['key'] ?? null;
+            if (! $key || ! array_key_exists($key, $data)) {
+                continue;
+            }
+            $val = $data[$key];
+            switch ($field['type'] ?? null) {
+                case 'date':
+                    if (! $this->isValidDate($val)) {
+                        throw ValidationException::withMessages([
+                            "form_data.$key" => 'invalid date',
+                        ]);
+                    }
+                    break;
+                case 'time':
+                    if (! $this->isValidTime($val)) {
+                        throw ValidationException::withMessages([
+                            "form_data.$key" => 'invalid time',
+                        ]);
+                    }
+                    break;
+                case 'datetime':
+                    if (! $this->isValidDateTime($val)) {
+                        throw ValidationException::withMessages([
+                            "form_data.$key" => 'invalid datetime',
+                        ]);
+                    }
+                    break;
+                case 'duration':
+                    if (! $this->isValidDuration($val)) {
+                        throw ValidationException::withMessages([
+                            "form_data.$key" => 'invalid duration',
+                        ]);
+                    }
+                    break;
+            }
+        }
+    }
+
+    protected function isValidDate(mixed $value): bool
+    {
+        if (! is_string($value)) {
+            return false;
+        }
+        $d = \DateTime::createFromFormat('Y-m-d', $value);
+        return $d && $d->format('Y-m-d') === $value;
+    }
+
+    protected function isValidTime(mixed $value): bool
+    {
+        if (! is_string($value)) {
+            return false;
+        }
+        $t = \DateTime::createFromFormat('H:i', $value);
+        return $t && $t->format('H:i') === $value;
+    }
+
+    protected function isValidDateTime(mixed $value): bool
+    {
+        if (! is_string($value)) {
+            return false;
+        }
+        return (bool) strtotime($value);
+    }
+
+    protected function isValidDuration(mixed $value): bool
+    {
+        if (! is_string($value)) {
+            return false;
+        }
+        return preg_match('/^PT\d+M$/', $value) === 1;
     }
 
     /**
