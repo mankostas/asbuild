@@ -22,7 +22,7 @@
         <li>Due: {{ format(task.due_at) || '—' }}</li>
         <li>Started: {{ format(task.started_at) || '—' }}</li>
         <li>Completed: {{ format(task.completed_at) || '—' }}</li>
-        <li>Assignee: {{ task.assignee?.label || '—' }}</li>
+        <li>Assignee: {{ task.assignee?.name || '—' }}</li>
         <li>Priority: {{ task.priority || '—' }}</li>
         <li>SLA End: {{ format(task.sla_end_at) || '—' }}</li>
         <li>SLA: {{ slaStatus }}</li>

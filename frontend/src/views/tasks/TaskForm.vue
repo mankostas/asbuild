@@ -101,7 +101,7 @@ const status = ref('');
 const serverError = ref('');
 const showError = ref(false);
 const originalStatus = ref('');
-const assignee = ref<{ kind: 'team' | 'employee'; id: number } | null>(null);
+const assignee = ref<{ id: number } | null>(null);
 const priority = ref('');
 const dueAt = ref('');
 
@@ -149,7 +149,7 @@ onMounted(async () => {
     status.value = task.status;
     originalStatus.value = task.status;
     if (task.assignee) {
-      assignee.value = { kind: task.assignee.kind, id: task.assignee.id };
+      assignee.value = { id: task.assignee.id };
     }
     const flow = task.type?.status_flow_json || [];
     let graph: Record<string, string[]> = {};

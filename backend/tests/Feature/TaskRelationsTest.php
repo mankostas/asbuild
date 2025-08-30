@@ -32,8 +32,7 @@ class TaskRelationsTest extends TestCase
             'tenant_id' => $tenant->id,
             'user_id' => $user->id,
             'title' => 'Task',
-            'assignee_type' => User::class,
-            'assignee_id' => $user->id,
+            'assigned_user_id' => $user->id,
         ]);
 
         $comment = TaskComment::create([

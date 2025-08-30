@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Task;
-use App\Models\Team;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class CalendarController extends Controller
@@ -15,8 +13,7 @@ class CalendarController extends Controller
         $data = $request->validate([
             'start' => 'required|date',
             'end' => 'required|date',
-            'team_id' => 'nullable|integer',
-            'employee_id' => 'nullable|integer',
+            'assignee_id' => 'nullable|integer',
             'type_id' => 'nullable|integer',
             'status_id' => 'nullable|string',
         ]);
@@ -25,14 +22,8 @@ class CalendarController extends Controller
             ->with(['type', 'assignee'])
             ->whereBetween('scheduled_at', [$data['start'], $data['end']]);
 
-        if ($request->filled('team_id')) {
-            $query->where('assignee_type', Team::class)
-                ->where('assignee_id', $request->query('team_id'));
-        }
-
-        if ($request->filled('employee_id')) {
-            $query->where('assignee_type', User::class)
-                ->where('assignee_id', $request->query('employee_id'));
+        if ($request->filled('assignee_id')) {
+            $query->where('assigned_user_id', $request->query('assignee_id'));
         }
 
         if ($request->filled('type_id')) {

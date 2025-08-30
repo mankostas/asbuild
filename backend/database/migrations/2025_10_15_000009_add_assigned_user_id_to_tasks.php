@@ -17,7 +17,7 @@ return new class extends Migration
                     $table->dropColumn('assignee_id');
                 }
                 if (! Schema::hasColumn('tasks', 'assigned_user_id')) {
-                    $table->unsignedBigInteger('assigned_user_id')->nullable();
+                    $table->unsignedBigInteger('assigned_user_id')->nullable()->after('user_id');
                     $table->index('assigned_user_id');
                 }
             });
@@ -30,6 +30,13 @@ return new class extends Migration
             Schema::table('tasks', function (Blueprint $table) {
                 if (Schema::hasColumn('tasks', 'assigned_user_id')) {
                     $table->dropColumn('assigned_user_id');
+                }
+                if (! Schema::hasColumn('tasks', 'assignee_type')) {
+                    $table->string('assignee_type', 50)->nullable();
+                }
+                if (! Schema::hasColumn('tasks', 'assignee_id')) {
+                    $table->unsignedBigInteger('assignee_id')->nullable();
+                    $table->index(['assignee_type', 'assignee_id']);
                 }
             });
         }

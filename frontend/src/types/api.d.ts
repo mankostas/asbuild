@@ -18,7 +18,6 @@ export interface paths {
                     type?: number;
                     status?: string;
                     assignee?: number;
-                    team?: number;
                     priority?: number;
                     due_from?: string;
                     due_to?: string;

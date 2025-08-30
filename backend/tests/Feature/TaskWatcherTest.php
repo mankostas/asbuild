@@ -174,7 +174,7 @@ class TaskWatcherTest extends TestCase
 
         $payload = [
             'task_type_id' => $type->id,
-            'assignee' => ['kind' => 'employee', 'id' => $assignee->id],
+            'assignee' => ['id' => $assignee->id],
         ];
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/tasks', $payload)
