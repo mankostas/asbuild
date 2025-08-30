@@ -3,10 +3,16 @@
     <div v-if="selected" class="inspector">
       <UiTabs>
         <template #list>
-          <Tab as="template" v-for="tab in tabs" :key="tab" v-slot="{ selected: isSelected }">
+          <Tab
+            v-for="tab in tabs"
+            :key="tab"
+            #default="{ selected: isSelected }"
+            as="template"
+          >
             <button
               class="px-2 py-1 text-sm rounded"
-              :class="isSelected ? 'bg-primary-500 text-white' : 'bg-gray-100'">
+              :class="isSelected ? 'bg-primary-500 text-white' : 'bg-gray-100'"
+            >
               {{ tab }}
             </button>
           </Tab>
@@ -14,38 +20,58 @@
         <template #panel>
           <TabPanel>
             <div class="space-y-2">
-              <Textinput
-                id="fieldLabel"
-                v-model="label"
-                :label="t('Label')"
-                classInput="text-sm"
-              />
-              <Switch id="fieldRequired" v-model="required" :label="t('Required')" />
+              <FromGroup #default="{ inputId, labelId }" :label="t('Label')">
+                <Textinput
+                  :id="inputId"
+                  v-model="label"
+                  :aria-labelledby="labelId"
+                  classInput="text-sm"
+                />
+              </FromGroup>
+              <FromGroup #default="{ inputId, labelId }" :label="t('Required')">
+                <Switch
+                  :id="inputId"
+                  v-model="required"
+                  :aria-labelledby="labelId"
+                />
+              </FromGroup>
             </div>
           </TabPanel>
           <TabPanel>
             <div class="space-y-2">
-              <Textinput
-                id="valRegex"
-                v-model="validations.regex"
-                :label="t('validation.regex')"
-                classInput="text-sm"
-              />
-              <Textinput
-                id="valMin"
-                type="number"
-                v-model.number="validations.min"
-                :label="t('validation.min')"
-                classInput="text-sm"
-              />
-              <Textinput
-                id="valMax"
-                type="number"
-                v-model.number="validations.max"
-                :label="t('validation.max')"
-                classInput="text-sm"
-              />
-              <Switch id="valUnique" v-model="validations.unique" :label="t('validation.unique')" />
+              <FromGroup #default="{ inputId, labelId }" :label="t('validation.regex')">
+                <Textinput
+                  :id="inputId"
+                  v-model="validations.regex"
+                  :aria-labelledby="labelId"
+                  classInput="text-sm"
+                />
+              </FromGroup>
+              <FromGroup #default="{ inputId, labelId }" :label="t('validation.min')">
+                <Textinput
+                  :id="inputId"
+                  v-model.number="validations.min"
+                  type="number"
+                  :aria-labelledby="labelId"
+                  classInput="text-sm"
+                />
+              </FromGroup>
+              <FromGroup #default="{ inputId, labelId }" :label="t('validation.max')">
+                <Textinput
+                  :id="inputId"
+                  v-model.number="validations.max"
+                  type="number"
+                  :aria-labelledby="labelId"
+                  classInput="text-sm"
+                />
+              </FromGroup>
+              <FromGroup #default="{ inputId, labelId }" :label="t('validation.unique')">
+                <Switch
+                  :id="inputId"
+                  v-model="validations.unique"
+                  :aria-labelledby="labelId"
+                />
+              </FromGroup>
             </div>
           </TabPanel>
         </template>
@@ -57,12 +83,13 @@
 
 <script setup lang="ts">
 /* eslint-disable vue/no-mutating-props */
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import UiTabs from '@/components/ui/Tabs/index.vue';
 import { Tab, TabPanel } from '@headlessui/vue';
 import Textinput from '@/components/ui/Textinput/index.vue';
 import Switch from '@/components/ui/Switch/index.vue';
+import FromGroup from '@/components/ui/FromGroup/index.vue';
 
 interface RoleOption {
   id: number;
@@ -84,11 +111,14 @@ const label = computed({
   },
 });
 
-const validations = computed(() => {
-  if (!props.selected) return {} as any;
-  if (!props.selected.validations) props.selected.validations = {};
-  return props.selected.validations;
-});
+const validations = computed(() => props.selected?.validations ?? {});
+watch(
+  () => props.selected,
+  (val) => {
+    if (val && !val.validations) val.validations = {};
+  },
+  { immediate: true },
+);
 
 const required = computed({
   get: () => validations.value.required ?? false,
