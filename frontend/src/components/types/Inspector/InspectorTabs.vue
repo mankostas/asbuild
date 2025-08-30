@@ -180,7 +180,7 @@
           <span class="block mb-1">{{ t('View roles') }}</span>
           <select
             id="rolesView"
-            v-model="roles.value.view"
+            v-model="roles.view"
             multiple
             class="w-full rounded border px-2 py-1"
             aria-label="View roles"
@@ -192,7 +192,7 @@
           <span class="block mb-1">{{ t('Edit roles') }}</span>
           <select
             id="rolesEdit"
-            v-model="roles.value.edit"
+            v-model="roles.edit"
             multiple
             class="w-full rounded border px-2 py-1"
             aria-label="Edit roles"
