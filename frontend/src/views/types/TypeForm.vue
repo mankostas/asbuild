@@ -1,32 +1,102 @@
 <template>
   <div v-if="canAccess" class="type-builder">
     <form @submit.prevent="onSubmit">
-      <header class="builder-header flex items-center justify-between px-4 py-2 shadow">
-        <h1 class="text-lg font-semibold">{{ isEdit ? t('routes.taskTypeEdit') : t('routes.taskTypeCreate') }}</h1>
+      <header class="builder-header flex items-center justify-between px-4 py-2 shadow bg-white">
+        <Breadcrumbs />
         <div class="flex items-center gap-3">
-          <div>
-            <select
-              v-if="versions.length"
-              id="versionSelect"
-              v-model="selectedVersionId"
-              class="text-xs px-2 py-1 border rounded"
-              :aria-label="t('Version')"
-              @change="onVersionChange"
-            >
-              <option v-for="v in versions" :key="v.id" :value="v.id">v{{ v.semver }}</option>
-            </select>
-            <span v-else class="text-xs px-2 py-1 border rounded" :aria-label="t('Version')">v1</span>
-          </div>
-          <label class="flex items-center gap-1" for="previewToggle">
-            <input
-              id="previewToggle"
-              v-model="showPreview"
-              type="checkbox"
-              :aria-label="t('preview.title')"
-            />
-            <span>{{ t('preview.title') }}</span>
-          </label>
-          <button type="submit" class="px-3 py-1 bg-indigo-600 text-white rounded" aria-label="Save">{{ t('Save') }}</button>
+          <Select
+            v-if="versions.length"
+            id="versionSelect"
+            v-model="selectedVersionId"
+            :options="versions.map((v) => ({ value: v.id, label: `v${v.semver}` }))"
+            :label="t('Version')"
+            class="w-24"
+            classLabel="sr-only"
+            classInput="text-xs"
+            @change="onVersionChange"
+          />
+          <span v-else class="text-xs px-2 py-1 border rounded" :aria-label="t('Version')">v1</span>
+          <Badge
+            v-if="currentVersion"
+            :label="t(`versionStatus.${versionStatusLabel}`)"
+            :badgeClass="versionStatusClass"
+          />
+          <Select
+            id="localeSelect"
+            v-model="previewLang"
+            :options="[
+              { value: 'el', label: 'EL' },
+              { value: 'en', label: 'EN' },
+            ]"
+            :label="t('preview.language')"
+            class="w-24"
+            classLabel="sr-only"
+            classInput="text-xs"
+          />
+          <Select
+            id="previewTheme"
+            v-model="previewTheme"
+            :options="[
+              { value: 'light', label: t('preview.light') },
+              { value: 'dark', label: t('preview.dark') },
+            ]"
+            :label="t('preview.theme')"
+            class="w-28"
+            classLabel="sr-only"
+            classInput="text-xs"
+          />
+          <Select
+            id="previewViewport"
+            v-model="previewViewport"
+            :options="[
+              { value: 'mobile', label: t('preview.mobile') },
+              { value: 'tablet', label: t('preview.tablet') },
+              { value: 'desktop', label: t('preview.desktop') },
+            ]"
+            :label="t('preview.viewport')"
+            class="w-28"
+            classLabel="sr-only"
+            classInput="text-xs"
+          />
+          <Button
+            type="button"
+            :aria-label="t('preview.title')"
+            :btnClass="`${showPreview ? 'btn-primary' : 'btn-outline-primary'} text-xs px-3 py-1`"
+            @click="togglePreview"
+          >
+            {{ t('preview.title') }}
+          </Button>
+          <Button
+            type="button"
+            :aria-label="t('actions.duplicate')"
+            btnClass="btn-outline-primary text-xs px-3 py-1"
+            @click="duplicateVersion"
+          >
+            {{ t('actions.duplicate') }}
+          </Button>
+          <Button
+            type="button"
+            :aria-label="t('actions.publish')"
+            btnClass="btn-outline-primary text-xs px-3 py-1"
+            @click="publishVersion"
+          >
+            {{ t('actions.publish') }}
+          </Button>
+          <Button
+            type="button"
+            :aria-label="t('actions.delete')"
+            btnClass="btn-outline-danger text-xs px-3 py-1"
+            @click="deleteVersion"
+          >
+            {{ t('actions.delete') }}
+          </Button>
+          <Button
+            type="submit"
+            :aria-label="t('actions.save')"
+            btnClass="btn-primary text-xs px-3 py-1"
+          >
+            {{ t('actions.save') }}
+          </Button>
         </div>
       </header>
       <div class="grid grid-cols-2 gap-4 p-4 border-b">
@@ -97,42 +167,14 @@
       </div>
       <div v-if="showPreview" class="builder-preview p-4 border-t">
           <div class="flex items-center gap-2 mb-2">
-            <select
-              id="previewLang"
-              v-model="previewLang"
-              class="text-xs px-2 py-1 border rounded"
-              :aria-label="t('preview.language')"
-            >
-              <option value="el">EL</option>
-              <option value="en">EN</option>
-            </select>
-            <select
-              id="previewTheme"
-              v-model="previewTheme"
-              class="text-xs px-2 py-1 border rounded"
-              :aria-label="t('preview.theme')"
-            >
-              <option value="light">{{ t('preview.light') }}</option>
-              <option value="dark">{{ t('preview.dark') }}</option>
-            </select>
-            <select
-              id="previewViewport"
-              v-model="previewViewport"
-              class="text-xs px-2 py-1 border rounded"
-              :aria-label="t('preview.viewport')"
-            >
-              <option value="mobile">{{ t('preview.mobile') }}</option>
-              <option value="tablet">{{ t('preview.tablet') }}</option>
-              <option value="desktop">{{ t('preview.desktop') }}</option>
-            </select>
-            <button
+            <Button
               type="button"
-              class="px-2 py-1 bg-indigo-600 text-white rounded"
               :aria-label="t('preview.runValidation')"
+              btnClass="btn-primary text-xs px-2 py-1"
               @click="runValidation"
             >
               {{ t('preview.runValidation') }}
-            </button>
+            </Button>
           </div>
           <div :class="[{ dark: previewTheme === 'dark' }, viewportClass]" class="border p-2 overflow-auto">
             <JsonSchemaForm ref="formRef" v-model="previewData" :schema="previewSchema" :task-id="0" />
@@ -160,6 +202,10 @@ import WorkflowDesigner from '@/components/types/WorkflowDesigner.vue';
 import SLAPolicyEditor from '@/components/types/SLAPolicyEditor.vue';
 import AutomationsEditor from '@/components/types/AutomationsEditor.vue';
 import TypeAbilitiesEditor from '@/components/types/TypeAbilitiesEditor.vue';
+import Breadcrumbs from '@/components/ui/Breadcrumbs/index.vue';
+import Button from '@/components/ui/Button/index.vue';
+import Select from '@/components/ui/Select/index.vue';
+import Badge from '@/components/ui/Badge/index.vue';
 import { can } from '@/stores/auth';
 import api from '@/services/api';
 import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
@@ -209,6 +255,25 @@ const validationErrors = ref<Record<string, string>>({});
 const formRef = ref<any>(null);
 const versions = ref<any[]>([]);
 const selectedVersionId = ref<number | null>(null);
+const currentVersion = computed(() =>
+  versions.value.find((v) => v.id === selectedVersionId.value) || null,
+);
+const versionStatusLabel = computed(() => {
+  if (!currentVersion.value) return '';
+  if (currentVersion.value.deprecated_at) return 'deprecated';
+  if (currentVersion.value.published_at) return 'published';
+  return 'draft';
+});
+const versionStatusClass = computed(() => {
+  switch (versionStatusLabel.value) {
+    case 'published':
+      return 'bg-success-500 text-white';
+    case 'deprecated':
+      return 'bg-danger-500 text-white';
+    default:
+      return 'bg-warning-500 text-white';
+  }
+});
 const statuses = ref<string[]>([]);
 const statusFlow = ref<[string, string][]>([]);
 const abilities = ref({
@@ -372,6 +437,30 @@ function onVersionChange() {
   if (v) {
     loadVersion(v);
   }
+}
+
+function togglePreview() {
+  showPreview.value = !showPreview.value;
+}
+
+async function duplicateVersion() {
+  if (!route.params.id) return;
+  await versionsStore.create(Number(route.params.id));
+  versions.value = await versionsStore.list(Number(route.params.id));
+  selectedVersionId.value = versions.value[0]?.id ?? null;
+}
+
+async function publishVersion() {
+  if (!selectedVersionId.value) return;
+  await versionsStore.publish(selectedVersionId.value);
+  versions.value = await versionsStore.list(Number(route.params.id));
+}
+
+async function deleteVersion() {
+  if (!selectedVersionId.value) return;
+  await versionsStore.deprecate(selectedVersionId.value);
+  versions.value = await versionsStore.list(Number(route.params.id));
+  selectedVersionId.value = versions.value[0]?.id ?? null;
 }
 
 function removeSection(index: number) {
