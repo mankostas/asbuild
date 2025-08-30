@@ -102,7 +102,7 @@
         :tenant-options="tenantOptions"
         class="border-b mb-4"
       />
-      <WorkflowDesigner
+      <StatusFlowEditor
         v-model="statusFlow"
         v-model:statuses="statuses"
         class="p-4 border-b"
@@ -278,7 +278,7 @@ import draggable from 'vuedraggable';
 import CanvasSection from '@/components/types/CanvasSection.vue';
 import InspectorTabs from '@/components/types/Inspector/InspectorTabs.vue';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
-import WorkflowDesigner from '@/components/types/WorkflowDesigner.vue';
+import StatusFlowEditor from '@/components/types/StatusFlowEditor.vue';
 import SLAPolicyEditor from '@/components/types/SLAPolicyEditor.vue';
 import AutomationsEditor from '@/components/types/AutomationsEditor.vue';
 import TypeAbilitiesEditor from '@/components/types/TypeAbilitiesEditor.vue';

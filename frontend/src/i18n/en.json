@@ -26,13 +26,14 @@
   "messages": {
     "helloToast": "Hello from toast"
   },
-  "a11y": {
-    "skipToContent": "Skip to content",
-    "language": "Language",
-    "dragToReorder": "Drag to reorder",
-    "removeSection": "Remove section",
-    "enableAutomation": "Enable automation"
-  },
+    "a11y": {
+      "skipToContent": "Skip to content",
+      "language": "Language",
+      "dragToReorder": "Drag to reorder",
+      "removeSection": "Remove section",
+      "enableAutomation": "Enable automation",
+      "movedToPosition": "Moved to position {pos}"
+    },
   "commandPalette": {
     "title": "Command palette",
     "placeholder": "Type to search...",
@@ -188,7 +189,13 @@
     "workflow": {
       "title": "Workflow",
       "addStatus": "Add status",
-      "transitions": "Transitions"
+      "transitions": "Transitions",
+      "addTransition": "Add transition",
+      "from": "From",
+      "to": "To",
+      "condition": "Condition",
+      "noCondition": "Always",
+      "transition": "Transition"
     },
     "form": {
       "name": "Name",
