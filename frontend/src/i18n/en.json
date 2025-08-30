@@ -100,7 +100,8 @@
       "edit": "Allow editing tasks of this type",
       "delete": "Allow deleting tasks of this type",
       "export": "Allow exporting tasks of this type",
-      "assign": "Allow assigning tasks of this type"
+      "assign": "Allow assigning tasks of this type",
+      "transition": "Allow transitioning tasks of this type"
     }
   },
   "tasks": {
