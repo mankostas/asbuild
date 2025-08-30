@@ -85,4 +85,28 @@ class TaskStatusFlowTest extends TestCase
             ->assertStatus(422)
             ->assertJson(['message' => 'invalid_transition']);
     }
+
+    public function test_defaults_when_no_custom_flow(): void
+    {
+        $user = $this->authUser();
+        $type = TaskType::create([
+            'name' => 'Type',
+            'tenant_id' => 1,
+            'statuses' => ['draft' => [], 'assigned' => [], 'completed' => []],
+            'status_flow_json' => null,
+        ]);
+        $task = Task::create([
+            'tenant_id' => 1,
+            'user_id' => $user->id,
+            'task_type_id' => $type->id,
+            'status' => 'draft',
+        ]);
+
+        $this->withHeader('X-Tenant-ID', 1)
+            ->postJson("/api/tasks/{$task->id}/status", ['status' => 'assigned'])
+            ->assertStatus(200);
+        $this->withHeader('X-Tenant-ID', 1)
+            ->postJson("/api/tasks/{$task->id}/status", ['status' => 'completed'])
+            ->assertStatus(422);
+    }
 }

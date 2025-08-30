@@ -1384,6 +1384,7 @@ export interface components {
             statuses?: {
                 [key: string]: string[];
             } | null;
+            status_flow_json?: Record<string, never> | null;
             tenant_id?: number | null;
         };
         TaskTypeVersion: {

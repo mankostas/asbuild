@@ -12,7 +12,9 @@
     "delete": "Διαγραφή",
     "save": "Αποθήκευση",
     "cancel": "Ακύρωση",
-    "retry": "Επανάληψη"
+    "retry": "Επανάληψη",
+    "add": "Προσθήκη",
+    "select": "Επιλογή"
   },
   "messages": {
     "helloToast": "Γεια από το τοστ"
@@ -154,6 +156,13 @@
     "moveRight": "Μετακίνηση δεξιά",
     "addCommentPrompt": "Εισαγωγή σχολίου",
     "errorMove": "Η μετακίνηση δεν επιτρέπεται"
+  },
+  "types": {
+    "workflow": {
+      "title": "Ροή εργασίας",
+      "addStatus": "Προσθήκη κατάστασης",
+      "transitions": "Μεταβάσεις"
+    }
   },
   "dashboard": {
     "messages": {
