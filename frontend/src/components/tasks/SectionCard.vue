@@ -4,7 +4,13 @@
     <h3 class="font-medium mb-2">{{ section.label }}</h3>
     <div class="grid grid-cols-2 gap-4">
       <template v-for="field in section.fields" :key="field.key">
-        <div :class="colClass(field)">
+        <div v-if="field.type === 'divider'" class="col-span-2">
+          <hr />
+        </div>
+        <div v-else-if="field.type === 'headline'" class="col-span-2 font-bold">
+          {{ field.label }}
+        </div>
+        <div v-else :class="colClass(field)">
           <span class="block font-medium mb-1">
             {{ field.label }}<span v-if="field.required" class="text-red-600">*</span>
           </span>
@@ -119,13 +125,53 @@
             v-model="local[field.key]"
             @change="emitUpdate(field)"
           />
-          <input
-            v-else-if="field.type === 'file'"
-            :id="field.key"
-            type="file"
-            :aria-label="field.label"
-            @change="onFile(field, $event)"
+          <ReviewerPicker
+            v-else-if="field.type === 'reviewer'"
+            v-model="local[field.key]"
+            @change="emitUpdate(field)"
           />
+          <RichText
+            v-else-if="field.type === 'richtext'"
+            v-model="local[field.key]"
+            :readonly="readonly"
+            :aria-label="field.label"
+            @update:modelValue="() => emitUpdate(field)"
+          />
+          <MarkdownInput
+            v-else-if="field.type === 'markdown'"
+            v-model="local[field.key]"
+            :readonly="readonly"
+            :aria-label="field.label"
+            @update:modelValue="() => emitUpdate(field)"
+          />
+          <div v-else-if="field.type === 'file'">
+            <div v-if="files[field.key]" class="mb-2 relative inline-block">
+              <img
+                v-if="files[field.key].preview"
+                :src="files[field.key].preview"
+                class="w-32 h-32 object-cover"
+                alt=""
+              />
+              <span v-else>{{ files[field.key].name }}</span>
+              <button
+                type="button"
+                class="absolute top-0 right-0 bg-red-600 text-white px-1"
+                :aria-label="t('actions.delete')"
+                @click="removeFile(field)"
+                @keyup.enter.prevent="removeFile(field)"
+                @keyup.space.prevent="removeFile(field)"
+              >
+                ×
+              </button>
+            </div>
+            <input
+              v-if="!files[field.key]"
+              :id="field.key"
+              type="file"
+              :aria-label="field.label"
+              @change="onFile(field, $event)"
+            />
+          </div>
           <div v-if="errors[field.key]" class="text-red-600 text-sm mt-1">{{ errors[field.key] }}</div>
         </div>
       </template>
@@ -154,6 +200,9 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import AssigneePicker from '@/components/tasks/AssigneePicker.vue';
+import ReviewerPicker from '@/components/fields/ReviewerPicker.vue';
+import RichText from '@/components/fields/RichText.vue';
+import MarkdownInput from '@/components/fields/MarkdownInput.vue';
 import PhotoField from '@/components/tasks/PhotoField.vue';
 import PhotoRepeater from '@/components/tasks/PhotoRepeater.vue';
 import ChipsInput from '@/components/fields/ChipsInput.vue';
@@ -163,11 +212,15 @@ import DateInput from '@/components/fields/DateInput.vue';
 import TimeInput from '@/components/fields/TimeInput.vue';
 import DateTimeInput from '@/components/fields/DateTimeInput.vue';
 import DurationInput from '@/components/fields/DurationInput.vue';
+import { uploadFile } from '@/services/uploader';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{ section: any; form: any; errors: Record<string, string>; taskId: number; readonly?: boolean }>();
 const emit = defineEmits<{ (e: 'update', payload: { key: string; value: any }): void; (e: 'error', payload: { key: string; msg: string }): void }>();
 
+const { t } = useI18n();
 const local = reactive<any>(props.form);
+const files = reactive<Record<string, { preview: string | null; name: string } | null>>({});
 
 function colClass(field: any) {
   return field['x-cols'] === 1 ? 'col-span-1' : 'col-span-2';
@@ -190,9 +243,29 @@ function emitUpdate(field: any) {
   emit('update', { key: field.key, value: local[field.key] });
 }
 
-function onFile(field: any, e: Event) {
+async function onFile(field: any, e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0];
-  emit('update', { key: field.key, value: file });
+  if (!file) return;
+  const uploaded = await uploadFile(file, {
+    taskId: props.taskId,
+    fieldKey: field.key,
+    sectionKey: props.section.key,
+  });
+  if (file.type.startsWith('image/')) {
+    files[field.key] = { preview: URL.createObjectURL(file), name: file.name };
+    uploaded.preview = files[field.key]!.preview;
+  } else {
+    files[field.key] = { preview: null, name: file.name };
+  }
+  local[field.key] = uploaded;
+  emit('update', { key: field.key, value: uploaded });
+  validate(field);
+}
+
+function removeFile(field: any) {
+  files[field.key] = null;
+  local[field.key] = null;
+  emit('update', { key: field.key, value: null });
   validate(field);
 }
 

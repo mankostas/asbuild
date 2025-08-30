@@ -89,6 +89,10 @@ class TaskController extends Controller
         $data['status'] = $type && $type->statuses ? array_key_first($type->statuses) : Task::STATUS_DRAFT;
         $this->validateAgainstSchema($type, $data['form_data'] ?? []);
         $this->formSchemaService->mapAssignee($type->schema_json ?? [], $data);
+        $this->formSchemaService->mapReviewer($type->schema_json ?? [], $data);
+        if (isset($data['form_data'])) {
+            $this->formSchemaService->sanitizeRichText($type->schema_json ?? [], $data['form_data']);
+        }
 
         $task = Task::create($data);
         $task->watchers()->firstOrCreate(['user_id' => $request->user()->id]);
@@ -120,6 +124,10 @@ class TaskController extends Controller
         $type = $typeId ? TaskType::find($typeId) : $task->type;
         $this->validateAgainstSchema($type, $data['form_data'] ?? $task->form_data ?? []);
         $this->formSchemaService->mapAssignee($type->schema_json ?? [], $data);
+        $this->formSchemaService->mapReviewer($type->schema_json ?? [], $data);
+        if (isset($data['form_data'])) {
+            $this->formSchemaService->sanitizeRichText($type->schema_json ?? [], $data['form_data']);
+        }
         $task->fill($data);
         $task->save();
         if ($task->assignee_type === User::class && $task->assignee_id) {

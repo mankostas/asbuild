@@ -26,6 +26,9 @@ class TaskUpsertRequest extends FormRequest
             'assignee' => ['nullable', 'array'],
             'assignee.kind' => ['required_with:assignee', 'in:team,employee'],
             'assignee.id' => ['required_with:assignee', 'integer'],
+            'reviewer' => ['nullable', 'array'],
+            'reviewer.kind' => ['required_with:reviewer', 'in:team,employee'],
+            'reviewer.id' => ['required_with:reviewer', 'integer'],
         ];
 
         if ($task = $this->route('task')) {
@@ -53,6 +56,8 @@ class TaskUpsertRequest extends FormRequest
             'form_data' => 'form data',
             'assignee.kind' => 'assignee type',
             'assignee.id' => 'assignee',
+            'reviewer.kind' => 'reviewer type',
+            'reviewer.id' => 'reviewer',
             'status' => 'status',
         ];
     }
