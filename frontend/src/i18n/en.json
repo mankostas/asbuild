@@ -171,6 +171,13 @@
     "resolveWithin": "Resolve within (mins)",
     "calendar": "Calendar JSON"
   },
+  "automations": {
+    "title": "Automations",
+    "event": "Event",
+    "status": "Status",
+    "team": "Team",
+    "enabled": "Enabled"
+  },
   "dashboard": {
     "messages": {
       "loadFailed": "Failed to load dashboard data.",

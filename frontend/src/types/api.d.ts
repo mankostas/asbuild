@@ -1206,6 +1206,144 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/task-types/{task_type}/automations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List automations */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    task_type: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Automations */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data?: components["schemas"]["TaskAutomation"][];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Create automation */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    task_type: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TaskAutomation"];
+                };
+            };
+            responses: {
+                /** @description Automation */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data?: components["schemas"]["TaskAutomation"];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/task-types/{task_type}/automations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update automation */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    task_type: number;
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TaskAutomation"];
+                };
+            };
+            responses: {
+                /** @description Automation */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data?: components["schemas"]["TaskAutomation"];
+                        };
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** Delete automation */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    task_type: number;
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Deleted */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message?: string;
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/task-statuses": {
         parameters: {
             query?: never;
@@ -1496,6 +1634,14 @@ export interface components {
             response_within_mins?: number | null;
             resolve_within_mins?: number | null;
             calendar_json?: Record<string, never> | null;
+        };
+        TaskAutomation: {
+            id?: number;
+            task_type_id?: number;
+            event?: string;
+            conditions_json?: Record<string, never> | null;
+            actions_json?: Record<string, never>[];
+            enabled?: boolean;
         };
         TaskSubtask: {
             id?: number;

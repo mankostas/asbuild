@@ -171,6 +171,13 @@
     "resolveWithin": "Επίλυση εντός (λεπτά)",
     "calendar": "Ημερολόγιο JSON"
   },
+  "automations": {
+    "title": "Αυτοματισμοί",
+    "event": "Συμβάν",
+    "status": "Κατάσταση",
+    "team": "Ομάδα",
+    "enabled": "Ενεργό"
+  },
   "dashboard": {
     "messages": {
       "loadFailed": "Αποτυχία φόρτωσης δεδομένων πίνακα.",

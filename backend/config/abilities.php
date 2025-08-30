@@ -37,6 +37,7 @@ return [
     'task_types.manage',
     'task_type_versions.manage',
     'task_sla_policies.manage',
+    'task_automations.manage',
 
     // Teams
     'teams.view',

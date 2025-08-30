@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\CalendarController;
 use App\Http\Controllers\Api\BrandingController;
 use App\Http\Controllers\Api\TaskSubtaskController;
 use App\Http\Controllers\Api\TaskSlaPolicyController;
+use App\Http\Controllers\Api\TaskAutomationController;
 use App\Http\Middleware\EnsureTenantScope;
 use App\Http\Middleware\Ability;
 use Illuminate\Http\Request;
@@ -133,6 +134,17 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::delete('task-types/{task_type}/sla-policies/{task_sla_policy}', [TaskSlaPolicyController::class, 'destroy'])
         ->middleware(Ability::class . ':task_sla_policies.manage')
         ->whereNumber('task_sla_policy');
+
+    Route::get('task-types/{task_type}/automations', [TaskAutomationController::class, 'index'])
+        ->middleware(Ability::class . ':task_automations.manage');
+    Route::post('task-types/{task_type}/automations', [TaskAutomationController::class, 'store'])
+        ->middleware(Ability::class . ':task_automations.manage');
+    Route::put('task-types/{task_type}/automations/{task_automation}', [TaskAutomationController::class, 'update'])
+        ->middleware(Ability::class . ':task_automations.manage')
+        ->whereNumber('task_automation');
+    Route::delete('task-types/{task_type}/automations/{task_automation}', [TaskAutomationController::class, 'destroy'])
+        ->middleware(Ability::class . ':task_automations.manage')
+        ->whereNumber('task_automation');
     Route::apiResource('roles', RoleController::class)
         ->only(['index', 'show'])
         ->middleware(Ability::class . ':roles.view');
