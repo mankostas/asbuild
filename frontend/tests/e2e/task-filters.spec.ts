@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test('save and load filter view', async ({ page }) => {
-  await page.goto('about:blank');
+  // provide an http origin and fulfill with empty page so localStorage works
+  await page.route('**/*', (route) => route.fulfill({ body: '<html></html>', contentType: 'text/html' }));
+  await page.goto('http://localhost');
   await page.evaluate(() => {
     localStorage.clear();
     const views: Record<string, any> = {};
@@ -13,7 +15,8 @@ test('save and load filter view', async ({ page }) => {
 });
 
 test('bulk status change respects allowed actions', async ({ page }) => {
-  await page.goto('about:blank');
+  await page.route('**/*', (route) => route.fulfill({ body: '<html></html>', contentType: 'text/html' }));
+  await page.goto('http://localhost');
   const updated = await page.evaluate(() => {
     const selected = [1, 2];
     const actions: Record<number, string[]> = { 1: ['done'], 2: [] };
