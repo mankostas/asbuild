@@ -181,6 +181,10 @@ class TaskController extends Controller
 
         $fields = collect($type->schema_json['sections'] ?? [])
             ->flatMap(fn ($s) => $s['fields'] ?? []);
+        $logic = $this->formSchemaService->evaluateLogic($type->schema_json, $data);
+        $visible = collect($logic['visible']);
+        $showTargets = collect($logic['showTargets']);
+        $requiredOverride = collect($logic['required']);
 
         foreach ($fields as $field) {
             $key = $field['key'] ?? null;
@@ -188,7 +192,15 @@ class TaskController extends Controller
                 continue;
             }
             $rules = $field['validations'] ?? [];
-            if (($rules['required'] ?? false) && ! array_key_exists($key, $data)) {
+
+            $hasShow = $showTargets->contains($key);
+            $isVisible = ! $hasShow || $visible->contains($key);
+            if (! $isVisible) {
+                continue;
+            }
+
+            $isRequired = ($rules['required'] ?? false) || $requiredOverride->contains($key);
+            if ($isRequired && ! array_key_exists($key, $data)) {
                 throw ValidationException::withMessages([
                     "form_data.$key" => 'required',
                 ]);

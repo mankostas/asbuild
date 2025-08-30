@@ -4,15 +4,15 @@
     <h3 class="font-medium mb-2">{{ section.label }}</h3>
     <div class="grid grid-cols-2 gap-4">
       <template v-for="field in section.fields" :key="field.key">
-        <div v-if="field.type === 'divider'" class="col-span-2">
+        <div v-if="isVisible(field.key) && field.type === 'divider'" class="col-span-2">
           <hr />
         </div>
-        <div v-else-if="field.type === 'headline'" class="col-span-2 font-bold">
+        <div v-else-if="isVisible(field.key) && field.type === 'headline'" class="col-span-2 font-bold">
           {{ field.label }}
         </div>
-        <div v-else :class="colClass(field)">
+        <div v-else-if="isVisible(field.key)" :class="colClass(field)">
           <span class="block font-medium mb-1">
-            {{ field.label }}<span v-if="field.validations?.required" class="text-red-600">*</span>
+            {{ field.label }}<span v-if="isRequired(field)" class="text-red-600">*</span>
           </span>
           <input
             v-if="isText(field.type)"
@@ -177,7 +177,7 @@
       </template>
       <template v-for="photo in section.photos" :key="photo.key">
         <PhotoField
-          v-if="photo.type === 'photo_single'"
+          v-if="isVisible(photo.key) && photo.type === 'photo_single'"
           :photo="photo"
           :section-key="section.key"
           :task-id="taskId"
@@ -185,7 +185,7 @@
           @update:modelValue="(v) => updatePhoto(photo.key, v)"
         />
         <PhotoRepeater
-          v-else
+          v-else-if="isVisible(photo.key)"
           :photo="photo"
           :section-key="section.key"
           :task-id="taskId"
@@ -216,7 +216,7 @@ import { uploadFile } from '@/services/uploader';
 import { useI18n } from 'vue-i18n';
 import { validate as runValidators } from '@/utils/validators';
 
-const props = defineProps<{ section: any; form: any; errors: Record<string, string>; taskId: number; readonly?: boolean }>();
+const props = defineProps<{ section: any; form: any; errors: Record<string, string>; taskId: number; readonly?: boolean; visible: Set<string>; required: Set<string>; showTargets: Set<string> }>();
 const emit = defineEmits<{ (e: 'update', payload: { key: string; value: any }): void; (e: 'error', payload: { key: string; msg: string }): void }>();
 
 const { t } = useI18n();
@@ -225,6 +225,14 @@ const files = reactive<Record<string, { preview: string | null; name: string } |
 
 function colClass(field: any) {
   return field['x-cols'] === 1 ? 'col-span-1' : 'col-span-2';
+}
+
+function isVisible(key: string) {
+  return !props.showTargets.has(key) || props.visible.has(key);
+}
+
+function isRequired(field: any) {
+  return (field.validations?.required ?? false) || props.required.has(field.key);
 }
 
 function isText(type: string) {
@@ -275,8 +283,16 @@ function updatePhoto(key: string, value: any) {
 }
 
 function validateField(field: any) {
+  if (!isVisible(field.key)) {
+    emit('error', { key: field.key, msg: '' });
+    return;
+  }
   const val = local[field.key];
-  const msg = runValidators(val, field.validations || {});
+  const rules = { ...(field.validations || {}) } as any;
+  if (props.required.has(field.key)) {
+    rules.required = true;
+  }
+  const msg = runValidators(val, rules);
   emit('error', { key: field.key, msg: msg || '' });
 }
 </script>
