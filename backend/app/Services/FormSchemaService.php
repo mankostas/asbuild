@@ -92,6 +92,46 @@ class FormSchemaService
     }
 
     /**
+     * Evaluate conditional logic against form data.
+     *
+     * @return array{visible: array, required: array, showTargets: array}
+     */
+    public function evaluateLogic(array $schema, array $data): array
+    {
+        $visible = [];
+        $required = [];
+        $showTargets = [];
+
+        foreach ($schema['logic'] ?? [] as $rule) {
+            foreach ($rule['then'] ?? [] as $action) {
+                if (isset($action['show'])) {
+                    $showTargets[] = $action['show'];
+                }
+            }
+
+            $condField = $rule['if']['field'] ?? null;
+            $eq = $rule['if']['eq'] ?? null;
+
+            if ($condField && ($data[$condField] ?? null) === $eq) {
+                foreach ($rule['then'] ?? [] as $action) {
+                    if (isset($action['show'])) {
+                        $visible[] = $action['show'];
+                    }
+                    if (isset($action['require'])) {
+                        $required[] = $action['require'];
+                    }
+                }
+            }
+        }
+
+        return [
+            'visible' => $visible,
+            'required' => $required,
+            'showTargets' => $showTargets,
+        ];
+    }
+
+    /**
      * Validate data payload against schema types.
      */
     public function validateData(array $schema, array $data): void
@@ -99,16 +139,29 @@ class FormSchemaService
         $fields = collect($schema['sections'] ?? [])
             ->flatMap(fn ($s) => $s['fields'] ?? []);
 
+        $logic = $this->evaluateLogic($schema, $data);
+        $visible = collect($logic['visible']);
+        $showTargets = collect($logic['showTargets']);
+        $requiredOverride = collect($logic['required']);
+
         foreach ($fields as $field) {
             $key = $field['key'] ?? null;
             if (! $key) {
                 continue;
             }
             $rules = $field['validations'] ?? [];
+
+            $hasShow = $showTargets->contains($key);
+            $isVisible = ! $hasShow || $visible->contains($key);
+            if (! $isVisible) {
+                continue;
+            }
+
             $present = array_key_exists($key, $data);
             $val = $present ? $data[$key] : null;
 
-            if (($rules['required'] ?? false) && ! $present) {
+            $isRequired = ($rules['required'] ?? false) || $requiredOverride->contains($key);
+            if ($isRequired && ! $present) {
                 throw ValidationException::withMessages([
                     "form_data.$key" => 'required',
                 ]);
