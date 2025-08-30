@@ -188,6 +188,18 @@
       "trend": "Trend"
     }
   },
+  "preview": {
+    "title": "Preview",
+    "runValidation": "Run Validation",
+    "language": "Language",
+    "theme": "Theme",
+    "viewport": "Viewport",
+    "light": "Light",
+    "dark": "Dark",
+    "mobile": "Mobile",
+    "tablet": "Tablet",
+    "desktop": "Desktop"
+  },
   "validation": {
     "regex": "Pattern",
     "min": "Minimum",

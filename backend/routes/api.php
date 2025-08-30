@@ -170,6 +170,10 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':task_types.manage')
         ->name('task-types.copy');
 
+    Route::post('task-types/{task_type}/validate', [TaskTypeController::class, 'previewValidate'])
+        ->middleware(Ability::class . ':task_types.manage')
+        ->name('task-types.validate');
+
     Route::post('roles', [RoleController::class, 'store'])
         ->middleware(Ability::class . ':roles.manage')
         ->name('roles.store');

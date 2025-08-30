@@ -188,6 +188,18 @@
       "trend": "Τάση"
     }
   },
+  "preview": {
+    "title": "Προεπισκόπηση",
+    "runValidation": "Εκτέλεση Ελέγχου",
+    "language": "Γλώσσα",
+    "theme": "Θέμα",
+    "viewport": "Προβολή",
+    "light": "Φωτεινό",
+    "dark": "Σκοτεινό",
+    "mobile": "Κινητό",
+    "tablet": "Tablet",
+    "desktop": "Επιτραπέζιο"
+  },
   "validation": {
     "regex": "Πρότυπο",
     "min": "Ελάχιστο",

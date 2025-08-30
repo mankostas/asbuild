@@ -124,4 +124,23 @@ class TaskTypeController extends Controller
             ->response()
             ->setStatusCode(201);
     }
+
+    public function previewValidate(Request $request, TaskType $taskType)
+    {
+        $this->ensureAdmin($request);
+
+        if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'schema_json' => 'required|array',
+            'form_data' => 'array',
+        ]);
+
+        $this->formSchemaService->validate($data['schema_json']);
+        $this->formSchemaService->validateData($data['schema_json'], $data['form_data'] ?? []);
+
+        return response()->json(['message' => 'ok']);
+    }
 }
