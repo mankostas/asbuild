@@ -74,7 +74,7 @@
               </FromGroup>
             </div>
           </TabPanel>
-          <TabPanel v-if="roleOptions.length">
+          <TabPanel v-if="auth.isSuperAdmin || roleOptions.length">
             <div class="space-y-2">
               <FromGroup #default="{ inputId, labelId }" :label="t('roles.view')">
                 <div :id="inputId" :aria-labelledby="labelId" class="flex flex-col gap-1">
@@ -117,6 +117,7 @@ import Textinput from '@/components/ui/Textinput/index.vue';
 import Switch from '@/components/ui/Switch/index.vue';
 import FromGroup from '@/components/ui/FromGroup/index.vue';
 import Checkbox from '@/components/ui/Checkbox/index.vue';
+import { useAuthStore } from '@/stores/auth';
 
 interface RoleOption {
   id: number;
@@ -129,9 +130,10 @@ const props = withDefaults(
   { roleOptions: () => [] },
 );
 const { t, locale } = useI18n();
+const auth = useAuthStore();
 const tabs = computed(() => {
   const tbs = ['Basics', 'Validation'];
-  if (props.roleOptions.length) tbs.push(t('roles.label'));
+  if (auth.isSuperAdmin || props.roleOptions.length) tbs.push(t('roles.label'));
   return tbs;
 });
 
