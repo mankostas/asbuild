@@ -47,7 +47,8 @@
         <input
           id="color"
           v-model="color"
-          class="border rounded p-2 w-full"
+          type="color"
+          class="h-10 w-20 rounded border border-slate-200"
           aria-label="Color"
         />
         <div v-if="errors.color" class="text-red-600 text-sm">{{ errors.color }}</div>
