@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\App;
 use App\Models\TaskSlaEvent;
+use App\Models\TaskAutomation;
 
 class Task extends Model
 {
@@ -129,6 +130,12 @@ class Task extends Model
     {
         static::saving(function (Task $task) {
             App::make(\App\Services\TaskSlaService::class)->apply($task);
+        });
+
+        static::updated(function (Task $task) {
+            if ($task->wasChanged('status_slug')) {
+                TaskAutomation::run($task, 'status_changed');
+            }
         });
     }
 }

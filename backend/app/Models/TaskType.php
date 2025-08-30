@@ -49,4 +49,9 @@ class TaskType extends Model
     {
         return $this->hasMany(TaskSlaPolicy::class);
     }
+
+    public function automations(): HasMany
+    {
+        return $this->hasMany(TaskAutomation::class);
+    }
 }

@@ -730,6 +730,106 @@ paths:
                 properties:
                   message:
                     type: string
+
+  /task-types/{task_type}/automations:
+    get:
+      summary: List automations
+      parameters:
+        - name: task_type
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Automations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TaskAutomation'
+    post:
+      summary: Create automation
+      parameters:
+        - name: task_type
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskAutomation'
+      responses:
+        '201':
+          description: Automation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TaskAutomation'
+
+  /task-types/{task_type}/automations/{id}:
+    put:
+      summary: Update automation
+      parameters:
+        - name: task_type
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskAutomation'
+      responses:
+        '200':
+          description: Automation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TaskAutomation'
+    delete:
+      summary: Delete automation
+      parameters:
+        - name: task_type
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
   /task-statuses:
     get:
       summary: List task statuses
@@ -935,6 +1035,24 @@ components:
         calendar_json:
           type: object
           nullable: true
+    TaskAutomation:
+      type: object
+      properties:
+        id:
+          type: integer
+        task_type_id:
+          type: integer
+        event:
+          type: string
+        conditions_json:
+          type: object
+          nullable: true
+        actions_json:
+          type: array
+          items:
+            type: object
+        enabled:
+          type: boolean
     TaskSubtask:
       type: object
       properties:
