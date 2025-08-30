@@ -11,6 +11,8 @@
     "edit": "Edit",
     "delete": "Delete",
     "save": "Save",
+    "publish": "Publish",
+    "duplicate": "Duplicate",
     "cancel": "Cancel",
     "retry": "Retry",
     "add": "Add",
@@ -27,6 +29,11 @@
     "title": "Command palette",
     "placeholder": "Type to search...",
     "empty": "No actions"
+  },
+  "versionStatus": {
+    "draft": "Draft",
+    "published": "Published",
+    "deprecated": "Deprecated"
   },
   "profile": {
     "settings": "Settings"
