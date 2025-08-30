@@ -95,22 +95,13 @@
           </Button>
         </div>
       </header>
-      <div class="grid grid-cols-2 gap-4 p-4 border-b">
-        <Textinput
-          id="typeName"
-          v-model="name"
-          :label="t('types.form.name')"
-          class="text-sm"
-        />
-        <Select
-          id="tenantSelect"
-          v-model="tenantId"
-          :label="t('types.form.tenant')"
-          :options="tenantOptions"
-          :placeholder="t('none')"
-          class="text-sm"
-        />
-      </div>
+      <TypeMetaBar
+        v-model:name="name"
+        v-model:search="search"
+        v-model:tenant-id="tenantId"
+        :tenant-options="tenantOptions"
+        class="border-b mb-4"
+      />
       <WorkflowDesigner
         v-model="statusFlow"
         v-model:statuses="statuses"
@@ -159,7 +150,12 @@
             <div aria-describedby="reorderHint" class="p-4">
               <draggable v-model="sections" item-key="id" handle=".handle" class="space-y-4">
                 <template #item="{ element, index }">
-                  <CanvasSection :section="element" @remove="removeSection(index)" @select="selectField" />
+                  <CanvasSection
+                    v-if="visibleSections.includes(element)"
+                    :section="element"
+                    @remove="removeSection(index)"
+                    @select="selectField"
+                  />
                 </template>
               </draggable>
             </div>
@@ -230,7 +226,12 @@
                   <div aria-describedby="reorderHintMobile">
                     <draggable v-model="sections" item-key="id" handle=".handle" class="space-y-4">
                       <template #item="{ element, index }">
-                        <CanvasSection :section="element" @remove="removeSection(index)" @select="selectField" />
+                        <CanvasSection
+                          v-if="visibleSections.includes(element)"
+                          :section="element"
+                          @remove="removeSection(index)"
+                          @select="selectField"
+                        />
                       </template>
                     </draggable>
                   </div>
@@ -284,19 +285,19 @@ import TypeAbilitiesEditor from '@/components/types/TypeAbilitiesEditor.vue';
 import Breadcrumbs from '@/components/ui/Breadcrumbs/index.vue';
 import Button from '@/components/ui/Button/index.vue';
 import Select from '@/components/ui/Select/index.vue';
-import Textinput from '@/components/ui/Textinput/index.vue';
 import Badge from '@/components/ui/Badge/index.vue';
 import Card from '@/components/ui/Card/index.vue';
 import UiTabs from '@/components/ui/Tabs/index.vue';
 import Drawer from '@/components/ui/Drawer/index.vue';
 import FieldPalette from '@/components/types/FieldPalette.vue';
+import TypeMetaBar from '@/components/types/TypeMetaBar.vue';
 import { Tab, TabPanel } from '@headlessui/vue';
 import { can, useAuthStore } from '@/stores/auth';
 import api from '@/services/api';
 import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
 import { useTenantStore } from '@/stores/tenant';
 import '@/styles/types-builder.css';
-import type { I18nString } from '@/utils/i18n';
+import { resolveI18n, type I18nString } from '@/utils/i18n';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -329,6 +330,7 @@ interface Section {
 }
 
 const name = ref('');
+const search = ref('');
 const tenantId = ref<number | ''>('');
 const sections = ref<Section[]>([]);
 const selected = ref<Field | null>(null);
@@ -395,6 +397,20 @@ const tenants = computed(() => tenantStore.tenants);
 const tenantOptions = computed(() =>
   tenants.value.map((t) => ({ value: t.id, label: t.name }))
 );
+
+const visibleSections = computed(() => {
+  if (!search.value) return sections.value;
+  const q = search.value.toLowerCase();
+  return sections.value.filter(
+    (s) =>
+      resolveI18n(s.label, locale.value).toLowerCase().includes(q) ||
+      s.fields.some(
+        (f) =>
+          resolveI18n(f.label, locale.value).toLowerCase().includes(q) ||
+          f.name.toLowerCase().includes(q),
+      ),
+  );
+});
 
 const isEdit = computed(() => route.name === 'taskTypes.edit');
 const canAccess = computed(() => auth.isSuperAdmin || can('task_types.view'));

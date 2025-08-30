@@ -20,6 +20,7 @@
     "add": "Add",
     "select": "Select",
     "close": "Close",
+    "clear": "Clear",
     "chooseFile": "Choose File"
   },
   "messages": {
@@ -191,7 +192,8 @@
     },
     "form": {
       "name": "Name",
-      "tenant": "Tenant"
+      "tenant": "Tenant",
+      "search": "Search"
     }
   },
   "slaPolicies": {

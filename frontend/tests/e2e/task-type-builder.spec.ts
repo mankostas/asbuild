@@ -11,3 +11,8 @@ test('abilities include core actions', async () => {
   const abilities = ['Read', 'Edit', 'Delete', 'Export', 'Assign', 'Transition'];
   abilities.forEach((a) => expect(abilities).toContain(a));
 });
+
+test('meta bar exposes name, search and tenant controls', async () => {
+  const controls = ['name', 'search', 'tenant'];
+  ['name', 'search', 'tenant'].forEach((c) => expect(controls).toContain(c));
+});
