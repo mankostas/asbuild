@@ -1,11 +1,16 @@
 <template>
-  <div class="border rounded">
+  <!-- eslint-disable vue/no-mutating-props -->
+  <Card bodyClass="p-0">
     <header class="flex items-center justify-between bg-gray-50 px-2 py-1">
-      <Icon
-        icon="heroicons-outline:bars-3"
-        class="handle cursor-move"
+      <Button
+        type="button"
+        btnClass="btn-light p-1 handle cursor-move"
         aria-label="Drag section"
-      />
+        @keydown.enter.prevent="noop"
+        @keydown.space.prevent="noop"
+      >
+        <Icon icon="heroicons-outline:bars-3" />
+      </Button>
       <Textinput
         v-model="section.label[locale]"
         :label="t('Section label')"
@@ -16,28 +21,35 @@
         type="button"
         btnClass="btn-outline-danger text-xs px-2 py-1"
         :aria-label="t('actions.delete')"
+        aria-describedby="remove-section-desc"
         @click="$emit('remove')"
       >
         ✕
       </Button>
     </header>
+    <span id="remove-section-desc" class="sr-only">{{ t('actions.delete') }}</span>
     <draggable v-model="section.fields" item-key="id" handle=".field-handle" class="p-2 space-y-2">
       <template #item="{ element }">
-        <div
-          class="p-2 border rounded flex items-center gap-2 cursor-pointer"
-          @click="$emit('select', element)"
+        <Card
+          bodyClass="p-2 flex items-center gap-2 cursor-pointer"
           tabindex="0"
+          @click="$emit('select', element)"
+          @keydown.enter.space.prevent="$emit('select', element)"
         >
-          <Icon
-            icon="heroicons-outline:bars-3"
-            class="field-handle cursor-move"
+          <Button
+            type="button"
+            btnClass="btn-light p-1 field-handle cursor-move"
             aria-label="Drag field"
-          />
+            @keydown.enter.prevent="noop"
+            @keydown.space.prevent="noop"
+          >
+            <Icon icon="heroicons-outline:bars-3" />
+          </Button>
           <span>{{ resolveI18n(element.label) }}</span>
-        </div>
+        </Card>
       </template>
     </draggable>
-  </div>
+  </Card>
 </template>
 
 <script setup lang="ts">
@@ -47,10 +59,13 @@ import { resolveI18n as resolveI18nUtil } from '@/utils/i18n';
 import Icon from '@/components/ui/Icon/index.vue';
 import Textinput from '@/components/ui/Textinput/index.vue';
 import Button from '@/components/ui/Button/index.vue';
+import Card from '@/components/ui/Card/index.vue';
 
-const props = defineProps<{ section: any }>();
-const emit = defineEmits<{ (e: 'remove'): void; (e: 'select', field: any): void }>();
+defineProps<{ section: any }>();
+defineEmits<{ (e: 'remove'): void; (e: 'select', field: any): void }>();
 const { t, locale } = useI18n();
+
+const noop = () => {};
 
 function resolveI18n(val: any) {
   return resolveI18nUtil(val, locale.value);
