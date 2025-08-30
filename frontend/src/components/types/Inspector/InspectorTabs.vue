@@ -358,7 +358,7 @@ function removeLogicAction(rule: any, idx: number) {
 
 const roles = computed(() => {
   if (!props.selected) return { view: [], edit: [] } as any;
-  return props.selected.roles;
+  return props.selected.roles ?? { view: [], edit: [] };
 });
 const availableRoles = computed(() => props.roleOptions);
 
