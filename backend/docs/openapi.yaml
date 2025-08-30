@@ -607,6 +607,8 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - schema_json
               properties:
                 schema_json:
                   type: object
@@ -615,6 +617,13 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
         '422':
           description: Validation errors
   /task-types/{id}/validate:
