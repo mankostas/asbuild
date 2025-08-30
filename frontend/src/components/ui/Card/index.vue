@@ -5,7 +5,7 @@
   >
     <div :class="cn('card-body flex flex-col', bodyClass)">
       <header
-        v-if="title || subtitle"
+        v-if="title || subtitle || $slots.header"
         :class="cn('flex mb-5 items-center', {
         'order-1': imgTop,
         'border-b border-slate-100 dark:border-slate-700 pb-5 -mx-6 px-6': !noborder
