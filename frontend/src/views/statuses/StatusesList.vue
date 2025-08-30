@@ -113,7 +113,7 @@ const columns = [
 async function fetchStatuses({ page, perPage, sort, search }: any) {
   if (!all.value.length) {
     const tenantId = auth.isSuperAdmin ? tenantStore.currentTenantId : undefined;
-    all.value = await statusesStore.fetch(scope.value, tenantId);
+    all.value = (await statusesStore.fetch(scope.value, tenantId)).data;
   }
   let rows = all.value.slice();
   if (search) {
