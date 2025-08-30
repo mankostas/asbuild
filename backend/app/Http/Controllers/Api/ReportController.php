@@ -143,6 +143,54 @@ class ReportController extends Controller
         return response()->json($materials);
     }
 
+    public function tasksOverview(Request $request)
+    {
+        Gate::authorize('reports.view');
+        $range = $this->dateRange($request);
+        $tenantId = $request->user()->tenant_id;
+        $typeId = (int) $request->query('type_id');
+
+        $base = Task::where('tenant_id', $tenantId)
+            ->where('task_type_id', $typeId)
+            ->whereNotNull('completed_at')
+            ->whereBetween('completed_at', [$range['from'], $range['to']]);
+
+        $throughput = (clone $base)
+            ->select(DB::raw('DATE(completed_at) as date'), DB::raw('count(*) as count'))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(fn ($row) => ['x' => $row->date, 'y' => $row->count]);
+
+        $cycle = (clone $base)
+            ->whereNotNull('started_at')
+            ->select(
+                DB::raw('DATE(completed_at) as date'),
+                DB::raw('AVG(TIMESTAMPDIFF(SECOND, started_at, completed_at))/60 as avg')
+            )
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(fn ($row) => ['x' => $row->date, 'y' => round($row->avg, 2)]);
+
+        $sla = (clone $base)
+            ->whereNotNull('sla_end_at')
+            ->select(
+                DB::raw('DATE(completed_at) as date'),
+                DB::raw('SUM(CASE WHEN completed_at <= sla_end_at THEN 1 ELSE 0 END) / COUNT(*) * 100 as pct')
+            )
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(fn ($row) => ['x' => $row->date, 'y' => round($row->pct, 2)]);
+
+        return response()->json([
+            'throughput' => $throughput,
+            'cycle_time' => $cycle,
+            'sla_attainment' => $sla,
+        ]);
+    }
+
     public function export(Request $request): StreamedResponse
     {
         Gate::authorize('reports.view');

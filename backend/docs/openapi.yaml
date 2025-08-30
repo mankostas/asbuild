@@ -985,6 +985,59 @@ paths:
                 $ref: '#/components/schemas/Task'
         '422':
           description: Invalid move
+
+  /reports/tasks/overview:
+    get:
+      summary: Task type overview metrics
+      parameters:
+        - in: query
+          name: type_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: range
+          schema:
+            type: string
+            enum: ['7','30','90']
+      responses:
+        '200':
+          description: Metrics for task type
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  throughput:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        x:
+                          type: string
+                          format: date
+                        y:
+                          type: number
+                  cycle_time:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        x:
+                          type: string
+                          format: date
+                        y:
+                          type: number
+                  sla_attainment:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        x:
+                          type: string
+                          format: date
+                        y:
+                          type: number
 components:
   schemas:
     Task:
