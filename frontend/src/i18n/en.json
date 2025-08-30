@@ -213,7 +213,8 @@
       "search": "Search"
     },
     "saveToConfigureSLA": "Save to configure SLA policies",
-    "saveToConfigureAutomations": "Save to configure automations"
+    "saveToConfigureAutomations": "Save to configure automations",
+    "selectTenantToSetPermissions": "Select tenant to set permissions"
   },
   "slaPolicies": {
     "title": "SLA Policies",
