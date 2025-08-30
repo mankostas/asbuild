@@ -117,7 +117,12 @@
         :task-type-id="Number(route.params.id)"
         class="p-4 border-b"
       />
-      <TypeAbilitiesEditor v-model="abilities" class="p-4 border-b" />
+      <PermissionsMatrix
+        v-model="permissions"
+        :roles="tenantRoles"
+        :can-manage="canManage"
+        class="p-4 border-b"
+      />
       <div class="h-[calc(100vh-3rem)] p-4">
         <div class="hidden lg:grid grid-cols-3 gap-4 h-full">
           <Card class="overflow-y-auto">
@@ -281,7 +286,7 @@ import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
 import StatusFlowEditor from '@/components/types/StatusFlowEditor.vue';
 import SLAPolicyEditor from '@/components/types/SLAPolicyEditor.vue';
 import AutomationsEditor from '@/components/types/AutomationsEditor.vue';
-import TypeAbilitiesEditor from '@/components/types/TypeAbilitiesEditor.vue';
+import PermissionsMatrix from '@/components/types/PermissionsMatrix.vue';
 import Breadcrumbs from '@/components/ui/Breadcrumbs/index.vue';
 import Button from '@/components/ui/Button/index.vue';
 import Select from '@/components/ui/Select/index.vue';
@@ -329,6 +334,14 @@ interface Section {
   photos: any[];
 }
 
+interface Permission {
+  read: boolean;
+  edit: boolean;
+  delete: boolean;
+  export: boolean;
+  assign: boolean;
+}
+
 const name = ref('');
 const search = ref('');
 const tenantId = ref<number | ''>('');
@@ -363,15 +376,9 @@ const versionStatusClass = computed(() => {
 });
 const statuses = ref<string[]>([]);
 const statusFlow = ref<[string, string][]>([]);
-const abilities = ref({
-  read: true,
-  edit: true,
-  delete: true,
-  export: true,
-  assign: true,
-  transition: true,
-});
+const permissions = ref<Record<string, Permission>>({});
 const tenantRoles = ref<any[]>([]);
+const canManage = computed(() => auth.isSuperAdmin || can('task_types.manage'));
 
 const fieldTypes = [
   { key: 'text', label: 'Text', group: 'Inputs' },
@@ -460,11 +467,24 @@ onMounted(async () => {
         try {
           const { data } = await api.get('/roles', { params: { tenant_id: id } });
           tenantRoles.value = data.data ?? data;
+          tenantRoles.value.forEach((r: any) => {
+            if (!permissions.value[r.slug]) {
+              permissions.value[r.slug] = {
+                read: false,
+                edit: false,
+                delete: false,
+                export: false,
+                assign: false,
+              };
+            }
+          });
         } catch {
           tenantRoles.value = [];
+          permissions.value = {};
         }
       } else {
         tenantRoles.value = [];
+        permissions.value = {};
       }
     },
     { immediate: true },
@@ -526,15 +546,18 @@ function loadVersion(v: any) {
   } else {
     statusFlow.value = [];
   }
-  abilities.value = {
-    read: true,
-    edit: true,
-    delete: true,
-    export: true,
-    assign: true,
-    transition: true,
-    ...(v.abilities_json || {}),
-  };
+  permissions.value = { ...(v.abilities_json || {}) };
+  tenantRoles.value.forEach((r) => {
+    if (!permissions.value[r.slug]) {
+      permissions.value[r.slug] = {
+        read: false,
+        edit: false,
+        delete: false,
+        export: false,
+        assign: false,
+      };
+    }
+  });
 }
 
 function onVersionChange() {
@@ -633,7 +656,7 @@ function onSubmit() {
     }),
     statuses: JSON.stringify(statuses.value.reduce((acc: any, s) => ({ ...acc, [s]: [] }), {})),
     status_flow_json: JSON.stringify(statusFlow.value),
-    abilities_json: JSON.stringify(abilities.value),
+    abilities_json: JSON.stringify(permissions.value),
   };
   if (isEdit.value) {
     api.patch(`/task-types/${route.params.id}`, payload).then(() => router.push({ name: 'taskTypes.list' }));
