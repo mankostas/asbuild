@@ -73,7 +73,7 @@
             :aria-label="tr(field.label)"
             @change="emitUpdate(field)"
           >
-            <option value="" disabled>Select...</option>
+            <option value="" disabled>{{ t('common.select') }}</option>
             <option v-for="opt in field.enum" :key="opt" :value="opt">{{ opt }}</option>
           </select>
           <select

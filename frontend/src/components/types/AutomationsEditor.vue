@@ -31,7 +31,7 @@
                   :label="t('automations.event')"
                   class="w-full"
                 >
-                  <option value="status_changed">status_changed</option>
+                  <option value="status_changed">{{ t('automations.events.statusChanged') }}</option>
                 </Select>
               </td>
               <td class="table-td">

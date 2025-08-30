@@ -15,7 +15,13 @@
             classInput="text-xs"
             @change="onVersionChange"
           />
-          <span v-else class="text-xs px-2 py-1 border rounded" :aria-label="t('Version')">v1</span>
+          <span
+            v-else
+            class="text-xs px-2 py-1 border rounded"
+            :aria-label="t('Version')"
+          >
+            {{ t('version.fallback', { n: 1 }) }}
+          </span>
           <Badge
             v-if="currentVersion"
             :label="t(`versionStatus.${versionStatusLabel}`)"

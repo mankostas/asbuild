@@ -26,8 +26,11 @@
   "messages": {
     "helloToast": "Hello from toast"
   },
-    "a11y": {
-      "skipToContent": "Skip to content",
+  "common": {
+    "select": "Select..."
+  },
+  "a11y": {
+    "skipToContent": "Skip to content",
       "language": "Language",
       "dragToReorder": "Drag to reorder",
       "removeSection": "Remove section",
@@ -46,6 +49,9 @@
   },
   "profile": {
     "settings": "Settings"
+  },
+  "version": {
+    "fallback": "v{n}"
   },
   "Version": "Version",
   "Section": "Section",
@@ -232,7 +238,10 @@
     "event": "Event",
     "status": "Status",
     "team": "Team",
-    "enabled": "Enabled"
+    "enabled": "Enabled",
+    "events": {
+      "statusChanged": "Status changed"
+    }
   },
   "dashboard": {
     "messages": {
@@ -261,6 +270,10 @@
     "canvas": "Canvas",
     "preview": "Preview",
     "inspector": "Inspector"
+  },
+  "inspector": {
+    "basics": "Basics",
+    "validation": "Validation"
   },
   "validation": {
     "regex": "Pattern",
