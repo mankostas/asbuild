@@ -32,6 +32,37 @@
         />
         <div v-if="errors.name" class="text-red-600 text-sm">{{ errors.name }}</div>
       </div>
+      <div>
+        <span class="block font-medium mb-1">Slug</span>
+        <input
+          id="slug"
+          v-model="slug"
+          class="border rounded p-2 w-full"
+          aria-label="Slug"
+        />
+        <div v-if="errors.slug" class="text-red-600 text-sm">{{ errors.slug }}</div>
+      </div>
+      <div>
+        <span class="block font-medium mb-1">Color</span>
+        <input
+          id="color"
+          v-model="color"
+          class="border rounded p-2 w-full"
+          aria-label="Color"
+        />
+        <div v-if="errors.color" class="text-red-600 text-sm">{{ errors.color }}</div>
+      </div>
+      <div>
+        <span class="block font-medium mb-1">Position</span>
+        <input
+          id="position"
+          type="number"
+          v-model.number="position"
+          class="border rounded p-2 w-full"
+          aria-label="Position"
+        />
+        <div v-if="errors.position" class="text-red-600 text-sm">{{ errors.position }}</div>
+      </div>
       <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
       <button
         type="submit"
@@ -56,6 +87,9 @@ const auth = useAuthStore();
 const tenantStore = useTenantStore();
 
 const name = ref('');
+const slug = ref('');
+const color = ref('');
+const position = ref(0);
 const serverError = ref('');
 const tenantId = ref('');
 
@@ -78,6 +112,9 @@ onMounted(async () => {
     const res = await api.get(`/task-statuses/${route.params.id}`);
     const data = res.data;
     name.value = data.name;
+    slug.value = data.slug;
+    color.value = data.color || '';
+    position.value = data.position || 0;
     tenantId.value = data.tenant_id ? String(data.tenant_id) : '';
   }
 });
@@ -98,7 +135,12 @@ const { handleSubmit, setErrors, errors } = useForm();
 const onSubmit = handleSubmit(async () => {
   serverError.value = '';
   if (!canSubmit.value) return;
-  const payload: any = { name: name.value };
+  const payload: any = {
+    name: name.value,
+    slug: slug.value || undefined,
+    color: color.value || null,
+    position: position.value,
+  };
   if (auth.isSuperAdmin) {
     payload.tenant_id = tenantId.value === '' ? null : Number(tenantId.value);
   }
