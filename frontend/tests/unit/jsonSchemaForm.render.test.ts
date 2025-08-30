@@ -1,6 +1,7 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect, vi } from 'vitest';
 import { createApp } from 'vue';
+import { createI18n } from 'vue-i18n';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
 
 vi.mock('@/components/tasks/AssigneePicker.vue', () => ({
@@ -37,7 +38,13 @@ describe('JsonSchemaForm', () => {
         },
       ],
     };
-    const app = createApp(JsonSchemaForm, { schema, modelValue: {} });
+    const app = createApp(JsonSchemaForm, {
+      schema,
+      modelValue: {},
+      taskId: 1,
+    });
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en: {} } });
+    app.use(i18n);
     const div = document.createElement('div');
     app.mount(div);
     expect(div.querySelector('input[type="text"]')).toBeTruthy();
