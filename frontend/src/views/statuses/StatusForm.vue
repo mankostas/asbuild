@@ -10,9 +10,17 @@
           aria-label="Tenant"
         >
           <option value="">Global</option>
-          <option v-for="t in tenantStore.tenants" :key="t.id" :value="t.id">{{ t.name }}</option>
+          <option
+            v-for="t in tenantStore.tenants"
+            :key="t.id"
+            :value="String(t.id)"
+          >
+            {{ t.name }}
+          </option>
         </select>
-        <div v-if="errors.tenant_id" class="text-red-600 text-sm">{{ errors.tenant_id }}</div>
+        <div v-if="errors.tenant_id" class="text-red-600 text-sm">
+          {{ errors.tenant_id }}
+        </div>
       </div>
       <div>
         <span class="block font-medium mb-1">Name<span class="text-red-600">*</span></span>
@@ -35,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api, { extractFormErrors } from '@/services/api';
 import { useAuthStore, can } from '@/stores/auth';
@@ -49,7 +57,7 @@ const tenantStore = useTenantStore();
 
 const name = ref('');
 const serverError = ref('');
-const tenantId = ref<string | number | ''>('');
+const tenantId = ref('');
 
 const isEdit = computed(() => route.name === 'taskStatuses.edit');
 const canAccess = computed(() =>
@@ -58,17 +66,30 @@ const canAccess = computed(() =>
     : can('task_statuses.create') || can('task_statuses.manage'),
 );
 
-onMounted(async () => {
-  if (auth.isSuperAdmin) {
+async function loadTenantsIfNeeded() {
+  if (auth.isSuperAdmin && tenantStore.tenants.length === 0) {
     await tenantStore.loadTenants();
   }
+}
+
+onMounted(async () => {
+  await loadTenantsIfNeeded();
   if (isEdit.value) {
     const res = await api.get(`/task-statuses/${route.params.id}`);
     const data = res.data;
     name.value = data.name;
-    tenantId.value = data.tenant_id ?? '';
+    tenantId.value = data.tenant_id ? String(data.tenant_id) : '';
   }
 });
+
+watch(
+  () => auth.isSuperAdmin,
+  async (val) => {
+    if (val) {
+      await loadTenantsIfNeeded();
+    }
+  },
+);
 
 const canSubmit = computed(() => !!name.value);
 
@@ -79,7 +100,7 @@ const onSubmit = handleSubmit(async () => {
   if (!canSubmit.value) return;
   const payload: any = { name: name.value };
   if (auth.isSuperAdmin) {
-    payload.tenant_id = tenantId.value === '' ? null : tenantId.value;
+    payload.tenant_id = tenantId.value === '' ? null : Number(tenantId.value);
   }
   try {
     if (isEdit.value) {
