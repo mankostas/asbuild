@@ -16,7 +16,8 @@
     "cancel": "Ακύρωση",
     "retry": "Επανάληψη",
     "add": "Προσθήκη",
-    "select": "Επιλογή"
+    "select": "Επιλογή",
+    "close": "Κλείσιμο"
   },
   "messages": {
     "helloToast": "Γεια από το τοστ"
@@ -241,5 +242,12 @@
     "placeholder": "Υπόδειξη",
     "help": "Βοήθεια",
     "reorderHint": "Χρησιμοποιήστε Alt+βέλη για αναδιάταξη"
+  }
+  ,
+  "templates": {
+    "title": "Πρότυπα",
+    "export": "Εξαγωγή JSON",
+    "import": "Εισαγωγή JSON",
+    "selectType": "Επιλέξτε τύπο"
   }
 }
