@@ -1,17 +1,14 @@
 <template>
-  <label class="block">
-    <span class="sr-only">{{ label }}</span>
-    <select
-      class="form-select"
-      :aria-label="label"
-      :value="modelValue"
-      @change="onChange"
-    >
-      <option v-for="opt in options" :key="opt.value" :value="opt.value">
-        {{ opt.label }}
-      </option>
-    </select>
-  </label>
+  <select
+    class="form-select"
+    :aria-label="label"
+    :value="modelValue"
+    @change="onChange"
+  >
+    <option v-for="opt in options" :key="opt.value" :value="opt.value">
+      {{ opt.label }}
+    </option>
+  </select>
 </template>
 
 <script setup lang="ts">

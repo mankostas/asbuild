@@ -66,4 +66,47 @@ class TaskSlaPolicyTest extends TestCase
 
         $this->assertEquals('2025-01-02T10:00:00.000000Z', $task['sla_end_at']);
     }
+
+    public function test_can_create_and_list_policies(): void
+    {
+        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $role = Role::create([
+            'name' => 'Admin',
+            'slug' => 'admin',
+            'tenant_id' => $tenant->id,
+            'abilities' => ['task_sla_policies.manage'],
+            'level' => 1,
+        ]);
+        $user = User::create([
+            'name' => 'U',
+            'email' => 'u@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
+        Sanctum::actingAs($user);
+
+        $type = TaskType::create([
+            'name' => 'Type',
+            'tenant_id' => $tenant->id,
+            'schema_json' => ['sections' => []],
+            'statuses' => ['draft' => []],
+        ]);
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson("/api/task-types/{$type->id}/sla-policies", [
+                'priority' => 'low',
+                'response_within_mins' => 60,
+            ])->assertCreated();
+
+        $list = $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->getJson("/api/task-types/{$type->id}/sla-policies")
+            ->assertOk()
+            ->json('data');
+
+        $this->assertCount(1, $list);
+        $this->assertEquals('low', $list[0]['priority']);
+    }
 }

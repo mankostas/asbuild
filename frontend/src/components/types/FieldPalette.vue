@@ -14,8 +14,8 @@
           <button
             type="button"
             class="w-full text-left px-2 py-1 rounded hover:bg-gray-100"
-            @click="$emit('select', item)"
             :aria-label="`Add ${item.label}`"
+            @click="$emit('select', item)"
           >
             {{ item.label }}
           </button>

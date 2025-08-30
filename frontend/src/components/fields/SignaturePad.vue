@@ -10,8 +10,8 @@
     <button
       type="button"
       class="mt-2 px-2 py-1 border"
-      @click="clearPad"
       aria-label="Clear signature"
+      @click="clearPad"
     >
       Clear
     </button>

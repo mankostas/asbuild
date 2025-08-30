@@ -186,7 +186,11 @@
     "priority": "Priority",
     "responseWithin": "Response within (mins)",
     "resolveWithin": "Resolve within (mins)",
-    "calendar": "Calendar JSON"
+    "calendar": "Calendar JSON",
+    "useCalendar": "Use custom calendar",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
   },
   "automations": {
     "title": "Automations",

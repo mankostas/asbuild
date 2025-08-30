@@ -78,8 +78,8 @@
                 <Button
                   type="button"
                   btnClass="btn-outline-primary text-xs px-3 py-1"
-                  @click="save(a)"
                   :aria-label="t('actions.save')"
+                  @click="save(a)"
                 >
                   {{ t('actions.save') }}
                 </Button>
@@ -93,8 +93,8 @@
       type="button"
       class="mt-2"
       btnClass="btn-outline-primary text-xs px-3 py-1"
-      @click="addAutomation"
       :aria-label="t('actions.add')"
+      @click="addAutomation"
     >
       {{ t('actions.add') }}
     </Button>

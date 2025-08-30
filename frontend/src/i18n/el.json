@@ -186,7 +186,11 @@
     "priority": "Προτεραιότητα",
     "responseWithin": "Απόκριση εντός (λεπτά)",
     "resolveWithin": "Επίλυση εντός (λεπτά)",
-    "calendar": "Ημερολόγιο JSON"
+    "calendar": "Ημερολόγιο JSON",
+    "useCalendar": "Χρήση προσαρμοσμένου ημερολογίου",
+    "low": "Χαμηλή",
+    "medium": "Μεσαία",
+    "high": "Υψηλή"
   },
   "automations": {
     "title": "Αυτοματισμοί",
