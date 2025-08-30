@@ -178,21 +178,27 @@
       <div v-else-if="active === 'Roles'" class="space-y-2">
         <label class="block text-sm" for="rolesView">
           <span class="block mb-1">{{ t('View roles') }}</span>
-          <input
+          <select
             id="rolesView"
-            v-model="viewRoles"
-            class="w-full border rounded px-2 py-1"
+            v-model="roles.value.view"
+            multiple
+            class="w-full rounded border px-2 py-1"
             aria-label="View roles"
-          />
+          >
+            <option v-for="r in availableRoles" :key="r.id" :value="r.slug">{{ r.name }}</option>
+          </select>
         </label>
         <label class="block text-sm" for="rolesEdit">
           <span class="block mb-1">{{ t('Edit roles') }}</span>
-          <input
+          <select
             id="rolesEdit"
-            v-model="editRoles"
-            class="w-full border rounded px-2 py-1"
+            v-model="roles.value.edit"
+            multiple
+            class="w-full rounded border px-2 py-1"
             aria-label="Edit roles"
-          />
+          >
+            <option v-for="r in availableRoles" :key="r.id" :value="r.slug">{{ r.name }}</option>
+          </select>
         </label>
       </div>
       <div v-else-if="active === 'i18n'" class="space-y-2">
@@ -282,7 +288,16 @@
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-const props = defineProps<{ selected: any | null }>();
+interface RoleOption {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+const props = withDefaults(
+  defineProps<{ selected: any | null; roleOptions?: RoleOption[] }>(),
+  { roleOptions: () => [] },
+);
 const { t, locale } = useI18n();
 const tabs = ['Basics', 'Validation', 'Logic', 'Roles', 'i18n', 'Data'];
 const active = ref('Basics');
@@ -345,18 +360,7 @@ const roles = computed(() => {
   if (!props.selected) return { view: [], edit: [] } as any;
   return props.selected.roles;
 });
-const viewRoles = computed({
-  get: () => roles.value.view.join(','),
-  set: (val: string) => {
-    roles.value.view = val ? val.split(',').map((s) => s.trim()) : [];
-  },
-});
-const editRoles = computed({
-  get: () => roles.value.edit.join(','),
-  set: (val: string) => {
-    roles.value.edit = val ? val.split(',').map((s) => s.trim()) : [];
-  },
-});
+const availableRoles = computed(() => props.roleOptions);
 
 const dataObj = computed(() => {
   if (!props.selected) return { default: '', enum: [] } as any;
