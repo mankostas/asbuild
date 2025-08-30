@@ -8,13 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('appointment_comment_files', function (Blueprint $table) {
+        Schema::create('task_comment_files', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('appointment_comment_id');
+            $table->unsignedBigInteger('task_comment_id');
             $table->unsignedBigInteger('file_id');
             $table->timestamps();
-            $table->foreign('appointment_comment_id')
-                ->references('id')->on('appointment_comments')
+            $table->foreign('task_comment_id')
+                ->references('id')->on('task_comments')
                 ->onDelete('cascade');
             $table->foreign('file_id')
                 ->references('id')->on('files')
@@ -24,6 +24,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('appointment_comment_files');
+        Schema::dropIfExists('task_comment_files');
     }
 };

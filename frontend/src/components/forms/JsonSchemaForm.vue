@@ -1,5 +1,5 @@
 <template>
-  <div v-if="schema?.sections">
+  <div v-if="schema?.sections" id="task-type-preview">
     <SectionCard
       v-for="section in schema.sections"
       :key="section.key"

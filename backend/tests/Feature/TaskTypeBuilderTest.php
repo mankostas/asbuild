@@ -1,0 +1,56 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Role;
+use App\Models\Tenant;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\Sanctum;
+use Tests\TestCase;
+
+class TaskTypeBuilderTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_create_task_type_with_sections(): void
+    {
+        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $role = Role::create(['name' => 'Admin', 'slug' => 'admin', 'tenant_id' => $tenant->id, 'abilities' => ['task_types.manage'], 'level' => 1]);
+        $user = User::create([
+            'name' => 'U',
+            'email' => 'u@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
+        Sanctum::actingAs($user);
+
+        $payload = [
+            'name' => 'Builder',
+            'schema_json' => json_encode([
+                'sections' => [[
+                    'key' => 's1',
+                    'label' => 'Section 1',
+                    'fields' => [[
+                        'key' => 'f1',
+                        'label' => 'Field 1',
+                        'type' => 'text',
+                    ]],
+                ]],
+            ]),
+            'statuses' => json_encode([[
+                'key' => 'draft',
+                'label' => 'Draft',
+            ]]),
+        ];
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson('/api/task-types', $payload)
+            ->assertCreated()
+            ->assertJsonPath('data.name', 'Builder');
+    }
+}

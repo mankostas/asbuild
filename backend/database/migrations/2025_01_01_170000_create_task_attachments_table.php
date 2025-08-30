@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $taskTable = Schema::hasTable('tasks') ? 'tasks' : 'appointments';
+        $taskTable = 'tasks';
 
         Schema::create('task_attachments', function (Blueprint $table) use ($taskTable) {
             $table->id();
