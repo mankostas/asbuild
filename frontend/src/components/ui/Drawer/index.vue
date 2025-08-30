@@ -41,11 +41,18 @@ watch(
   (isOpen) => {
     if (isOpen) {
       scrollY.value = window.scrollY;
-      document.body.style.top = `-${scrollY.value}px`;
-      document.body.style.position = 'fixed';
+      const body = document.body;
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      body.style.top = `-${scrollY.value}px`;
+      body.style.position = 'fixed';
+      body.style.width = '100%';
+      body.style.paddingRight = `${scrollbarWidth}px`;
     } else {
-      document.body.style.position = '';
-      document.body.style.top = '';
+      const body = document.body;
+      body.style.position = '';
+      body.style.top = '';
+      body.style.width = '';
+      body.style.paddingRight = '';
       window.scrollTo(0, scrollY.value);
     }
   },
