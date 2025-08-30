@@ -19,6 +19,7 @@ class TaskType extends Model
         'tenant_id',
         'require_subtasks_complete',
         'current_version_id',
+        'abilities_json',
     ];
 
     protected $casts = [
@@ -28,6 +29,7 @@ class TaskType extends Model
         'tenant_id' => 'integer',
         'require_subtasks_complete' => 'boolean',
         'current_version_id' => 'integer',
+        'abilities_json' => 'array',
     ];
 
     public function tasks(): HasMany

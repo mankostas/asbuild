@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-test('task type builder placeholder', async () => {
+test('task type abilities editor placeholder', async () => {
   expect(true).toBe(true);
 });

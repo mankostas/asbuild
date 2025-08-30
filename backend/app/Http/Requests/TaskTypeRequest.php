@@ -22,6 +22,7 @@ class TaskTypeRequest extends FormRequest
             'statuses' => [$required, 'json'],
             'status_flow_json' => ['nullable', 'json'],
             'tenant_id' => ['sometimes', 'integer'],
+            'abilities_json' => ['nullable', 'json'],
         ];
     }
 
@@ -33,6 +34,7 @@ class TaskTypeRequest extends FormRequest
             'statuses' => 'statuses',
             'status_flow_json' => 'status flow',
             'tenant_id' => 'tenant',
+            'abilities_json' => 'abilities',
         ];
     }
 
@@ -54,6 +56,9 @@ class TaskTypeRequest extends FormRequest
             if (isset($data[$field])) {
                 $data[$field] = json_decode($data[$field], true);
             }
+        }
+        if (isset($data['abilities_json'])) {
+            $data['abilities_json'] = json_decode($data['abilities_json'], true);
         }
         return $data;
     }

@@ -16,6 +16,7 @@ class TaskTypeVersion extends Model
         'created_by',
         'published_at',
         'deprecated_at',
+        'abilities_json',
     ];
 
     protected $casts = [
@@ -24,6 +25,7 @@ class TaskTypeVersion extends Model
         'status_flow_json' => 'array',
         'published_at' => 'datetime',
         'deprecated_at' => 'datetime',
+        'abilities_json' => 'array',
     ];
 
     public function taskType(): BelongsTo

@@ -1727,6 +1727,7 @@ export interface components {
             } | null;
             status_flow_json?: Record<string, never> | null;
             tenant_id?: number | null;
+            abilities_json?: Record<string, never> | null;
         };
         TaskTypeVersion: {
             id?: number;
@@ -1735,6 +1736,7 @@ export interface components {
             schema_json?: Record<string, never> | null;
             statuses?: Record<string, never> | null;
             status_flow_json?: Record<string, never> | null;
+            abilities_json?: Record<string, never> | null;
             created_by?: number;
             /** Format: date-time */
             published_at?: string | null;

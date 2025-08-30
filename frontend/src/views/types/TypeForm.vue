@@ -5,14 +5,13 @@
         <h1 class="text-lg font-semibold">{{ isEdit ? t('routes.taskTypeEdit') : t('routes.taskTypeCreate') }}</h1>
         <div class="flex items-center gap-3">
           <div>
-            <label for="versionSelect" class="sr-only">{{ t('Version') }}</label>
             <select
               v-if="versions.length"
               id="versionSelect"
               v-model="selectedVersionId"
-              @change="onVersionChange"
               class="text-xs px-2 py-1 border rounded"
               :aria-label="t('Version')"
+              @change="onVersionChange"
             >
               <option v-for="v in versions" :key="v.id" :value="v.id">v{{ v.semver }}</option>
             </select>
@@ -45,6 +44,7 @@
         :task-type-id="Number(route.params.id)"
         class="p-4 border-b"
       />
+      <TypeAbilitiesEditor v-model="abilities" class="p-4 border-b" />
       <div class="flex h-[calc(100vh-3rem)]">
         <aside class="w-1/5 border-r overflow-y-auto">
           <FieldPalette :groups="paletteGroups" @select="onAddField" />
@@ -69,7 +69,6 @@
       </div>
       <div v-if="showPreview" class="builder-preview p-4 border-t">
           <div class="flex items-center gap-2 mb-2">
-            <label for="previewLang" class="sr-only">{{ t('preview.language') }}</label>
             <select
               id="previewLang"
               v-model="previewLang"
@@ -79,7 +78,6 @@
               <option value="el">EL</option>
               <option value="en">EN</option>
             </select>
-            <label for="previewTheme" class="sr-only">{{ t('preview.theme') }}</label>
             <select
               id="previewTheme"
               v-model="previewTheme"
@@ -89,7 +87,6 @@
               <option value="light">{{ t('preview.light') }}</option>
               <option value="dark">{{ t('preview.dark') }}</option>
             </select>
-            <label for="previewViewport" class="sr-only">{{ t('preview.viewport') }}</label>
             <select
               id="previewViewport"
               v-model="previewViewport"
@@ -134,6 +131,7 @@ import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
 import WorkflowDesigner from '@/components/types/WorkflowDesigner.vue';
 import SLAPolicyEditor from '@/components/types/SLAPolicyEditor.vue';
 import AutomationsEditor from '@/components/types/AutomationsEditor.vue';
+import TypeAbilitiesEditor from '@/components/types/TypeAbilitiesEditor.vue';
 import { can } from '@/stores/auth';
 import api from '@/services/api';
 import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
@@ -179,6 +177,14 @@ const versions = ref<any[]>([]);
 const selectedVersionId = ref<number | null>(null);
 const statuses = ref<string[]>([]);
 const statusFlow = ref<[string, string][]>([]);
+const abilities = ref({
+  read: true,
+  edit: true,
+  delete: true,
+  export: true,
+  assign: true,
+  transition: true,
+});
 
 const fieldTypes = [
   { key: 'text', label: 'Text', group: 'Inputs' },
@@ -265,6 +271,15 @@ function loadVersion(v: any) {
   } else {
     statusFlow.value = [];
   }
+  abilities.value = {
+    read: true,
+    edit: true,
+    delete: true,
+    export: true,
+    assign: true,
+    transition: true,
+    ...(v.abilities_json || {}),
+  };
 }
 
 function onVersionChange() {
@@ -316,6 +331,7 @@ function onSubmit() {
     }),
     statuses: JSON.stringify(statuses.value.reduce((acc: any, s) => ({ ...acc, [s]: [] }), {})),
     status_flow_json: JSON.stringify(statusFlow.value),
+    abilities_json: JSON.stringify(abilities.value),
   };
   if (isEdit.value) {
     api.patch(`/task-types/${route.params.id}`, payload).then(() => router.push({ name: 'taskTypes.list' }));
