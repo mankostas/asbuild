@@ -1,12 +1,12 @@
 <template>
   <div>
-    <span class="block mb-2">Schema</span>
+    <span id="formbuilder-schema-label" class="block mb-2">Schema</span>
     <textarea
       id="formbuilder-schema"
       v-model="json"
       class="border p-2 w-full h-64"
       placeholder="Enter JSON schema"
-      aria-label="Schema"
+      aria-labelledby="formbuilder-schema-label"
     ></textarea>
     <div class="mt-2">
       <button class="bg-blue-600 text-white px-4 py-2" @click="emitSchema">

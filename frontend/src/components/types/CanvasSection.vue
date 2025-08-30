@@ -33,8 +33,10 @@
         <Card
           bodyClass="p-2 flex items-center gap-2 cursor-pointer"
           tabindex="0"
+          role="button"
           @click="$emit('select', element)"
-          @keydown.enter.space.prevent="$emit('select', element)"
+          @keydown.enter.prevent="$emit('select', element)"
+          @keydown.space.prevent="$emit('select', element)"
         >
           <Button
             type="button"

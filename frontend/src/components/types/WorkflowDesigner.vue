@@ -28,7 +28,15 @@
     <draggable v-model="localStatuses" item-key="value" handle=".handle" class="space-y-2" @end="emitStatuses">
       <template #item="{ element }">
         <div class="flex items-center gap-2 border p-1 rounded">
-          <span class="handle cursor-move" tabindex="0" aria-label="drag">≡</span>
+          <span
+            class="handle cursor-move"
+            tabindex="0"
+            role="button"
+            aria-label="drag"
+            @keydown.enter.prevent="noop"
+            @keydown.space.prevent="noop"
+            >≡</span
+          >
           <span>{{ displayName(element) }}</span>
           <button
             type="button"
@@ -116,6 +124,8 @@ const remainingStatuses = computed(() =>
 function displayName(slug: string) {
   return allStatuses.value.find((s) => s.slug === slug)?.name || slug;
 }
+
+const noop = () => {};
 
 function addStatus() {
   if (newStatus.value && !localStatuses.value.includes(newStatus.value)) {
