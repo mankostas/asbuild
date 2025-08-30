@@ -275,22 +275,30 @@ onMounted(async () => {
   }
 });
 
-watch(
-  tenantId,
-  async (id) => {
-    if (id) {
-      try {
-        const { data } = await api.get('/roles', { params: { tenant_id: id } });
-        tenantRoles.value = data;
-      } catch {
+  watch(
+    tenantId,
+    async (id, oldId) => {
+      if (oldId !== undefined && id !== oldId) {
+        sections.value.forEach((s) =>
+          s.fields.forEach((f) => {
+            f.roles.view = [];
+            f.roles.edit = [];
+          }),
+        );
+      }
+      if (id) {
+        try {
+          const { data } = await api.get('/roles', { params: { tenant_id: id } });
+          tenantRoles.value = data;
+        } catch {
+          tenantRoles.value = [];
+        }
+      } else {
         tenantRoles.value = [];
       }
-    } else {
-      tenantRoles.value = [];
-    }
-  },
-  { immediate: true },
-);
+    },
+    { immediate: true },
+  );
 
 function addSection() {
   sections.value.push({
