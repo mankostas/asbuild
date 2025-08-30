@@ -1,28 +1,24 @@
 <template>
   <div class="space-y-4">
     <div>
-      <span class="block text-sm font-medium">{{ t('types.workflow.addStatus') }}</span>
       <div class="mt-1 flex gap-2">
-        <select
+        <Select
           id="status-select"
           v-model="newStatus"
-          class="border rounded p-1 flex-1"
-          :aria-label="t('types.workflow.addStatus')"
-        >
-          <option value="" disabled>{{ t('actions.select') }}</option>
-          <option
-            v-for="s in remainingStatuses"
-            :key="s.slug"
-            :value="s.slug"
-          >{{ s.name }}</option>
-        </select>
-        <button
+          :options="statusOptions"
+          :placeholder="t('actions.select')"
+          :label="t('types.workflow.addStatus')"
+          class="flex-1"
+        />
+        <Button
           type="button"
-          class="px-2 py-1 border rounded"
           :disabled="!newStatus"
           :aria-label="t('actions.add')"
+          btnClass="btn-outline-primary px-2 py-1"
           @click="addStatus"
-        >{{ t('actions.add') }}</button>
+        >
+          {{ t('actions.add') }}
+        </Button>
       </div>
     </div>
     <draggable v-model="localStatuses" item-key="value" handle=".handle" class="space-y-2" @end="emitStatuses">
@@ -38,12 +34,15 @@
             >≡</span
           >
           <span>{{ displayName(element) }}</span>
-          <button
+          <Button
             type="button"
-            class="ml-auto text-red-600"
+            class="ml-auto"
+            btnClass="btn-outline-danger text-xs"
             :aria-label="t('actions.delete')"
             @click="removeStatus(element)"
-          >{{ t('actions.delete') }}</button>
+          >
+            {{ t('actions.delete') }}
+          </Button>
         </div>
       </template>
     </draggable>
@@ -64,12 +63,11 @@
               :key="to"
               class="px-2 py-1 border text-center"
             >
-              <input
-                :checked="hasEdge(from, to)"
+              <Switch
+                :model-value="hasEdge(from, to)"
                 :disabled="from === to"
                 :aria-label="`${displayName(from)} → ${displayName(to)}`"
-                type="checkbox"
-                @change="toggleEdge(from, to)"
+                @update:model-value="() => toggleEdge(from, to)"
               />
             </td>
           </tr>
@@ -84,6 +82,9 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
 import api from '@/services/api';
+import Select from '@/components/ui/Select/index.vue';
+import Button from '@/components/ui/Button/index.vue';
+import Switch from '@/components/ui/Switch/index.vue';
 
 interface StatusOption {
   slug: string;
@@ -119,6 +120,10 @@ onMounted(async () => {
 
 const remainingStatuses = computed(() =>
   allStatuses.value.filter((s) => !localStatuses.value.includes(s.slug))
+);
+
+const statusOptions = computed(() =>
+  remainingStatuses.value.map((s) => ({ value: s.slug, label: s.name }))
 );
 
 function displayName(slug: string) {

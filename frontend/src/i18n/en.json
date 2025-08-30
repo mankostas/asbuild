@@ -188,6 +188,10 @@
       "title": "Workflow",
       "addStatus": "Add status",
       "transitions": "Transitions"
+    },
+    "form": {
+      "name": "Name",
+      "tenant": "Tenant"
     }
   },
   "slaPolicies": {

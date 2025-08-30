@@ -188,6 +188,10 @@
       "title": "Ροή εργασίας",
       "addStatus": "Προσθήκη κατάστασης",
       "transitions": "Μεταβάσεις"
+    },
+    "form": {
+      "name": "Όνομα",
+      "tenant": "Μισθωτής"
     }
   },
   "slaPolicies": {
