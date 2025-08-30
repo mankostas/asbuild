@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Task;
 use App\Models\TaskType;
+use App\Models\TaskTypeVersion;
 
 class StatusFlowService
 {
@@ -24,7 +25,7 @@ class StatusFlowService
     /**
      * Build transition map for given task type.
      */
-    public function transitions(?TaskType $type = null): array
+    public function transitions(TaskType|TaskTypeVersion|null $type = null): array
     {
         $map = $type?->status_flow_json;
         if (is_array($map)) {
@@ -46,7 +47,7 @@ class StatusFlowService
     /**
      * Get allowed transitions for a given status.
      */
-    public function allowedTransitions(string $status, ?TaskType $type = null): array
+    public function allowedTransitions(string $status, TaskType|TaskTypeVersion|null $type = null): array
     {
         $map = $this->transitions($type);
         return $map[$status] ?? [];
@@ -55,7 +56,7 @@ class StatusFlowService
     /**
      * Determine if transition is allowed.
      */
-    public function canTransition(string $from, string $to, ?TaskType $type = null): bool
+    public function canTransition(string $from, string $to, TaskType|TaskTypeVersion|null $type = null): bool
     {
         return in_array($to, $this->allowedTransitions($from, $type), true);
     }
@@ -65,7 +66,7 @@ class StatusFlowService
      */
     public function checkConstraints(Task $task, string $next): ?string
     {
-        $type = $task->type;
+        $type = $task->typeVersion ?? $task->type;
         if (! $type) {
             return null;
         }
@@ -98,7 +99,10 @@ class StatusFlowService
             }
         }
 
-        if ($type->require_subtasks_complete &&
+        $require = $type instanceof TaskTypeVersion
+            ? ($type->taskType->require_subtasks_complete ?? false)
+            : ($type->require_subtasks_complete ?? false);
+        if ($require &&
             $task->subtasks()->where('is_required', true)->where('is_completed', false)->exists()) {
             return 'subtasks_incomplete';
         }

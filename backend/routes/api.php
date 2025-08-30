@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Api\TaskWatcherController;
 use App\Http\Controllers\Api\TaskTypeController;
+use App\Http\Controllers\Api\TaskTypeVersionController;
 use App\Http\Controllers\Api\TaskBoardController;
 use App\Http\Controllers\Api\ManualController;
 use App\Http\Controllers\Api\NotificationController;
@@ -112,6 +113,14 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::apiResource('task-types', TaskTypeController::class)
         ->only(['index', 'show'])
         ->middleware(Ability::class . ':task_types.manage');
+    Route::get('task-type-versions', [TaskTypeVersionController::class, 'index'])
+        ->middleware(Ability::class . ':task_type_versions.manage');
+    Route::post('task-types/{task_type}/versions', [TaskTypeVersionController::class, 'store'])
+        ->middleware(Ability::class . ':task_type_versions.manage');
+    Route::post('task-type-versions/{task_type_version}/publish', [TaskTypeVersionController::class, 'publish'])
+        ->middleware(Ability::class . ':task_type_versions.manage');
+    Route::post('task-type-versions/{task_type_version}/deprecate', [TaskTypeVersionController::class, 'deprecate'])
+        ->middleware(Ability::class . ':task_type_versions.manage');
     Route::apiResource('roles', RoleController::class)
         ->only(['index', 'show'])
         ->middleware(Ability::class . ':roles.view');

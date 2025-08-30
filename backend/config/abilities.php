@@ -35,6 +35,7 @@ return [
 
     // Task Types
     'task_types.manage',
+    'task_type_versions.manage',
 
     // Teams
     'teams.view',

@@ -43,6 +43,7 @@ return [
         'label' => 'Task Types',
         'abilities' => [
             'task_types.manage',
+            'task_type_versions.manage',
         ],
     ],
     'teams' => [

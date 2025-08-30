@@ -28,7 +28,7 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         $base = Task::where('tenant_id', $request->user()->tenant_id)
-            ->with(['type', 'assignee', 'status'])
+            ->with(['type', 'typeVersion', 'assignee', 'status'])
             ->withCount(['comments', 'attachments', 'watchers', 'subtasks']);
 
         if ($type = $request->query('type')) {
@@ -83,15 +83,20 @@ class TaskController extends Controller
         $data['tenant_id'] = $request->user()->tenant_id;
 
         $type = null;
+        $version = null;
         if (isset($data['task_type_id'])) {
             $type = TaskType::find($data['task_type_id']);
+            $version = $type?->currentVersion;
+            if ($version) {
+                $data['task_type_version_id'] = $version->id;
+            }
         }
-        $data['status'] = $type && $type->statuses ? array_key_first($type->statuses) : Task::STATUS_DRAFT;
-        $this->validateAgainstSchema($type, $data['form_data'] ?? [], null);
-        $this->formSchemaService->mapAssignee($type->schema_json ?? [], $data);
-        $this->formSchemaService->mapReviewer($type->schema_json ?? [], $data);
+        $data['status'] = $version && $version->statuses ? array_key_first($version->statuses) : Task::STATUS_DRAFT;
+        $this->validateAgainstSchema($version, $data['form_data'] ?? [], null);
+        $this->formSchemaService->mapAssignee($version->schema_json ?? [], $data);
+        $this->formSchemaService->mapReviewer($version->schema_json ?? [], $data);
         if (isset($data['form_data'])) {
-            $this->formSchemaService->sanitizeRichText($type->schema_json ?? [], $data['form_data']);
+            $this->formSchemaService->sanitizeRichText($version->schema_json ?? [], $data['form_data']);
         }
 
         $task = Task::create($data);
@@ -99,7 +104,7 @@ class TaskController extends Controller
         if ($task->assignee_type === User::class && $task->assignee_id) {
             $task->watchers()->firstOrCreate(['user_id' => $task->assignee_id]);
         }
-        $task->load('type', 'assignee', 'watchers');
+        $task->load('type', 'typeVersion', 'assignee', 'watchers');
 
         return (new TaskResource($task))
             ->response()
@@ -109,7 +114,7 @@ class TaskController extends Controller
     public function show(Task $task)
     {
         $this->authorize('view', $task);
-        return new TaskResource($task->load('comments', 'type', 'assignee', 'watchers'));
+        return new TaskResource($task->load('comments', 'type', 'typeVersion', 'assignee', 'watchers'));
     }
 
     public function update(TaskUpsertRequest $request, Task $task)
@@ -122,11 +127,15 @@ class TaskController extends Controller
 
         $typeId = $data['task_type_id'] ?? $task->task_type_id;
         $type = $typeId ? TaskType::find($typeId) : $task->type;
-        $this->validateAgainstSchema($type, $data['form_data'] ?? $task->form_data ?? [], $task);
-        $this->formSchemaService->mapAssignee($type->schema_json ?? [], $data);
-        $this->formSchemaService->mapReviewer($type->schema_json ?? [], $data);
+        $version = $type?->currentVersion;
+        if ($version) {
+            $data['task_type_version_id'] = $version->id;
+        }
+        $this->validateAgainstSchema($version, $data['form_data'] ?? $task->form_data ?? [], $task);
+        $this->formSchemaService->mapAssignee($version->schema_json ?? [], $data);
+        $this->formSchemaService->mapReviewer($version->schema_json ?? [], $data);
         if (isset($data['form_data'])) {
-            $this->formSchemaService->sanitizeRichText($type->schema_json ?? [], $data['form_data']);
+            $this->formSchemaService->sanitizeRichText($version->schema_json ?? [], $data['form_data']);
         }
         $task->fill($data);
         $task->save();
@@ -134,7 +143,7 @@ class TaskController extends Controller
             $task->watchers()->firstOrCreate(['user_id' => $task->assignee_id]);
         }
 
-        return new TaskResource($task->load('comments', 'type', 'assignee', 'watchers'));
+        return new TaskResource($task->load('comments', 'type', 'typeVersion', 'assignee', 'watchers'));
     }
 
     public function destroy(Task $task)
@@ -150,7 +159,7 @@ class TaskController extends Controller
 
         $data = $request->validate(['status' => 'required|string']);
         $next = $data['status'];
-        $type = $task->type;
+        $type = $task->typeVersion;
 
         if (! $this->statusFlow->canTransition($task->status, $next, $type)) {
             return response()->json(['message' => 'invalid_transition'], 422);
@@ -173,17 +182,17 @@ class TaskController extends Controller
         return new TaskResource($task->load('type', 'assignee'));
     }
 
-    protected function validateAgainstSchema(?TaskType $type, array $data, ?Task $task = null): void
+    protected function validateAgainstSchema($version, array $data, ?Task $task = null): void
     {
-        if (! $type || ! $type->schema_json) {
+        if (! $version || ! $version->schema_json) {
             return;
         }
 
-        $this->formSchemaService->assertCanEdit($type->schema_json, $data, auth()->user());
+        $this->formSchemaService->assertCanEdit($version->schema_json, $data, auth()->user());
 
-        $fields = collect($type->schema_json['sections'] ?? [])
+        $fields = collect($version->schema_json['sections'] ?? [])
             ->flatMap(fn ($s) => $s['fields'] ?? []);
-        $logic = $this->formSchemaService->evaluateLogic($type->schema_json, $data);
+        $logic = $this->formSchemaService->evaluateLogic($version->schema_json, $data);
         $visible = collect($logic['visible']);
         $showTargets = collect($logic['showTargets']);
         $requiredOverride = collect($logic['required']);
@@ -208,7 +217,7 @@ class TaskController extends Controller
                 ]);
             }
             if (($rules['unique'] ?? false) && array_key_exists($key, $data)) {
-                $query = Task::where('task_type_id', $type->id)
+                $query = Task::where('task_type_id', $version->task_type_id)
                     ->where('form_data->'.$key, $data[$key]);
                 if ($task) {
                     $query->where('id', '!=', $task->id);
@@ -221,6 +230,6 @@ class TaskController extends Controller
             }
         }
 
-        $this->formSchemaService->validateData($type->schema_json, $data);
+        $this->formSchemaService->validateData($version->schema_json, $data);
     }
 }
