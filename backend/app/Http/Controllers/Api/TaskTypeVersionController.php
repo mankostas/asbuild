@@ -11,6 +11,9 @@ class TaskTypeVersionController extends Controller
 {
     public function index(Request $request)
     {
+        if ($request->user()->cannot('task_type_versions.manage')) {
+            abort(403);
+        }
         $query = TaskTypeVersion::query()->whereHas('taskType', function ($q) use ($request) {
             $q->where('tenant_id', $request->user()->tenant_id);
         });
@@ -22,6 +25,9 @@ class TaskTypeVersionController extends Controller
 
     public function store(TaskType $taskType, Request $request)
     {
+        if ($request->user()->cannot('task_type_versions.manage')) {
+            abort(403);
+        }
         $user = $request->user();
         $count = $taskType->versions()->count();
         $semver = ($count + 1) . '.0.0';
@@ -36,8 +42,11 @@ class TaskTypeVersionController extends Controller
         return response()->json(['data' => $version], 201);
     }
 
-    public function publish(TaskTypeVersion $taskTypeVersion)
+    public function publish(Request $request, TaskTypeVersion $taskTypeVersion)
     {
+        if ($request->user()->cannot('task_type_versions.manage')) {
+            abort(403);
+        }
         if (! $taskTypeVersion->published_at) {
             $taskTypeVersion->published_at = now();
             $taskTypeVersion->save();
@@ -46,8 +55,11 @@ class TaskTypeVersionController extends Controller
         return response()->json(['data' => $taskTypeVersion]);
     }
 
-    public function deprecate(TaskTypeVersion $taskTypeVersion)
+    public function deprecate(Request $request, TaskTypeVersion $taskTypeVersion)
     {
+        if ($request->user()->cannot('task_type_versions.manage')) {
+            abort(403);
+        }
         if (! $taskTypeVersion->deprecated_at) {
             $taskTypeVersion->deprecated_at = now();
             $taskTypeVersion->save();
