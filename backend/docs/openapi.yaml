@@ -1155,6 +1155,9 @@ components:
         tenant_id:
           type: integer
           nullable: true
+        abilities_json:
+          type: object
+          nullable: true
     TaskTypeVersion:
       type: object
       properties:
@@ -1171,6 +1174,9 @@ components:
           type: object
           nullable: true
         status_flow_json:
+          type: object
+          nullable: true
+        abilities_json:
           type: object
           nullable: true
         created_by:

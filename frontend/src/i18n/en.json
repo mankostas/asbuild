@@ -66,6 +66,15 @@
     "tenantCreate": "Create Tenant",
     "tenantEdit": "Edit Tenant"
   },
+  "abilities": {
+    "title": "Abilities",
+    "read": "Read",
+    "edit": "Edit",
+    "delete": "Delete",
+    "export": "Export",
+    "assign": "Assign",
+    "transition": "Transition"
+  },
   "tasks": {
     "new": "New Task",
     "edit": "Edit Task",

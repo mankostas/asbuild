@@ -30,6 +30,7 @@ class TaskTypeVersionController extends Controller
             'schema_json' => $taskType->schema_json,
             'statuses' => $taskType->statuses,
             'status_flow_json' => $taskType->status_flow_json,
+            'abilities_json' => $taskType->abilities_json,
             'created_by' => $user->id,
         ]);
         return response()->json(['data' => $version], 201);

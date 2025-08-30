@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-4">
     <div>
-      <label for="status-select" class="block text-sm font-medium">{{ t('types.workflow.addStatus') }}</label>
+      <span class="block text-sm font-medium">{{ t('types.workflow.addStatus') }}</span>
       <div class="mt-1 flex gap-2">
         <select
           id="status-select"
@@ -20,8 +20,8 @@
           type="button"
           class="px-2 py-1 border rounded"
           :disabled="!newStatus"
-          @click="addStatus"
           :aria-label="t('actions.add')"
+          @click="addStatus"
         >{{ t('actions.add') }}</button>
       </div>
     </div>
@@ -33,8 +33,8 @@
           <button
             type="button"
             class="ml-auto text-red-600"
-            @click="removeStatus(element)"
             :aria-label="t('actions.delete')"
+            @click="removeStatus(element)"
           >{{ t('actions.delete') }}</button>
         </div>
       </template>
@@ -57,10 +57,10 @@
               class="px-2 py-1 border text-center"
             >
               <input
-                type="checkbox"
                 :checked="hasEdge(from, to)"
                 :disabled="from === to"
                 :aria-label="`${displayName(from)} → ${displayName(to)}`"
+                type="checkbox"
                 @change="toggleEdge(from, to)"
               />
             </td>

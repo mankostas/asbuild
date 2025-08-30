@@ -53,4 +53,33 @@ class TaskTypeBuilderTest extends TestCase
             ->assertCreated()
             ->assertJsonPath('data.name', 'Builder');
     }
+
+    public function test_store_task_type_with_abilities(): void
+    {
+        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $role = Role::create(['name' => 'Admin', 'slug' => 'admin', 'tenant_id' => $tenant->id, 'abilities' => ['task_types.manage'], 'level' => 1]);
+        $user = User::create([
+            'name' => 'U',
+            'email' => 'u2@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
+        Sanctum::actingAs($user);
+
+        $payload = [
+            'name' => 'With Abilities',
+            'schema_json' => json_encode(['sections' => []]),
+            'statuses' => json_encode([]),
+            'abilities_json' => json_encode(['read' => true, 'delete' => false]),
+        ];
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson('/api/task-types', $payload)
+            ->assertCreated()
+            ->assertJsonPath('data.abilities_json.read', true)
+            ->assertJsonPath('data.abilities_json.delete', false);
+    }
 }
