@@ -151,11 +151,19 @@ onMounted(async () => {
     if (task.assignee) {
       assignee.value = { kind: task.assignee.kind, id: task.assignee.id };
     }
-    const map = task.type?.statuses || {};
-    const allowed = Array.from(new Set([...Object.keys(map), ...Object.values(map).flat()]));
-    if (allowed.length) {
-      statusOptions.value = allowed;
+    const flow = task.type?.status_flow_json || [];
+    let graph: Record<string, string[]> = {};
+    if (Array.isArray(flow)) {
+      flow.forEach((e: [string, string]) => {
+        const [from, to] = e;
+        if (!graph[from]) graph[from] = [];
+        graph[from].push(to);
+      });
+    } else if (flow && typeof flow === 'object') {
+      graph = flow;
     }
+    const allowed = graph[task.status] || [];
+    statusOptions.value = [task.status, ...allowed];
   }
 });
 

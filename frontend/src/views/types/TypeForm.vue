@@ -25,6 +25,11 @@
           <button type="submit" class="px-3 py-1 bg-indigo-600 text-white rounded" aria-label="Save">{{ t('Save') }}</button>
         </div>
       </header>
+      <WorkflowDesigner
+        v-model="statusFlow"
+        v-model:statuses="statuses"
+        class="p-4 border-b"
+      />
       <div class="flex h-[calc(100vh-3rem)]">
         <aside class="w-1/5 border-r overflow-y-auto">
           <FieldPalette :groups="paletteGroups" @select="onAddField" />
@@ -63,6 +68,7 @@ import FieldPalette from '@/components/types/FieldPalette.vue';
 import CanvasSection from '@/components/types/CanvasSection.vue';
 import InspectorTabs from '@/components/types/Inspector/InspectorTabs.vue';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
+import WorkflowDesigner from '@/components/types/WorkflowDesigner.vue';
 import { can } from '@/stores/auth';
 import api from '@/services/api';
 import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
@@ -101,6 +107,8 @@ const showPreview = ref(false);
 const previewData = ref<Record<string, any>>({});
 const versions = ref<any[]>([]);
 const selectedVersionId = ref<number | null>(null);
+const statuses = ref<string[]>([]);
+const statusFlow = ref<[string, string][]>([]);
 
 const fieldTypes = [
   { key: 'text', label: 'Text', group: 'Inputs' },
@@ -162,6 +170,16 @@ function loadVersion(v: any) {
     })),
     photos: [],
   }));
+  statuses.value = Object.keys(v.statuses || {});
+  if (Array.isArray(v.status_flow_json)) {
+    statusFlow.value = v.status_flow_json;
+  } else if (v.status_flow_json) {
+    statusFlow.value = Object.entries(v.status_flow_json).flatMap(([from, tos]: any) =>
+      (tos as string[]).map((to) => [from, to])
+    );
+  } else {
+    statusFlow.value = [];
+  }
 }
 
 function onVersionChange() {
@@ -211,7 +229,8 @@ function onSubmit() {
         })),
       })),
     }),
-    statuses: JSON.stringify([]),
+    statuses: JSON.stringify(statuses.value.reduce((acc: any, s) => ({ ...acc, [s]: [] }), {})),
+    status_flow_json: JSON.stringify(statusFlow.value),
   };
   if (isEdit.value) {
     api.patch(`/task-types/${route.params.id}`, payload).then(() => router.push({ name: 'taskTypes.list' }));

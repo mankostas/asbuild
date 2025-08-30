@@ -28,7 +28,7 @@ class StatusFlowService
     public function transitions(TaskType|TaskTypeVersion|null $type = null): array
     {
         $map = $type?->status_flow_json;
-        if (is_array($map)) {
+        if (is_array($map) && count($map) > 0) {
             if (array_is_list($map)) {
                 $graph = [];
                 foreach ($map as $edge) {

@@ -12,7 +12,9 @@
     "delete": "Delete",
     "save": "Save",
     "cancel": "Cancel",
-    "retry": "Retry"
+    "retry": "Retry",
+    "add": "Add",
+    "select": "Select"
   },
   "messages": {
     "helloToast": "Hello from toast"
@@ -154,6 +156,13 @@
     "moveRight": "Move right",
     "addCommentPrompt": "Enter comment",
     "errorMove": "Cannot move task"
+  },
+  "types": {
+    "workflow": {
+      "title": "Workflow",
+      "addStatus": "Add status",
+      "transitions": "Transitions"
+    }
   },
   "dashboard": {
     "messages": {

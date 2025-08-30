@@ -20,6 +20,7 @@ class TaskTypeRequest extends FormRequest
             'name' => [$required, 'string', 'max:255'],
             'schema_json' => ['nullable', 'json'],
             'statuses' => [$required, 'json'],
+            'status_flow_json' => ['nullable', 'json'],
             'tenant_id' => ['sometimes', 'integer'],
         ];
     }
@@ -30,6 +31,7 @@ class TaskTypeRequest extends FormRequest
             'name' => 'name',
             'schema_json' => 'schema',
             'statuses' => 'statuses',
+            'status_flow_json' => 'status flow',
             'tenant_id' => 'tenant',
         ];
     }
@@ -48,7 +50,7 @@ class TaskTypeRequest extends FormRequest
     public function validated($key = null, $default = null)
     {
         $data = parent::validated($key, $default);
-        foreach (['schema_json', 'statuses'] as $field) {
+        foreach (['schema_json', 'statuses', 'status_flow_json'] as $field) {
             if (isset($data[$field])) {
                 $data[$field] = json_decode($data[$field], true);
             }
