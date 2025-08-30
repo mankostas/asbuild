@@ -73,4 +73,6 @@ function onError(payload: { key: string; msg: string }) {
     delete errors[payload.key];
   }
 }
+
+defineExpose({ errors });
 </script>

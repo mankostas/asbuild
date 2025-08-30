@@ -19,8 +19,13 @@
             <span v-else class="text-xs px-2 py-1 border rounded" :aria-label="t('Version')">v1</span>
           </div>
           <label class="flex items-center gap-1" for="previewToggle">
-            <input id="previewToggle" v-model="showPreview" type="checkbox" aria-label="Toggle preview" />
-            <span>{{ t('Preview') }}</span>
+            <input
+              id="previewToggle"
+              v-model="showPreview"
+              type="checkbox"
+              :aria-label="t('preview.title')"
+            />
+            <span>{{ t('preview.title') }}</span>
           </label>
           <button type="submit" class="px-3 py-1 bg-indigo-600 text-white rounded" aria-label="Save">{{ t('Save') }}</button>
         </div>
@@ -63,14 +68,62 @@
         </aside>
       </div>
       <div v-if="showPreview" class="builder-preview p-4 border-t">
-          <JsonSchemaForm v-model="previewData" :schema="previewSchema" :task-id="0" />
+          <div class="flex items-center gap-2 mb-2">
+            <label for="previewLang" class="sr-only">{{ t('preview.language') }}</label>
+            <select
+              id="previewLang"
+              v-model="previewLang"
+              class="text-xs px-2 py-1 border rounded"
+              :aria-label="t('preview.language')"
+            >
+              <option value="el">EL</option>
+              <option value="en">EN</option>
+            </select>
+            <label for="previewTheme" class="sr-only">{{ t('preview.theme') }}</label>
+            <select
+              id="previewTheme"
+              v-model="previewTheme"
+              class="text-xs px-2 py-1 border rounded"
+              :aria-label="t('preview.theme')"
+            >
+              <option value="light">{{ t('preview.light') }}</option>
+              <option value="dark">{{ t('preview.dark') }}</option>
+            </select>
+            <label for="previewViewport" class="sr-only">{{ t('preview.viewport') }}</label>
+            <select
+              id="previewViewport"
+              v-model="previewViewport"
+              class="text-xs px-2 py-1 border rounded"
+              :aria-label="t('preview.viewport')"
+            >
+              <option value="mobile">{{ t('preview.mobile') }}</option>
+              <option value="tablet">{{ t('preview.tablet') }}</option>
+              <option value="desktop">{{ t('preview.desktop') }}</option>
+            </select>
+            <button
+              type="button"
+              class="px-2 py-1 bg-indigo-600 text-white rounded"
+              :aria-label="t('preview.runValidation')"
+              @click="runValidation"
+            >
+              {{ t('preview.runValidation') }}
+            </button>
+          </div>
+          <div :class="[{ dark: previewTheme === 'dark' }, viewportClass]" class="border p-2 overflow-auto">
+            <JsonSchemaForm ref="formRef" v-model="previewData" :schema="previewSchema" :task-id="0" />
+          </div>
+          <div v-if="Object.keys(validationErrors).length" class="mt-2 text-red-600">
+            <ul>
+              <li v-for="(msg, key) in validationErrors" :key="key">{{ key }}: {{ msg }}</li>
+            </ul>
+          </div>
       </div>
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
@@ -86,7 +139,7 @@ import api from '@/services/api';
 import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
 import '@/styles/types-builder.css';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const versionsStore = useTaskTypeVersionsStore();
@@ -117,6 +170,11 @@ const sections = ref<Section[]>([]);
 const selected = ref<Field | null>(null);
 const showPreview = ref(false);
 const previewData = ref<Record<string, any>>({});
+const previewLang = ref<'el' | 'en'>('el');
+const previewTheme = ref<'light' | 'dark'>('light');
+const previewViewport = ref<'mobile' | 'tablet' | 'desktop'>('desktop');
+const validationErrors = ref<Record<string, string>>({});
+const formRef = ref<any>(null);
 const versions = ref<any[]>([]);
 const selectedVersionId = ref<number | null>(null);
 const statuses = ref<string[]>([]);
@@ -143,6 +201,21 @@ const canAccess = computed(() =>
     ? can('task_types.update') || can('task_types.manage')
     : can('task_types.create') || can('task_types.manage'),
 );
+
+watch(previewLang, (lang) => {
+  locale.value = lang;
+});
+
+const viewportClass = computed(() => {
+  switch (previewViewport.value) {
+    case 'mobile':
+      return 'max-w-xs';
+    case 'tablet':
+      return 'max-w-md';
+    default:
+      return 'w-full';
+  }
+});
 
 onMounted(async () => {
   if (isEdit.value) {
@@ -249,6 +322,23 @@ function onSubmit() {
   } else {
     api.post('/task-types', payload).then(() => router.push({ name: 'taskTypes.list' }));
   }
+}
+
+function runValidation() {
+  validationErrors.value = {};
+  const feErrors = formRef.value?.errors || {};
+  if (Object.keys(feErrors).length) {
+    validationErrors.value = feErrors;
+    return;
+  }
+  api
+    .post(`/task-types/${route.params.id}/validate`, {
+      schema_json: previewSchema.value,
+      form_data: previewData.value,
+    })
+    .catch((err) => {
+      validationErrors.value = err.response?.data?.errors || { error: 'validation failed' };
+    });
 }
 
 const previewSchema = computed(() => ({
