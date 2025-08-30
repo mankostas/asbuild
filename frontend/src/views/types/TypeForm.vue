@@ -59,7 +59,10 @@
             classInput="text-xs"
           />
           <Button
-            v-if="auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage'))"
+            v-if="
+              isEdit &&
+              (auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage')))
+            "
             type="button"
             :aria-label="t('actions.duplicate')"
             btnClass="btn-outline-primary text-xs px-3 py-1"
@@ -68,7 +71,10 @@
             {{ t('actions.duplicate') }}
           </Button>
           <Button
-            v-if="auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage'))"
+            v-if="
+              isEdit &&
+              (auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage')))
+            "
             type="button"
             :aria-label="t('actions.publish')"
             btnClass="btn-outline-primary text-xs px-3 py-1"
@@ -77,7 +83,10 @@
             {{ t('actions.publish') }}
           </Button>
           <Button
-            v-if="auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage'))"
+            v-if="
+              isEdit &&
+              (auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage')))
+            "
             type="button"
             :aria-label="t('actions.delete')"
             btnClass="btn-outline-danger text-xs px-3 py-1"
