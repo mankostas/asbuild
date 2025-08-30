@@ -1,18 +1,25 @@
 <template>
   <div class="space-y-2">
     <Tabs v-model="tab" :tabs="tabs" />
-    <vSelect
-      v-model="selected"
-      :options="options"
-      label="label"
-      placeholder="Select assignee"
-    />
+    <VueSelect>
+      <template #default="{ inputId }">
+        <vSelect
+          :id="inputId"
+          v-model="selected"
+          :options="options"
+          label="label"
+          placeholder="Select assignee"
+        />
+      </template>
+    </VueSelect>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import vSelect from 'vue-select';
+import 'vue-select/dist/vue-select.css';
+import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import Tabs from '@/components/ui/Tabs.vue';
 import { useLookupsStore } from '@/stores/lookups';
 
