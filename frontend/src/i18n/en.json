@@ -16,7 +16,8 @@
     "cancel": "Cancel",
     "retry": "Retry",
     "add": "Add",
-    "select": "Select"
+    "select": "Select",
+    "close": "Close"
   },
   "messages": {
     "helloToast": "Hello from toast"
@@ -241,5 +242,12 @@
     "placeholder": "Placeholder",
     "help": "Help",
     "reorderHint": "Use Alt+Arrow keys to reorder"
+  }
+  ,
+  "templates": {
+    "title": "Templates",
+    "export": "Export JSON",
+    "import": "Import JSON",
+    "selectType": "Select type"
   }
 }
