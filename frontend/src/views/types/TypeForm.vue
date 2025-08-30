@@ -57,11 +57,14 @@
               @click="addSection"
             >+
               {{ t('Section') }}</button>
-          <draggable v-model="sections" item-key="id" handle=".handle" class="space-y-4">
-            <template #item="{ element, index }">
-              <CanvasSection :section="element" @remove="removeSection(index)" @select="selectField" />
-            </template>
-          </draggable>
+          <p id="reorderHint" class="sr-only">{{ t('fields.reorderHint') }}</p>
+          <div aria-describedby="reorderHint">
+            <draggable v-model="sections" item-key="id" handle=".handle" class="space-y-4">
+              <template #item="{ element, index }">
+                <CanvasSection :section="element" @remove="removeSection(index)" @select="selectField" />
+              </template>
+            </draggable>
+          </div>
         </main>
         <aside class="w-1/4 border-l overflow-y-auto p-4">
           <InspectorTabs :selected="selected" />
@@ -109,7 +112,7 @@
           <div :class="[{ dark: previewTheme === 'dark' }, viewportClass]" class="border p-2 overflow-auto">
             <JsonSchemaForm ref="formRef" v-model="previewData" :schema="previewSchema" :task-id="0" />
           </div>
-          <div v-if="Object.keys(validationErrors).length" class="mt-2 text-red-600">
+          <div v-if="Object.keys(validationErrors).length" class="mt-2 text-red-600" role="alert" aria-live="assertive">
             <ul>
               <li v-for="(msg, key) in validationErrors" :key="key">{{ key }}: {{ msg }}</li>
             </ul>
@@ -136,6 +139,7 @@ import { can } from '@/stores/auth';
 import api from '@/services/api';
 import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
 import '@/styles/types-builder.css';
+import type { I18nString } from '@/utils/i18n';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -145,19 +149,19 @@ const versionsStore = useTaskTypeVersionsStore();
 interface Field {
   id: number;
   name: string;
-  label: string;
+  label: I18nString;
   typeKey: string;
   cols: number;
   fields?: Field[];
-  placeholder?: string;
-  help?: string;
+  placeholder?: I18nString;
+  help?: I18nString;
   validations: Record<string, any>;
 }
 
 interface Section {
   id: number;
   key: string;
-  label: string;
+  label: I18nString;
   fields: Field[];
   photos: any[];
 }
@@ -238,7 +242,7 @@ function addSection() {
   sections.value.push({
     id: Date.now() + Math.random(),
     key: `section${sections.value.length + 1}`,
-    label: `Section ${sections.value.length + 1}`,
+    label: { en: `Section ${sections.value.length + 1}`, el: `Section ${sections.value.length + 1}` },
     fields: [],
     photos: [],
   });
@@ -249,15 +253,17 @@ function loadVersion(v: any) {
   sections.value = (schema.sections || []).map((s: any, idx: number) => ({
     id: idx + 1,
     key: s.key,
-    label: s.label,
+    label: typeof s.label === 'string' ? { en: s.label, el: s.label } : s.label,
     fields: (s.fields || []).map((f: any, fid: number) => ({
       id: fid + 1,
       name: f.key,
-      label: f.label,
+      label: typeof f.label === 'string' ? { en: f.label, el: f.label } : f.label,
       typeKey: f.type,
       cols: f['x-cols'] || 2,
       validations: f.validations || {},
       fields: f.fields || undefined,
+      placeholder: typeof f.placeholder === 'string' ? { en: f.placeholder, el: f.placeholder } : (f.placeholder || { en: '', el: '' }),
+      help: typeof f.help === 'string' ? { en: f.help, el: f.help } : (f.help || { en: '', el: '' }),
     })),
     photos: [],
   }));
@@ -300,11 +306,13 @@ function onAddField(type: any) {
   section.fields.push({
     id: Date.now() + Math.random(),
     name: `field${section.fields.length + 1}`,
-    label: type.label,
+    label: { en: type.label, el: type.label },
     typeKey: type.key,
     cols: 2,
     validations: {},
     fields: type.key === 'repeater' ? [] : undefined,
+    placeholder: { en: '', el: '' },
+    help: { en: '', el: '' },
   });
 }
 
@@ -326,6 +334,9 @@ function onSubmit() {
           type: f.typeKey,
           validations: f.validations,
           'x-cols': f.cols,
+          placeholder: f.placeholder,
+          help: f.help,
+          fields: f.fields,
         })),
       })),
     }),
@@ -361,7 +372,15 @@ const previewSchema = computed(() => ({
   sections: sections.value.map((s) => ({
     key: s.key,
     label: s.label,
-    fields: s.fields.map((f) => ({ key: f.name, label: f.label, type: f.typeKey, validations: f.validations })),
+    fields: s.fields.map((f) => ({
+      key: f.name,
+      label: f.label,
+      type: f.typeKey,
+      validations: f.validations,
+      placeholder: f.placeholder,
+      help: f.help,
+      fields: f.fields,
+    })),
   })),
 }));
 </script>

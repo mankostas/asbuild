@@ -3,7 +3,7 @@
     <header class="flex items-center justify-between bg-gray-50 px-2 py-1">
       <span class="handle cursor-move" aria-label="Drag section">≡</span>
       <input
-        v-model="section.label"
+        v-model="section.label[locale]"
         class="flex-1 mx-2 border rounded px-2 py-1 text-sm"
         :aria-label="t('Section label')"
       />
@@ -17,7 +17,7 @@
           tabindex="0"
         >
           <span class="field-handle cursor-move" aria-label="Drag field">≡</span>
-          <span>{{ element.label }}</span>
+          <span>{{ resolveI18n(element.label) }}</span>
         </div>
       </template>
     </draggable>
@@ -27,8 +27,13 @@
 <script setup lang="ts">
 import draggable from 'vuedraggable';
 import { useI18n } from 'vue-i18n';
+import { resolveI18n as resolveI18nUtil } from '@/utils/i18n';
 
 const props = defineProps<{ section: any }>();
 const emit = defineEmits<{ (e: 'remove'): void; (e: 'select', field: any): void }>();
-const { t } = useI18n();
+const { t, locale } = useI18n();
+
+function resolveI18n(val: any) {
+  return resolveI18nUtil(val, locale.value);
+}
 </script>

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Services\FormSchemaService;
 
 class TaskTypeVersion extends Model
 {
@@ -36,5 +38,14 @@ class TaskTypeVersion extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    protected function schemaJson(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => app(FormSchemaService::class)->normalizeSchema(
+                is_array($value) ? $value : (json_decode($value ?: '[]', true) ?? [])
+            ),
+        );
     }
 }

@@ -1223,6 +1223,7 @@ components:
         schema_json:
           type: object
           nullable: true
+          description: "Form schema. Text fields support string or {en,el} objects."
         statuses:
           type: object
           additionalProperties:
@@ -1251,6 +1252,7 @@ components:
         schema_json:
           type: object
           nullable: true
+          description: "Form schema. Text fields support string or {en,el} objects."
         statuses:
           type: object
           nullable: true

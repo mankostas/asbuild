@@ -7,6 +7,46 @@ use Illuminate\Validation\ValidationException;
 
 class FormSchemaService
 {
+    protected function isI18nString($val): bool
+    {
+        return is_string($val) || (is_array($val) && (isset($val['en']) || isset($val['el'])));
+    }
+
+    protected function normalizeI18n($val): array
+    {
+        if (is_array($val)) {
+            $en = $val['en'] ?? ($val['el'] ?? '');
+            $el = $val['el'] ?? $en;
+            return ['en' => $en, 'el' => $el];
+        }
+        return ['en' => (string) $val, 'el' => (string) $val];
+    }
+
+    public function normalizeSchema(array $schema): array
+    {
+        if (isset($schema['sections']) && is_array($schema['sections'])) {
+            foreach ($schema['sections'] as &$section) {
+                if (isset($section['label'])) {
+                    $section['label'] = $this->normalizeI18n($section['label']);
+                }
+                if (isset($section['fields']) && is_array($section['fields'])) {
+                    foreach ($section['fields'] as &$field) {
+                        if (isset($field['label'])) {
+                            $field['label'] = $this->normalizeI18n($field['label']);
+                        }
+                        if (isset($field['placeholder'])) {
+                            $field['placeholder'] = $this->normalizeI18n($field['placeholder']);
+                        }
+                        if (isset($field['help'])) {
+                            $field['help'] = $this->normalizeI18n($field['help']);
+                        }
+                    }
+                }
+            }
+        }
+        return $schema;
+    }
+
     /**
      * Validate the task type schema structure.
      *
@@ -23,7 +63,7 @@ class FormSchemaService
         }
         $allKeys = [];
         foreach ($schema['sections'] as $section) {
-            if (! isset($section['key'], $section['label'])) {
+            if (! isset($section['key'], $section['label']) || ! $this->isI18nString($section['label'])) {
                 throw ValidationException::withMessages([
                     'schema_json' => 'section key/label required',
                 ]);
@@ -44,7 +84,7 @@ class FormSchemaService
     protected function validateField(array $field, array $allKeys): void
     {
         $allowed = ['text','textarea','number','date','time','datetime','duration','email','phone','url','boolean','select','multiselect','radio','checkbox','chips','assignee','reviewer','file','photo_single','photo_repeater','repeater','richtext','markdown','divider','headline','lookup','computed','signature','location','rating','priority','status'];
-        if (! isset($field['key'], $field['label']) || ! in_array($field['type'] ?? '', $allowed, true)) {
+        if (! isset($field['key'], $field['label']) || ! $this->isI18nString($field['label']) || ! in_array($field['type'] ?? '', $allowed, true)) {
             throw ValidationException::withMessages([
                 'schema_json' => 'invalid field',
             ]);
@@ -78,6 +118,14 @@ class FormSchemaService
             throw ValidationException::withMessages([
                 'schema_json' => 'validations must be object',
             ]);
+        }
+
+        foreach (['placeholder', 'help'] as $attr) {
+            if (isset($field[$attr]) && ! $this->isI18nString($field[$attr])) {
+                throw ValidationException::withMessages([
+                    'schema_json' => "$attr must be string or i18n object",
+                ]);
+            }
         }
 
         if ($field['type'] === 'repeater') {
@@ -383,7 +431,7 @@ class FormSchemaService
         }
 
         $schema['sections'] = $sections;
-        return $schema;
+        return $this->normalizeSchema($schema);
     }
 
     /**
