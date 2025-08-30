@@ -5,8 +5,8 @@
         <h1 class="text-lg font-semibold">{{ isEdit ? t('routes.taskTypeEdit') : t('routes.taskTypeCreate') }}</h1>
         <div class="flex items-center gap-3">
           <span class="text-xs px-2 py-1 border rounded" aria-label="Version">v1</span>
-          <label class="flex items-center gap-1">
-            <input type="checkbox" v-model="showPreview" aria-label="Toggle preview" />
+            <label class="flex items-center gap-1" for="previewToggle">
+              <input id="previewToggle" v-model="showPreview" type="checkbox" aria-label="Toggle preview" />
             <span>{{ t('Preview') }}</span>
           </label>
           <button type="submit" class="px-3 py-1 bg-indigo-600 text-white rounded" aria-label="Save">{{ t('Save') }}</button>
@@ -17,8 +17,13 @@
           <FieldPalette :groups="paletteGroups" @select="onAddField" />
         </aside>
         <main class="flex-1 overflow-y-auto p-4">
-          <button type="button" class="mb-4 px-2 py-1 border rounded" @click="addSection" aria-label="Add section">+
-            {{ t('Section') }}</button>
+            <button
+              type="button"
+              class="mb-4 px-2 py-1 border rounded"
+              aria-label="Add section"
+              @click="addSection"
+            >+
+              {{ t('Section') }}</button>
           <draggable v-model="sections" item-key="id" handle=".handle" class="space-y-4">
             <template #item="{ element, index }">
               <CanvasSection :section="element" @remove="removeSection(index)" @select="selectField" />
@@ -30,7 +35,7 @@
         </aside>
       </div>
       <div v-if="showPreview" class="builder-preview p-4 border-t">
-        <JsonSchemaForm :schema="previewSchema" v-model="previewData" :task-id="0" />
+          <JsonSchemaForm v-model="previewData" :schema="previewSchema" :task-id="0" />
       </div>
     </form>
   </div>
@@ -45,7 +50,7 @@ import FieldPalette from '@/components/types/FieldPalette.vue';
 import CanvasSection from '@/components/types/CanvasSection.vue';
 import InspectorTabs from '@/components/types/Inspector/InspectorTabs.vue';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
-import { can } from '@/services/auth';
+import { can } from '@/stores/auth';
 import api from '@/services/api';
 import '@/styles/types-builder.css';
 
