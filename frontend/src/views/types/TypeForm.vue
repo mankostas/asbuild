@@ -157,7 +157,7 @@
                     type="button"
                     btnClass="btn-outline-primary text-xs"
                     :aria-label="t('actions.add')"
-                    @click="onAddField(fieldTypes[0])"
+                    @click="paletteOpen = true"
                   >
                     Field
                   </Button>
@@ -231,7 +231,7 @@
                     type="button"
                     btnClass="btn-outline-primary text-xs mb-4 ml-2"
                     :aria-label="t('actions.add')"
-                    @click="onAddField(fieldTypes[0])"
+                    @click="paletteOpen = true"
                   >
                     Field
                   </Button>
@@ -272,6 +272,9 @@
         </div>
       </div>
     </form>
+    <Drawer :open="paletteOpen" @close="paletteOpen = false">
+      <FieldPalette :groups="fieldTypeGroups" @select="onSelectType" />
+    </Drawer>
   </div>
 </template>
 
@@ -293,6 +296,8 @@ import Select from '@/components/ui/Select/index.vue';
 import Badge from '@/components/ui/Badge/index.vue';
 import Card from '@/components/ui/Card/index.vue';
 import UiTabs from '@/components/ui/Tabs/index.vue';
+import Drawer from '@/components/ui/Drawer/index.vue';
+import FieldPalette from '@/components/types/FieldPalette.vue';
 import { Tab, TabPanel } from '@headlessui/vue';
 import { can } from '@/stores/auth';
 import api from '@/services/api';
@@ -382,6 +387,16 @@ const fieldTypes = [
   { key: 'assignee', label: 'Assignee', group: 'People' },
   { key: 'repeater', label: 'Repeater', group: 'Content' },
 ];
+
+const paletteOpen = ref(false);
+const fieldTypeGroups = computed(() => {
+  const groups: Record<string, { label: string; items: any[] }> = {};
+  fieldTypes.forEach((ft) => {
+    if (!groups[ft.group]) groups[ft.group] = { label: ft.group, items: [] };
+    groups[ft.group].items.push(ft);
+  });
+  return Object.values(groups);
+});
 
 const tenants = computed(() => tenantStore.tenants);
 
@@ -559,6 +574,11 @@ function onAddField(type: any) {
     roles: { view: [], edit: [] },
     data: { default: '', enum: [] },
   });
+}
+
+function onSelectType(type: any) {
+  onAddField(type);
+  paletteOpen.value = false;
 }
 
 function selectField(field: Field) {
