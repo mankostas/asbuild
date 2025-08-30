@@ -560,7 +560,7 @@ function removeSection(index: number) {
 function onAddField(type: any) {
   if (!sections.value.length) addSection();
   const section = sections.value[sections.value.length - 1];
-  section.fields.push({
+  const field = {
     id: Date.now() + Math.random(),
     name: `field${section.fields.length + 1}`,
     label: { en: type.label, el: type.label },
@@ -573,7 +573,9 @@ function onAddField(type: any) {
     logic: [],
     roles: { view: [], edit: [] },
     data: { default: '', enum: [] },
-  });
+  };
+  section.fields.push(field);
+  selected.value = field;
 }
 
 function onSelectType(type: any) {
