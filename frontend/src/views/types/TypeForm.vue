@@ -223,22 +223,25 @@ function removeField(index: number) {
 const formSchemaObj = computed(() => {
   const properties: Record<string, any> = {};
   const required: string[] = [];
-  const fieldsArr = fields.value.map((f) => {
+  const fieldsArr: any[] = [];
+
+  fields.value.forEach((f) => {
     const def = fieldTypes.find((ft) => ft.key === f.typeKey);
+    if (!def) return;
     properties[f.name] = {
       title: f.label,
-      type: def?.schema?.type || 'string',
-      ...def?.schema,
+      type: def.schema?.type || 'string',
+      ...(def.schema || {}),
       'x-cols': f.cols,
     };
     if (f.required) required.push(f.name);
-    return {
+    fieldsArr.push({
       key: f.name,
       label: f.label,
       type: f.typeKey,
       required: f.required,
       'x-cols': f.cols,
-    };
+    });
   });
   const schema: any = {
     type: 'object',
