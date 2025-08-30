@@ -12,7 +12,7 @@
         </div>
         <div v-else :class="colClass(field)">
           <span class="block font-medium mb-1">
-            {{ field.label }}<span v-if="field.required" class="text-red-600">*</span>
+            {{ field.label }}<span v-if="field.validations?.required" class="text-red-600">*</span>
           </span>
           <input
             v-if="isText(field.type)"
@@ -214,6 +214,7 @@ import DateTimeInput from '@/components/fields/DateTimeInput.vue';
 import DurationInput from '@/components/fields/DurationInput.vue';
 import { uploadFile } from '@/services/uploader';
 import { useI18n } from 'vue-i18n';
+import { validate as runValidators } from '@/utils/validators';
 
 const props = defineProps<{ section: any; form: any; errors: Record<string, string>; taskId: number; readonly?: boolean }>();
 const emit = defineEmits<{ (e: 'update', payload: { key: string; value: any }): void; (e: 'error', payload: { key: string; msg: string }): void }>();
@@ -239,7 +240,7 @@ function inputType(type: string) {
 }
 
 function emitUpdate(field: any) {
-  validate(field);
+  validateField(field);
   emit('update', { key: field.key, value: local[field.key] });
 }
 
@@ -259,26 +260,23 @@ async function onFile(field: any, e: Event) {
   }
   local[field.key] = uploaded;
   emit('update', { key: field.key, value: uploaded });
-  validate(field);
+  validateField(field);
 }
 
 function removeFile(field: any) {
   files[field.key] = null;
   local[field.key] = null;
   emit('update', { key: field.key, value: null });
-  validate(field);
+  validateField(field);
 }
 
 function updatePhoto(key: string, value: any) {
   emit('update', { key, value });
 }
 
-function validate(field: any) {
+function validateField(field: any) {
   const val = local[field.key];
-  if (field.required && (val === undefined || val === null || val === '' || (Array.isArray(val) && !val.length))) {
-    emit('error', { key: field.key, msg: 'Required' });
-  } else {
-    emit('error', { key: field.key, msg: '' });
-  }
+  const msg = runValidators(val, field.validations || {});
+  emit('error', { key: field.key, msg: msg || '' });
 }
 </script>

@@ -11,7 +11,7 @@ class FormSchemaService
      *
      * Schema keys:
      *  sections[]: { key, label, fields[], allow_subtasks }
-     *  fields[]: { key, label, type: text|textarea|number|date|time|datetime|email|phone|url|boolean|select|multiselect|radio|checkbox|chips|assignee|file|photo_single|photo_repeater|repeater, required, enum?, x-cols?, fields? }
+     *  fields[]: { key, label, type: text|textarea|number|date|time|datetime|email|phone|url|boolean|select|multiselect|radio|checkbox|chips|assignee|file|photo_single|photo_repeater|repeater, validations?, enum?, x-cols?, fields? }
      */
     public function validate(array $schema): void
     {
@@ -73,6 +73,12 @@ class FormSchemaService
                 }
             }
         }
+        if (isset($field['validations']) && ! is_array($field['validations'])) {
+            throw ValidationException::withMessages([
+                'schema_json' => 'validations must be object',
+            ]);
+        }
+
         if ($field['type'] === 'repeater') {
             if (! is_array($field['fields'] ?? null)) {
                 throw ValidationException::withMessages([
@@ -95,10 +101,67 @@ class FormSchemaService
 
         foreach ($fields as $field) {
             $key = $field['key'] ?? null;
-            if (! $key || ! array_key_exists($key, $data)) {
+            if (! $key) {
                 continue;
             }
-            $val = $data[$key];
+            $rules = $field['validations'] ?? [];
+            $present = array_key_exists($key, $data);
+            $val = $present ? $data[$key] : null;
+
+            if (($rules['required'] ?? false) && ! $present) {
+                throw ValidationException::withMessages([
+                    "form_data.$key" => 'required',
+                ]);
+            }
+
+            if (! $present) {
+                continue;
+            }
+
+            if (($rules['regex'] ?? null) && is_string($val) && @preg_match('/' . $rules['regex'] . '/', '') !== false) {
+                if (! preg_match('/' . $rules['regex'] . '/', $val)) {
+                    throw ValidationException::withMessages([
+                        "form_data.$key" => 'invalid',
+                    ]);
+                }
+            }
+            if (is_numeric($val)) {
+                if (isset($rules['min']) && $val < $rules['min']) {
+                    throw ValidationException::withMessages([
+                        "form_data.$key" => 'min',
+                    ]);
+                }
+                if (isset($rules['max']) && $val > $rules['max']) {
+                    throw ValidationException::withMessages([
+                        "form_data.$key" => 'max',
+                    ]);
+                }
+            }
+            if (is_string($val)) {
+                if (isset($rules['lengthMin']) && mb_strlen($val) < $rules['lengthMin']) {
+                    throw ValidationException::withMessages([
+                        "form_data.$key" => 'min_length',
+                    ]);
+                }
+                if (isset($rules['lengthMax']) && mb_strlen($val) > $rules['lengthMax']) {
+                    throw ValidationException::withMessages([
+                        "form_data.$key" => 'max_length',
+                    ]);
+                }
+            }
+            if (isset($rules['mime']) && is_array($rules['mime']) && is_array($val) && isset($val['mime'])) {
+                if (! in_array($val['mime'], $rules['mime'], true)) {
+                    throw ValidationException::withMessages([
+                        "form_data.$key" => 'mime',
+                    ]);
+                }
+            }
+            if (isset($rules['size']) && is_array($val) && isset($val['size']) && $val['size'] > $rules['size']) {
+                throw ValidationException::withMessages([
+                    "form_data.$key" => 'size',
+                ]);
+            }
+
             switch ($field['type'] ?? null) {
                 case 'date':
                     if (! $this->isValidDate($val)) {

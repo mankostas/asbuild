@@ -63,11 +63,11 @@ interface Field {
   name: string;
   label: string;
   typeKey: string;
-  required: boolean;
   cols: number;
   fields?: Field[];
   placeholder?: string;
   help?: string;
+  validations: Record<string, any>;
 }
 
 interface Section {
@@ -130,8 +130,8 @@ function onAddField(type: any) {
     name: `field${section.fields.length + 1}`,
     label: type.label,
     typeKey: type.key,
-    required: false,
     cols: 2,
+    validations: {},
     fields: type.key === 'repeater' ? [] : undefined,
   });
 }
@@ -152,7 +152,7 @@ function onSubmit() {
           key: f.name,
           label: f.label,
           type: f.typeKey,
-          required: f.required,
+          validations: f.validations,
           'x-cols': f.cols,
         })),
       })),
@@ -170,7 +170,7 @@ const previewSchema = computed(() => ({
   sections: sections.value.map((s) => ({
     key: s.key,
     label: s.label,
-    fields: s.fields.map((f) => ({ key: f.name, label: f.label, type: f.typeKey })),
+    fields: s.fields.map((f) => ({ key: f.name, label: f.label, type: f.typeKey, validations: f.validations })),
   })),
 }));
 </script>
