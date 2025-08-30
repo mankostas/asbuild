@@ -440,7 +440,11 @@ const visibleSections = computed(() => {
 });
 
 const isEdit = computed(() => route.name === 'taskTypes.edit');
-const canAccess = computed(() => auth.isSuperAdmin || can('task_types.view'));
+const canAccess = computed(
+  () =>
+    auth.isSuperAdmin ||
+    (isEdit.value ? can('task_types.view') : can('task_types.create')),
+);
 
 watch(previewLang, (lang) => {
   locale.value = lang;

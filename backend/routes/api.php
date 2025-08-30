@@ -158,7 +158,7 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':teams.view');
 
     Route::post('task-types', [TaskTypeController::class, 'store'])
-        ->middleware(Ability::class . ':task_types.manage')
+        ->middleware(Ability::class . ':task_types.create')
         ->name('task-types.store');
     Route::match(['put', 'patch'], 'task-types/{task_type}', [TaskTypeController::class, 'update'])
         ->middleware(Ability::class . ':task_types.manage')
