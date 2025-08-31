@@ -1,6 +1,36 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('task type create UI', () => {
+  test('can add field then access preview and inspector', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.setContent(`
+      <button id="add">Add Field</button>
+      <nav role="tablist">
+        <button role="tab">Canvas</button>
+        <button role="tab">Preview</button>
+        <button role="tab">Inspector</button>
+      </nav>
+      <div id="canvas"></div>
+      <div id="inspector">Select a field</div>
+      <script>
+        document.getElementById('add').addEventListener('click', () => {
+          const f = document.createElement('button');
+          f.textContent = 'Field 1';
+          f.id = 'f1';
+          f.addEventListener('click', () => {
+            document.getElementById('inspector').textContent = 'Field 1 selected';
+          });
+          document.getElementById('canvas').appendChild(f);
+        });
+      <\/script>
+    `);
+    await page.getByRole('button', { name: 'Add Field' }).click();
+    await expect(page.getByRole('button', { name: 'Field 1' })).toBeVisible();
+    await page.getByRole('tab', { name: 'Preview' }).click();
+    await page.getByRole('tab', { name: 'Inspector' }).click();
+    await page.getByRole('button', { name: 'Field 1' }).click();
+    await expect(page.locator('#inspector')).toHaveText('Field 1 selected');
+  });
   test('tabs render on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.setContent(`
