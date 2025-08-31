@@ -35,7 +35,8 @@
     "dragToReorder": "Σύρετε για αναδιάταξη",
     "removeSection": "Αφαίρεση ενότητας",
     "enableAutomation": "Ενεργοποίηση αυτοματοποίησης",
-    "movedToPosition": "Μετακινήθηκε στη θέση {pos}"
+    "movedToPosition": "Μετακινήθηκε στη θέση {pos}",
+    "reorderInstructions": "Πατήστε Enter για επιλογή, χρησιμοποιήστε τα βέλη για μετακίνηση, Escape για ακύρωση"
   },
   "commandPalette": {
     "title": "Παλέτα εντολών",
@@ -211,7 +212,9 @@
       "to": "Προς",
       "condition": "Συνθήκη",
       "noCondition": "Πάντα",
-      "transition": "Μετάβαση"
+      "transition": "Μετάβαση",
+      "quickPresets": "Γρήγορες προεπιλογές",
+      "presetBasic": "Βασικό: todo → in_progress → completed"
     },
     "form": {
       "name": "Όνομα",
