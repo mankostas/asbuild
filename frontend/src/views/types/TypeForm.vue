@@ -124,6 +124,7 @@
         <StatusFlowEditor
           v-model="statusFlow"
           v-model:statuses="statuses"
+          :tenant-id="tenantId"
           class="p-4 border-b"
         />
         <template v-if="canManageSLA">
@@ -577,6 +578,7 @@ onMounted(async () => {
   watch(
     tenantId,
     async (id, oldId) => {
+      tenantStore.setTenant(id ? String(id) : '');
       if (oldId !== undefined && id !== oldId) {
         sections.value.forEach((s) =>
           s.fields.forEach((f) => {
@@ -584,6 +586,8 @@ onMounted(async () => {
             f.roles.edit = ['super_admin'];
           }),
         );
+        statuses.value = [];
+        statusFlow.value = [];
       }
       if (id) {
         try {
@@ -615,6 +619,8 @@ onMounted(async () => {
       } else {
         tenantRoles.value = [];
         permissions.value = {};
+        statuses.value = [];
+        statusFlow.value = [];
       }
     },
     { immediate: true },
