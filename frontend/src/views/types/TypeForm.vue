@@ -120,31 +120,12 @@
         :tenant-options="tenantOptions"
         class="border-b mb-4"
       />
-      <Card
-        v-if="isCreate && !tenantId"
-        class="p-4 border-b flex items-center gap-2 text-sm"
-        role="alert"
-        aria-live="polite"
-      >
-        <Icon
-          icon="heroicons-outline:information-circle"
-          class="w-5 h-5 text-slate-400"
-          aria-hidden="true"
-        />
-        <p>
-          {{
-            locale === 'el'
-              ? 'Επιλέξτε μισθωτή για να συνεχίσετε τη ρύθμιση ρόλων και δικαιωμάτων.'
-              : 'Select a tenant to continue configuring roles and permissions.'
-          }}
-        </p>
-      </Card>
-      <StatusFlowEditor
-        v-model="statusFlow"
-        v-model:statuses="statuses"
-        class="p-4 border-b"
-      />
       <template v-if="tenantId || !isCreate">
+        <StatusFlowEditor
+          v-model="statusFlow"
+          v-model:statuses="statuses"
+          class="p-4 border-b"
+        />
         <template v-if="canManageSLA">
           <SLAPolicyEditor
             v-if="isEdit"
@@ -406,6 +387,25 @@
           </div>
         </div>
       </template>
+      <Card
+        v-else
+        class="p-4 border-b flex items-center gap-2 text-sm"
+        role="alert"
+        aria-live="polite"
+      >
+        <Icon
+          icon="heroicons-outline:information-circle"
+          class="w-5 h-5 text-slate-400"
+          aria-hidden="true"
+        />
+        <p>
+          {{
+            locale === 'el'
+              ? 'Επιλέξτε μισθωτή για να συνεχίσετε τη ρύθμιση ρόλων και δικαιωμάτων.'
+              : 'Select a tenant to continue configuring roles and permissions.'
+          }}
+        </p>
+      </Card>
     </form>
     <Drawer
       v-if="tenantId || !isCreate"
