@@ -2,7 +2,8 @@
 
 namespace Tests\Feature\TaskType;
 
-use App\Models\{Tenant, Role, User, TaskType};
+use App\Models\{Tenant, Role, User, TaskType, TaskTypeVersion};
+use App\Services\StatusFlowService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
@@ -116,5 +117,31 @@ class ValidateSchemaTest extends TestCase
                 'form_data' => [],
             ])
             ->assertStatus(403);
+    }
+
+    public function test_task_type_version_round_trip_preserves_status_flow(): void
+    {
+        [$tenant, $user] = $this->createUser(['task_types.manage']);
+        $type = TaskType::create(['name' => 'Type', 'tenant_id' => $tenant->id]);
+
+        $flow = [
+            ['draft', 'review'],
+            ['review', 'done'],
+        ];
+
+        $version = TaskTypeVersion::create([
+            'task_type_id' => $type->id,
+            'semver' => '1.0.0',
+            'schema_json' => [],
+            'status_flow_json' => $flow,
+            'created_by' => $user->id,
+        ]);
+
+        $reloaded = TaskTypeVersion::find($version->id);
+        $service = new StatusFlowService();
+
+        $this->assertSame($flow, $reloaded->status_flow_json);
+        $this->assertTrue($service->canTransition('draft', 'review', $reloaded));
+        $this->assertTrue($service->canTransition('review', 'done', $reloaded));
     }
 }

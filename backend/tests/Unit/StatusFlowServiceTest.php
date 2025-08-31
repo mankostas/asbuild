@@ -29,6 +29,24 @@ class StatusFlowServiceTest extends TestCase
         ]);
     }
 
+    public function test_allows_custom_transitions(): void
+    {
+        $type = TaskType::create([
+            'name' => 'Type',
+            'tenant_id' => 1,
+            'status_flow_json' => [
+                ['draft', 'review'],
+                ['review', 'done'],
+            ],
+        ]);
+
+        $service = new StatusFlowService();
+
+        $this->assertSame(['review'], $service->allowedTransitions('draft', $type));
+        $this->assertTrue($service->canTransition('review', 'done', $type));
+        $this->assertFalse($service->canTransition('draft', 'assigned', $type));
+    }
+
     public function test_detects_missing_required_field(): void
     {
         $type = TaskType::create([
