@@ -46,8 +46,12 @@
           <li
             v-for="opt in tenantSearchResults"
             :key="opt.value"
+            role="button"
+            tabindex="0"
             class="px-2 py-1 cursor-pointer hover:bg-slate-100"
             @click="selectTenant(opt)"
+            @keydown.enter="selectTenant(opt)"
+            @keydown.space.prevent="selectTenant(opt)"
           >
             {{ opt.label }}
           </li>

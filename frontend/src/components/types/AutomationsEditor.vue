@@ -117,7 +117,7 @@ interface Automation {
   enabled: boolean;
 }
 
-const props = defineProps<{ taskTypeId: number }>();
+const props = defineProps<{ taskTypeId?: number }>();
 const { t } = useI18n();
 const automations = ref<Automation[]>([]);
 const statusOptions = ref<{ value: string; label: string }[]>([]);
@@ -126,12 +126,10 @@ const teamOptions = ref<{ value: number; label: string }[]>([]);
 onMounted(load);
 
 async function load() {
-  const [res, statusRes, teamRes] = await Promise.all([
-    api.get(`/task-types/${props.taskTypeId}/automations`),
+  const [statusRes, teamRes] = await Promise.all([
     api.get('/task-statuses'),
     api.get('/teams'),
   ]);
-  automations.value = res.data.data;
   statusOptions.value = statusRes.data.map((s: any) => ({
     value: s.slug,
     label: s.name,
@@ -140,6 +138,10 @@ async function load() {
     value: t.id,
     label: t.name,
   }));
+  if (props.taskTypeId) {
+    const res = await api.get(`/task-types/${props.taskTypeId}/automations`);
+    automations.value = res.data.data;
+  }
 }
 
 function addAutomation() {
@@ -152,6 +154,7 @@ function addAutomation() {
 }
 
 async function save(a: Automation) {
+  if (!props.taskTypeId) return;
   const payload = {
     event: a.event,
     conditions_json: a.conditions_json,
