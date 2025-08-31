@@ -130,17 +130,19 @@ async function load() {
     api.get('/task-statuses'),
     api.get('/teams'),
   ]);
-  statusOptions.value = statusRes.data.map((s: any) => ({
+  const statusData = statusRes.data.data ?? statusRes.data;
+  statusOptions.value = statusData.map((s: any) => ({
     value: s.slug,
     label: s.name,
   }));
-  teamOptions.value = teamRes.data.map((t: any) => ({
+  const teamData = teamRes.data.data ?? teamRes.data;
+  teamOptions.value = teamData.map((t: any) => ({
     value: t.id,
     label: t.name,
   }));
   if (props.taskTypeId) {
     const res = await api.get(`/task-types/${props.taskTypeId}/automations`);
-    automations.value = res.data.data;
+    automations.value = res.data.data ?? res.data;
   }
 }
 

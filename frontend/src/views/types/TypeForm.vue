@@ -584,7 +584,10 @@ onMounted(async () => {
   watch(
     tenantId,
     async (id, oldId) => {
-      tenantStore.setTenant(id ? String(id) : '');
+      const normalized = id ? String(id) : '';
+      if (tenantStore.tenantId !== normalized) {
+        tenantStore.setTenant(normalized);
+      }
       if (oldId !== undefined && id !== oldId) {
         sections.value.forEach((s) =>
           s.fields.forEach((f) => {
