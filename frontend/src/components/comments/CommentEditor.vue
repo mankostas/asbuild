@@ -1,18 +1,24 @@
 <template>
   <div class="flex flex-col gap-2">
+    <span id="comment-body-label" class="sr-only">
+      {{ t('tasks.comments.comments') }}
+    </span>
     <Textarea
       id="comment-body"
       v-model="body"
       :rows="3"
       placeholder="Add a comment"
-      aria-label="Comment"
+      :aria-labelledby="'comment-body-label'"
     />
     <MentionInput v-model="selectedMentions" />
     <div v-if="allowFiles" class="flex flex-col">
+      <span id="comment-file-label" class="sr-only">
+        {{ t('tasks.comments.file') }}
+      </span>
       <input
         id="comment-file"
         type="file"
-        :aria-label="t('tasks.comments.file')"
+        :aria-labelledby="'comment-file-label'"
         @change="onFileChange"
       />
     </div>

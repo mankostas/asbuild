@@ -1,11 +1,11 @@
 <template>
   <div>
-    <span class="block mb-1 text-sm">Tenant</span>
+    <span id="tenant-switcher-label" class="block mb-1 text-sm">Tenant</span>
     <select
       id="tenant-switcher"
       v-model="selected"
       class="border rounded px-2 py-1 text-sm"
-      aria-label="Tenant"
+      aria-labelledby="tenant-switcher-label"
       @change="onChange"
     >
       <option
