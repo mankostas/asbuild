@@ -84,5 +84,44 @@ class RoleRoutesTest extends TestCase
             ->deleteJson("/api/roles/{$roleId}")
             ->assertStatus(200);
     }
+
+    public function test_super_admin_filters_roles_by_tenant(): void
+    {
+        $tenantA = Tenant::create(['name' => 'Tenant A']);
+        $tenantB = Tenant::create(['name' => 'Tenant B']);
+
+        Role::create(['name' => 'Global', 'slug' => 'global']);
+        Role::create(['name' => 'Role A', 'slug' => 'role_a', 'tenant_id' => $tenantA->id]);
+        $roleB = Role::create(['name' => 'Role B', 'slug' => 'role_b', 'tenant_id' => $tenantB->id]);
+
+        $superRole = Role::create([
+            'name' => 'SuperAdmin',
+            'slug' => 'super_admin',
+            'tenant_id' => $tenantA->id,
+            'abilities' => ['*'],
+            'level' => 0,
+        ]);
+
+        $user = User::create([
+            'name' => 'Super',
+            'email' => 'super@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenantA->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($superRole->id, ['tenant_id' => $tenantA->id]);
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson("/api/roles?tenant_id={$tenantB->id}")
+            ->assertStatus(200)
+            ->assertJsonMissing(['name' => 'Global'])
+            ->assertJsonMissing(['name' => 'Role A'])
+            ->assertJsonFragment(['id' => $roleB->id, 'tenant_id' => $tenantB->id]);
+
+        foreach ($response->json('data') as $role) {
+            $this->assertSame($tenantB->id, $role['tenant_id']);
+        }
+    }
 }
 
