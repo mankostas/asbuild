@@ -310,7 +310,7 @@ paths:
         - name: tenant_id
           in: query
           schema:
-            type: string
+            type: integer
       responses:
         '200':
           description: List of roles
@@ -927,16 +927,30 @@ paths:
         - name: tenant_id
           in: query
           schema:
-            type: string
+            type: integer
       responses:
         '200':
           description: List of task statuses
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TaskStatus'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TaskStatus'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total:
+                        type: integer
+                      last_page:
+                        type: integer
   /task-statuses/{id}/copy-to-tenant:
     post:
       summary: Copy status to tenant
@@ -1288,9 +1302,17 @@ components:
           description: "Form schema. Text fields support string or {en,el} objects."
         statuses:
           type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
           nullable: true
         status_flow_json:
-          type: object
+          type: array
+          items:
+            type: array
+            items:
+              type: string
           nullable: true
         abilities_json:
           type: object
