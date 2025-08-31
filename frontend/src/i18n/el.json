@@ -99,7 +99,8 @@
     "delete": "Διαγραφή",
     "export": "Εξαγωγή",
     "assign": "Ανάθεση",
-    "transition": "Μετάβαση"
+    "transition": "Μετάβαση",
+    "legend": "Υπόμνημα"
   },
   "permissions": {
     "tooltip": {

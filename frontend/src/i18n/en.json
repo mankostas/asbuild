@@ -99,7 +99,8 @@
     "delete": "Delete",
     "export": "Export",
     "assign": "Assign",
-    "transition": "Transition"
+    "transition": "Transition",
+    "legend": "Legend"
   },
   "permissions": {
     "tooltip": {

@@ -12,7 +12,7 @@
         :id="inputId"
         v-model="localValue"
         type="checkbox"
-        class="hidden"
+        class="sr-only peer"
         :disabled="disabled"
         :name="name"
         :value="value"
@@ -21,7 +21,7 @@
       />
       <div
         :class="ck ? activeClass : 'bg-secondary-500'"
-        class="relative inline-flex h-6 w-[46px] ltr:mr-3 rtl:ml-3 items-center rounded-full transition-all duration-150"
+        class="relative inline-flex h-6 w-[46px] ltr:mr-3 rtl:ml-3 items-center rounded-full transition-all duration-150 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary-500"
       >
         <span
           v-if="badge && ck"
