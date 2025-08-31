@@ -6,6 +6,7 @@
         type="button"
         btnClass="btn-light p-1 handle cursor-move"
         aria-label="Drag section"
+        aria-describedby="reorderHint reorderHintMobile"
         @keydown.enter.prevent="noop"
         @keydown.space.prevent="noop"
       >
@@ -28,7 +29,14 @@
       </Button>
     </header>
     <span id="remove-section-desc" class="sr-only">{{ t('actions.delete') }}</span>
-    <draggable v-model="section.fields" item-key="id" handle=".field-handle" class="p-2 space-y-2">
+    <p id="fieldReorderHint" class="sr-only">{{ t('fields.reorderHint') }}</p>
+    <draggable
+      v-model="section.fields"
+      item-key="id"
+      handle=".field-handle"
+      class="p-2 space-y-2"
+      aria-describedby="fieldReorderHint"
+    >
       <template #item="{ element }">
         <Card
           bodyClass="p-2 flex items-center gap-2 cursor-pointer"
@@ -42,6 +50,7 @@
             type="button"
             btnClass="btn-light p-1 field-handle cursor-move"
             aria-label="Drag field"
+            aria-describedby="fieldReorderHint"
             @keydown.enter.prevent="noop"
             @keydown.space.prevent="noop"
           >
