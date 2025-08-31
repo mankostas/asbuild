@@ -220,6 +220,7 @@
           v-model="permissions"
           :roles="tenantRoles"
           :can-manage="canManage"
+          :status-count="statuses.length"
           class="p-4 border-b"
         />
         <div class="h-[calc(100vh-3rem)] p-4">

@@ -7,7 +7,7 @@
     </template>
     <div class="hidden md:block max-h-64 overflow-auto">
       <table class="min-w-full text-sm">
-        <thead class="sticky top-0 bg-white">
+        <thead class="sticky top-0 z-10 bg-white">
           <tr>
             <th scope="col" class="px-4 py-2 text-left">
               {{ t('roles') }}
@@ -35,7 +35,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="role in roles" :key="role.id" class="border-t">
+          <tr
+            v-for="role in roles"
+            :key="role.id"
+            class="border-t odd:bg-secondary-50 focus-within:bg-primary-50"
+          >
             <th scope="row" class="px-4 py-2 text-left">
               {{ role.name }}
             </th>
@@ -48,8 +52,7 @@
                 :id="`perm-${role.slug}-${ability.key}`"
                 v-model="localPermissions[role.slug][ability.key]"
                 :aria-label="`${role.name} ${ability.label}`"
-                classLabel="sr-only"
-                :disabled="!canManage"
+                :disabled="!canManage || (ability.key === 'transition' && !canTransition)"
               />
             </td>
           </tr>
@@ -69,22 +72,36 @@
             :id="`perm-${role.slug}-${ability.key}-m`"
             v-model="localPermissions[role.slug][ability.key]"
             :aria-label="`${role.name} ${ability.label}`"
-            classLabel="sr-only"
-            :disabled="!canManage"
+            :disabled="!canManage || (ability.key === 'transition' && !canTransition)"
           />
         </div>
       </div>
+    </div>
+    <div class="mt-4 text-xs text-slate-600">
+      <p class="font-medium mb-1">{{ t('abilities.legend') }}</p>
+      <ul class="grid grid-cols-2 gap-x-4 gap-y-1">
+        <li
+          v-for="ability in abilityList"
+          :key="ability.key"
+          class="flex items-center gap-1"
+        >
+          <span>{{ elAbilities[ability.key] }}</span>
+          <span class="text-slate-400">/ {{ enAbilities[ability.key] }}</span>
+        </li>
+      </ul>
     </div>
   </Card>
 </template>
 
 <script setup lang="ts">
-import { reactive, watch } from 'vue';
+import { reactive, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Card from '@/components/ui/Card/index.vue';
 import Switch from '@/components/ui/Switch/index.vue';
 import Tooltip from '@/components/ui/Tooltip/index.vue';
 import Icon from '@/components/Icon';
+import en from '@/i18n/en.json';
+import el from '@/i18n/el.json';
 
 interface Role {
   id: number;
@@ -105,6 +122,7 @@ const props = defineProps<{
   modelValue: Record<string, Permission>;
   roles: Role[];
   canManage: boolean;
+  statusCount: number;
 }>();
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
@@ -169,4 +187,21 @@ const abilityList = [
   { key: 'assign', label: t('abilities.assign') },
   { key: 'transition', label: t('abilities.transition') },
 ];
+
+const canTransition = computed(() => props.statusCount >= 2);
+
+watch(
+  canTransition,
+  (val) => {
+    if (!val) {
+      Object.values(localPermissions).forEach((p) => {
+        p.transition = false;
+      });
+    }
+  },
+  { immediate: true },
+);
+
+const enAbilities = (en as any).abilities;
+const elAbilities = (el as any).abilities;
 </script>
