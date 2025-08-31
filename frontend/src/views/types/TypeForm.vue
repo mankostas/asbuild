@@ -134,10 +134,7 @@
           class="p-4 border-b"
         />
         <template v-if="canManageSLA">
-          <SLAPolicyEditor
-            :task-type-id="taskTypeId"
-            class="p-4 border-b"
-          />
+          <SLAPolicyEditor :task-type-id="taskTypeId" class="p-4 border-b" />
         </template>
         <template v-else>
           <Card class="p-4 border-b flex flex-col items-center text-center gap-2">
@@ -150,10 +147,7 @@
           </Card>
         </template>
         <template v-if="canManageAutomations">
-          <AutomationsEditor
-            :task-type-id="taskTypeId"
-            class="p-4 border-b"
-          />
+          <AutomationsEditor :task-type-id="taskTypeId" class="p-4 border-b" />
         </template>
         <template v-else>
           <Card class="p-4 border-b flex flex-col items-center text-center gap-2">
@@ -185,8 +179,28 @@
           :status-count="statuses.length"
           class="p-4 border-b"
         />
-        <div class="h-[calc(100vh-3rem)] p-4">
-          <div class="hidden lg:grid grid-cols-3 gap-4 h-full">
+      </template>
+      <Card
+        v-else
+        class="p-4 border-b flex items-center gap-2 text-sm"
+        role="alert"
+        aria-live="polite"
+      >
+        <Icon
+          icon="heroicons-outline:information-circle"
+          class="w-5 h-5 text-slate-400"
+          aria-hidden="true"
+        />
+        <p>
+          {{
+            locale === 'el'
+              ? 'Επιλέξτε μισθωτή για να συνεχίσετε τη ρύθμιση ρόλων και δικαιωμάτων.'
+              : 'Select a tenant to continue configuring roles and permissions.'
+          }}
+        </p>
+      </Card>
+      <div class="h-[calc(100vh-3rem)] p-4">
+        <div class="hidden lg:grid grid-cols-3 gap-4 h-full">
           <Card class="overflow-y-auto">
             <template #header>
               <div class="flex items-center justify-between">
@@ -266,113 +280,89 @@
               <InspectorTabs :key="`insp-${tenantId}`" :selected="selected" :role-options="tenantRoles" />
             </div>
           </Card>
-          </div>
-          <div class="lg:hidden">
-            <UiTabs>
-              <template #list>
-                <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.canvas') }}</Tab>
-                <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.preview') }}</Tab>
-                <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.inspector') }}</Tab>
-              </template>
-              <template #panel>
-                <TabPanel>
-                  <div class="mt-4">
-                    <Dropdown
-                      v-if="auth.isSuperAdmin || can('task_types.manage')"
-                      class="mb-4"
-                    >
-                      <template #default>
-                        <Button
-                          type="button"
-                          btnClass="btn-primary text-xs flex items-center gap-1"
-                          :aria-label="t('actions.add')"
-                        >
-                          {{ t('actions.add') }}
-                          <Icon icon="heroicons-outline:chevron-down" />
-                        </Button>
-                      </template>
-                      <template #menus>
-                        <MenuItem #default="{ active }">
-                          <button type="button" :class="menuItemClass(active)" @click="addSection">
-                            {{ t('actions.addSection') }}
-                          </button>
-                        </MenuItem>
-                        <MenuItem #default="{ active }">
-                          <button type="button" :class="menuItemClass(active)" @click="paletteOpen = true">
-                            {{ t('actions.addField') }}
-                          </button>
-                        </MenuItem>
-                      </template>
-                    </Dropdown>
-                    <p id="reorderHintMobile" class="sr-only">{{ t('fields.reorderHint') }}</p>
-                    <div aria-describedby="reorderHintMobile">
-                      <draggable v-model="sections" item-key="id" handle=".handle" class="space-y-4">
-                        <template #item="{ element, index }">
-                          <CanvasSection
-                            v-if="visibleSections.includes(element)"
-                            :section="element"
-                            @remove="removeSection(index)"
-                            @select="selectField"
-                            @add-field="paletteOpen = true"
-                            @add-section="addSection"
-                          />
-                        </template>
-                      </draggable>
-                    </div>
-                  </div>
-                </TabPanel>
-                <TabPanel>
-                  <div class="p-2">
-                    <div class="flex items-center gap-2 mb-2">
+        </div>
+        <div class="lg:hidden">
+          <UiTabs>
+            <template #list>
+              <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.canvas') }}</Tab>
+              <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.preview') }}</Tab>
+              <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.inspector') }}</Tab>
+            </template>
+            <template #panel>
+              <TabPanel>
+                <div class="mt-4">
+                  <Dropdown
+                    v-if="auth.isSuperAdmin || can('task_types.manage')"
+                    class="mb-4"
+                  >
+                    <template #default>
                       <Button
                         type="button"
-                        :aria-label="t('preview.runValidation')"
-                        btnClass="btn-primary text-xs px-2 py-1"
-                        @click="runValidation"
+                        btnClass="btn-primary text-xs flex items-center gap-1"
+                        :aria-label="t('actions.add')"
                       >
-                        {{ t('preview.runValidation') }}
+                        {{ t('actions.add') }}
+                        <Icon icon="heroicons-outline:chevron-down" />
                       </Button>
-                    </div>
-                    <div :class="[{ dark: previewTheme === 'dark' }, viewportClass]" class="border p-2 overflow-auto">
-                      <JsonSchemaForm ref="formRef" v-model="previewData" :schema="previewSchema" :task-id="0" />
-                    </div>
+                    </template>
+                    <template #menus>
+                      <MenuItem #default="{ active }">
+                        <button type="button" :class="menuItemClass(active)" @click="addSection">
+                          {{ t('actions.addSection') }}
+                        </button>
+                      </MenuItem>
+                      <MenuItem #default="{ active }">
+                        <button type="button" :class="menuItemClass(active)" @click="paletteOpen = true">
+                          {{ t('actions.addField') }}
+                        </button>
+                      </MenuItem>
+                    </template>
+                  </Dropdown>
+                  <p id="reorderHintMobile" class="sr-only">{{ t('fields.reorderHint') }}</p>
+                  <div aria-describedby="reorderHintMobile">
+                    <draggable v-model="sections" item-key="id" handle=".handle" class="space-y-4">
+                      <template #item="{ element, index }">
+                        <CanvasSection
+                          v-if="visibleSections.includes(element)"
+                          :section="element"
+                          @remove="removeSection(index)"
+                          @select="selectField"
+                          @add-field="paletteOpen = true"
+                          @add-section="addSection"
+                        />
+                      </template>
+                    </draggable>
                   </div>
-                </TabPanel>
-                <TabPanel>
-                  <div class="p-2">
-                    <InspectorTabs :key="`insp-${tenantId}`" :selected="selected" :role-options="tenantRoles" />
+                </div>
+              </TabPanel>
+              <TabPanel>
+                <div class="p-2">
+                  <div class="flex items-center gap-2 mb-2">
+                    <Button
+                      type="button"
+                      :aria-label="t('preview.runValidation')"
+                      btnClass="btn-primary text-xs px-2 py-1"
+                      @click="runValidation"
+                    >
+                      {{ t('preview.runValidation') }}
+                    </Button>
                   </div>
-                </TabPanel>
-              </template>
-            </UiTabs>
-          </div>
+                  <div :class="[{ dark: previewTheme === 'dark' }, viewportClass]" class="border p-2 overflow-auto">
+                    <JsonSchemaForm ref="formRef" v-model="previewData" :schema="previewSchema" :task-id="0" />
+                  </div>
+                </div>
+              </TabPanel>
+              <TabPanel>
+                <div class="p-2">
+                  <InspectorTabs :key="`insp-${tenantId}`" :selected="selected" :role-options="tenantRoles" />
+                </div>
+              </TabPanel>
+            </template>
+          </UiTabs>
         </div>
-      </template>
-      <Card
-        v-else
-        class="p-4 border-b flex items-center gap-2 text-sm"
-        role="alert"
-        aria-live="polite"
-      >
-        <Icon
-          icon="heroicons-outline:information-circle"
-          class="w-5 h-5 text-slate-400"
-          aria-hidden="true"
-        />
-        <p>
-          {{
-            locale === 'el'
-              ? 'Επιλέξτε μισθωτή για να συνεχίσετε τη ρύθμιση ρόλων και δικαιωμάτων.'
-              : 'Select a tenant to continue configuring roles and permissions.'
-          }}
-        </p>
-      </Card>
+      </div>
     </form>
-    <Drawer
-      v-if="tenantId || !isCreate"
-      :open="paletteOpen"
-      @close="paletteOpen = false"
-    >
+    <Drawer :open="paletteOpen" @close="paletteOpen = false">
       <FieldPalette :groups="fieldTypeGroups" @select="onSelectType" />
     </Drawer>
   </div>
