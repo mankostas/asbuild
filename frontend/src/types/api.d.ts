@@ -460,7 +460,7 @@ export interface paths {
             parameters: {
                 query?: {
                     scope?: string;
-                    tenant_id?: string;
+                    tenant_id?: number;
                 };
                 header?: never;
                 path?: never;
@@ -1539,7 +1539,7 @@ export interface paths {
             parameters: {
                 query?: {
                     scope?: string;
-                    tenant_id?: string;
+                    tenant_id?: number;
                 };
                 header?: never;
                 path?: never;
@@ -1553,7 +1553,15 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["TaskStatus"][];
+                        "application/json": {
+                            data?: components["schemas"]["TaskStatus"][];
+                            meta?: {
+                                page?: number;
+                                per_page?: number;
+                                total?: number;
+                                last_page?: number;
+                            };
+                        };
                     };
                 };
             };
@@ -1924,8 +1932,10 @@ export interface components {
             semver?: string;
             /** @description Form schema. Text fields support string or {en,el} objects. */
             schema_json?: Record<string, never> | null;
-            statuses?: Record<string, never> | null;
-            status_flow_json?: Record<string, never> | null;
+            statuses?: {
+                [key: string]: string[];
+            } | null;
+            status_flow_json?: string[][] | null;
             abilities_json?: Record<string, never> | null;
             created_by?: number;
             /** Format: date-time */
