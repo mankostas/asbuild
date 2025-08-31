@@ -216,6 +216,7 @@
         </Card>
         <PermissionsMatrix
           v-else
+          :key="`perm-${tenantId}`"
           v-model="permissions"
           :roles="tenantRoles"
           :can-manage="canManage"
@@ -299,7 +300,7 @@
               <h3 class="text-sm font-medium">{{ t('builder.inspector') }}</h3>
             </template>
             <div class="p-4">
-              <InspectorTabs :selected="selected" :role-options="tenantRoles" />
+              <InspectorTabs :key="`insp-${tenantId}`" :selected="selected" :role-options="tenantRoles" />
             </div>
           </Card>
           </div>
@@ -376,7 +377,7 @@
                 </TabPanel>
                 <TabPanel>
                   <div class="p-2">
-                    <InspectorTabs :selected="selected" :role-options="tenantRoles" />
+                    <InspectorTabs :key="`insp-${tenantId}`" :selected="selected" :role-options="tenantRoles" />
                   </div>
                 </TabPanel>
               </template>
@@ -596,7 +597,7 @@ onMounted(async () => {
       }
       if (id) {
         try {
-          const { data } = await api.get('/roles', { params: { tenant_id: id } });
+          const { data } = await api.get('/roles', { params: { tenant_id: Number(id) } });
           tenantRoles.value = data.data ?? data;
           tenantRoles.value.forEach((r: any) => {
             if (!permissions.value[r.slug]) {
@@ -612,6 +613,11 @@ onMounted(async () => {
               permissions.value[r.slug].transition = false;
             }
           });
+          const validSlugs = tenantRoles.value.map((r: any) => r.slug);
+          if (selected.value) {
+            selected.value.roles.view = selected.value.roles.view.filter((s: string) => validSlugs.includes(s));
+            selected.value.roles.edit = selected.value.roles.edit.filter((s: string) => validSlugs.includes(s));
+          }
         } catch {
           tenantRoles.value = [];
           permissions.value = {};
