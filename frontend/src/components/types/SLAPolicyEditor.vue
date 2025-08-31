@@ -44,6 +44,7 @@
             type="button"
             btnClass="btn-outline-primary text-xs px-3 py-1"
             :aria-label="t('actions.save')"
+            :disabled="!props.taskTypeId"
             @click="save(p)"
           >
             {{ t('actions.save') }}
@@ -56,6 +57,7 @@
       class="mt-2"
       btnClass="btn-outline-primary text-xs px-3 py-1"
       :aria-label="t('actions.add')"
+      :disabled="!props.taskTypeId"
       @click="addPolicy"
     >
       {{ t('actions.add') }}
