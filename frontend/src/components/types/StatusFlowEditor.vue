@@ -42,30 +42,15 @@
           </li>
         </template>
       </draggable>
-      <Dropdown v-if="editable">
-        <template #default>
-          <Button
-            type="button"
-            btnClass="btn-primary text-xs px-3 py-1 flex items-center gap-1"
-            :aria-label="t('actions.add')"
-          >
-            {{ t('actions.add') }}
-            <Icon icon="heroicons-outline:chevron-down" />
-          </Button>
-        </template>
-        <template #menus>
-          <MenuItem #default="{ active }">
-            <button type="button" :class="menuItemClass(active)" @click="openAddStatusModal">
-              {{ t('types.workflow.addStatus') }}
-            </button>
-          </MenuItem>
-          <MenuItem #default="{ active }">
-            <button type="button" :class="menuItemClass(active)" @click="openTransitionForm">
-              {{ t('types.workflow.addTransition') }}
-            </button>
-          </MenuItem>
-        </template>
-      </Dropdown>
+      <Button
+        v-if="editable"
+        type="button"
+        btnClass="btn-primary text-xs px-3 py-1"
+        :aria-label="t('types.workflow.addStatus')"
+        @click="openAddStatusModal"
+      >
+        {{ t('types.workflow.addStatus') }}
+      </Button>
       <Dropdown v-if="editable">
         <template #default>
           <Button
@@ -98,6 +83,15 @@
     <div>
       <div class="flex items-center justify-between mb-2">
         <h3 class="text-sm font-medium">{{ t('types.workflow.transitions') }}</h3>
+        <Button
+          v-if="editable"
+          type="button"
+          btnClass="btn-primary text-xs px-3 py-1"
+          :aria-label="t('types.workflow.addTransition')"
+          @click="openTransitionForm"
+        >
+          {{ t('types.workflow.addTransition') }}
+        </Button>
       </div>
       <div v-if="showTransitionForm" class="flex flex-wrap items-center gap-2 mb-2">
         <VueSelect
@@ -240,7 +234,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
 import api from '@/services/api';
@@ -261,6 +255,7 @@ interface StatusOption {
 const props = defineProps<{
   statuses: string[];
   modelValue: string[][];
+  tenantId?: number | '';
 }>();
 const emit = defineEmits(['update:statuses', 'update:modelValue']);
 const { t } = useI18n();
@@ -293,10 +288,32 @@ const presets = [
   },
 ];
 
-onMounted(async () => {
-  const res = await api.get('/task-statuses');
-  allStatuses.value = res.data.data;
-});
+async function fetchStatuses(id: number | string) {
+  const { data } = await api.get('/task-statuses', {
+    params: { scope: 'tenant', tenant_id: id, per_page: 100 },
+  });
+  allStatuses.value = data.data ?? data;
+}
+
+watch(
+  () => props.tenantId,
+  async (id: number | '' | undefined) => {
+    if (id) {
+      await fetchStatuses(id);
+      localStatuses.value = [];
+      edges.value = [];
+      emitStatuses();
+      emitEdges();
+    } else {
+      allStatuses.value = [];
+      localStatuses.value = [];
+      edges.value = [];
+      emitStatuses();
+      emitEdges();
+    }
+  },
+  { immediate: true },
+);
 
 const remainingStatuses = computed(() =>
   allStatuses.value.filter((s) => !localStatuses.value.includes(s.slug))
