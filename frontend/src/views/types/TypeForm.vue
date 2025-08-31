@@ -585,6 +585,11 @@ onMounted(async () => {
     tenantId,
     async (id, oldId) => {
       const normalized = id ? String(id) : '';
+      const prev = oldId ? String(oldId) : '';
+
+      // Avoid triggering the watcher again when the value hasn't actually changed
+      if (normalized === prev) return;
+
       if (tenantStore.tenantId !== normalized) {
         tenantStore.setTenant(normalized);
       }

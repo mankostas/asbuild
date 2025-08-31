@@ -2,7 +2,7 @@
   <div>
     <h2 class="text-lg font-semibold mb-2">{{ t('types.workflow.statuses') }}</h2>
     <Card :bodyClass="'p-4'">
-      <div class="flex flex-wrap items-center gap-2 mb-2" role="list">
+      <div class="flex flex-wrap items-center gap-2 mb-4" role="list">
         <p id="statusReorderHint" class="sr-only">
           {{ t('a11y.reorderInstructions') }}
         </p>
@@ -44,57 +44,26 @@
             </li>
           </template>
         </draggable>
-        <Button
-          v-if="editable"
-          type="button"
-          btnClass="btn-primary text-xs px-3 py-1"
-          :aria-label="t('types.workflow.addStatus')"
-          @click="openAddStatusModal"
+      </div>
+      <div v-if="editable" class="flex flex-wrap items-center gap-4">
+        <div
+          v-for="status in allStatuses"
+          :key="status.slug"
+          class="flex items-center gap-1"
         >
-          {{ t('types.workflow.addStatus') }}
-        </Button>
+          <input
+            :id="`status-${status.slug}`"
+            v-model="localStatuses"
+            type="checkbox"
+            :value="status.slug"
+            :aria-label="status.name"
+            @change="emitStatuses"
+          />
+          <span>{{ status.name }}</span>
+        </div>
       </div>
       <span class="sr-only" aria-live="assertive">{{ liveMessage }}</span>
     </Card>
-    <Modal
-      v-if="editable"
-      ref="addStatusModal"
-      label=""
-      labelClass="hidden"
-      :title="t('types.workflow.addStatus')"
-      @close="onModalClose"
-    >
-      <template #header>{{ t('types.workflow.addStatus') }}</template>
-      <template #body>
-        <VueSelect
-          id="status-select"
-          v-model="newStatus"
-          :options="addStatusOptions"
-          :label="t('types.workflow.addStatus')"
-          classLabel="sr-only"
-          :placeholder="t('actions.select')"
-        />
-      </template>
-      <template #footer>
-        <Button
-          type="button"
-          btnClass="btn-primary text-xs px-3 py-1"
-          :disabled="!newStatus"
-          :aria-label="t('actions.add')"
-          @click="confirmAddStatus"
-        >
-          {{ t('actions.add') }}
-        </Button>
-        <Button
-          type="button"
-          btnClass="btn-outline-secondary text-xs px-3 py-1"
-          :aria-label="t('actions.cancel')"
-          @click="closeAddStatusModal"
-        >
-          {{ t('actions.cancel') }}
-        </Button>
-      </template>
-    </Modal>
   </div>
 </template>
 
@@ -105,8 +74,6 @@ import draggable from 'vuedraggable';
 import api from '@/services/api';
 import Card from '@/components/ui/Card/index.vue';
 import Button from '@/components/ui/Button/index.vue';
-import Modal from '@/components/ui/Modal/Modal.vue';
-import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import { useAuthStore, can } from '@/stores/auth';
 
 interface StatusOption {
@@ -128,8 +95,6 @@ watch(
 );
 
 const allStatuses = ref<StatusOption[]>([]);
-const newStatus = ref('');
-const addStatusModal = ref<InstanceType<typeof Modal> | null>(null);
 const grabbedIndex = ref<number | null>(null);
 const liveMessage = ref('');
 
@@ -156,37 +121,8 @@ watch(
   { immediate: true },
 );
 
-const remainingStatuses = computed(() =>
-  allStatuses.value.filter((s) => !localStatuses.value.includes(s.slug))
-);
-
-const addStatusOptions = computed(() =>
-  remainingStatuses.value.map((s) => ({ value: s.slug, label: s.name }))
-);
-
 function displayName(slug: string) {
   return allStatuses.value.find((s) => s.slug === slug)?.name || slug;
-}
-
-function openAddStatusModal() {
-  if (!allStatuses.value.length && props.tenantId) {
-    fetchStatuses(props.tenantId);
-  }
-  addStatusModal.value?.openModal();
-}
-function closeAddStatusModal() {
-  addStatusModal.value?.closeModal();
-  newStatus.value = '';
-}
-function onModalClose() {
-  newStatus.value = '';
-}
-function confirmAddStatus() {
-  if (newStatus.value && !localStatuses.value.includes(newStatus.value)) {
-    localStatuses.value.push(newStatus.value);
-    emitStatuses();
-  }
-  closeAddStatusModal();
 }
 function removeStatus(slug: string) {
   localStatuses.value = localStatuses.value.filter((s) => s !== slug);
