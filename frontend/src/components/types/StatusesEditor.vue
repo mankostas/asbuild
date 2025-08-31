@@ -57,10 +57,12 @@
       <span class="sr-only" aria-live="assertive">{{ liveMessage }}</span>
     </Card>
     <Modal
-      :open="showAddStatusModal"
+      v-if="editable"
+      ref="addStatusModal"
+      label=""
+      labelClass="hidden"
       :title="t('types.workflow.addStatus')"
-      :label="t('types.workflow.addStatus')"
-      @close="closeAddStatusModal"
+      @close="onModalClose"
     >
       <template #header>{{ t('types.workflow.addStatus') }}</template>
       <template #body>
@@ -127,7 +129,7 @@ watch(
 
 const allStatuses = ref<StatusOption[]>([]);
 const newStatus = ref('');
-const showAddStatusModal = ref(false);
+const addStatusModal = ref<InstanceType<typeof Modal> | null>(null);
 const grabbedIndex = ref<number | null>(null);
 const liveMessage = ref('');
 
@@ -167,10 +169,16 @@ function displayName(slug: string) {
 }
 
 function openAddStatusModal() {
-  showAddStatusModal.value = true;
+  if (!allStatuses.value.length && props.tenantId) {
+    fetchStatuses(props.tenantId);
+  }
+  addStatusModal.value?.openModal();
 }
 function closeAddStatusModal() {
-  showAddStatusModal.value = false;
+  addStatusModal.value?.closeModal();
+  newStatus.value = '';
+}
+function onModalClose() {
   newStatus.value = '';
 }
 function confirmAddStatus() {
