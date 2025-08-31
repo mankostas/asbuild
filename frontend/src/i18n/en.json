@@ -220,7 +220,8 @@
     "form": {
       "name": "Name",
       "tenant": "Tenant",
-      "search": "Search"
+      "search": "Search",
+      "searchHelp": "Filters sections and fields in the canvas."
     },
     "saveToConfigureSLA": "Save to configure SLA policies",
     "saveToConfigureAutomations": "Save to configure automations",

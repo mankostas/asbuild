@@ -575,7 +575,10 @@ onMounted(async () => {
   if (isEdit.value) {
     const { data: typeData } = await api.get(`/task-types/${route.params.id}`);
     name.value = typeData.name || '';
-    tenantId.value = typeData.tenant_id || '';
+    tenantId.value =
+      typeData.tenant_id !== null && typeData.tenant_id !== undefined
+        ? Number(typeData.tenant_id)
+        : '';
     const list = await versionsStore.list(Number(route.params.id));
     versions.value = list;
     if (list.length) {
