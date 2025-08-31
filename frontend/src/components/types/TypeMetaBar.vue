@@ -8,7 +8,7 @@
         class="flex-1 min-w-[150px]"
         classInput="text-sm"
       />
-      <div class="flex-1 min-w-[150px]">
+      <div class="flex-1 min-w-[150px] relative">
         <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -->
         <label
           for="typeSearch"
@@ -39,6 +39,19 @@
               </Button>
           </template>
         </InputGroup>
+        <ul
+          v-if="tenantSearchResults.length"
+          class="absolute z-10 w-full bg-white border rounded mt-1 max-h-60 overflow-auto"
+        >
+          <li
+            v-for="opt in tenantSearchResults"
+            :key="opt.value"
+            class="px-2 py-1 cursor-pointer hover:bg-slate-100"
+            @click="selectTenant(opt)"
+          >
+            {{ opt.label }}
+          </li>
+        </ul>
       </div>
       <Select
         id="tenantSelect"
@@ -133,11 +146,20 @@ const selectedTenant = computed(() =>
   props.tenantOptions.find((o) => o.value === localTenantId.value)
 );
 
+const tenantSearchResults = computed(() =>
+  localSearch.value.length >= 3 ? props.tenantOptions : []
+);
+
 function clearSearch() {
   emit('update:search', '');
 }
 
 function clearTenant() {
   emit('update:tenantId', '');
+}
+
+function selectTenant(opt: Option) {
+  emit('update:tenantId', opt.value);
+  emit('update:search', '');
 }
 </script>

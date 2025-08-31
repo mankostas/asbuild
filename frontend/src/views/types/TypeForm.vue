@@ -560,7 +560,11 @@ const tenantOptions = computed(() =>
 const visibleSections = computed(() => sections.value);
 
 watch(search, async (q) => {
-  await tenantStore.loadTenants({ per_page: 100, search: q });
+  if (q.length >= 3) {
+    await tenantStore.loadTenants({ per_page: 100, search: q });
+  } else if (q.length === 0) {
+    await tenantStore.loadTenants({ per_page: 100 });
+  }
 });
 
 const isEdit = computed(() => route.name === 'taskTypes.edit');
