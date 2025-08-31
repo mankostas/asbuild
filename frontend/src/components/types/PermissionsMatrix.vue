@@ -94,7 +94,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, computed } from 'vue';
+import { reactive, watch, computed, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Card from '@/components/ui/Card/index.vue';
 import Switch from '@/components/ui/Switch/index.vue';
@@ -136,6 +136,8 @@ const localPermissions = reactive<Record<string, Permission>>(
   ),
 );
 
+let updatingFromParent = false;
+
 watch(
   () => props.roles,
   (roles) => {
@@ -164,8 +166,12 @@ watch(
 watch(
   () => props.modelValue,
   (val) => {
+    updatingFromParent = true;
     Object.keys(val).forEach((k) => {
       localPermissions[k] = { transition: false, ...val[k] } as Permission;
+    });
+    nextTick(() => {
+      updatingFromParent = false;
     });
   },
   { deep: true },
@@ -174,6 +180,7 @@ watch(
 watch(
   localPermissions,
   (val) => {
+    if (updatingFromParent) return;
     emit('update:modelValue', JSON.parse(JSON.stringify(val)));
   },
   { deep: true },
