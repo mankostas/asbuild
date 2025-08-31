@@ -121,9 +121,14 @@
         class="border-b mb-4"
       />
       <template v-if="tenantId || !isCreate">
-        <StatusFlowEditor
+        <StatusesEditor
+          v-model="statuses"
+          :tenant-id="tenantId"
+          class="p-4 border-b"
+        />
+        <TransitionsEditor
           v-model="statusFlow"
-          v-model:statuses="statuses"
+          :statuses="statuses"
           :tenant-id="tenantId"
           class="p-4 border-b"
         />
@@ -380,7 +385,8 @@ import draggable from 'vuedraggable';
 import CanvasSection from '@/components/types/CanvasSection.vue';
 import InspectorTabs from '@/components/types/Inspector/InspectorTabs.vue';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
-import StatusFlowEditor from '@/components/types/StatusFlowEditor.vue';
+import StatusesEditor from '@/components/types/StatusesEditor.vue';
+import TransitionsEditor from '@/components/types/TransitionsEditor.vue';
 import SLAPolicyEditor from '@/components/types/SLAPolicyEditor.vue';
 import AutomationsEditor from '@/components/types/AutomationsEditor.vue';
 import PermissionsMatrix from '@/components/types/PermissionsMatrix.vue';
