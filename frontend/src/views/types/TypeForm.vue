@@ -446,7 +446,7 @@ import api from '@/services/api';
 import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
 import { useTenantStore } from '@/stores/tenant';
 import '@/styles/types-builder.css';
-import { resolveI18n, type I18nString } from '@/utils/i18n';
+import { type I18nString } from '@/utils/i18n';
 import Swal from 'sweetalert2';
 
 const { t, locale } = useI18n();
@@ -557,19 +557,10 @@ const tenants = computed(() => tenantStore.tenants);
 const tenantOptions = computed(() =>
   tenants.value.map((t) => ({ value: t.id, label: t.name }))
 );
+const visibleSections = computed(() => sections.value);
 
-const visibleSections = computed(() => {
-  if (!search.value) return sections.value;
-  const q = search.value.toLowerCase();
-  return sections.value.filter(
-    (s) =>
-      resolveI18n(s.label, locale.value).toLowerCase().includes(q) ||
-      s.fields.some(
-        (f) =>
-          resolveI18n(f.label, locale.value).toLowerCase().includes(q) ||
-          f.name.toLowerCase().includes(q),
-      ),
-  );
+watch(search, async (q) => {
+  await tenantStore.loadTenants({ per_page: 100, search: q });
 });
 
 const isEdit = computed(() => route.name === 'taskTypes.edit');
