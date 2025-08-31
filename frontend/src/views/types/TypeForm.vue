@@ -1,7 +1,10 @@
 <template>
   <div v-if="canAccess" class="type-builder">
     <form @submit.prevent="onSubmit">
-      <header class="builder-header flex items-center justify-between px-4 py-2 shadow bg-white">
+      <header
+        v-if="tenantId || !isCreate"
+        class="builder-header flex items-center justify-between px-4 py-2 shadow bg-white"
+      >
         <Breadcrumbs />
         <div class="flex items-center gap-3">
           <Select
@@ -117,17 +120,37 @@
         :tenant-options="tenantOptions"
         class="border-b mb-4"
       />
+      <Card
+        v-if="isCreate && !tenantId"
+        class="p-4 border-b flex items-center gap-2 text-sm"
+        role="alert"
+        aria-live="polite"
+      >
+        <Icon
+          icon="heroicons-outline:information-circle"
+          class="w-5 h-5 text-slate-400"
+          aria-hidden="true"
+        />
+        <p>
+          {{
+            locale === 'el'
+              ? 'Επιλέξτε μισθωτή για να συνεχίσετε τη ρύθμιση ρόλων και δικαιωμάτων.'
+              : 'Select a tenant to continue configuring roles and permissions.'
+          }}
+        </p>
+      </Card>
       <StatusFlowEditor
         v-model="statusFlow"
         v-model:statuses="statuses"
         class="p-4 border-b"
       />
-      <template v-if="auth.isSuperAdmin || can('task_sla_policies.manage')">
-        <SLAPolicyEditor
-          v-if="isEdit"
-          :task-type-id="Number(route.params.id)"
-          class="p-4 border-b"
-        />
+      <template v-if="tenantId || !isCreate">
+        <template v-if="auth.isSuperAdmin || can('task_sla_policies.manage')">
+          <SLAPolicyEditor
+            v-if="isEdit"
+            :task-type-id="Number(route.params.id)"
+            class="p-4 border-b"
+          />
         <Card
           v-else
           class="p-4 border-b flex flex-col items-center text-center gap-2"
@@ -144,17 +167,19 @@
             :aria-label="t('actions.save')"
             btnClass="btn-primary text-xs px-3 py-1"
             :disabled="!isFormValid"
+            :aria-disabled="!isFormValid ? 'true' : 'false'"
+            :tabindex="!isFormValid ? -1 : 0"
           >
             {{ t('actions.save') }}
           </Button>
         </Card>
-      </template>
-      <template v-if="auth.isSuperAdmin || can('task_automations.manage')">
-        <AutomationsEditor
-          v-if="isEdit"
-          :task-type-id="Number(route.params.id)"
-          class="p-4 border-b"
-        />
+        </template>
+        <template v-if="auth.isSuperAdmin || can('task_automations.manage')">
+          <AutomationsEditor
+            v-if="isEdit"
+            :task-type-id="Number(route.params.id)"
+            class="p-4 border-b"
+          />
         <Card
           v-else
           class="p-4 border-b flex flex-col items-center text-center gap-2"
@@ -171,31 +196,33 @@
             :aria-label="t('actions.save')"
             btnClass="btn-primary text-xs px-3 py-1"
             :disabled="!isFormValid"
+            :aria-disabled="!isFormValid ? 'true' : 'false'"
+            :tabindex="!isFormValid ? -1 : 0"
           >
             {{ t('actions.save') }}
           </Button>
         </Card>
-      </template>
-      <Card
-        v-if="!tenantId"
-        class="p-4 border-b flex flex-col items-center text-center gap-2"
-      >
-        <Icon
-          icon="heroicons-outline:information-circle"
-          class="w-6 h-6 text-slate-400"
-          aria-hidden="true"
+        </template>
+        <Card
+          v-if="!tenantId"
+          class="p-4 border-b flex flex-col items-center text-center gap-2"
+        >
+          <Icon
+            icon="heroicons-outline:information-circle"
+            class="w-6 h-6 text-slate-400"
+            aria-hidden="true"
+          />
+          <p class="text-sm">{{ t('types.selectTenantToSetPermissions') }}</p>
+        </Card>
+        <PermissionsMatrix
+          v-else
+          v-model="permissions"
+          :roles="tenantRoles"
+          :can-manage="canManage"
+          class="p-4 border-b"
         />
-        <p class="text-sm">{{ t('types.selectTenantToSetPermissions') }}</p>
-      </Card>
-      <PermissionsMatrix
-        v-else
-        v-model="permissions"
-        :roles="tenantRoles"
-        :can-manage="canManage"
-        class="p-4 border-b"
-      />
-      <div class="h-[calc(100vh-3rem)] p-4">
-        <div class="hidden lg:grid grid-cols-3 gap-4 h-full">
+        <div class="h-[calc(100vh-3rem)] p-4">
+          <div class="hidden lg:grid grid-cols-3 gap-4 h-full">
           <Card class="overflow-y-auto">
             <template #header>
               <div class="flex items-center justify-between">
@@ -275,89 +302,94 @@
               <InspectorTabs :selected="selected" :role-options="tenantRoles" />
             </div>
           </Card>
-        </div>
-        <div class="lg:hidden">
-          <UiTabs>
-            <template #list>
-              <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.canvas') }}</Tab>
-              <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.preview') }}</Tab>
-              <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.inspector') }}</Tab>
-            </template>
-            <template #panel>
-              <TabPanel>
-                <div class="mt-4">
-                  <Dropdown
-                    v-if="auth.isSuperAdmin || can('task_types.manage')"
-                    class="mb-4"
-                  >
-                    <template #default>
+          </div>
+          <div class="lg:hidden">
+            <UiTabs>
+              <template #list>
+                <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.canvas') }}</Tab>
+                <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.preview') }}</Tab>
+                <Tab as="button" class="px-3 py-2 text-sm">{{ t('builder.inspector') }}</Tab>
+              </template>
+              <template #panel>
+                <TabPanel>
+                  <div class="mt-4">
+                    <Dropdown
+                      v-if="auth.isSuperAdmin || can('task_types.manage')"
+                      class="mb-4"
+                    >
+                      <template #default>
+                        <Button
+                          type="button"
+                          btnClass="btn-primary text-xs flex items-center gap-1"
+                          :aria-label="t('actions.add')"
+                        >
+                          {{ t('actions.add') }}
+                          <Icon icon="heroicons-outline:chevron-down" />
+                        </Button>
+                      </template>
+                      <template #menus>
+                        <MenuItem #default="{ active }">
+                          <button type="button" :class="menuItemClass(active)" @click="addSection">
+                            {{ t('actions.addSection') }}
+                          </button>
+                        </MenuItem>
+                        <MenuItem #default="{ active }">
+                          <button type="button" :class="menuItemClass(active)" @click="paletteOpen = true">
+                            {{ t('actions.addField') }}
+                          </button>
+                        </MenuItem>
+                      </template>
+                    </Dropdown>
+                    <p id="reorderHintMobile" class="sr-only">{{ t('fields.reorderHint') }}</p>
+                    <div aria-describedby="reorderHintMobile">
+                      <draggable v-model="sections" item-key="id" handle=".handle" class="space-y-4">
+                        <template #item="{ element, index }">
+                          <CanvasSection
+                            v-if="visibleSections.includes(element)"
+                            :section="element"
+                            @remove="removeSection(index)"
+                            @select="selectField"
+                            @add-field="paletteOpen = true"
+                            @add-section="addSection"
+                          />
+                        </template>
+                      </draggable>
+                    </div>
+                  </div>
+                </TabPanel>
+                <TabPanel>
+                  <div class="p-2">
+                    <div class="flex items-center gap-2 mb-2">
                       <Button
                         type="button"
-                        btnClass="btn-primary text-xs flex items-center gap-1"
-                        :aria-label="t('actions.add')"
+                        :aria-label="t('preview.runValidation')"
+                        btnClass="btn-primary text-xs px-2 py-1"
+                        @click="runValidation"
                       >
-                        {{ t('actions.add') }}
-                        <Icon icon="heroicons-outline:chevron-down" />
+                        {{ t('preview.runValidation') }}
                       </Button>
-                    </template>
-                    <template #menus>
-                      <MenuItem #default="{ active }">
-                        <button type="button" :class="menuItemClass(active)" @click="addSection">
-                          {{ t('actions.addSection') }}
-                        </button>
-                      </MenuItem>
-                      <MenuItem #default="{ active }">
-                        <button type="button" :class="menuItemClass(active)" @click="paletteOpen = true">
-                          {{ t('actions.addField') }}
-                        </button>
-                      </MenuItem>
-                    </template>
-                  </Dropdown>
-                  <p id="reorderHintMobile" class="sr-only">{{ t('fields.reorderHint') }}</p>
-                  <div aria-describedby="reorderHintMobile">
-                    <draggable v-model="sections" item-key="id" handle=".handle" class="space-y-4">
-                      <template #item="{ element, index }">
-                        <CanvasSection
-                          v-if="visibleSections.includes(element)"
-                          :section="element"
-                          @remove="removeSection(index)"
-                          @select="selectField"
-                          @add-field="paletteOpen = true"
-                          @add-section="addSection"
-                        />
-                      </template>
-                    </draggable>
+                    </div>
+                    <div :class="[{ dark: previewTheme === 'dark' }, viewportClass]" class="border p-2 overflow-auto">
+                      <JsonSchemaForm ref="formRef" v-model="previewData" :schema="previewSchema" :task-id="0" />
+                    </div>
                   </div>
-                </div>
-              </TabPanel>
-              <TabPanel>
-                <div class="p-2">
-                  <div class="flex items-center gap-2 mb-2">
-                    <Button
-                      type="button"
-                      :aria-label="t('preview.runValidation')"
-                      btnClass="btn-primary text-xs px-2 py-1"
-                      @click="runValidation"
-                    >
-                      {{ t('preview.runValidation') }}
-                    </Button>
+                </TabPanel>
+                <TabPanel>
+                  <div class="p-2">
+                    <InspectorTabs :selected="selected" :role-options="tenantRoles" />
                   </div>
-                  <div :class="[{ dark: previewTheme === 'dark' }, viewportClass]" class="border p-2 overflow-auto">
-                    <JsonSchemaForm ref="formRef" v-model="previewData" :schema="previewSchema" :task-id="0" />
-                  </div>
-                </div>
-              </TabPanel>
-              <TabPanel>
-                <div class="p-2">
-                  <InspectorTabs :selected="selected" :role-options="tenantRoles" />
-                </div>
-              </TabPanel>
-            </template>
-          </UiTabs>
+                </TabPanel>
+              </template>
+            </UiTabs>
+          </div>
         </div>
-      </div>
+      </template>
     </form>
-    <Drawer :open="paletteOpen" @close="paletteOpen = false">
+    <Drawer
+      v-if="tenantId || !isCreate"
+      :open="paletteOpen"
+      @close="paletteOpen = false"
+    >
       <FieldPalette :groups="fieldTypeGroups" @select="onSelectType" />
     </Drawer>
   </div>
@@ -512,6 +544,9 @@ const visibleSections = computed(() => {
 });
 
 const isEdit = computed(() => route.name === 'taskTypes.edit');
+const isCreate = computed(
+  () => route.name === 'taskTypes.create' && auth.isSuperAdmin,
+);
 const canAccess = computed(
   () =>
     auth.isSuperAdmin ||
