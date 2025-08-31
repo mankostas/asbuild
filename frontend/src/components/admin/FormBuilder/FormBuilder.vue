@@ -9,7 +9,11 @@
       aria-labelledby="formbuilder-schema-label"
     ></textarea>
     <div class="mt-2">
-      <button class="bg-blue-600 text-white px-4 py-2" @click="emitSchema">
+      <button
+        type="button"
+        class="bg-blue-600 text-white px-4 py-2"
+        @click="emitSchema"
+      >
         Save
       </button>
     </div>

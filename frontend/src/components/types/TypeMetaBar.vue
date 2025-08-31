@@ -9,34 +9,34 @@
         classInput="text-sm"
       />
       <div class="flex-1 min-w-[150px]">
+        <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -->
         <label
           for="typeSearch"
           class="input-label inline-flex items-center gap-1"
         >
           {{ t('types.form.search') }}
           <Icon
-            icon="heroicons-outline:question-mark-circle"
-            class="w-4 h-4"
-            aria-hidden="true"
             v-tippy="{
               theme: 'light',
               trigger: 'mouseenter focus click',
               content: t('types.form.searchHelp'),
             }"
+            icon="heroicons-outline:question-mark-circle"
+            class="w-4 h-4"
+            aria-hidden="true"
           />
         </label>
         <InputGroup id="typeSearch" v-model="localSearch" classInput="text-sm">
           <template #append>
-            <Button
-              v-if="localSearch"
-              type="button"
-              btnClass="btn-light px-2 py-1"
-              :aria-label="t('actions.clear')"
-              tabindex="0"
-              @click="clearSearch"
-            >
-              ✕
-            </Button>
+              <Button
+                v-if="localSearch"
+                type="button"
+                btnClass="btn-light px-2 py-1"
+                :aria-label="t('actions.clear')"
+                @click="clearSearch"
+              >
+                ✕
+              </Button>
           </template>
         </InputGroup>
       </div>
