@@ -447,6 +447,7 @@ import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
 import { useTenantStore } from '@/stores/tenant';
 import '@/styles/types-builder.css';
 import { resolveI18n, type I18nString } from '@/utils/i18n';
+import Swal from 'sweetalert2';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -494,8 +495,8 @@ const sections = ref<Section[]>([]);
 const selected = ref<Field | null>(null);
 const previewData = ref<Record<string, any>>({});
 const previewLang = ref<'el' | 'en'>('el');
-const previewTheme = ref<'light' | 'dark'>('light');
-const previewViewport = ref<'mobile' | 'tablet' | 'desktop'>('desktop');
+const previewTheme = ref<'light' | 'dark'>((localStorage.getItem('builderPreviewTheme') as 'light' | 'dark') || 'light');
+const previewViewport = ref<'mobile' | 'tablet' | 'desktop'>((localStorage.getItem('builderPreviewViewport') as 'mobile' | 'tablet' | 'desktop') || 'desktop');
 const validationErrors = ref<Record<string, string>>({});
 const formRef = ref<any>(null);
 const versions = ref<any[]>([]);
@@ -584,6 +585,14 @@ const canAccess = computed(
 
 watch(previewLang, (lang) => {
   locale.value = lang;
+});
+
+watch(previewTheme, (theme) => {
+  localStorage.setItem('builderPreviewTheme', theme);
+});
+
+watch(previewViewport, (viewport) => {
+  localStorage.setItem('builderPreviewViewport', viewport);
 });
 
 const viewportClass = computed(() => {
@@ -750,12 +759,26 @@ async function duplicateVersion() {
 
 async function publishVersion() {
   if (!selectedVersionId.value) return;
+  const result = await Swal.fire({
+    title: 'Publish this version?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, publish',
+  });
+  if (!result.isConfirmed) return;
   await versionsStore.publish(selectedVersionId.value);
   versions.value = await versionsStore.list(Number(route.params.id));
 }
 
 async function deleteVersion() {
   if (!selectedVersionId.value) return;
+  const result = await Swal.fire({
+    title: 'Deprecate this version?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, deprecate',
+  });
+  if (!result.isConfirmed) return;
   await versionsStore.deprecate(selectedVersionId.value);
   versions.value = await versionsStore.list(Number(route.params.id));
   selectedVersionId.value = versions.value[0]?.id ?? null;
