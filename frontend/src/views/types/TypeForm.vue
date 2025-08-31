@@ -128,32 +128,9 @@
         />
         <template v-if="canManageSLA">
           <SLAPolicyEditor
-            v-if="isEdit"
-            :task-type-id="Number(route.params.id)"
+            :task-type-id="taskTypeId"
             class="p-4 border-b"
           />
-          <Card
-            v-else
-            class="p-4 border-b flex flex-col items-center text-center gap-2"
-          >
-            <Icon
-              icon="heroicons-outline:information-circle"
-              class="w-6 h-6 text-slate-400"
-              aria-hidden="true"
-            />
-            <p class="text-sm">{{ t('types.saveToConfigureSLA') }}</p>
-            <Button
-              v-if="auth.isSuperAdmin || can('task_types.manage')"
-              type="submit"
-              :aria-label="t('actions.save')"
-              btnClass="btn-primary text-xs px-3 py-1"
-              :disabled="!isFormValid"
-              :aria-disabled="!isFormValid ? 'true' : 'false'"
-              :tabindex="!isFormValid ? -1 : 0"
-            >
-              {{ t('actions.save') }}
-            </Button>
-          </Card>
         </template>
         <template v-else>
           <Card class="p-4 border-b flex flex-col items-center text-center gap-2">
@@ -167,32 +144,9 @@
         </template>
         <template v-if="canManageAutomations">
           <AutomationsEditor
-            v-if="isEdit"
-            :task-type-id="Number(route.params.id)"
+            :task-type-id="taskTypeId"
             class="p-4 border-b"
           />
-          <Card
-            v-else
-            class="p-4 border-b flex flex-col items-center text-center gap-2"
-          >
-            <Icon
-              icon="heroicons-outline:information-circle"
-              class="w-6 h-6 text-slate-400"
-              aria-hidden="true"
-            />
-            <p class="text-sm">{{ t('types.saveToConfigureAutomations') }}</p>
-            <Button
-              v-if="auth.isSuperAdmin || can('task_types.manage')"
-              type="submit"
-              :aria-label="t('actions.save')"
-              btnClass="btn-primary text-xs px-3 py-1"
-              :disabled="!isFormValid"
-              :aria-disabled="!isFormValid ? 'true' : 'false'"
-              :tabindex="!isFormValid ? -1 : 0"
-            >
-              {{ t('actions.save') }}
-            </Button>
-          </Card>
         </template>
         <template v-else>
           <Card class="p-4 border-b flex flex-col items-center text-center gap-2">
@@ -455,6 +409,7 @@ const router = useRouter();
 const versionsStore = useTaskTypeVersionsStore();
 const tenantStore = useTenantStore();
 const auth = useAuthStore();
+const taskTypeId = computed(() => Number(route.params.id ?? 0));
 
 interface Field {
   id: number;

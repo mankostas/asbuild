@@ -83,7 +83,7 @@ interface Policy {
   useCalendar?: boolean;
 }
 
-const props = defineProps<{ taskTypeId: number }>();
+const props = defineProps<{ taskTypeId?: number }>();
 const { t } = useI18n();
 const policies = ref<Policy[]>([]);
 const priorityOptions = [
@@ -92,9 +92,14 @@ const priorityOptions = [
   { value: 'high', label: t('slaPolicies.high') },
 ];
 
-onMounted(load);
+onMounted(() => {
+  if (props.taskTypeId) {
+    load();
+  }
+});
 
 async function load() {
+  if (!props.taskTypeId) return;
   const res = await api.get(`/task-types/${props.taskTypeId}/sla-policies`);
   policies.value = res.data.data.map((p: any) => ({
     ...p,
@@ -114,6 +119,7 @@ function addPolicy() {
 }
 
 async function save(p: Policy) {
+  if (!props.taskTypeId) return;
   const payload: any = {
     priority: p.priority,
     response_within_mins: p.response_within_mins,

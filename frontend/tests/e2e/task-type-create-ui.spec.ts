@@ -28,15 +28,15 @@ test.describe('task type create UI', () => {
     await expect(page.getByRole('button', { name: 'Save' })).toBeVisible();
   });
 
-  test('SLA and Automations show empty states', async ({ page }) => {
+  test('SLA and Automations editors are visible without saving', async ({ page }) => {
     await page.setContent(`
       <section>
-        <p>Save to configure SLA policies</p>
-        <p>Save to configure automations</p>
+        <h2>SLA Policies</h2>
+        <h2>Automations</h2>
       </section>
     `);
-    await expect(page.getByText('Save to configure SLA policies')).toBeVisible();
-    await expect(page.getByText('Save to configure automations')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'SLA Policies' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Automations' })).toBeVisible();
   });
 
   test('permissions empty state until tenant selected', async ({ page }) => {
