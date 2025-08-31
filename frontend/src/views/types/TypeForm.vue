@@ -605,8 +605,16 @@ onMounted(async () => {
       }
       if (id) {
         try {
-          const { data } = await api.get('/roles', { params: { tenant_id: Number(id) } });
-          tenantRoles.value = data.data ?? data;
+          const params: Record<string, any> = auth.isSuperAdmin
+            ? { scope: 'all' }
+            : { tenant_id: Number(id) };
+          const { data } = await api.get('/roles', { params });
+          let roles = data.data ?? data;
+          if (auth.isSuperAdmin) {
+            const tid = Number(id);
+            roles = roles.filter((r: any) => r.tenant_id === null || r.tenant_id === tid);
+          }
+          tenantRoles.value = roles;
           tenantRoles.value.forEach((r: any) => {
             if (!permissions.value[r.slug]) {
               permissions.value[r.slug] = {
