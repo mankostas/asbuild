@@ -1,35 +1,44 @@
 <template>
   <Card :bodyClass="'p-4'">
     <div class="flex flex-wrap items-center gap-2 mb-4" role="list">
+      <p id="statusReorderHint" class="sr-only">
+        {{ t('a11y.reorderInstructions') }}
+      </p>
       <draggable
         v-model="localStatuses"
         item-key="value"
         handle=".handle"
         tag="ul"
         class="flex flex-wrap items-center gap-2"
+        aria-describedby="statusReorderHint"
         @end="emitStatuses"
       >
         <template #item="{ element, index }">
-          <li :key="element" class="flex items-center gap-1">
+          <li :key="element" class="flex items-center gap-2">
             <button
               type="button"
               class="handle cursor-move text-slate-600 dark:text-slate-300"
               :aria-label="t('a11y.dragToReorder')"
+              :aria-describedby="'statusReorderHint'"
               :aria-grabbed="grabbedIndex === index"
               @keydown="onHandleKeydown($event, index)"
             >
               ≡
             </button>
-            <Badge :label="displayName(element)" />
-            <Button
-              v-if="editable"
-              type="button"
-              btnClass="btn-outline-danger text-xs px-2 py-0"
-              :aria-label="t('actions.delete')"
-              @click="removeStatus(element)"
+            <span
+              class="flex items-center gap-1 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 py-1 shadow-sm"
             >
-              ×
-            </Button>
+              {{ displayName(element) }}
+              <Button
+                v-if="editable"
+                type="button"
+                btnClass="btn-outline-danger text-xs px-1 py-0"
+                :aria-label="t('actions.delete')"
+                @click="removeStatus(element)"
+              >
+                ×
+              </Button>
+            </span>
           </li>
         </template>
       </draggable>
@@ -53,6 +62,33 @@
           <MenuItem #default="{ active }">
             <button type="button" :class="menuItemClass(active)" @click="openTransitionForm">
               {{ t('types.workflow.addTransition') }}
+            </button>
+          </MenuItem>
+        </template>
+      </Dropdown>
+      <Dropdown v-if="editable">
+        <template #default>
+          <Button
+            type="button"
+            btnClass="btn-outline-secondary text-xs px-3 py-1 flex items-center gap-1"
+            :aria-label="t('types.workflow.quickPresets')"
+          >
+            {{ t('types.workflow.quickPresets') }}
+            <Icon icon="heroicons-outline:chevron-down" />
+          </Button>
+        </template>
+        <template #menus>
+          <MenuItem
+            v-for="preset in presets"
+            :key="preset.key"
+            #default="{ active }"
+          >
+            <button
+              type="button"
+              :class="menuItemClass(active)"
+              @click="applyPreset(preset)"
+            >
+              {{ preset.label }}
             </button>
           </MenuItem>
         </template>
@@ -101,12 +137,14 @@
           {{ t('actions.cancel') }}
         </Button>
       </div>
-      <div class="overflow-x-auto">
+      <div class="max-h-64 overflow-auto">
         <table
           class="min-w-full divide-y divide-slate-100 dark:divide-slate-700"
           :aria-label="t('types.workflow.transitions')"
         >
-          <thead class="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+          <thead
+            class="sticky top-0 z-10 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+          >
             <tr>
               <th scope="col" class="table-th">{{ t('types.workflow.from') }}</th>
               <th scope="col" class="table-th">{{ t('types.workflow.to') }}</th>
@@ -129,7 +167,7 @@
                     <Button
                       type="button"
                       btnClass="btn-outline-secondary text-xs px-2 py-1"
-                      :aria-label="t('types.workflow.transition')"
+                      :aria-label="t('actions.actions')"
                     >
                       ⋯
                     </Button>
@@ -207,7 +245,6 @@ import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
 import api from '@/services/api';
 import Card from '@/components/ui/Card/index.vue';
-import Badge from '@/components/ui/Badge/index.vue';
 import Button from '@/components/ui/Button/index.vue';
 import Dropdown from '@/components/ui/Dropdown/index.vue';
 import Modal from '@/components/ui/Modal/Modal.vue';
@@ -248,6 +285,13 @@ const newStatus = ref('');
 const showAddStatusModal = ref(false);
 const grabbedIndex = ref<number | null>(null);
 const liveMessage = ref('');
+const presets = [
+  {
+    key: 'basic',
+    label: t('types.workflow.presetBasic'),
+    statuses: ['todo', 'in_progress', 'completed'],
+  },
+];
 
 onMounted(async () => {
   const res = await api.get('/task-statuses');
@@ -298,6 +342,23 @@ function emitStatuses() {
 }
 function emitEdges() {
   emit('update:modelValue', edges.value);
+}
+
+function applyPreset(preset: { statuses: string[] }) {
+  preset.statuses.forEach((slug, idx) => {
+    if (!localStatuses.value.includes(slug)) {
+      localStatuses.value.push(slug);
+    }
+    if (idx < preset.statuses.length - 1) {
+      const from = preset.statuses[idx];
+      const to = preset.statuses[idx + 1];
+      if (!edges.value.some((e) => e[0] === from && e[1] === to)) {
+        edges.value.push([from, to]);
+      }
+    }
+  });
+  emitStatuses();
+  emitEdges();
 }
 
 function onHandleKeydown(e: KeyboardEvent, index: number) {

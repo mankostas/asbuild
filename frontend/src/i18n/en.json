@@ -35,7 +35,8 @@
       "dragToReorder": "Drag to reorder",
       "removeSection": "Remove section",
       "enableAutomation": "Enable automation",
-      "movedToPosition": "Moved to position {pos}"
+      "movedToPosition": "Moved to position {pos}",
+      "reorderInstructions": "Press Enter to grab, use arrow keys to move, Escape to release"
     },
   "commandPalette": {
     "title": "Command palette",
@@ -211,7 +212,9 @@
       "to": "To",
       "condition": "Condition",
       "noCondition": "Always",
-      "transition": "Transition"
+      "transition": "Transition",
+      "quickPresets": "Quick presets",
+      "presetBasic": "Basic: todo → in_progress → completed"
     },
     "form": {
       "name": "Name",
