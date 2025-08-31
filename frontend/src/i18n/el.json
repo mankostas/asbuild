@@ -225,7 +225,9 @@
     },
     "saveToConfigureSLA": "Αποθηκεύστε για να ρυθμίσετε τις Πολιτικές SLA",
     "saveToConfigureAutomations": "Αποθηκεύστε για να ρυθμίσετε Αυτοματισμούς",
-    "selectTenantToSetPermissions": "Επιλέξτε μισθωτή για να ορίσετε δικαιώματα"
+    "selectTenantToSetPermissions": "Επιλέξτε μισθωτή για να ορίσετε δικαιώματα",
+    "noSLAPermissions": "Δεν έχετε δικαίωμα διαχείρισης Πολιτικών SLA",
+    "noAutomationsPermissions": "Δεν έχετε δικαίωμα διαχείρισης Αυτοματισμών"
   },
   "slaPolicies": {
     "title": "Πολιτικές SLA",

@@ -225,7 +225,9 @@
     },
     "saveToConfigureSLA": "Save to configure SLA policies",
     "saveToConfigureAutomations": "Save to configure automations",
-    "selectTenantToSetPermissions": "Select tenant to set permissions"
+    "selectTenantToSetPermissions": "Select tenant to set permissions",
+    "noSLAPermissions": "You do not have permission to manage SLA policies",
+    "noAutomationsPermissions": "You do not have permission to manage automations"
   },
   "slaPolicies": {
     "title": "SLA Policies",

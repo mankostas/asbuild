@@ -145,63 +145,83 @@
         class="p-4 border-b"
       />
       <template v-if="tenantId || !isCreate">
-        <template v-if="auth.isSuperAdmin || can('task_sla_policies.manage')">
+        <template v-if="canManageSLA">
           <SLAPolicyEditor
             v-if="isEdit"
             :task-type-id="Number(route.params.id)"
             class="p-4 border-b"
           />
-        <Card
-          v-else
-          class="p-4 border-b flex flex-col items-center text-center gap-2"
-        >
-          <Icon
-            icon="heroicons-outline:information-circle"
-            class="w-6 h-6 text-slate-400"
-            aria-hidden="true"
-          />
-          <p class="text-sm">{{ t('types.saveToConfigureSLA') }}</p>
-          <Button
-            v-if="auth.isSuperAdmin || can('task_types.manage')"
-            type="submit"
-            :aria-label="t('actions.save')"
-            btnClass="btn-primary text-xs px-3 py-1"
-            :disabled="!isFormValid"
-            :aria-disabled="!isFormValid ? 'true' : 'false'"
-            :tabindex="!isFormValid ? -1 : 0"
+          <Card
+            v-else
+            class="p-4 border-b flex flex-col items-center text-center gap-2"
           >
-            {{ t('actions.save') }}
-          </Button>
-        </Card>
+            <Icon
+              icon="heroicons-outline:information-circle"
+              class="w-6 h-6 text-slate-400"
+              aria-hidden="true"
+            />
+            <p class="text-sm">{{ t('types.saveToConfigureSLA') }}</p>
+            <Button
+              v-if="auth.isSuperAdmin || can('task_types.manage')"
+              type="submit"
+              :aria-label="t('actions.save')"
+              btnClass="btn-primary text-xs px-3 py-1"
+              :disabled="!isFormValid"
+              :aria-disabled="!isFormValid ? 'true' : 'false'"
+              :tabindex="!isFormValid ? -1 : 0"
+            >
+              {{ t('actions.save') }}
+            </Button>
+          </Card>
         </template>
-        <template v-if="auth.isSuperAdmin || can('task_automations.manage')">
+        <template v-else>
+          <Card class="p-4 border-b flex flex-col items-center text-center gap-2">
+            <Icon
+              icon="heroicons-outline:information-circle"
+              class="w-6 h-6 text-slate-400"
+              aria-hidden="true"
+            />
+            <p class="text-sm">{{ t('types.noSLAPermissions') }}</p>
+          </Card>
+        </template>
+        <template v-if="canManageAutomations">
           <AutomationsEditor
             v-if="isEdit"
             :task-type-id="Number(route.params.id)"
             class="p-4 border-b"
           />
-        <Card
-          v-else
-          class="p-4 border-b flex flex-col items-center text-center gap-2"
-        >
-          <Icon
-            icon="heroicons-outline:information-circle"
-            class="w-6 h-6 text-slate-400"
-            aria-hidden="true"
-          />
-          <p class="text-sm">{{ t('types.saveToConfigureAutomations') }}</p>
-          <Button
-            v-if="auth.isSuperAdmin || can('task_types.manage')"
-            type="submit"
-            :aria-label="t('actions.save')"
-            btnClass="btn-primary text-xs px-3 py-1"
-            :disabled="!isFormValid"
-            :aria-disabled="!isFormValid ? 'true' : 'false'"
-            :tabindex="!isFormValid ? -1 : 0"
+          <Card
+            v-else
+            class="p-4 border-b flex flex-col items-center text-center gap-2"
           >
-            {{ t('actions.save') }}
-          </Button>
-        </Card>
+            <Icon
+              icon="heroicons-outline:information-circle"
+              class="w-6 h-6 text-slate-400"
+              aria-hidden="true"
+            />
+            <p class="text-sm">{{ t('types.saveToConfigureAutomations') }}</p>
+            <Button
+              v-if="auth.isSuperAdmin || can('task_types.manage')"
+              type="submit"
+              :aria-label="t('actions.save')"
+              btnClass="btn-primary text-xs px-3 py-1"
+              :disabled="!isFormValid"
+              :aria-disabled="!isFormValid ? 'true' : 'false'"
+              :tabindex="!isFormValid ? -1 : 0"
+            >
+              {{ t('actions.save') }}
+            </Button>
+          </Card>
+        </template>
+        <template v-else>
+          <Card class="p-4 border-b flex flex-col items-center text-center gap-2">
+            <Icon
+              icon="heroicons-outline:information-circle"
+              class="w-6 h-6 text-slate-400"
+              aria-hidden="true"
+            />
+            <p class="text-sm">{{ t('types.noAutomationsPermissions') }}</p>
+          </Card>
         </template>
         <Card
           v-if="!tenantId"
@@ -504,6 +524,12 @@ const statusFlow = ref<[string, string][]>([]);
 const permissions = ref<Record<string, Permission>>({});
 const tenantRoles = ref<any[]>([]);
 const canManage = computed(() => auth.isSuperAdmin || can('task_types.manage'));
+const canManageSLA = computed(
+  () => auth.isSuperAdmin || can('task_sla_policies.manage'),
+);
+const canManageAutomations = computed(
+  () => auth.isSuperAdmin || can('task_automations.manage'),
+);
 const isFormValid = computed(() => name.value.trim().length > 0 && tenantId.value !== '');
 
 const fieldTypes = [
@@ -552,7 +578,8 @@ const isCreate = computed(
 const canAccess = computed(
   () =>
     auth.isSuperAdmin ||
-    (isEdit.value ? can('task_types.view') : can('task_types.create')),
+    (can('task_types.manage') &&
+      (isEdit.value ? can('task_types.view') : can('task_types.create'))),
 );
 
 watch(previewLang, (lang) => {
