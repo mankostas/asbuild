@@ -79,12 +79,12 @@
               </FromGroup>
             </div>
           </TabPanel>
-          <TabPanel v-if="auth.isSuperAdmin || roleOptions.length">
+          <TabPanel v-if="auth.isSuperAdmin || (roleOptions?.length ?? 0)">
             <div class="space-y-2">
               <FromGroup #default="{ inputId, labelId }" :label="t('roles.view')">
                 <div :id="inputId" :aria-labelledby="labelId" class="flex flex-col gap-1">
                   <Checkbox
-                    v-for="r in roleOptions"
+                    v-for="r in (roleOptions || [])"
                     :key="r.id"
                     v-model="roles.view"
                     :value="r.slug"
@@ -95,7 +95,7 @@
               <FromGroup #default="{ inputId, labelId }" :label="t('roles.edit')">
                 <div :id="inputId" :aria-labelledby="labelId" class="flex flex-col gap-1">
                   <Checkbox
-                    v-for="r in roleOptions"
+                    v-for="r in (roleOptions || [])"
                     :key="r.id"
                     v-model="roles.edit"
                     :value="r.slug"
@@ -139,7 +139,7 @@ const { t, locale } = useI18n();
 const auth = useAuthStore();
 const tabs = computed(() => {
   const tbs = [t('inspector.basics'), t('inspector.validation')];
-  if (auth.isSuperAdmin || props.roleOptions.length) tbs.push(t('roles.label'));
+  if (auth.isSuperAdmin || (props.roleOptions?.length ?? 0)) tbs.push(t('roles.label'));
   return tbs;
 });
 

@@ -121,6 +121,10 @@ const localPermissions = reactive<Record<string, Permission>>(
 watch(
   () => props.roles,
   (roles) => {
+    const slugs = roles.map((r) => r.slug);
+    Object.keys(localPermissions).forEach((k) => {
+      if (!slugs.includes(k)) delete localPermissions[k];
+    });
     roles.forEach((r) => {
       if (!localPermissions[r.slug]) {
         localPermissions[r.slug] = {
@@ -136,7 +140,7 @@ watch(
       }
     });
   },
-  { immediate: true },
+  { immediate: true, deep: true },
 );
 
 watch(
