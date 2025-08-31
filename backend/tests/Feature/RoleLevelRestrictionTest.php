@@ -56,4 +56,47 @@ class RoleLevelRestrictionTest extends TestCase
             ->deleteJson("/api/roles/{$higherRole->id}")
             ->assertStatus(403);
     }
+
+    public function test_index_scopes_roles_to_tenant_and_level(): void
+    {
+        $tenant1 = Tenant::create(['name' => 'Tenant1']);
+        $tenant2 = Tenant::create(['name' => 'Tenant2']);
+
+        $managerRole = Role::create([
+            'name' => 'Manager',
+            'slug' => 'manager',
+            'tenant_id' => $tenant1->id,
+            'level' => 2,
+            'abilities' => ['roles.manage'],
+        ]);
+
+        $allowed1 = Role::create(['name' => 'Assistant', 'slug' => 'assistant', 'tenant_id' => $tenant1->id, 'level' => 2]);
+        $allowed2 = Role::create(['name' => 'Helper', 'slug' => 'helper', 'tenant_id' => $tenant1->id, 'level' => 3]);
+        $disallowed = Role::create(['name' => 'Supervisor', 'slug' => 'supervisor', 'tenant_id' => $tenant1->id, 'level' => 1]);
+        $otherTenant = Role::create(['name' => 'Other', 'slug' => 'other', 'tenant_id' => $tenant2->id, 'level' => 2]);
+        $global = Role::create(['name' => 'Global', 'slug' => 'global']);
+
+        $user = User::create([
+            'name' => 'Admin',
+            'email' => 'admin@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant1->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($managerRole->id, ['tenant_id' => $tenant1->id]);
+        Sanctum::actingAs($user);
+
+        $response = $this->withHeader('X-Tenant-ID', $tenant1->id)
+            ->getJson("/api/roles?tenant_id={$tenant2->id}")
+            ->assertStatus(200);
+
+        $ids = array_column($response->json('data'), 'id');
+
+        $this->assertContains($allowed1->id, $ids);
+        $this->assertContains($allowed2->id, $ids);
+        $this->assertNotContains($disallowed->id, $ids);
+        $this->assertNotContains($otherTenant->id, $ids);
+        $this->assertNotContains($global->id, $ids);
+    }
 }
