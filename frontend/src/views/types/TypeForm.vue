@@ -127,6 +127,7 @@
           class="p-4 border-b"
         />
         <TransitionsEditor
+          ref="transitionsEditor"
           v-model="statusFlow"
           :statuses="statuses"
           :tenant-id="tenantId"
@@ -453,6 +454,7 @@ interface Permission {
 const name = ref('');
 const search = ref('');
 const tenantId = ref<number | ''>('');
+const transitionsEditor = ref<any>(null);
 const sections = ref<Section[]>([]);
 const selected = ref<Field | null>(null);
 const previewData = ref<Record<string, any>>({});
@@ -798,6 +800,7 @@ function selectField(field: Field) {
 }
 
 function onSubmit() {
+  transitionsEditor.value?.commitPending?.();
   const logicRules = sections.value.flatMap((s) =>
     s.fields.flatMap((f) =>
       (f.logic || []).map((r) => ({

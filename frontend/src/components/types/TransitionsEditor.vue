@@ -226,6 +226,18 @@ function emitEdges() {
   emit('update:modelValue', edges.value);
 }
 
+function commitPending() {
+  if (
+    showTransitionForm.value &&
+    transitionForm.value.from &&
+    transitionForm.value.to
+  ) {
+    saveTransition();
+  }
+}
+
+defineExpose({ commitPending });
+
 function menuItemClass(active: boolean) {
   return (
     (active
