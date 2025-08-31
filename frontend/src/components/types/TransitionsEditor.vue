@@ -155,11 +155,11 @@ watch(
     if (id) {
       await fetchStatuses(id);
       edges.value = [];
-      emitEdges();
+      if (props.modelValue.length) emitEdges();
     } else {
       allStatuses.value = [];
       edges.value = [];
-      emitEdges();
+      if (props.modelValue.length) emitEdges();
     }
   },
   { immediate: true },

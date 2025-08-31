@@ -146,11 +146,11 @@ watch(
     if (id) {
       await fetchStatuses(id);
       localStatuses.value = [];
-      emitStatuses();
+      if (props.modelValue.length) emitStatuses();
     } else {
       allStatuses.value = [];
       localStatuses.value = [];
-      emitStatuses();
+      if (props.modelValue.length) emitStatuses();
     }
   },
   { immediate: true },
