@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from '@headlessui/vue';
-import { ref, watch } from 'vue';
+import { watch, onUnmounted } from 'vue';
 
 interface Props {
   open: boolean;
@@ -34,27 +34,19 @@ interface Props {
 const props = defineProps<Props>();
 defineEmits(['close']);
 
-const scrollY = ref(0);
-
 watch(
   () => props.open,
   (isOpen) => {
+    const body = document.body;
     if (isOpen) {
-      scrollY.value = window.scrollY;
-      const body = document.body;
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      body.style.top = `-${scrollY.value}px`;
-      body.style.position = 'fixed';
-      body.style.width = '100%';
-      body.style.paddingRight = `${scrollbarWidth}px`;
+      body.classList.add('overflow-hidden');
     } else {
-      const body = document.body;
-      body.style.position = '';
-      body.style.top = '';
-      body.style.width = '';
-      body.style.paddingRight = '';
-      window.scrollTo(0, scrollY.value);
+      body.classList.remove('overflow-hidden');
     }
   },
 );
+
+onUnmounted(() => {
+  document.body.classList.remove('overflow-hidden');
+});
 </script>
