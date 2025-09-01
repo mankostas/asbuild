@@ -1,6 +1,7 @@
 <template>
   <div
     v-if="!overlay"
+    v-bind="attrs"
     :class="cn('card rounded-md bg-white dark:bg-slate-800 shadow-base', props.class)"
   >
     <div :class="cn('card-body flex flex-col', bodyClass)">
@@ -49,7 +50,8 @@
     </div>
   </div>
   <div
-   v-if="overlay"
+    v-else
+    v-bind="attrs"
     :class="cn('rounded-md overlay bg-no-repeat bg-center bg-cover card', customClass)"
     :style="{
       backgroundImage: 'url(' + `${img}` + ')',
@@ -76,6 +78,7 @@
   </div>
 </template>
 <script setup>
+import { useAttrs } from 'vue';
 import { cn } from "@/lib/utils";
 const props = defineProps({
   class: {
@@ -135,6 +138,8 @@ const props = defineProps({
     default: "",
   },
 });
+const attrs = useAttrs();
+defineOptions({ inheritAttrs: false });
 </script>
 <style lang="scss" scoped>
 .card-title {
