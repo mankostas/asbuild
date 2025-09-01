@@ -151,6 +151,7 @@
             ref="automationsEditor"
             :task-type-id="taskTypeId"
             :tenant-id="tenantId"
+            :statuses="statuses"
             class="p-4 border-b"
           />
         </template>

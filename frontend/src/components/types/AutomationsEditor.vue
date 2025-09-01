@@ -118,10 +118,15 @@ interface Automation {
   _saved?: boolean;
 }
 
-const props = defineProps<{ taskTypeId?: number; tenantId?: number | '' }>();
+const props = defineProps<{
+  taskTypeId?: number;
+  tenantId?: number | '';
+  statuses?: string[];
+}>();
 const { t } = useI18n();
 const automations = ref<Automation[]>([]);
 const statusOptions = ref<{ value: string; label: string }[]>([]);
+const allStatusOptions = ref<{ value: string; label: string }[]>([]);
 const teamOptions = ref<{ value: number; label: string }[]>([]);
 
 watch(
@@ -131,6 +136,7 @@ watch(
       await load(id);
     } else {
       statusOptions.value = [];
+      allStatusOptions.value = [];
       teamOptions.value = [];
       automations.value = [];
     }
@@ -146,10 +152,11 @@ async function load(id: number | string) {
     api.get('/teams', { params: { tenant_id: id } }),
   ]);
   const statusData = statusRes.data.data ?? statusRes.data;
-  statusOptions.value = statusData.map((s: any) => ({
+  allStatusOptions.value = statusData.map((s: any) => ({
     value: s.slug,
     label: s.name,
   }));
+  filterStatuses();
   const teamData = teamRes.data.data ?? teamRes.data;
   teamOptions.value = teamData.map((t: any) => ({
     value: t.id,
@@ -183,15 +190,40 @@ async function save(a: Automation) {
     enabled: a.enabled,
   };
   if (a.id) {
-    const res = await api.put(`/task-types/${props.taskTypeId}/automations/${a.id}`, payload);
+    const res = await api.put(
+      `/task-types/${props.taskTypeId}/automations/${a.id}`,
+      payload,
+    );
     Object.assign(a, res.data.data);
   } else {
-    const res = await api.post(`/task-types/${props.taskTypeId}/automations`, payload);
+    const res = await api.post(
+      `/task-types/${props.taskTypeId}/automations`,
+      payload,
+    );
     Object.assign(a, res.data.data);
   }
+  a._saved = true;
 }
 
 defineExpose({
   getAutomations: () => automations.value,
 });
+
+watch(
+  () => props.statuses,
+  () => {
+    filterStatuses();
+  },
+  { immediate: true },
+);
+
+function filterStatuses() {
+  if (props.statuses && props.statuses.length) {
+    statusOptions.value = allStatusOptions.value.filter((s) =>
+      props.statuses!.includes(s.value),
+    );
+  } else {
+    statusOptions.value = [...allStatusOptions.value];
+  }
+}
 </script>
