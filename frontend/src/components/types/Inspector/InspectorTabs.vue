@@ -9,17 +9,17 @@
             #default="{ selected: isSelected }"
             as="template"
           >
-            <Button
+            <button
               type="button"
               :aria-selected="isSelected"
-              :btnClass="
+              :class="
                 (isSelected
                   ? 'bg-primary-500 text-white'
                   : 'bg-gray-100') + ' px-2 py-1 text-sm rounded'
               "
             >
               {{ tab }}
-            </Button>
+            </button>
           </Tab>
         </template>
         <template #panel>
@@ -122,7 +122,6 @@ import Textinput from '@/components/ui/Textinput/index.vue';
 import Switch from '@/components/ui/Switch/index.vue';
 import FromGroup from '@/components/ui/FromGroup/index.vue';
 import Checkbox from '@/components/ui/Checkbox/index.vue';
-import Button from '@/components/ui/Button/index.vue';
 import { useAuthStore } from '@/stores/auth';
 
 interface RoleOption {
