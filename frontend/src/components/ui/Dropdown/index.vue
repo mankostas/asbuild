@@ -15,8 +15,8 @@
       leave-to-class="transform scale-95 opacity-0"
     >
       <MenuItems
-        :class="classMenuItems"
-        class="absolute ltr:right-0 rtl:left-0 origin-top-right rounded bg-white dark:bg-slate-800 dark:border dark:border-slate-700 shadow-dropdown z-[9999]"
+        :class="[classMenuItems, align === 'left' ? 'ltr:left-0 rtl:right-0 origin-top-left' : 'ltr:right-0 rtl:left-0 origin-top-right']"
+        class="absolute rounded bg-white dark:bg-slate-800 dark:border dark:border-slate-700 shadow-dropdown z-[9999]"
       >
         <div v-if="!$slots.menus">
           <MenuItem v-for="(item, i) in items" #default="{ active }" :key="i">
@@ -98,6 +98,10 @@ export default {
     parentClass: {
       type: String,
       default: "inline-block",
+    },
+    align: {
+      type: String,
+      default: "right",
     },
     items: {
       type: Array,
