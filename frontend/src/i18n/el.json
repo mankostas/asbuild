@@ -311,5 +311,8 @@
     "import": "Εισαγωγή JSON",
     "selectType": "Επιλέξτε τύπο"
   },
+  "Section label": "Ετικέτα ενότητας",
+  "Label": "Ετικέτα",
+  "Required": "Υποχρεωτικό",
   "Select a field": "Επιλέξτε πεδίο"
 }

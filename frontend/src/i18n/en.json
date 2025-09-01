@@ -311,5 +311,8 @@
     "import": "Import JSON",
     "selectType": "Select type"
   },
+  "Section label": "Section label",
+  "Label": "Label",
+  "Required": "Required",
   "Select a field": "Select a field"
 }
