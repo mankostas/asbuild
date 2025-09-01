@@ -49,4 +49,5 @@ watch(
 onUnmounted(() => {
   document.body.classList.remove('overflow-hidden');
 });
+});
 </script>
