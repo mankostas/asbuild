@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from '@headlessui/vue';
-import { ref, watch } from 'vue';
+import { ref, watch, onUnmounted } from 'vue';
 
 interface Props {
   open: boolean;
@@ -57,4 +57,12 @@ watch(
     }
   },
 );
+
+onUnmounted(() => {
+  const body = document.body;
+  body.style.position = '';
+  body.style.top = '';
+  body.style.width = '';
+  body.style.paddingRight = '';
+});
 </script>
