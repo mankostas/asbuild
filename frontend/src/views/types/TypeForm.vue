@@ -209,11 +209,13 @@
                   <template #default>
                     <Button
                       type="button"
-                      btnClass="btn-primary text-xs flex items-center gap-1"
+                      btnClass="btn-primary text-xs items-center px-2 py-1"
                       :aria-label="t('actions.add')"
                     >
-                      {{ t('actions.add') }}
-                      <Icon icon="heroicons-outline:chevron-down" />
+                      <span class="inline-flex items-center gap-1">
+                        {{ t('actions.add') }}
+                        <Icon icon="heroicons-outline:chevron-down" />
+                      </span>
                     </Button>
                   </template>
                   <template #menus>
@@ -299,11 +301,13 @@
                     <template #default>
                       <Button
                         type="button"
-                        btnClass="btn-primary text-xs flex items-center gap-1"
+                        btnClass="btn-primary text-xs items-center px-2 py-1"
                         :aria-label="t('actions.add')"
                       >
-                        {{ t('actions.add') }}
-                        <Icon icon="heroicons-outline:chevron-down" />
+                        <span class="inline-flex items-center gap-1">
+                          {{ t('actions.add') }}
+                          <Icon icon="heroicons-outline:chevron-down" />
+                        </span>
                       </Button>
                     </template>
                     <template #menus>
