@@ -309,5 +309,6 @@
     "export": "Export JSON",
     "import": "Import JSON",
     "selectType": "Select type"
-  }
+  },
+  "Select a field": "Select a field"
 }

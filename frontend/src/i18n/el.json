@@ -305,5 +305,6 @@
     "export": "Εξαγωγή JSON",
     "import": "Εισαγωγή JSON",
     "selectType": "Επιλέξτε τύπο"
-  }
+  },
+  "Select a field": "Επιλέξτε πεδίο"
 }
