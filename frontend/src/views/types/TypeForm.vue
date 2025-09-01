@@ -595,8 +595,8 @@ onMounted(async () => {
       selectedVersionId.value = list[0].id;
       loadVersion(list[0]);
     }
-  } else if (tenantStore.tenantId) {
-    tenantId.value = Number(tenantStore.tenantId);
+  } else {
+    tenantStore.setTenant('');
   }
 });
 
@@ -664,7 +664,6 @@ onMounted(async () => {
         statusFlow.value = [];
       }
     },
-    { immediate: true },
   );
 
 function addSection(afterIndex?: number) {
