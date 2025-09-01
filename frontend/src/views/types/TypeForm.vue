@@ -816,7 +816,11 @@ function onAddField(type: any) {
 
 function onSelectType(type: any) {
   onAddField(type);
-  paletteOpen.value = false;
+  // Delay closing to prevent the click from propagating to the underlying
+  // "Add Field" button which would immediately reopen the palette.
+  setTimeout(() => {
+    paletteOpen.value = false;
+  }, 0);
 }
 
 function selectField(field: Field) {

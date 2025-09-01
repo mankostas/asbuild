@@ -16,7 +16,7 @@
             type="button"
             btnClass="w-full text-left px-2 py-1 rounded hover:bg-gray-100"
             :aria-label="`${t('actions.add')} ${item.label}`"
-            @click="$emit('select', item)"
+            @click.stop.prevent="$emit('select', item)"
           >
             {{ item.label }}
           </Button>
