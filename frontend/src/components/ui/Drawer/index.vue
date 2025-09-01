@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel } from '@headlessui/vue';
-import { ref, watch, onUnmounted } from 'vue';
+import { watch, onUnmounted } from 'vue';
 
 interface Props {
   open: boolean;
@@ -34,35 +34,46 @@ interface Props {
 const props = defineProps<Props>();
 defineEmits(['close']);
 
-const scrollY = ref(0);
+const SCROLL_LOCK_ATTR = 'data-scroll-lock-count';
+
+const lockBodyScroll = () => {
+  const body = document.body;
+  const count = Number(body.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
+  if (count === 0) {
+    body.classList.add('overflow-hidden');
+  }
+  body.setAttribute(SCROLL_LOCK_ATTR, String(count + 1));
+};
+
+const unlockBodyScroll = () => {
+  const body = document.body;
+  const count = Number(body.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
+  if (count <= 1) {
+    body.classList.remove('overflow-hidden');
+    body.removeAttribute(SCROLL_LOCK_ATTR);
+  } else {
+    body.setAttribute(SCROLL_LOCK_ATTR, String(count - 1));
+  }
+};
+
+let locked = false;
 
 watch(
   () => props.open,
   (isOpen) => {
     if (isOpen) {
-      scrollY.value = window.scrollY;
-      const body = document.body;
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      body.style.top = `-${scrollY.value}px`;
-      body.style.position = 'fixed';
-      body.style.width = '100%';
-      body.style.paddingRight = `${scrollbarWidth}px`;
-    } else {
-      const body = document.body;
-      body.style.position = '';
-      body.style.top = '';
-      body.style.width = '';
-      body.style.paddingRight = '';
-      window.scrollTo(0, scrollY.value);
+      lockBodyScroll();
+      locked = true;
+    } else if (locked) {
+      unlockBodyScroll();
+      locked = false;
     }
   },
 );
 
 onUnmounted(() => {
-  const body = document.body;
-  body.style.position = '';
-  body.style.top = '';
-  body.style.width = '';
-  body.style.paddingRight = '';
+  if (locked) {
+    unlockBodyScroll();
+  }
 });
 </script>
