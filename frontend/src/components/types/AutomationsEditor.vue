@@ -102,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import Select from '@/components/ui/Select/index.vue';
@@ -117,18 +117,32 @@ interface Automation {
   enabled: boolean;
 }
 
-const props = defineProps<{ taskTypeId?: number }>();
+const props = defineProps<{ taskTypeId?: number; tenantId?: number | '' }>();
 const { t } = useI18n();
 const automations = ref<Automation[]>([]);
 const statusOptions = ref<{ value: string; label: string }[]>([]);
 const teamOptions = ref<{ value: number; label: string }[]>([]);
 
-onMounted(load);
+watch(
+  () => props.tenantId,
+  async (id: number | '' | undefined) => {
+    if (id) {
+      await load(id);
+    } else {
+      statusOptions.value = [];
+      teamOptions.value = [];
+      automations.value = [];
+    }
+  },
+  { immediate: true },
+);
 
-async function load() {
+async function load(id: number | string) {
   const [statusRes, teamRes] = await Promise.all([
-    api.get('/task-statuses'),
-    api.get('/teams'),
+    api.get('/task-statuses', {
+      params: { scope: 'tenant', tenant_id: id, per_page: 100 },
+    }),
+    api.get('/teams', { params: { tenant_id: id } }),
   ]);
   const statusData = statusRes.data.data ?? statusRes.data;
   statusOptions.value = statusData.map((s: any) => ({

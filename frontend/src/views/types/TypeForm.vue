@@ -147,7 +147,11 @@
           </Card>
         </template>
         <template v-if="canManageAutomations">
-          <AutomationsEditor :task-type-id="taskTypeId" class="p-4 border-b" />
+          <AutomationsEditor
+            :task-type-id="taskTypeId"
+            :tenant-id="tenantId"
+            class="p-4 border-b"
+          />
         </template>
         <template v-else>
           <Card class="p-4 border-b flex flex-col items-center text-center gap-2">
