@@ -29,6 +29,7 @@
   "common": {
     "select": "Select..."
   },
+  "none": "None",
   "a11y": {
     "skipToContent": "Skip to content",
       "language": "Language",
