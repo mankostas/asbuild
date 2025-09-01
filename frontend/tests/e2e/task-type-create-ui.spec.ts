@@ -104,4 +104,41 @@ test.describe('task type create UI', () => {
     await page.getByRole('button', { name: 'Run Validation' }).click();
     await expect(page.getByRole('alert')).toHaveText('Required');
   });
+
+  test('automations saved after type creation', async ({ page }) => {
+    await page.route('**/api/task-types', async (route) => {
+      await route.fulfill({
+        status: 201,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: 7 }),
+      });
+    });
+    await page.route('**/api/task-types/7/automations', async (route) => {
+      const data = JSON.parse(route.request().postData() || '{}');
+      expect(data.enabled).toBe(false);
+      await route.fulfill({ status: 201, body: '{}' });
+    });
+    await page.setContent(`
+      <button id="saveAuto">Save Automation</button>
+      <button id="saveType">Save Type</button>
+      <script>
+        const autos = [];
+        document.getElementById('saveAuto').onclick = () => {
+          autos.push({ event: 'status_changed', conditions_json: {}, actions_json: [], enabled: false, _saved: true });
+        };
+        document.getElementById('saveType').onclick = () => {
+          fetch('/api/task-types', { method: 'post' })
+            .then(r => r.json())
+            .then(res => {
+              autos.filter(a => a._saved).forEach(a => {
+                fetch('/api/task-types/' + res.id + '/automations', { method: 'post', body: JSON.stringify(a) });
+              });
+            });
+        };
+      <\/script>
+    `);
+    await page.getByRole('button', { name: 'Save Automation' }).click();
+    await page.getByRole('button', { name: 'Save Type' }).click();
+    await page.waitForRequest('**/api/task-types/7/automations');
+  });
 });

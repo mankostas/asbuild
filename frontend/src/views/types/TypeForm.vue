@@ -148,6 +148,7 @@
         </template>
         <template v-if="canManageAutomations">
           <AutomationsEditor
+            ref="automationsEditor"
             :task-type-id="taskTypeId"
             :tenant-id="tenantId"
             class="p-4 border-b"
@@ -455,6 +456,7 @@ const name = ref('');
 const search = ref('');
 const tenantId = ref<number | ''>('');
 const transitionsEditor = ref<any>(null);
+const automationsEditor = ref<any>(null);
 const sections = ref<Section[]>([]);
 const selected = ref<Field | null>(null);
 const previewData = ref<Record<string, any>>({});
@@ -836,7 +838,7 @@ function selectField(field: Field) {
   paletteOpen.value = false;
 }
 
-function onSubmit() {
+async function onSubmit() {
   transitionsEditor.value?.commitPending?.();
   const logicRules = sections.value.flatMap((s) =>
     s.fields.flatMap((f) =>
@@ -874,10 +876,26 @@ function onSubmit() {
     abilities_json: JSON.stringify(permissions.value),
   };
   if (isEdit.value) {
-    api.patch(`/task-types/${route.params.id}`, payload).then(() => router.push({ name: 'taskTypes.list' }));
+    await api.patch(`/task-types/${route.params.id}`, payload);
   } else {
-    api.post('/task-types', payload).then(() => router.push({ name: 'taskTypes.list' }));
+    const res = await api.post('/task-types', payload);
+    const newId = res.data?.data?.id ?? res.data?.id;
+    const pending =
+      automationsEditor.value?.getAutomations?.().filter((a: any) => !a.id && a._saved) || [];
+    if (newId && pending.length) {
+      await Promise.all(
+        pending.map((a: any) =>
+          api.post(`/task-types/${newId}/automations`, {
+            event: a.event,
+            conditions_json: a.conditions_json,
+            actions_json: a.actions_json,
+            enabled: a.enabled,
+          })
+        )
+      );
+    }
   }
+  router.push({ name: 'taskTypes.list' });
 }
 
 function runValidation() {
