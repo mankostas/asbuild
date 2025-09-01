@@ -34,20 +34,46 @@ interface Props {
 const props = defineProps<Props>();
 defineEmits(['close']);
 
+const SCROLL_LOCK_ATTR = 'data-scroll-lock-count';
+
+const lockBodyScroll = () => {
+  const body = document.body;
+  const count = Number(body.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
+  if (count === 0) {
+    body.classList.add('overflow-hidden');
+  }
+  body.setAttribute(SCROLL_LOCK_ATTR, String(count + 1));
+};
+
+const unlockBodyScroll = () => {
+  const body = document.body;
+  const count = Number(body.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
+  if (count <= 1) {
+    body.classList.remove('overflow-hidden');
+    body.removeAttribute(SCROLL_LOCK_ATTR);
+  } else {
+    body.setAttribute(SCROLL_LOCK_ATTR, String(count - 1));
+  }
+};
+
+let locked = false;
+
 watch(
   () => props.open,
   (isOpen) => {
-    const body = document.body;
     if (isOpen) {
-      body.classList.add('overflow-hidden');
-    } else {
-      body.classList.remove('overflow-hidden');
+      lockBodyScroll();
+      locked = true;
+    } else if (locked) {
+      unlockBodyScroll();
+      locked = false;
     }
   },
 );
 
 onUnmounted(() => {
-  document.body.classList.remove('overflow-hidden');
-});
+  if (locked) {
+    unlockBodyScroll();
+  }
 });
 </script>
