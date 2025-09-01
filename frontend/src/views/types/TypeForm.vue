@@ -189,27 +189,7 @@
           :status-count="statuses.length"
           class="p-4 border-b"
         />
-      </template>
-      <Card
-        v-else
-        class="p-4 border-b flex items-center gap-2 text-sm"
-        role="alert"
-        aria-live="polite"
-      >
-        <Icon
-          icon="heroicons-outline:information-circle"
-          class="w-5 h-5 text-slate-400"
-          aria-hidden="true"
-        />
-        <p>
-          {{
-            locale === 'el'
-              ? 'Επιλέξτε μισθωτή για να συνεχίσετε τη ρύθμιση ρόλων και δικαιωμάτων.'
-              : 'Select a tenant to continue configuring roles and permissions.'
-          }}
-        </p>
-      </Card>
-      <div class="h-[calc(100vh-3rem)] p-4">
+        <div class="h-[calc(100vh-3rem)] p-4">
         <div class="hidden lg:grid grid-cols-3 gap-4 h-full">
           <Card class="overflow-y-auto">
             <template #header>
@@ -377,7 +357,27 @@
           </UiTabs>
         </div>
       </div>
-    </form>
+      </template>
+      <Card
+        v-else
+        class="p-4 border-b flex items-center gap-2 text-sm"
+        role="alert"
+        aria-live="polite"
+      >
+        <Icon
+          icon="heroicons-outline:information-circle"
+          class="w-5 h-5 text-slate-400"
+          aria-hidden="true"
+        />
+        <p>
+          {{
+            locale === 'el'
+              ? 'Επιλέξτε μισθωτή για να συνεχίσετε τη ρύθμιση ρόλων και δικαιωμάτων.'
+              : 'Select a tenant to continue configuring roles and permissions.'
+          }}
+        </p>
+      </Card>
+      </form>
     <Drawer :open="paletteOpen" @close="paletteOpen = false">
       <FieldPalette :groups="fieldTypeGroups" @select="onSelectType" />
     </Drawer>
