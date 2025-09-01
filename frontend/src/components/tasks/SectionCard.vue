@@ -226,6 +226,11 @@ const emit = defineEmits<{ (e: 'update', payload: { key: string; value: any }): 
 
 const { t, locale } = useI18n();
 const local = reactive<any>(props.form);
+for (const field of props.section.fields) {
+  if (field.type === 'time' && local[field.key] === undefined) {
+    local[field.key] = null;
+  }
+}
 const files = reactive<Record<string, { preview: string | null; name: string } | null>>({});
 
 function tr(val: any) {
