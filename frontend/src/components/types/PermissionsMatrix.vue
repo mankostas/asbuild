@@ -10,7 +10,7 @@
         <thead class="sticky top-0 z-10 bg-white">
           <tr>
             <th scope="col" class="px-4 py-2 text-left">
-              {{ t('roles') }}
+              {{ t('roles.label') }}
             </th>
             <th
               v-for="ability in abilityList"
