@@ -207,6 +207,7 @@
   "types": {
     "workflow": {
       "title": "Ροή εργασίας",
+      "statuses": "Καταστάσεις",
       "addStatus": "Προσθήκη κατάστασης",
       "transitions": "Μεταβάσεις",
       "addTransition": "Προσθήκη μετάβασης",
@@ -298,8 +299,12 @@
     "placeholder": "Υπόδειξη",
     "help": "Βοήθεια",
     "reorderHint": "Χρησιμοποιήστε Alt+βέλη για αναδιάταξη"
-  }
-  ,
+  },
+  "roles": {
+    "label": "Ρόλοι",
+    "view": "Προβολή ρόλων",
+    "edit": "Επεξεργασία ρόλων"
+  },
   "templates": {
     "title": "Πρότυπα",
     "export": "Εξαγωγή JSON",

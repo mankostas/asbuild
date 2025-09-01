@@ -207,6 +207,7 @@
   "types": {
     "workflow": {
       "title": "Workflow",
+      "statuses": "Statuses",
       "addStatus": "Add status",
       "transitions": "Transitions",
       "addTransition": "Add transition",
