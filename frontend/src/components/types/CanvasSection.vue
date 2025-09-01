@@ -56,7 +56,15 @@
           >
             <Icon icon="heroicons-outline:bars-3" />
           </Button>
-          <span>{{ resolveI18n(element.label) }}</span>
+          <span class="flex-1">{{ resolveI18n(element.label) }}</span>
+          <Button
+            type="button"
+            btnClass="btn-outline-danger text-xs px-1 py-1"
+            :aria-label="t('actions.delete')"
+            @click.stop="$emit('remove-field', element)"
+          >
+            ✕
+          </Button>
         </Card>
       </template>
     </draggable>
@@ -106,6 +114,7 @@ defineEmits<{
   (e: 'select', field: any): void;
   (e: 'add-field'): void;
   (e: 'add-section'): void;
+  (e: 'remove-field', field: any): void;
 }>();
 const { t, locale } = useI18n();
 

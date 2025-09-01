@@ -218,12 +218,12 @@
                   </template>
                   <template #menus>
                     <MenuItem #default="{ active }">
-                      <button type="button" :class="menuItemClass(active)" @click="addSection">
+                      <button type="button" :class="menuItemClass(active)" @click="addSection()">
                         {{ t('actions.addSection') }}
                       </button>
                     </MenuItem>
                     <MenuItem #default="{ active }">
-                      <button type="button" :class="menuItemClass(active)" @click="paletteOpen = true">
+                      <button type="button" :class="menuItemClass(active)" @click="openPalette()">
                         {{ t('actions.addField') }}
                       </button>
                     </MenuItem>
@@ -240,8 +240,9 @@
                     :section="element"
                     @remove="removeSection(index)"
                     @select="selectField"
-                    @add-field="paletteOpen = true"
-                    @add-section="addSection"
+                    @add-field="openPalette(index)"
+                    @add-section="addSection(index)"
+                    @remove-field="removeField(index, $event)"
                   />
                 </template>
               </draggable>
@@ -307,12 +308,12 @@
                     </template>
                     <template #menus>
                       <MenuItem #default="{ active }">
-                        <button type="button" :class="menuItemClass(active)" @click="addSection">
+                        <button type="button" :class="menuItemClass(active)" @click="addSection()">
                           {{ t('actions.addSection') }}
                         </button>
                       </MenuItem>
                       <MenuItem #default="{ active }">
-                        <button type="button" :class="menuItemClass(active)" @click="paletteOpen = true">
+                        <button type="button" :class="menuItemClass(active)" @click="openPalette()">
                           {{ t('actions.addField') }}
                         </button>
                       </MenuItem>
@@ -327,8 +328,9 @@
                           :section="element"
                           @remove="removeSection(index)"
                           @select="selectField"
-                          @add-field="paletteOpen = true"
-                          @add-section="addSection"
+                          @add-field="openPalette(index)"
+                          @add-section="addSection(index)"
+                          @remove-field="removeField(index, $event)"
                         />
                       </template>
                     </draggable>
@@ -498,6 +500,7 @@ const fieldTypes = [
 ];
 
 const paletteOpen = ref(false);
+const paletteSectionIndex = ref<number | null>(null);
 const fieldTypeGroups = computed(() => {
   const groups: Record<string, { label: string; items: any[] }> = {};
   fieldTypes.forEach((ft) => {
@@ -512,6 +515,12 @@ const tenantOptions = computed(() =>
   tenants.value.map((t) => ({ value: t.id, label: t.name }))
 );
 const visibleSections = computed(() => sections.value);
+
+function openPalette(index?: number) {
+  paletteSectionIndex.value =
+    typeof index === 'number' ? index : sections.value.length - 1;
+  paletteOpen.value = true;
+}
 
 watch(search, async (q) => {
   if (q.length >= 3) {
@@ -640,14 +649,23 @@ onMounted(async () => {
     { immediate: true },
   );
 
-function addSection() {
-  sections.value.push({
+function addSection(afterIndex?: number) {
+  const newSection = {
     id: Date.now() + Math.random(),
     key: `section${sections.value.length + 1}`,
     label: { en: `Section ${sections.value.length + 1}`, el: `Section ${sections.value.length + 1}` },
     fields: [],
     photos: [],
-  });
+  };
+  if (
+    afterIndex === undefined ||
+    afterIndex < 0 ||
+    afterIndex >= sections.value.length
+  ) {
+    sections.value.push(newSection);
+  } else {
+    sections.value.splice(afterIndex + 1, 0, newSection);
+  }
 }
 
 function loadVersion(v: any) {
@@ -759,9 +777,24 @@ function removeSection(index: number) {
   selected.value = null;
 }
 
+function removeField(sectionIndex: number, field: Field) {
+  const fields = sections.value[sectionIndex].fields;
+  const idx = fields.indexOf(field);
+  if (idx !== -1) fields.splice(idx, 1);
+  if (selected.value === field) selected.value = null;
+}
+
 function onAddField(type: any) {
   if (!sections.value.length) addSection();
-  const section = sections.value[sections.value.length - 1];
+  let target = paletteSectionIndex.value;
+  if (
+    target === null ||
+    target < 0 ||
+    target >= sections.value.length
+  ) {
+    target = sections.value.length - 1;
+  }
+  const section = sections.value[target];
   const field = {
     id: Date.now() + Math.random(),
     name: `field${section.fields.length + 1}`,
@@ -778,6 +811,7 @@ function onAddField(type: any) {
   };
   section.fields.push(field);
   selected.value = field;
+  paletteSectionIndex.value = null;
 }
 
 function onSelectType(type: any) {
@@ -787,6 +821,7 @@ function onSelectType(type: any) {
 
 function selectField(field: Field) {
   selected.value = field;
+  paletteOpen.value = false;
 }
 
 function onSubmit() {
