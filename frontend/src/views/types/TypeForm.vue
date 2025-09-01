@@ -134,7 +134,11 @@
           class="p-4 border-b"
         />
         <template v-if="canManageSLA">
-          <SLAPolicyEditor :task-type-id="taskTypeId" class="p-4 border-b" />
+          <SLAPolicyEditor
+            ref="slaPolicyEditor"
+            :task-type-id="taskTypeId"
+            class="p-4 border-b"
+          />
         </template>
         <template v-else>
           <Card class="p-4 border-b flex flex-col items-center text-center gap-2">
@@ -458,6 +462,7 @@ const search = ref('');
 const tenantId = ref<number | ''>('');
 const transitionsEditor = ref<any>(null);
 const automationsEditor = ref<any>(null);
+const slaPolicyEditor = ref<any>(null);
 const sections = ref<Section[]>([]);
 const selected = ref<Field | null>(null);
 const previewData = ref<Record<string, any>>({});
@@ -881,19 +886,38 @@ async function onSubmit() {
   } else {
     const res = await api.post('/task-types', payload);
     const newId = res.data?.data?.id ?? res.data?.id;
-    const pending =
+    const pendingAutomations =
       automationsEditor.value?.getAutomations?.().filter((a: any) => !a.id && a._saved) || [];
-    if (newId && pending.length) {
-      await Promise.all(
-        pending.map((a: any) =>
-          api.post(`/task-types/${newId}/automations`, {
-            event: a.event,
-            conditions_json: a.conditions_json,
-            actions_json: a.actions_json,
-            enabled: a.enabled,
-          })
-        )
-      );
+    const pendingPolicies =
+      slaPolicyEditor.value?.getPolicies?.().filter((p: any) => !p.id && p._saved) || [];
+    if (newId) {
+      if (pendingAutomations.length) {
+        await Promise.all(
+          pendingAutomations.map((a: any) =>
+            api.post(`/task-types/${newId}/automations`, {
+              event: a.event,
+              conditions_json: a.conditions_json,
+              actions_json: a.actions_json,
+              enabled: a.enabled,
+            })
+          )
+        );
+      }
+      if (pendingPolicies.length) {
+        await Promise.all(
+          pendingPolicies.map((p: any) =>
+            api.post(`/task-types/${newId}/sla-policies`, {
+              priority: p.priority,
+              response_within_mins: p.response_within_mins,
+              resolve_within_mins: p.resolve_within_mins,
+              calendar_json:
+                p.useCalendar && p.calendar_json
+                  ? JSON.parse(p.calendar_json)
+                  : null,
+            })
+          )
+        );
+      }
     }
   }
   router.push({ name: 'taskTypes.list' });
