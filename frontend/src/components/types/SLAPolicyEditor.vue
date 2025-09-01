@@ -44,7 +44,6 @@
             type="button"
             btnClass="btn-outline-primary text-xs px-3 py-1"
             :aria-label="t('actions.save')"
-            :disabled="!props.taskTypeId"
             @click="save(p)"
           >
             {{ t('actions.save') }}
@@ -82,6 +81,7 @@ interface Policy {
   resolve_within_mins?: number | null;
   calendar_json?: string | null;
   useCalendar?: boolean;
+  _saved?: boolean;
 }
 
 const props = defineProps<{ taskTypeId?: number }>();
@@ -106,6 +106,7 @@ async function load() {
     ...p,
     calendar_json: p.calendar_json ? JSON.stringify(p.calendar_json) : '',
     useCalendar: !!p.calendar_json,
+    _saved: true,
   }));
 }
 
@@ -116,19 +117,22 @@ function addPolicy() {
     resolve_within_mins: null,
     calendar_json: '',
     useCalendar: false,
+    _saved: false,
   });
 }
 
 async function save(p: Policy) {
-  if (!props.taskTypeId) return;
   const payload: any = {
     priority: p.priority,
     response_within_mins: p.response_within_mins,
     resolve_within_mins: p.resolve_within_mins,
-    calendar_json: p.useCalendar && p.calendar_json
-      ? JSON.parse(p.calendar_json)
-      : null,
+    calendar_json:
+      p.useCalendar && p.calendar_json ? JSON.parse(p.calendar_json) : null,
   };
+  if (!props.taskTypeId) {
+    p._saved = true;
+    return;
+  }
   if (p.id) {
     const res = await api.put(
       `/task-types/${props.taskTypeId}/sla-policies/${p.id}`,
@@ -148,5 +152,10 @@ async function save(p: Policy) {
       useCalendar: p.useCalendar,
     });
   }
+  p._saved = true;
 }
+
+defineExpose({
+  getPolicies: () => policies.value,
+});
 </script>
