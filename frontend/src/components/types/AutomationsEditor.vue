@@ -115,6 +115,7 @@ interface Automation {
   conditions_json: Record<string, any>;
   actions_json: any[];
   enabled: boolean;
+  _saved?: boolean;
 }
 
 const props = defineProps<{ taskTypeId?: number; tenantId?: number | '' }>();
@@ -166,11 +167,15 @@ function addAutomation() {
     conditions_json: { status: '' },
     actions_json: [{ type: 'notify_team', team_id: null }],
     enabled: true,
+    _saved: false,
   });
 }
 
 async function save(a: Automation) {
-  if (!props.taskTypeId) return;
+  if (!props.taskTypeId) {
+    a._saved = true;
+    return;
+  }
   const payload = {
     event: a.event,
     conditions_json: a.conditions_json,
@@ -185,4 +190,8 @@ async function save(a: Automation) {
     Object.assign(a, res.data.data);
   }
 }
+
+defineExpose({
+  getAutomations: () => automations.value,
+});
 </script>
