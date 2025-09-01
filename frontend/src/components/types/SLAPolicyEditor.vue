@@ -1,78 +1,66 @@
 <template>
   <div>
     <h2 class="text-lg font-semibold mb-2">{{ t('slaPolicies.title') }}</h2>
-    <template v-if="props.taskTypeId">
-      <div v-for="(p, idx) in policies" :key="p.id ?? idx" class="mb-4">
-        <Card>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select
-              :id="`priority-${idx}`"
-              v-model="p.priority"
-              :label="t('slaPolicies.priority')"
-              :options="priorityOptions"
+    <div v-for="(p, idx) in policies" :key="p.id ?? idx" class="mb-4">
+      <Card>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Select
+            :id="`priority-${idx}`"
+            v-model="p.priority"
+            :label="t('slaPolicies.priority')"
+            :options="priorityOptions"
+            class="w-full"
+          />
+          <Textinput
+            :id="`response-${idx}`"
+            v-model.number="p.response_within_mins"
+            type="number"
+            :label="t('slaPolicies.responseWithin')"
+            class="w-full"
+          />
+          <Textinput
+            :id="`resolve-${idx}`"
+            v-model.number="p.resolve_within_mins"
+            type="number"
+            :label="t('slaPolicies.resolveWithin')"
+            class="w-full"
+          />
+          <div class="md:col-span-2 space-y-2">
+            <Switch
+              :id="`use-calendar-${idx}`"
+              v-model="p.useCalendar"
+              :label="t('slaPolicies.useCalendar')"
+            />
+            <Textarea
+              v-if="p.useCalendar"
+              :id="`calendar-${idx}`"
+              v-model="p.calendar_json"
+              :label="t('slaPolicies.calendar')"
+              rows="2"
               class="w-full"
             />
-            <Textinput
-              :id="`response-${idx}`"
-              v-model.number="p.response_within_mins"
-              type="number"
-              :label="t('slaPolicies.responseWithin')"
-              class="w-full"
-            />
-            <Textinput
-              :id="`resolve-${idx}`"
-              v-model.number="p.resolve_within_mins"
-              type="number"
-              :label="t('slaPolicies.resolveWithin')"
-              class="w-full"
-            />
-            <div class="md:col-span-2 space-y-2">
-              <Switch
-                :id="`use-calendar-${idx}`"
-                v-model="p.useCalendar"
-                :label="t('slaPolicies.useCalendar')"
-              />
-              <Textarea
-                v-if="p.useCalendar"
-                :id="`calendar-${idx}`"
-                v-model="p.calendar_json"
-                :label="t('slaPolicies.calendar')"
-                rows="2"
-                class="w-full"
-              />
-            </div>
-            <Button
-              type="button"
-              btnClass="btn-outline-primary text-xs px-3 py-1"
-              :aria-label="t('actions.save')"
-              @click="save(p)"
-            >
-              {{ t('actions.save') }}
-            </Button>
           </div>
-        </Card>
-      </div>
-      <Button
-        type="button"
-        class="mt-2"
-        btnClass="btn-outline-primary text-xs px-3 py-1"
-        :aria-label="t('actions.add')"
-        @click="addPolicy"
-      >
-        {{ t('actions.add') }}
-      </Button>
-    </template>
-    <Card
-      v-else
-      class="p-4 flex flex-col items-center text-center gap-2"
+          <Button
+            type="button"
+            btnClass="btn-outline-primary text-xs px-3 py-1"
+            :aria-label="t('actions.save')"
+            :disabled="!props.taskTypeId"
+            @click="save(p)"
+          >
+            {{ t('actions.save') }}
+          </Button>
+        </div>
+      </Card>
+    </div>
+    <Button
+      type="button"
+      class="mt-2"
+      btnClass="btn-outline-primary text-xs px-3 py-1"
+      :aria-label="t('actions.add')"
+      @click="addPolicy"
     >
-      <Icon
-        icon="heroicons-outline:information-circle"
-        class="w-6 h-6 text-slate-400"
-        aria-hidden="true"
-      />
-      <p class="text-sm">{{ t('types.saveToConfigureSLA') }}</p>
-    </Card>
+      {{ t('actions.add') }}
+    </Button>
   </div>
 </template>
 
@@ -86,7 +74,6 @@ import Textarea from '@/components/ui/Textarea/index.vue';
 import Select from '@/components/ui/Select/index.vue';
 import Switch from '@/components/ui/Switch/index.vue';
 import Button from '@/components/ui/Button/index.vue';
-import Icon from '@/components/ui/Icon/index.vue';
 
 interface Policy {
   id?: number;
