@@ -220,11 +220,16 @@ const noop = () => {};
 
 function addTab() {
   if (!section.tabs) section.tabs = [];
+  const newTabIndex = section.tabs.length + 1;
+  const fields =
+    section.tabs.length === 0 && section.fields && section.fields.length
+      ? section.fields.splice(0)
+      : [];
   section.tabs.push({
     id: Date.now() + Math.random(),
-    key: `tab${section.tabs.length + 1}`,
-    label: { en: `Tab ${section.tabs.length + 1}`, el: `Tab ${section.tabs.length + 1}` },
-    fields: [],
+    key: `tab${newTabIndex}`,
+    label: { en: `Tab ${newTabIndex}`, el: `Tab ${newTabIndex}` },
+    fields,
   });
 }
 
