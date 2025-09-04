@@ -40,6 +40,18 @@
                   :aria-labelledby="labelId"
                 />
               </FromGroup>
+              <FromGroup #default="{ inputId, labelId }" :label="t('Columns')">
+                <Select
+                  :id="inputId"
+                  v-model.number="cols"
+                  :options="[
+                    { value: 1, label: '1' },
+                    { value: 2, label: '2' },
+                  ]"
+                  :aria-labelledby="labelId"
+                  classInput="text-sm"
+                />
+              </FromGroup>
             </div>
           </TabPanel>
           <TabPanel>
@@ -122,6 +134,7 @@ import Textinput from '@/components/ui/Textinput/index.vue';
 import Switch from '@/components/ui/Switch/index.vue';
 import FromGroup from '@/components/ui/FromGroup/index.vue';
 import Checkbox from '@/components/ui/Checkbox/index.vue';
+import Select from '@/components/ui/Select/index.vue';
 import { useAuthStore } from '@/stores/auth';
 
 interface RoleOption {
@@ -151,12 +164,19 @@ const label = computed({
 
 const validations = computed(() => props.selected?.validations ?? {});
 const roles = computed(() => props.selected?.roles ?? { view: [], edit: [] });
+const cols = computed({
+  get: () => props.selected?.cols ?? 2,
+  set: (val: number) => {
+    if (props.selected) props.selected.cols = val;
+  },
+});
 watch(
   () => props.selected,
   (val) => {
     if (val) {
       if (!val.validations) val.validations = {};
       if (!val.roles) val.roles = { view: ['super_admin'], edit: ['super_admin'] };
+      if (val.cols === undefined) val.cols = 2;
     }
   },
   { immediate: true },
