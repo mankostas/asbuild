@@ -438,7 +438,8 @@ function tr(val: any) {
 }
 
 function colClass(field: any) {
-  return field['x-cols'] === 1 ? 'col-span-1' : 'col-span-2';
+  const span = field['x-cols'] || 1;
+  return `col-span-${span}`;
 }
 
 function isVisible(key: string) {

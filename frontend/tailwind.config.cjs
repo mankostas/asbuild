@@ -8,6 +8,14 @@ module.exports = {
     "./node_modules/vue-tailwind-datepicker/**/*.js",
   ],
   darkMode: "class",
+  safelist: [
+    "grid-cols-1",
+    "grid-cols-2",
+    "grid-cols-3",
+    "col-span-1",
+    "col-span-2",
+    "col-span-3",
+  ],
   theme: {
     container: {
       center: true,

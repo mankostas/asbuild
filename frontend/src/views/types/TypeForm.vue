@@ -879,7 +879,7 @@ function onAddField(type: any) {
     name: `field${sectionFields(section).length + 1}`,
     label: { en: type.label, el: type.label },
     typeKey: type.key,
-    cols: 2,
+    cols: 1,
     validations: {},
     fields: type.key === 'repeater' ? [] : undefined,
     placeholder: { en: '', el: '' },
