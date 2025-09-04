@@ -190,7 +190,7 @@
           class="p-4 border-b"
         />
         <div class="h-[calc(100vh-3rem)] p-4">
-        <div class="hidden lg:grid grid-cols-3 gap-4 h-full">
+        <div class="hidden lg:grid grid-cols-[3fr_2fr_1fr] gap-4 h-full">
           <Card class="overflow-y-auto">
             <template #header>
               <div class="flex items-center justify-between">
@@ -232,9 +232,9 @@
                     :section="element"
                     @remove="removeSection(index)"
                     @select="selectField"
-                    @add-field="openPalette(index)"
+                    @add-field="(tab) => openPalette(index, tab)"
                     @add-section="addSection(index)"
-                    @remove-field="removeField(index, $event)"
+                    @remove-field="(payload) => removeField(index, payload)"
                   />
                 </template>
               </draggable>
@@ -322,9 +322,9 @@
                           :section="element"
                           @remove="removeSection(index)"
                           @select="selectField"
-                          @add-field="openPalette(index)"
+                          @add-field="(tab) => openPalette(index, tab)"
                           @add-section="addSection(index)"
-                          @remove-field="removeField(index, $event)"
+                          @remove-field="(payload) => removeField(index, payload)"
                         />
                       </template>
                     </draggable>
@@ -446,6 +446,15 @@ interface Section {
   label: I18nString;
   fields: Field[];
   photos: any[];
+  cols: number;
+  tabs: SectionTab[];
+}
+
+interface SectionTab {
+  id: number;
+  key: string;
+  label: I18nString;
+  fields: Field[];
 }
 
 interface Permission {
@@ -516,7 +525,7 @@ const fieldTypes = [
 ];
 
 const paletteOpen = ref(false);
-const paletteSectionIndex = ref<number | null>(null);
+const paletteSectionIndex = ref<{ section: number; tab?: number } | null>(null);
 const fieldTypeGroups = computed(() => {
   const groups: Record<string, { label: string; items: any[] }> = {};
   fieldTypes.forEach((ft) => {
@@ -532,9 +541,10 @@ const tenantOptions = computed(() =>
 );
 const visibleSections = computed(() => sections.value);
 
-function openPalette(index?: number) {
-  paletteSectionIndex.value =
-    typeof index === 'number' ? index : sections.value.length - 1;
+function openPalette(sectionIndex?: number, tabIndex?: number) {
+  const section =
+    typeof sectionIndex === 'number' ? sectionIndex : sections.value.length - 1;
+  paletteSectionIndex.value = { section, tab: tabIndex };
   paletteOpen.value = true;
 }
 
@@ -614,7 +624,7 @@ onMounted(async () => {
       }
       if (oldId !== undefined && id !== oldId) {
         sections.value.forEach((s) =>
-          s.fields.forEach((f) => {
+          sectionFields(s).forEach((f) => {
             f.roles.view = ['super_admin'];
             f.roles.edit = ['super_admin'];
           }),
@@ -673,6 +683,8 @@ function addSection(afterIndex?: number) {
     label: { en: `Section ${sections.value.length + 1}`, el: `Section ${sections.value.length + 1}` },
     fields: [],
     photos: [],
+    cols: 2,
+    tabs: [],
   };
   if (
     afterIndex === undefined ||
@@ -683,6 +695,12 @@ function addSection(afterIndex?: number) {
   } else {
     sections.value.splice(afterIndex + 1, 0, newSection);
   }
+}
+
+function sectionFields(s: any) {
+  return s.tabs && s.tabs.length
+    ? s.tabs.flatMap((t: any) => t.fields)
+    : s.fields;
 }
 
 function loadVersion(v: any) {
@@ -699,16 +717,50 @@ function loadVersion(v: any) {
       cols: f['x-cols'] || 2,
       validations: f.validations || {},
       fields: f.fields || undefined,
-      placeholder: typeof f.placeholder === 'string' ? { en: f.placeholder, el: f.placeholder } : (f.placeholder || { en: '', el: '' }),
-      help: typeof f.help === 'string' ? { en: f.help, el: f.help } : (f.help || { en: '', el: '' }),
+      placeholder:
+        typeof f.placeholder === 'string'
+          ? { en: f.placeholder, el: f.placeholder }
+          : f.placeholder || { en: '', el: '' },
+      help:
+        typeof f.help === 'string'
+          ? { en: f.help, el: f.help }
+          : f.help || { en: '', el: '' },
       logic: [],
       roles: f['x-roles'] || { view: ['super_admin'], edit: ['super_admin'] },
       data: { default: f.default ?? '', enum: f.enum || [] },
     })),
+    tabs: (s.tabs || []).map((t: any, tid: number) => ({
+      id: tid + 1,
+      key: t.key || `tab${tid + 1}`,
+      label: typeof t.label === 'string' ? { en: t.label, el: t.label } : t.label,
+      fields: (t.fields || []).map((f: any, fid: number) => ({
+        id: fid + 1,
+        name: f.key,
+        label: typeof f.label === 'string' ? { en: f.label, el: f.label } : f.label,
+        typeKey: f.type,
+        cols: f['x-cols'] || 2,
+        validations: f.validations || {},
+        fields: f.fields || undefined,
+        placeholder:
+          typeof f.placeholder === 'string'
+            ? { en: f.placeholder, el: f.placeholder }
+            : f.placeholder || { en: '', el: '' },
+        help:
+          typeof f.help === 'string'
+            ? { en: f.help, el: f.help }
+            : f.help || { en: '', el: '' },
+        logic: [],
+        roles: f['x-roles'] || { view: ['super_admin'], edit: ['super_admin'] },
+        data: { default: f.default ?? '', enum: f.enum || [] },
+      })),
+    })),
+    cols: s['x-cols'] || 2,
     photos: [],
   }));
   const fieldMap: Record<string, any> = {};
-  sections.value.forEach((s) => s.fields.forEach((f) => (fieldMap[f.name] = f)));
+  sections.value.forEach((s) =>
+    sectionFields(s).forEach((f) => (fieldMap[f.name] = f)),
+  );
   (schema.logic || []).forEach((rule: any) => {
     const fld = fieldMap[rule.if?.field];
     if (fld) {
@@ -794,18 +846,28 @@ function removeSection(index: number) {
   selected.value = null;
 }
 
-function removeField(sectionIndex: number, field: Field) {
-  const fields = sections.value[sectionIndex].fields;
-  const idx = fields.indexOf(field);
-  if (idx !== -1) fields.splice(idx, 1);
-  if (selected.value === field) selected.value = null;
+function removeField(
+  sectionIndex: number,
+  payload: { field: Field; tabIndex?: number },
+) {
+  const section = sections.value[sectionIndex];
+  if (payload.tabIndex !== undefined && section.tabs[payload.tabIndex]) {
+    const fields = section.tabs[payload.tabIndex].fields;
+    const idx = fields.indexOf(payload.field);
+    if (idx !== -1) fields.splice(idx, 1);
+  } else {
+    const fields = section.fields;
+    const idx = fields.indexOf(payload.field);
+    if (idx !== -1) fields.splice(idx, 1);
+  }
+  if (selected.value === payload.field) selected.value = null;
 }
 
 function onAddField(type: any) {
   if (!sections.value.length) addSection();
-  let target = paletteSectionIndex.value;
+  let target = paletteSectionIndex.value?.section;
   if (
-    target === null ||
+    target === undefined ||
     target < 0 ||
     target >= sections.value.length
   ) {
@@ -814,7 +876,7 @@ function onAddField(type: any) {
   const section = sections.value[target];
   const field = {
     id: Date.now() + Math.random(),
-    name: `field${section.fields.length + 1}`,
+    name: `field${sectionFields(section).length + 1}`,
     label: { en: type.label, el: type.label },
     typeKey: type.key,
     cols: 2,
@@ -826,7 +888,12 @@ function onAddField(type: any) {
     roles: { view: ['super_admin'], edit: ['super_admin'] },
     data: { default: '', enum: [] },
   };
-  section.fields.push(field);
+  const tab = paletteSectionIndex.value?.tab;
+  if (tab !== undefined && section.tabs[tab]) {
+    section.tabs[tab].fields.push(field);
+  } else {
+    section.fields.push(field);
+  }
   selected.value = field;
   paletteSectionIndex.value = null;
 }
@@ -848,7 +915,7 @@ function selectField(field: Field) {
 async function onSubmit() {
   transitionsEditor.value?.commitPending?.();
   const logicRules = sections.value.flatMap((s) =>
-    s.fields.flatMap((f) =>
+    sectionFields(s).flatMap((f) =>
       (f.logic || []).map((r) => ({
         if: r.if,
         then: r.then.map((a: any) => ({ [a.type]: a.target })),
@@ -862,19 +929,42 @@ async function onSubmit() {
       sections: sections.value.map((s) => ({
         key: s.key,
         label: s.label,
-        fields: s.fields.map((f) => ({
-          key: f.name,
-          label: f.label,
-          type: f.typeKey,
-          validations: f.validations,
-          'x-cols': f.cols,
-          placeholder: f.placeholder,
-          help: f.help,
-          fields: f.fields,
-          default: f.data.default || undefined,
-          enum: f.data.enum.length ? f.data.enum : undefined,
-          'x-roles': f.roles,
-        })),
+        ...(s.tabs.length
+          ? {
+              tabs: s.tabs.map((t) => ({
+                key: t.key,
+                label: t.label,
+                fields: t.fields.map((f) => ({
+                  key: f.name,
+                  label: f.label,
+                  type: f.typeKey,
+                  validations: f.validations,
+                  'x-cols': f.cols,
+                  placeholder: f.placeholder,
+                  help: f.help,
+                  fields: f.fields,
+                  default: f.data.default || undefined,
+                  enum: f.data.enum.length ? f.data.enum : undefined,
+                  'x-roles': f.roles,
+                })),
+              })),
+            }
+          : {
+              fields: s.fields.map((f) => ({
+                key: f.name,
+                label: f.label,
+                type: f.typeKey,
+                validations: f.validations,
+                'x-cols': f.cols,
+                placeholder: f.placeholder,
+                help: f.help,
+                fields: f.fields,
+                default: f.data.default || undefined,
+                enum: f.data.enum.length ? f.data.enum : undefined,
+                'x-roles': f.roles,
+              })),
+            }),
+        'x-cols': s.cols,
       })),
       ...(logicRules.length ? { logic: logicRules } : {}),
     }),
@@ -956,22 +1046,44 @@ const previewSchema = computed(() => ({
   sections: sections.value.map((s) => ({
     key: s.key,
     label: s.label,
-    fields: s.fields.map((f) => ({
-      key: f.name,
-      label: f.label,
-      type: f.typeKey,
-      validations: f.validations,
-      placeholder: f.placeholder,
-      help: f.help,
-      fields: f.fields,
-      default: f.data.default || undefined,
-      enum: f.data.enum.length ? f.data.enum : undefined,
-      'x-roles': f.roles,
-    })),
+    ...(s.tabs.length
+      ? {
+          tabs: s.tabs.map((t) => ({
+            key: t.key,
+            label: t.label,
+            fields: t.fields.map((f) => ({
+              key: f.name,
+              label: f.label,
+              type: f.typeKey,
+              validations: f.validations,
+              placeholder: f.placeholder,
+              help: f.help,
+              fields: f.fields,
+              default: f.data.default || undefined,
+              enum: f.data.enum.length ? f.data.enum : undefined,
+              'x-roles': f.roles,
+            })),
+          })),
+        }
+      : {
+          fields: s.fields.map((f) => ({
+            key: f.name,
+            label: f.label,
+            type: f.typeKey,
+            validations: f.validations,
+            placeholder: f.placeholder,
+            help: f.help,
+            fields: f.fields,
+            default: f.data.default || undefined,
+            enum: f.data.enum.length ? f.data.enum : undefined,
+            'x-roles': f.roles,
+          })),
+        }),
+    'x-cols': s.cols,
   })),
   ...(sections.value
     .flatMap((s) =>
-      s.fields.flatMap((f) =>
+      sectionFields(s).flatMap((f) =>
         (f.logic || []).map((r) => ({
           if: r.if,
           then: r.then.map((a: any) => ({ [a.type]: a.target })),
@@ -980,7 +1092,7 @@ const previewSchema = computed(() => ({
     ).length
     ? {
         logic: sections.value.flatMap((s) =>
-          s.fields.flatMap((f) =>
+          sectionFields(s).flatMap((f) =>
             (f.logic || []).map((r) => ({
               if: r.if,
               then: r.then.map((a: any) => ({ [a.type]: a.target })),
