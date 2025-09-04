@@ -544,8 +544,10 @@ const visibleSections = computed(() => sections.value);
 function openPalette(sectionIndex?: number, tabIndex?: number) {
   const section =
     typeof sectionIndex === 'number' ? sectionIndex : sections.value.length - 1;
+  const scrollY = window.scrollY;
   paletteSectionIndex.value = { section, tab: tabIndex };
   paletteOpen.value = true;
+  nextTick(() => window.scrollTo({ top: scrollY }));
 }
 
 watch(search, async (q) => {
