@@ -298,6 +298,7 @@
   "fields": {
     "placeholder": "Υπόδειξη",
     "help": "Βοήθεια",
+    "default": "Προεπιλογή",
     "reorderHint": "Χρησιμοποιήστε Alt+βέλη για αναδιάταξη"
   },
   "roles": {

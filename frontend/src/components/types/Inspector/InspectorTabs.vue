@@ -33,6 +33,88 @@
                   classInput="text-sm"
                 />
               </FromGroup>
+              <FromGroup
+                v-if="showPlaceholder"
+                #default="{ inputId, labelId }"
+                :label="t('fields.placeholder')"
+              >
+                <Textinput
+                  :id="inputId"
+                  v-model="placeholder"
+                  :aria-labelledby="labelId"
+                  classInput="text-sm"
+                />
+              </FromGroup>
+              <FromGroup #default="{ inputId, labelId }" :label="t('fields.help')">
+                <Textinput
+                  :id="inputId"
+                  v-model="help"
+                  :aria-labelledby="labelId"
+                  classInput="text-sm"
+                />
+              </FromGroup>
+              <FromGroup
+                v-if="showDefaultText"
+                #default="{ inputId, labelId }"
+                :label="t('fields.default')"
+              >
+                <Textinput
+                  :id="inputId"
+                  v-model="defaultValue"
+                  :aria-labelledby="labelId"
+                  classInput="text-sm"
+                />
+              </FromGroup>
+              <FromGroup
+                v-else-if="showDefaultNumber"
+                #default="{ inputId, labelId }"
+                :label="t('fields.default')"
+              >
+                <Textinput
+                  :id="inputId"
+                  v-model.number="defaultValue"
+                  type="number"
+                  :aria-labelledby="labelId"
+                  classInput="text-sm"
+                />
+              </FromGroup>
+              <FromGroup
+                v-else-if="showDefaultDate"
+                #default="{ inputId, labelId }"
+                :label="t('fields.default')"
+              >
+                <Textinput
+                  :id="inputId"
+                  v-model="defaultValue"
+                  type="date"
+                  :aria-labelledby="labelId"
+                  classInput="text-sm"
+                />
+              </FromGroup>
+              <FromGroup
+                v-else-if="showDefaultTime"
+                #default="{ inputId, labelId }"
+                :label="t('fields.default')"
+              >
+                <Textinput
+                  :id="inputId"
+                  v-model="defaultValue"
+                  type="time"
+                  :aria-labelledby="labelId"
+                  classInput="text-sm"
+                />
+              </FromGroup>
+              <FromGroup
+                v-else-if="showDefaultBoolean"
+                #default="{ inputId, labelId }"
+                :label="t('fields.default')"
+              >
+                <Switch
+                  :id="inputId"
+                  v-model="defaultValue"
+                  :aria-labelledby="labelId"
+                />
+              </FromGroup>
               <FromGroup #default="{ inputId, labelId }" :label="t('Required')">
                 <Switch
                   :id="inputId"
@@ -57,7 +139,11 @@
           </TabPanel>
           <TabPanel>
             <div class="space-y-2">
-              <FromGroup #default="{ inputId, labelId }" :label="t('validation.regex')">
+              <FromGroup
+                v-if="showRegex"
+                #default="{ inputId, labelId }"
+                :label="t('validation.regex')"
+              >
                 <Textinput
                   :id="inputId"
                   v-model="validations.regex"
@@ -65,25 +151,63 @@
                   classInput="text-sm"
                 />
               </FromGroup>
-              <FromGroup #default="{ inputId, labelId }" :label="t('validation.min')">
+              <FromGroup
+                v-if="showLength"
+                #default="{ inputId, labelId }"
+                :label="t('validation.lengthMin')"
+              >
                 <Textinput
                   :id="inputId"
-                  v-model.number="validations.min"
+                  v-model.number="validations.lengthMin"
                   type="number"
                   :aria-labelledby="labelId"
                   classInput="text-sm"
                 />
               </FromGroup>
-              <FromGroup #default="{ inputId, labelId }" :label="t('validation.max')">
+              <FromGroup
+                v-if="showLength"
+                #default="{ inputId, labelId }"
+                :label="t('validation.lengthMax')"
+              >
                 <Textinput
                   :id="inputId"
-                  v-model.number="validations.max"
+                  v-model.number="validations.lengthMax"
                   type="number"
                   :aria-labelledby="labelId"
                   classInput="text-sm"
                 />
               </FromGroup>
-              <FromGroup #default="{ inputId, labelId }" :label="t('validation.unique')">
+              <FromGroup
+                v-if="showMinMax"
+                #default="{ inputId, labelId }"
+                :label="t('validation.min')"
+              >
+                <Textinput
+                  :id="inputId"
+                  v-model="validations.min"
+                  :type="minMaxType"
+                  :aria-labelledby="labelId"
+                  classInput="text-sm"
+                />
+              </FromGroup>
+              <FromGroup
+                v-if="showMinMax"
+                #default="{ inputId, labelId }"
+                :label="t('validation.max')"
+              >
+                <Textinput
+                  :id="inputId"
+                  v-model="validations.max"
+                  :type="minMaxType"
+                  :aria-labelledby="labelId"
+                  classInput="text-sm"
+                />
+              </FromGroup>
+              <FromGroup
+                v-if="showUnique"
+                #default="{ inputId, labelId }"
+                :label="t('validation.unique')"
+              >
                 <Switch
                   :id="inputId"
                   v-model="validations.unique"
@@ -171,6 +295,44 @@ const cols = computed({
     if (props.selected) props.selected.cols = val;
   },
 });
+const placeholder = computed({
+  get: () => props.selected?.placeholder?.[locale.value] ?? '',
+  set: (val: string) => {
+    if (props.selected) props.selected.placeholder[locale.value] = val;
+  },
+});
+const help = computed({
+  get: () => props.selected?.help?.[locale.value] ?? '',
+  set: (val: string) => {
+    if (props.selected) props.selected.help[locale.value] = val;
+  },
+});
+const defaultValue = computed({
+  get: () => props.selected?.data?.default,
+  set: (val: any) => {
+    if (props.selected) props.selected.data.default = val;
+  },
+});
+const typeKey = computed(() => props.selected?.typeKey || '');
+const showPlaceholder = computed(() =>
+  ['text', 'number', 'date', 'time'].includes(typeKey.value),
+);
+const showDefaultText = computed(() => typeKey.value === 'text');
+const showDefaultNumber = computed(() => typeKey.value === 'number');
+const showDefaultDate = computed(() => typeKey.value === 'date');
+const showDefaultTime = computed(() => typeKey.value === 'time');
+const showDefaultBoolean = computed(() => typeKey.value === 'boolean');
+const showRegex = computed(() => typeKey.value === 'text');
+const showLength = computed(() => typeKey.value === 'text');
+const showMinMax = computed(() =>
+  ['number', 'date', 'time', 'repeater'].includes(typeKey.value),
+);
+const minMaxType = computed(() => {
+  if (typeKey.value === 'date') return 'date';
+  if (typeKey.value === 'time') return 'time';
+  return 'number';
+});
+const showUnique = computed(() => ['text', 'number'].includes(typeKey.value));
 watch(
   () => props.selected,
   (val) => {
@@ -178,6 +340,12 @@ watch(
       if (!val.validations) val.validations = {};
       if (!val.roles) val.roles = { view: ['super_admin'], edit: ['super_admin'] };
       if (val.cols === undefined) val.cols = 2;
+      if (!val.placeholder)
+        val.placeholder = { en: '', el: '' };
+      if (!val.help) val.help = { en: '', el: '' };
+      if (!val.data) val.data = { default: '', enum: [] };
+      if (val.data.default === undefined)
+        val.data.default = val.typeKey === 'boolean' ? false : '';
     }
   },
   { immediate: true },

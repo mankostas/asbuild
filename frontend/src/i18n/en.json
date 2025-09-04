@@ -298,6 +298,7 @@
   "fields": {
     "placeholder": "Placeholder",
     "help": "Help",
+    "default": "Default",
     "reorderHint": "Use Alt+Arrow keys to reorder"
   },
   "roles": {
