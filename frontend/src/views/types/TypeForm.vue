@@ -1062,6 +1062,7 @@ const previewSchema = computed(() => ({
               default: f.data.default || undefined,
               enum: f.data.enum.length ? f.data.enum : undefined,
               'x-roles': f.roles,
+              'x-cols': f.cols,
             })),
           })),
         }
@@ -1077,6 +1078,7 @@ const previewSchema = computed(() => ({
             default: f.data.default || undefined,
             enum: f.data.enum.length ? f.data.enum : undefined,
             'x-roles': f.roles,
+            'x-cols': f.cols,
           })),
         }),
     'x-cols': s.cols,
