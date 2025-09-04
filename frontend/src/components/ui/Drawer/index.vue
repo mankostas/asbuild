@@ -35,6 +35,7 @@ const props = defineProps<Props>();
 defineEmits(['close']);
 
 const SCROLL_LOCK_ATTR = 'data-scroll-lock-count';
+const SCROLL_Y_ATTR = 'data-scroll-lock-y';
 
 let locked = false;
 
@@ -42,7 +43,11 @@ const lockBodyScroll = () => {
   const body = document.body;
   const count = Number(body.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
   if (count === 0) {
+    const scrollY = window.scrollY;
     body.classList.add('overflow-hidden');
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.setAttribute(SCROLL_Y_ATTR, String(scrollY));
   }
   body.setAttribute(SCROLL_LOCK_ATTR, String(count + 1));
 };
@@ -51,8 +56,13 @@ const unlockBodyScroll = () => {
   const body = document.body;
   const count = Number(body.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
   if (count <= 1) {
+    const scrollY = Number(body.getAttribute(SCROLL_Y_ATTR) ?? 0);
     body.classList.remove('overflow-hidden');
+    body.style.position = '';
+    body.style.top = '';
     body.removeAttribute(SCROLL_LOCK_ATTR);
+    body.removeAttribute(SCROLL_Y_ATTR);
+    window.scrollTo({ top: scrollY });
   } else {
     body.setAttribute(SCROLL_LOCK_ATTR, String(count - 1));
   }
