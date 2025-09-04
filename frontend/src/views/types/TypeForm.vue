@@ -1059,7 +1059,10 @@ const previewSchema = computed(() => ({
               placeholder: f.placeholder,
               help: f.help,
               fields: f.fields,
-              default: f.data.default || undefined,
+              default:
+                f.data.default === '' || f.data.default === undefined || f.data.default === null
+                  ? undefined
+                  : f.data.default,
               enum: f.data.enum.length ? f.data.enum : undefined,
               'x-roles': f.roles,
               'x-cols': f.cols,
@@ -1075,7 +1078,10 @@ const previewSchema = computed(() => ({
             placeholder: f.placeholder,
             help: f.help,
             fields: f.fields,
-            default: f.data.default || undefined,
+            default:
+              f.data.default === '' || f.data.default === undefined || f.data.default === null
+                ? undefined
+                : f.data.default,
             enum: f.data.enum.length ? f.data.enum : undefined,
             'x-roles': f.roles,
             'x-cols': f.cols,
