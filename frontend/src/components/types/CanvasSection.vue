@@ -68,7 +68,8 @@
               v-model="tab.fields"
               item-key="id"
               handle=".field-handle"
-              class="space-y-2"
+              class="grid gap-2"
+              :class="`grid-cols-${section.cols}`"
               aria-describedby="fieldReorderHint"
             >
               <template #item="{ element }">
@@ -76,6 +77,7 @@
                   bodyClass="p-2 flex items-center gap-2 cursor-pointer"
                   tabindex="0"
                   role="button"
+                  :class="`col-span-${element.cols}`"
                   @click="$emit('select', element)"
                   @keydown.enter.prevent="$emit('select', element)"
                   @keydown.space.prevent="$emit('select', element)"
@@ -121,7 +123,8 @@
         v-model="section.fields"
         item-key="id"
         handle=".field-handle"
-        class="p-2 space-y-2"
+        class="p-2 grid gap-2"
+        :class="`grid-cols-${section.cols}`"
         aria-describedby="fieldReorderHint"
       >
         <template #item="{ element }">
@@ -129,6 +132,7 @@
             bodyClass="p-2 flex items-center gap-2 cursor-pointer"
             tabindex="0"
             role="button"
+            :class="`col-span-${element.cols}`"
             @click="$emit('select', element)"
             @keydown.enter.prevent="$emit('select', element)"
             @keydown.space.prevent="$emit('select', element)"
