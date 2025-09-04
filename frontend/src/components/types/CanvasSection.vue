@@ -238,7 +238,10 @@ function addTab() {
 }
 
 function removeTab(index: number) {
-  section.tabs.splice(index, 1);
+  const removed = section.tabs.splice(index, 1)[0];
+  if (section.tabs.length === 0 && removed && removed.fields) {
+    section.fields = removed.fields;
+  }
 }
 
 function resolveI18n(val: any) {
