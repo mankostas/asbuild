@@ -190,7 +190,7 @@
           class="p-4 border-b"
         />
         <div class="h-[calc(100vh-3rem)] p-4">
-        <div class="hidden lg:grid grid-cols-[3fr_2fr_1fr] gap-4 h-full">
+        <div class="hidden lg:grid grid-cols-3 gap-4 h-full">
           <Card class="overflow-y-auto">
             <template #header>
               <div class="flex items-center justify-between">
