@@ -270,8 +270,9 @@ onMounted(async () => {
     api.get('/task-statuses'),
     api.get('/task-types'),
   ]);
-  statusOptions.value = statusRes.data.map((s: any) => s.name);
-  typeOptions.value = typeRes.data;
+  const statusData = statusRes.data?.data ?? statusRes.data;
+  statusOptions.value = statusData.map((s: any) => s.name);
+  typeOptions.value = typeRes.data?.data ?? typeRes.data;
   const stored = localStorage.getItem('taskViews');
   if (stored) savedViews.value = JSON.parse(stored);
 });
@@ -332,7 +333,7 @@ async function applyBulkStatus() {
 async function fetchTasks({ page, perPage, sort, search }: any) {
   if (!all.value.length) {
     const { data } = await api.get('/tasks');
-    all.value = data;
+    all.value = data?.data ?? data;
   }
   let rows = all.value.slice();
 
