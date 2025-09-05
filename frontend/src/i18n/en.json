@@ -282,7 +282,16 @@
   },
   "inspector": {
     "basics": "Basics",
+    "design": "Design",
     "validation": "Validation"
+  },
+  "design": {
+    "fontSize": "Font size",
+    "textColor": "Text color",
+    "backgroundColor": "Background color",
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large"
   },
   "validation": {
     "regex": "Pattern",

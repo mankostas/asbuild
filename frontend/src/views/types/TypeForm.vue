@@ -449,6 +449,7 @@ interface Field {
   logic: any[];
   roles: { view: string[]; edit: string[] };
   data: { default: any; enum: string[] };
+  styles: { fontSize: string; textColor: string; backgroundColor: string };
 }
 
 interface Section {
@@ -740,6 +741,7 @@ function loadVersion(v: any) {
           : f.help || { en: '', el: '' },
       logic: [],
       roles: f['x-roles'] || { view: ['super_admin'], edit: ['super_admin'] },
+      styles: f['x-styles'] || { fontSize: 'text-base', textColor: '#000000', backgroundColor: '#ffffff' },
       data: { default: f.default ?? '', enum: f.enum || [] },
     })),
     tabs: (s.tabs || []).map((t: any, tid: number) => ({
@@ -764,6 +766,7 @@ function loadVersion(v: any) {
             : f.help || { en: '', el: '' },
         logic: [],
         roles: f['x-roles'] || { view: ['super_admin'], edit: ['super_admin'] },
+        styles: f['x-styles'] || { fontSize: 'text-base', textColor: '#000000', backgroundColor: '#ffffff' },
         data: { default: f.default ?? '', enum: f.enum || [] },
       })),
     })),
@@ -900,6 +903,7 @@ function onAddField(type: any) {
     logic: [],
     roles: { view: ['super_admin'], edit: ['super_admin'] },
     data: { default: '', enum: [] },
+    styles: { fontSize: 'text-base', textColor: '#000000', backgroundColor: '#ffffff' },
   };
   const tab = paletteSectionIndex.value?.tab;
   if (tab !== undefined && section.tabs[tab]) {
@@ -959,6 +963,7 @@ async function onSubmit() {
                   default: f.data.default || undefined,
                   enum: f.data.enum.length ? f.data.enum : undefined,
                   'x-roles': f.roles,
+                  'x-styles': f.styles,
                 })),
               })),
             }
@@ -975,6 +980,7 @@ async function onSubmit() {
                 default: f.data.default || undefined,
                 enum: f.data.enum.length ? f.data.enum : undefined,
                 'x-roles': f.roles,
+                'x-styles': f.styles,
               })),
             }),
         'x-cols': s.cols,
@@ -1078,6 +1084,7 @@ const previewSchema = computed(() => ({
                   : f.data.default,
               enum: f.data.enum.length ? f.data.enum : undefined,
               'x-roles': f.roles,
+              'x-styles': f.styles,
               'x-cols': f.cols,
             })),
           })),
@@ -1097,6 +1104,7 @@ const previewSchema = computed(() => ({
                 : f.data.default,
             enum: f.data.enum.length ? f.data.enum : undefined,
             'x-roles': f.roles,
+            'x-styles': f.styles,
             'x-cols': f.cols,
           })),
         }),
