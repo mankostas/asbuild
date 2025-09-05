@@ -39,36 +39,35 @@ const SCROLL_Y_ATTR = 'data-scroll-lock-y';
 
 let locked = false;
 
+
 const lockBodyScroll = () => {
-  const el = document.documentElement;
   const body = document.body;
-  const count = Number(el.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
+  const count = Number(body.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
   if (count === 0) {
-    const scrollY = window.scrollY || el.scrollTop || body.scrollTop;
+    const scrollY = window.scrollY || document.documentElement.scrollTop || body.scrollTop;
     body.classList.add('overflow-hidden');
-    el.classList.add('overflow-hidden');
-    el.style.position = 'fixed';
-    el.style.top = `-${scrollY}px`;
-    el.setAttribute(SCROLL_Y_ATTR, String(scrollY));
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.width = '100%';
+    body.setAttribute(SCROLL_Y_ATTR, String(scrollY));
   }
-  el.setAttribute(SCROLL_LOCK_ATTR, String(count + 1));
+  body.setAttribute(SCROLL_LOCK_ATTR, String(count + 1));
 };
 
 const unlockBodyScroll = () => {
-  const el = document.documentElement;
   const body = document.body;
-  const count = Number(el.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
+  const count = Number(body.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
   if (count <= 1) {
-    const scrollY = Number(el.getAttribute(SCROLL_Y_ATTR) ?? 0);
+    const scrollY = Number(body.getAttribute(SCROLL_Y_ATTR) ?? 0);
     body.classList.remove('overflow-hidden');
-    el.classList.remove('overflow-hidden');
-    el.style.position = '';
-    el.style.top = '';
-    el.removeAttribute(SCROLL_LOCK_ATTR);
-    el.removeAttribute(SCROLL_Y_ATTR);
+    body.style.position = '';
+    body.style.top = '';
+    body.style.width = '';
+    body.removeAttribute(SCROLL_LOCK_ATTR);
+    body.removeAttribute(SCROLL_Y_ATTR);
     window.scrollTo({ top: scrollY });
   } else {
-    el.setAttribute(SCROLL_LOCK_ATTR, String(count - 1));
+    body.setAttribute(SCROLL_LOCK_ATTR, String(count - 1));
   }
 };
 
