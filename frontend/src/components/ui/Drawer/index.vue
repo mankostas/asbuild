@@ -43,10 +43,11 @@ const lockBodyScroll = () => {
   const body = document.body;
   const count = Number(body.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
   if (count === 0) {
-    const scrollY = window.scrollY;
+    const scrollY = window.scrollY || document.documentElement.scrollTop || body.scrollTop;
     body.classList.add('overflow-hidden');
     body.style.position = 'fixed';
     body.style.top = `-${scrollY}px`;
+    body.style.width = '100%';
     body.setAttribute(SCROLL_Y_ATTR, String(scrollY));
   }
   body.setAttribute(SCROLL_LOCK_ATTR, String(count + 1));
@@ -60,6 +61,7 @@ const unlockBodyScroll = () => {
     body.classList.remove('overflow-hidden');
     body.style.position = '';
     body.style.top = '';
+    body.style.width = '';
     body.removeAttribute(SCROLL_LOCK_ATTR);
     body.removeAttribute(SCROLL_Y_ATTR);
     window.scrollTo({ top: scrollY });
