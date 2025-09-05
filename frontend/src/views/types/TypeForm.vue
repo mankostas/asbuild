@@ -621,7 +621,8 @@ const viewportClass = computed(() => {
 onMounted(async () => {
   await tenantStore.loadTenants({ per_page: 100 });
   if (isEdit.value) {
-    const { data: typeData } = await api.get(`/task-types/${route.params.id}`);
+    const { data } = await api.get(`/task-types/${route.params.id}`);
+    const typeData = data.data ?? data;
     name.value = typeData.name || '';
     tenantId.value =
       typeData.tenant_id !== null && typeData.tenant_id !== undefined
