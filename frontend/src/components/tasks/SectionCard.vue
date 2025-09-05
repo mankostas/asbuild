@@ -23,7 +23,7 @@
               </div>
               <div v-else-if="isVisible(field.key)" :class="colClass(field)">
                 <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -->
-                <label :for="field.key" class="block font-medium mb-1">
+                <label :for="field.key" :class="labelClass(field)">
                   {{ tr(field.label) }}<span v-if="isRequired(field)" class="text-red-600">*</span>
                 </label>
                 <input
@@ -224,7 +224,7 @@
         </div>
         <div v-else-if="isVisible(field.key)" :class="colClass(field)">
           <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -->
-          <label :for="field.key" class="block font-medium mb-1">
+          <label :for="field.key" :class="labelClass(field)">
             {{ tr(field.label) }}<span v-if="isRequired(field)" class="text-red-600">*</span>
           </label>
           <input
@@ -496,6 +496,12 @@ function inputType(type: string) {
   if (type === 'phone') return 'tel';
   if (type === 'url') return 'url';
   return 'text';
+}
+
+function labelClass(field: any) {
+  const base = 'block font-medium mb-1';
+  const cls = field['x-styles']?.fontSize;
+  return cls ? `${base} ${cls}` : base;
 }
 
 function inputClass(field: any) {
