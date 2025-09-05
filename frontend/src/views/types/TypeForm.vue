@@ -1,5 +1,5 @@
 <template>
-  <div v-if="canAccess" class="type-builder">
+  <div v-if="canAccess" ref="builder" class="type-builder">
     <form @submit.prevent="onSubmit">
       <header
         v-if="tenantId || !isCreate"
@@ -378,7 +378,7 @@
         </p>
       </Card>
       </form>
-    <Drawer :open="paletteOpen" @close="paletteOpen = false">
+    <Drawer :open="paletteOpen" :lock-target="builder" @close="paletteOpen = false">
       <FieldPalette :groups="fieldTypeGroups" @select="onSelectType" />
     </Drawer>
   </div>
@@ -418,6 +418,7 @@ import { type I18nString } from '@/utils/i18n';
 import Swal from 'sweetalert2';
 
 const { t, locale } = useI18n();
+const builder = ref<HTMLElement | null>(null);
 const route = useRoute();
 const router = useRouter();
 const versionsStore = useTaskTypeVersionsStore();

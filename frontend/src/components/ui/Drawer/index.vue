@@ -29,6 +29,7 @@ import { watch, onUnmounted } from 'vue';
 
 interface Props {
   open: boolean;
+  lockTarget?: HTMLElement | null;
 }
 
 const props = defineProps<Props>();
@@ -39,33 +40,32 @@ const SCROLL_Y_ATTR = 'data-scroll-lock-y';
 
 let locked = false;
 
+const getTarget = (): HTMLElement => props.lockTarget ?? document.body;
 
 const lockBodyScroll = () => {
-  const el = (document.scrollingElement as HTMLElement) || document.body;
+  const el = getTarget();
   const count = Number(el.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
   if (count === 0) {
-    const scrollY = window.scrollY || el.scrollTop;
+    const scrollY = el === document.body ? window.scrollY : el.scrollTop;
     el.classList.add('overflow-hidden');
-    el.style.position = 'fixed';
-    el.style.top = `-${scrollY}px`;
-    el.style.width = '100%';
     el.setAttribute(SCROLL_Y_ATTR, String(scrollY));
   }
   el.setAttribute(SCROLL_LOCK_ATTR, String(count + 1));
 };
 
 const unlockBodyScroll = () => {
-  const el = (document.scrollingElement as HTMLElement) || document.body;
+  const el = getTarget();
   const count = Number(el.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
   if (count <= 1) {
     const scrollY = Number(el.getAttribute(SCROLL_Y_ATTR) ?? 0);
     el.classList.remove('overflow-hidden');
-    el.style.position = '';
-    el.style.top = '';
-    el.style.width = '';
     el.removeAttribute(SCROLL_LOCK_ATTR);
     el.removeAttribute(SCROLL_Y_ATTR);
-    window.scrollTo({ top: scrollY });
+    if (el === document.body) {
+      window.scrollTo({ top: scrollY });
+    } else {
+      el.scrollTop = scrollY;
+    }
   } else {
     el.setAttribute(SCROLL_LOCK_ATTR, String(count - 1));
   }
