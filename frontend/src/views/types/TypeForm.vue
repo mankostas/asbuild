@@ -255,8 +255,18 @@
                   {{ t('preview.runValidation') }}
                 </Button>
               </div>
-              <div :class="[{ dark: previewTheme === 'dark' }, viewportClass]" class="border p-2 overflow-auto">
-                <JsonSchemaForm ref="formRef" v-model="previewData" :schema="previewSchema" :task-id="0" />
+              <div class="bg-slate-900/50 p-4 flex items-center justify-center">
+                <div
+                  :class="[{ dark: previewTheme === 'dark' }, viewportClass]"
+                  class="bg-white dark:bg-slate-800 rounded-md shadow p-4 overflow-auto"
+                >
+                  <JsonSchemaForm
+                    ref="formRef"
+                    v-model="previewData"
+                    :schema="previewSchema"
+                    :task-id="0"
+                  />
+                </div>
               </div>
               <div v-if="Object.keys(validationErrors).length" class="mt-2 text-red-600" role="alert" aria-live="assertive">
                 <ul>
