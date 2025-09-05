@@ -29,6 +29,7 @@ import { watch, onUnmounted } from 'vue';
 
 interface Props {
   open: boolean;
+  lockTarget?: HTMLElement | null;
 }
 
 const props = defineProps<Props>();
@@ -39,32 +40,34 @@ const SCROLL_Y_ATTR = 'data-scroll-lock-y';
 
 let locked = false;
 
+const getTarget = (): HTMLElement => props.lockTarget ?? document.body;
+
 const lockBodyScroll = () => {
-  const body = document.body;
-  const count = Number(body.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
+  const el = getTarget();
+  const count = Number(el.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
   if (count === 0) {
-    const scrollY = window.scrollY;
-    body.classList.add('overflow-hidden');
-    body.style.position = 'fixed';
-    body.style.top = `-${scrollY}px`;
-    body.setAttribute(SCROLL_Y_ATTR, String(scrollY));
+    const scrollY = el === document.body ? window.scrollY : el.scrollTop;
+    el.classList.add('overflow-hidden');
+    el.setAttribute(SCROLL_Y_ATTR, String(scrollY));
   }
-  body.setAttribute(SCROLL_LOCK_ATTR, String(count + 1));
+  el.setAttribute(SCROLL_LOCK_ATTR, String(count + 1));
 };
 
 const unlockBodyScroll = () => {
-  const body = document.body;
-  const count = Number(body.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
+  const el = getTarget();
+  const count = Number(el.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
   if (count <= 1) {
-    const scrollY = Number(body.getAttribute(SCROLL_Y_ATTR) ?? 0);
-    body.classList.remove('overflow-hidden');
-    body.style.position = '';
-    body.style.top = '';
-    body.removeAttribute(SCROLL_LOCK_ATTR);
-    body.removeAttribute(SCROLL_Y_ATTR);
-    window.scrollTo({ top: scrollY });
+    const scrollY = Number(el.getAttribute(SCROLL_Y_ATTR) ?? 0);
+    el.classList.remove('overflow-hidden');
+    el.removeAttribute(SCROLL_LOCK_ATTR);
+    el.removeAttribute(SCROLL_Y_ATTR);
+    if (el === document.body) {
+      window.scrollTo({ top: scrollY });
+    } else {
+      el.scrollTop = scrollY;
+    }
   } else {
-    body.setAttribute(SCROLL_LOCK_ATTR, String(count - 1));
+    el.setAttribute(SCROLL_LOCK_ATTR, String(count - 1));
   }
 };
 
