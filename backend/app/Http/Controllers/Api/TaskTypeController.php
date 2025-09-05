@@ -28,7 +28,7 @@ class TaskTypeController extends Controller
     public function index(Request $request)
     {
         $scope = $request->query('scope', $request->user()->hasRole('SuperAdmin') ? 'all' : 'tenant');
-        $query = TaskType::query();
+        $query = TaskType::query()->with(['currentVersion', 'tenant']);
 
         if ($scope === 'tenant') {
             $tenantId = $request->query('tenant_id', $request->user()->tenant_id);
