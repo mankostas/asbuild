@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Services\FormSchemaService;
+use App\Models\Tenant;
 
 /**
  * @property array|null $schema_json Schema definition
@@ -57,6 +58,11 @@ class TaskType extends Model
     public function automations(): HasMany
     {
         return $this->hasMany(TaskAutomation::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
     }
 
     protected function schemaJson(): Attribute
