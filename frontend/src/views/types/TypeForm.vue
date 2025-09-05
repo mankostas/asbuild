@@ -268,10 +268,23 @@
                   />
                 </div>
               </div>
-              <div v-if="Object.keys(validationErrors).length" class="mt-2 text-red-600" role="alert" aria-live="assertive">
+              <div
+                v-if="validationStatus === 'error' && Object.keys(validationErrors).length"
+                class="mt-2 text-red-600"
+                role="alert"
+                aria-live="assertive"
+              >
                 <ul>
                   <li v-for="(msg, key) in validationErrors" :key="key">{{ key }}: {{ msg }}</li>
                 </ul>
+              </div>
+              <div
+                v-else-if="validationStatus === 'success'"
+                class="mt-2 text-green-600"
+                role="status"
+                aria-live="polite"
+              >
+                {{ t('preview.validationSuccess') }}
               </div>
             </div>
           </Card>
@@ -491,6 +504,7 @@ const previewLang = ref<'el' | 'en'>('el');
 const previewTheme = ref<'light' | 'dark'>((localStorage.getItem('builderPreviewTheme') as 'light' | 'dark') || 'light');
 const previewViewport = ref<'mobile' | 'tablet' | 'desktop'>((localStorage.getItem('builderPreviewViewport') as 'mobile' | 'tablet' | 'desktop') || 'desktop');
 const validationErrors = ref<Record<string, string>>({});
+const validationStatus = ref<'idle' | 'success' | 'error'>('idle');
 const formRef = ref<any>(null);
 const versions = ref<any[]>([]);
 const selectedVersionId = ref<number | null>(null);
@@ -1034,10 +1048,18 @@ async function onSubmit() {
 }
 
 function runValidation() {
+  validationStatus.value = 'idle';
   validationErrors.value = {};
-  const feErrors = formRef.value?.errors || {};
+  const feErrors = { ...(formRef.value?.errors || {}) };
+  if (formRef.value) {
+    Object.keys(formRef.value.errors).forEach((k) => delete formRef.value.errors[k]);
+  }
   if (Object.keys(feErrors).length) {
     validationErrors.value = feErrors;
+    validationStatus.value = 'error';
+    if (formRef.value) {
+      Object.assign(formRef.value.errors, feErrors);
+    }
     const first = Object.keys(validationErrors.value)[0];
     if (first) {
       nextTick(() => document.getElementById(first)?.focus());
@@ -1052,8 +1074,15 @@ function runValidation() {
       schema_json: previewSchema.value,
       form_data: previewData.value,
     })
+    .then(() => {
+      validationStatus.value = 'success';
+    })
     .catch((err) => {
       validationErrors.value = err.response?.data?.errors || { error: 'validation failed' };
+      validationStatus.value = 'error';
+      if (formRef.value) {
+        Object.assign(formRef.value.errors, validationErrors.value);
+      }
       const first = Object.keys(validationErrors.value)[0];
       if (first) {
         nextTick(() => document.getElementById(first)?.focus());

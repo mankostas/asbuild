@@ -265,6 +265,7 @@
   "preview": {
     "title": "Preview",
     "runValidation": "Run Validation",
+    "validationSuccess": "Validation passed",
     "language": "Language",
     "version": "Version",
     "theme": "Theme",

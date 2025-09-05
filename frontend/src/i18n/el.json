@@ -265,6 +265,7 @@
   "preview": {
     "title": "Προεπισκόπηση",
     "runValidation": "Εκτέλεση Ελέγχου",
+    "validationSuccess": "Η επικύρωση ολοκληρώθηκε",
     "language": "Γλώσσα",
     "version": "Έκδοση",
     "theme": "Θέμα",
