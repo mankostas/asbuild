@@ -1050,16 +1050,22 @@ async function onSubmit() {
 function runValidation() {
   validationStatus.value = 'idle';
   validationErrors.value = {};
-  const feErrors = { ...(formRef.value?.errors || {}) };
-  if (formRef.value) {
-    Object.keys(formRef.value.errors).forEach((k) => delete formRef.value.errors[k]);
-  }
+  const forms = Array.isArray(formRef.value)
+    ? formRef.value
+    : formRef.value
+      ? [formRef.value]
+      : [];
+  const feErrors = forms.reduce(
+    (acc, f) => Object.assign(acc, f?.errors || {}),
+    {} as Record<string, string>,
+  );
+  forms.forEach((f) => {
+    Object.keys(f.errors).forEach((k) => delete f.errors[k]);
+  });
   if (Object.keys(feErrors).length) {
     validationErrors.value = feErrors;
     validationStatus.value = 'error';
-    if (formRef.value) {
-      Object.assign(formRef.value.errors, feErrors);
-    }
+    forms.forEach((f) => Object.assign(f.errors, feErrors));
     const first = Object.keys(validationErrors.value)[0];
     if (first) {
       nextTick(() => document.getElementById(first)?.focus());
@@ -1086,9 +1092,8 @@ function runValidation() {
       });
       validationErrors.value = mappedErrors;
       validationStatus.value = 'error';
-      if (formRef.value) {
-        Object.assign(formRef.value.errors, mappedErrors);
-      }
+      forms.forEach((f) => Object.assign(f.errors, mappedErrors));
+
       const first = Object.keys(mappedErrors)[0];
       if (first) {
         nextTick(() => document.getElementById(first)?.focus());
