@@ -45,9 +45,10 @@ const lockBodyScroll = () => {
   if (count === 0) {
     const scrollY = window.scrollY;
     body.classList.add('overflow-hidden');
-    body.style.position = 'fixed';
-    body.style.top = `-${scrollY}px`;
     body.setAttribute(SCROLL_Y_ATTR, String(scrollY));
+    // Restore scroll position after the drawer steals focus
+    setTimeout(() => window.scrollTo({ top: scrollY }), 0);
+
   }
   body.setAttribute(SCROLL_LOCK_ATTR, String(count + 1));
 };
