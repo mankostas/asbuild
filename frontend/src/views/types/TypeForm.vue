@@ -1077,13 +1077,19 @@ function runValidation() {
     .then(() => {
       validationStatus.value = 'success';
     })
-    .catch((err) => {
-      validationErrors.value = err.response?.data?.errors || { error: 'validation failed' };
+    .catch((err: any) => {
+      const rawErrors = err.response?.data?.errors || { error: 'validation failed' };
+      const mappedErrors: Record<string, string> = {};
+      Object.entries(rawErrors).forEach(([k, v]) => {
+        const key = k.replace(/^form_data\./, '');
+        mappedErrors[key] = Array.isArray(v) ? (v[0] as string) : (v as string);
+      });
+      validationErrors.value = mappedErrors;
       validationStatus.value = 'error';
       if (formRef.value) {
-        Object.assign(formRef.value.errors, validationErrors.value);
+        Object.assign(formRef.value.errors, mappedErrors);
       }
-      const first = Object.keys(validationErrors.value)[0];
+      const first = Object.keys(mappedErrors)[0];
       if (first) {
         nextTick(() => document.getElementById(first)?.focus());
       }
