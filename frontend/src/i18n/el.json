@@ -282,7 +282,16 @@
   },
   "inspector": {
     "basics": "Βασικά",
+    "design": "Σχεδίαση",
     "validation": "Επικύρωση"
+  },
+  "design": {
+    "fontSize": "Μέγεθος γραμματοσειράς",
+    "textColor": "Χρώμα κειμένου",
+    "backgroundColor": "Χρώμα φόντου",
+    "small": "Μικρό",
+    "medium": "Μεσαίο",
+    "large": "Μεγάλο"
   },
   "validation": {
     "regex": "Πρότυπο",

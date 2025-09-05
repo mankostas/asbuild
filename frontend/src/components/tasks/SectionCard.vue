@@ -31,7 +31,8 @@
                   :id="field.key"
                   v-model="local[field.key]"
                   :type="inputType(field.type)"
-                  class="border rounded p-2 w-full"
+                  :class="inputClass(field)"
+                  :style="inputStyle(field)"
                   :readonly="readonly"
                   :aria-label="tr(field.label)"
                   :placeholder="tr(field.placeholder)"
@@ -40,6 +41,8 @@
                 <DateInput
                   v-else-if="field.type === 'date'"
                   v-model="local[field.key]"
+                  :class="inputClass(field)"
+                  :style="inputStyle(field)"
                   :readonly="readonly"
                   :aria-label="tr(field.label)"
                   @update:modelValue="() => emitUpdate(field)"
@@ -47,6 +50,8 @@
                 <TimeInput
                   v-else-if="field.type === 'time'"
                   v-model="local[field.key]"
+                  :class="inputClass(field)"
+                  :style="inputStyle(field)"
                   :readonly="readonly"
                   :aria-label="tr(field.label)"
                   @update:modelValue="() => emitUpdate(field)"
@@ -54,6 +59,8 @@
                 <DateTimeInput
                   v-else-if="field.type === 'datetime'"
                   v-model="local[field.key]"
+                  :class="inputClass(field)"
+                  :style="inputStyle(field)"
                   :readonly="readonly"
                   :aria-label="tr(field.label)"
                   @update:modelValue="() => emitUpdate(field)"
@@ -61,6 +68,8 @@
                 <DurationInput
                   v-else-if="field.type === 'duration'"
                   v-model="local[field.key]"
+                  :class="inputClass(field)"
+                  :style="inputStyle(field)"
                   :readonly="readonly"
                   :aria-label="tr(field.label)"
                   @update:modelValue="() => emitUpdate(field)"
@@ -69,7 +78,8 @@
                   v-else-if="field.type === 'textarea'"
                   :id="field.key"
                   v-model="local[field.key]"
-                  class="border rounded p-2 w-full"
+                  :class="inputClass(field)"
+                  :style="inputStyle(field)"
                   :readonly="readonly"
                   :aria-label="tr(field.label)"
                   :placeholder="tr(field.placeholder)"
@@ -79,7 +89,8 @@
                   v-else-if="field.type === 'select'"
                   :id="field.key"
                   v-model="local[field.key]"
-                  class="border rounded p-2 w-full"
+                  :class="inputClass(field)"
+                  :style="inputStyle(field)"
                   :disabled="readonly"
                   :aria-label="tr(field.label)"
                   @change="emitUpdate(field)"
@@ -92,7 +103,8 @@
                   :id="field.key"
                   v-model="local[field.key]"
                   multiple
-                  class="border rounded p-2 w-full"
+                  :class="inputClass(field)"
+                  :style="inputStyle(field)"
                   :disabled="readonly"
                   :aria-label="tr(field.label)"
                   @change="emitUpdate(field)"
@@ -104,6 +116,8 @@
                   v-model="local[field.key]"
                   :name="field.key"
                   :options="field.enum"
+                  :class="inputClass(field)"
+                  :style="inputStyle(field)"
                   :readonly="readonly"
                   :aria-label="tr(field.label)"
                   @update:modelValue="() => emitUpdate(field)"
@@ -113,6 +127,8 @@
                   v-model="local[field.key]"
                   :name="field.key"
                   :options="field.enum"
+                  :class="inputClass(field)"
+                  :style="inputStyle(field)"
                   :readonly="readonly"
                   :aria-label="tr(field.label)"
                   @update:modelValue="() => emitUpdate(field)"
@@ -121,6 +137,8 @@
                   v-else-if="field.type === 'chips'"
                   v-model="local[field.key]"
                   :options="field.enum"
+                  :class="inputClass(field)"
+                  :style="inputStyle(field)"
                   :readonly="readonly"
                   :aria-label="tr(field.label)"
                   @update:modelValue="() => emitUpdate(field)"
@@ -214,7 +232,8 @@
             :id="field.key"
             v-model="local[field.key]"
             :type="inputType(field.type)"
-            class="border rounded p-2 w-full"
+            :class="inputClass(field)"
+            :style="inputStyle(field)"
             :readonly="readonly"
             :aria-label="tr(field.label)"
             :placeholder="tr(field.placeholder)"
@@ -223,6 +242,8 @@
           <DateInput
             v-else-if="field.type === 'date'"
             v-model="local[field.key]"
+            :class="inputClass(field)"
+            :style="inputStyle(field)"
             :readonly="readonly"
             :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
@@ -230,6 +251,8 @@
           <TimeInput
             v-else-if="field.type === 'time'"
             v-model="local[field.key]"
+            :class="inputClass(field)"
+            :style="inputStyle(field)"
             :readonly="readonly"
             :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
@@ -237,6 +260,8 @@
           <DateTimeInput
             v-else-if="field.type === 'datetime'"
             v-model="local[field.key]"
+            :class="inputClass(field)"
+            :style="inputStyle(field)"
             :readonly="readonly"
             :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
@@ -244,6 +269,8 @@
           <DurationInput
             v-else-if="field.type === 'duration'"
             v-model="local[field.key]"
+            :class="inputClass(field)"
+            :style="inputStyle(field)"
             :readonly="readonly"
             :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
@@ -252,7 +279,8 @@
             v-else-if="field.type === 'textarea'"
             :id="field.key"
             v-model="local[field.key]"
-            class="border rounded p-2 w-full"
+            :class="inputClass(field)"
+            :style="inputStyle(field)"
             :readonly="readonly"
             :aria-label="tr(field.label)"
             :placeholder="tr(field.placeholder)"
@@ -262,7 +290,8 @@
             v-else-if="field.type === 'select'"
             :id="field.key"
             v-model="local[field.key]"
-            class="border rounded p-2 w-full"
+            :class="inputClass(field)"
+            :style="inputStyle(field)"
             :disabled="readonly"
             :aria-label="tr(field.label)"
             @change="emitUpdate(field)"
@@ -275,7 +304,8 @@
             :id="field.key"
             v-model="local[field.key]"
             multiple
-            class="border rounded p-2 w-full"
+            :class="inputClass(field)"
+            :style="inputStyle(field)"
             :disabled="readonly"
             :aria-label="tr(field.label)"
             @change="emitUpdate(field)"
@@ -287,6 +317,8 @@
             v-model="local[field.key]"
             :name="field.key"
             :options="field.enum"
+            :class="inputClass(field)"
+            :style="inputStyle(field)"
             :readonly="readonly"
             :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
@@ -296,6 +328,8 @@
             v-model="local[field.key]"
             :name="field.key"
             :options="field.enum"
+            :class="inputClass(field)"
+            :style="inputStyle(field)"
             :readonly="readonly"
             :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
@@ -304,6 +338,8 @@
             v-else-if="field.type === 'chips'"
             v-model="local[field.key]"
             :options="field.enum"
+            :class="inputClass(field)"
+            :style="inputStyle(field)"
             :readonly="readonly"
             :aria-label="tr(field.label)"
             @update:modelValue="() => emitUpdate(field)"
@@ -460,6 +496,20 @@ function inputType(type: string) {
   if (type === 'phone') return 'tel';
   if (type === 'url') return 'url';
   return 'text';
+}
+
+function inputClass(field: any) {
+  const base = 'border rounded p-2 w-full';
+  const cls = field['x-styles']?.fontSize;
+  return cls ? `${base} ${cls}` : base;
+}
+
+function inputStyle(field: any) {
+  const st = field['x-styles'] || {};
+  return {
+    color: st.textColor || undefined,
+    backgroundColor: st.backgroundColor || undefined,
+  };
 }
 
 function emitUpdate(field: any) {

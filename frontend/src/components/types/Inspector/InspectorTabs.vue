@@ -139,6 +139,41 @@
           </TabPanel>
           <TabPanel>
             <div class="space-y-2">
+              <FromGroup #default="{ inputId, labelId }" :label="t('design.fontSize')">
+                <Select
+                  :id="inputId"
+                  v-model="fontSize"
+                  :options="[
+                    { value: 'text-sm', label: t('design.small') },
+                    { value: 'text-base', label: t('design.medium') },
+                    { value: 'text-lg', label: t('design.large') },
+                  ]"
+                  :aria-labelledby="labelId"
+                  classInput="text-sm"
+                />
+              </FromGroup>
+              <FromGroup #default="{ inputId, labelId }" :label="t('design.textColor')">
+                <Textinput
+                  :id="inputId"
+                  v-model="textColor"
+                  type="color"
+                  :aria-labelledby="labelId"
+                  classInput="h-8 w-16 p-0 border-none"
+                />
+              </FromGroup>
+              <FromGroup #default="{ inputId, labelId }" :label="t('design.backgroundColor')">
+                <Textinput
+                  :id="inputId"
+                  v-model="backgroundColor"
+                  type="color"
+                  :aria-labelledby="labelId"
+                  classInput="h-8 w-16 p-0 border-none"
+                />
+              </FromGroup>
+            </div>
+          </TabPanel>
+          <TabPanel>
+            <div class="space-y-2">
               <FromGroup
                 v-if="showRegex"
                 #default="{ inputId, labelId }"
@@ -275,7 +310,7 @@ const props = withDefaults(
 const { t, locale } = useI18n();
 const auth = useAuthStore();
 const tabs = computed(() => {
-  const tbs = [t('inspector.basics'), t('inspector.validation')];
+  const tbs = [t('inspector.basics'), t('inspector.design'), t('inspector.validation')];
   if (auth.isSuperAdmin || (props.roleOptions?.length ?? 0)) tbs.push(t('roles.label'));
   return tbs;
 });
@@ -289,6 +324,7 @@ const label = computed({
 
 const validations = computed(() => props.selected?.validations ?? {});
 const roles = computed(() => props.selected?.roles ?? { view: [], edit: [] });
+const styles = computed(() => props.selected?.styles ?? {});
 const cols = computed({
   get: () => props.selected?.cols ?? 2,
   set: (val: number) => {
@@ -339,6 +375,8 @@ watch(
     if (val) {
       if (!val.validations) val.validations = {};
       if (!val.roles) val.roles = { view: ['super_admin'], edit: ['super_admin'] };
+      if (!val.styles)
+        val.styles = { fontSize: 'text-base', textColor: '#000000', backgroundColor: '#ffffff' };
       if (val.cols === undefined) val.cols = 2;
       if (!val.placeholder)
         val.placeholder = { en: '', el: '' };
@@ -355,6 +393,25 @@ const required = computed({
   get: () => validations.value.required ?? false,
   set: (val: boolean) => {
     validations.value.required = val;
+  },
+});
+
+const fontSize = computed({
+  get: () => styles.value.fontSize ?? 'text-base',
+  set: (val: string) => {
+    styles.value.fontSize = val;
+  },
+});
+const textColor = computed({
+  get: () => styles.value.textColor ?? '#000000',
+  set: (val: string) => {
+    styles.value.textColor = val;
+  },
+});
+const backgroundColor = computed({
+  get: () => styles.value.backgroundColor ?? '#ffffff',
+  set: (val: string) => {
+    styles.value.backgroundColor = val;
   },
 });
 </script>
