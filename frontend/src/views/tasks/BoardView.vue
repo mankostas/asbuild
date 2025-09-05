@@ -73,6 +73,7 @@ interface Task {
 interface Column {
   status: { slug: string; name: string };
   tasks: Task[];
+  meta?: { total: number };
 }
 
 const columns = ref<Column[]>([]);
@@ -99,13 +100,16 @@ function grouped(tasks: Task[]) {
 async function load() {
   const { data } = await api.get('/task-board');
   // The `/task-board` endpoint responds with an object that wraps the
-  // columns array in a `data` property. Previously we assigned the entire
-  // response body to `columns`, which left `columns` as an object like
-  // `{ data: [...] }`. Vue would then iterate over that object and attempt to
-  // access `status.slug` on the string key `'data'`, resulting in the runtime
-  // error "Cannot read properties of undefined (reading 'slug')". Extract the
-  // actual array from the response before assigning it.
-  columns.value = data.data ?? data;
+  // columns array in a `data` property, and each column's `tasks` array is
+  // also wrapped in its own `data` property. Previously we assigned these
+  // objects directly which caused Vue to iterate over object keys like `data`
+  // and `meta` instead of the actual task items. Unwrap both layers before
+  // updating state.
+  const cols = (data.data ?? data).map((col: any) => ({
+    ...col,
+    tasks: col.tasks?.data ?? col.tasks ?? [],
+  }));
+  columns.value = cols;
 }
 
 onMounted(load);
