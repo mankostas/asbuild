@@ -1093,6 +1093,7 @@ function runValidation() {
       validationErrors.value = mappedErrors;
       validationStatus.value = 'error';
       forms.forEach((f) => Object.assign(f.errors, mappedErrors));
+
       const first = Object.keys(mappedErrors)[0];
       if (first) {
         nextTick(() => document.getElementById(first)?.focus());
