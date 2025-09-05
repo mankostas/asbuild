@@ -98,7 +98,14 @@ function grouped(tasks: Task[]) {
 
 async function load() {
   const { data } = await api.get('/task-board');
-  columns.value = data;
+  // The `/task-board` endpoint responds with an object that wraps the
+  // columns array in a `data` property. Previously we assigned the entire
+  // response body to `columns`, which left `columns` as an object like
+  // `{ data: [...] }`. Vue would then iterate over that object and attempt to
+  // access `status.slug` on the string key `'data'`, resulting in the runtime
+  // error "Cannot read properties of undefined (reading 'slug')". Extract the
+  // actual array from the response before assigning it.
+  columns.value = data.data ?? data;
 }
 
 onMounted(load);
