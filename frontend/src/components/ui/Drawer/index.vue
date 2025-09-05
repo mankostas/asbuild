@@ -48,6 +48,11 @@ const lockBodyScroll = () => {
   if (count === 0) {
     const scrollY = el === document.body ? window.scrollY : el.scrollTop;
     el.classList.add('overflow-hidden');
+    if (el === document.body) {
+      el.style.position = 'fixed';
+      el.style.top = `-${scrollY}px`;
+      el.style.width = '100%';
+    }
     el.setAttribute(SCROLL_Y_ATTR, String(scrollY));
   }
   el.setAttribute(SCROLL_LOCK_ATTR, String(count + 1));
@@ -59,13 +64,16 @@ const unlockBodyScroll = () => {
   if (count <= 1) {
     const scrollY = Number(el.getAttribute(SCROLL_Y_ATTR) ?? 0);
     el.classList.remove('overflow-hidden');
-    el.removeAttribute(SCROLL_LOCK_ATTR);
-    el.removeAttribute(SCROLL_Y_ATTR);
     if (el === document.body) {
+      el.style.position = '';
+      el.style.top = '';
+      el.style.width = '';
       window.scrollTo({ top: scrollY });
     } else {
       el.scrollTop = scrollY;
     }
+    el.removeAttribute(SCROLL_LOCK_ATTR);
+    el.removeAttribute(SCROLL_Y_ATTR);
   } else {
     el.setAttribute(SCROLL_LOCK_ATTR, String(count - 1));
   }
