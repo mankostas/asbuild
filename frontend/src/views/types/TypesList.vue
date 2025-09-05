@@ -157,6 +157,12 @@ async function publish(id: number) {
   const type = all.value.find((t) => t.id === id);
   const versionId = type?.current_version?.id;
   if (!versionId) return;
+  const res = await Swal.fire({
+    title: 'Publish type?',
+    icon: 'warning',
+    showCancelButton: true,
+  });
+  if (!res.isConfirmed) return;
   await versionsStore.publish(versionId);
   reload();
 }
