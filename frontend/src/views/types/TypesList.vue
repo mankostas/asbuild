@@ -154,9 +154,15 @@ function onImported() {
 }
 
 async function publish(id: number) {
-  const type = all.value.find((t) => t.id === id);
-  const versionId = type?.current_version?.id;
+  const versions = await versionsStore.list(id);
+  const versionId = versions[0]?.id;
   if (!versionId) return;
+  const res = await Swal.fire({
+    title: 'Publish type?',
+    icon: 'warning',
+    showCancelButton: true,
+  });
+  if (!res.isConfirmed) return;
   await versionsStore.publish(versionId);
   reload();
 }
