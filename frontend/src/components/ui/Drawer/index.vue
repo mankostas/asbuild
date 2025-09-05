@@ -39,6 +39,7 @@ const SCROLL_Y_ATTR = 'data-scroll-lock-y';
 
 let locked = false;
 
+
 const lockBodyScroll = () => {
   const el = (document.scrollingElement as HTMLElement) || document.body;
   const count = Number(el.getAttribute(SCROLL_LOCK_ATTR) ?? 0);
