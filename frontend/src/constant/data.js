@@ -13,6 +13,18 @@ export const menuItems = [
     requiredAbilities: ["tasks.view", "tasks.manage"],
   },
   {
+    title: "Task Board",
+    icon: "heroicons-outline:view-columns",
+    link: "tasks.board",
+    requiredAbilities: ["tasks.view", "tasks.update"],
+  },
+  {
+    title: "Task Reports",
+    icon: "heroicons-outline:chart-bar",
+    link: "tasks.reports",
+    requiredAbilities: ["reports.view"],
+  },
+  {
     title: "Task Types",
     icon: "heroicons-outline:tag",
     link: "taskTypes.list",
@@ -109,6 +121,18 @@ export const topMenu = [
     icon: "heroicons-outline:calendar",
     link: "tasks.list",
     requiredAbilities: ["tasks.view", "tasks.manage"],
+  },
+  {
+    title: "Task Board",
+    icon: "heroicons-outline:view-columns",
+    link: "tasks.board",
+    requiredAbilities: ["tasks.view", "tasks.update"],
+  },
+  {
+    title: "Task Reports",
+    icon: "heroicons-outline:chart-bar",
+    link: "tasks.reports",
+    requiredAbilities: ["reports.view"],
   },
   {
     title: "Task Types",
