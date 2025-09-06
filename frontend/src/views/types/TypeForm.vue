@@ -194,6 +194,7 @@
           :roles="tenantRoles"
           :can-manage="canManage"
           :status-count="statuses.length"
+          :features="tenantFeatures"
           class="p-4 border-b"
         />
         <div class="h-[calc(100vh-3rem)] p-4">
@@ -502,6 +503,12 @@ interface Permission {
 
 const name = ref('');
 const tenantId = ref<number | ''>('');
+const tenantFeatures = computed(() => {
+  const tenant = tenantStore.tenants.find(
+    (t: any) => String(t.id) === String(tenantId.value),
+  );
+  return tenant?.features || [];
+});
 const transitionsEditor = ref<any>(null);
 const automationsEditor = ref<any>(null);
 const slaPolicyEditor = ref<any>(null);

@@ -84,6 +84,7 @@ import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import vSelect from 'vue-select';
 import { TENANT_HEADER } from '@/config/app';
 import { useForm } from 'vee-validate';
+import { featureMap } from '@/constants/featureMap';
 
 const route = useRoute();
 const router = useRouter();
@@ -159,10 +160,11 @@ async function loadAbilityOptions() {
       : undefined;
     const { data } = await api.get('/lookups/abilities', { params, headers });
     const features = tenantFeatures.value;
+    const allowed = new Set(
+      features.flatMap((f: string) => featureMap[f]?.abilities || []),
+    );
     abilityOptions.value = (data || [])
-      .filter((a: string) =>
-        features.length ? features.some((f: string) => a.startsWith(f + '.')) : true,
-      )
+      .filter((a: string) => (allowed.size ? allowed.has(a) : true))
       .map((a: string) => ({
         label: a,
         value: a,
@@ -174,6 +176,12 @@ async function loadAbilityOptions() {
 
 watch(tenantId, (val) => {
   if (val !== null) {
+    loadAbilityOptions();
+  }
+});
+
+watch(tenantFeatures, () => {
+  if (!auth.isSuperAdmin || tenantId.value !== null) {
     loadAbilityOptions();
   }
 });
