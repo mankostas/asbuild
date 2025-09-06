@@ -563,7 +563,7 @@ const versionStatusClass = computed(() => {
 const statuses = ref<string[]>([]);
 const statusFlow = ref<[string, string][]>([]);
 const permissions = ref<Record<string, Permission>>({});
-const tenantRoles = ref<any[]>([]);
+const tenantRoles = ref<{ slug: string }[]>([]);
 const canManage = computed(() => auth.isSuperAdmin || can('task_types.manage'));
 const canManageSLA = computed(
   () => auth.isSuperAdmin || can('task_sla_policies.manage'),
@@ -671,8 +671,8 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
         const tid = Number(id);
         roles = roles.filter((r: any) => r.tenant_id === null || r.tenant_id === tid);
       }
-      tenantRoles.value = roles;
-      tenantRoles.value.forEach((r: any) => {
+      tenantRoles.value = roles as { slug: string }[];
+      tenantRoles.value.forEach((r) => {
         if (!permissions.value[r.slug]) {
           permissions.value[r.slug] = {
             read: false,
@@ -686,13 +686,13 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
           permissions.value[r.slug].transition = false;
         }
       });
-      const validSlugs = tenantRoles.value.map((r: any) => r.slug);
+      const validSlugs = tenantRoles.value.map((r) => r.slug);
       if (selected.value) {
         selected.value.roles.view = selected.value.roles.view.filter((s: string) =>
-          validSlugs.includes(s),
+          validSlugs.includes(s)
         );
         selected.value.roles.edit = selected.value.roles.edit.filter((s: string) =>
-          validSlugs.includes(s),
+          validSlugs.includes(s)
         );
       }
     } catch {
@@ -867,10 +867,10 @@ function loadVersion(v: any) {
   });
   statuses.value = Object.keys(v.statuses || {});
   if (Array.isArray(v.status_flow_json)) {
-    statusFlow.value = v.status_flow_json;
+    statusFlow.value = v.status_flow_json as [string, string][];
   } else if (v.status_flow_json) {
     statusFlow.value = Object.entries(v.status_flow_json).flatMap(([from, tos]: any) =>
-      (tos as string[]).map((to) => [from, to])
+      (tos as string[]).map((to) => [from, to] as [string, string])
     );
   } else {
     statusFlow.value = [];
@@ -1093,17 +1093,18 @@ async function onSubmit() {
                 'x-roles': f.roles,
                 'x-styles': f.styles,
               })),
-            },
-          photos: s.photos.map((p) => ({
-            key: p.name,
-            label: p.label,
-            type: p.typeKey,
-            validations: p.validations,
-            maxCount: p.maxCount,
-            help: p.help,
-            'x-roles': p.roles,
-            'x-styles': p.styles,
-          })),
+            }
+        ),
+        photos: s.photos.map((p) => ({
+          key: p.name,
+          label: p.label,
+          type: p.typeKey,
+          validations: p.validations,
+          maxCount: p.maxCount,
+          help: p.help,
+          'x-roles': p.roles,
+          'x-styles': p.styles,
+        })),
         'x-cols': s.cols,
       })),
       ...(logicRules.length ? { logic: logicRules } : {}),
@@ -1254,17 +1255,18 @@ const previewSchema = computed(() => ({
             'x-styles': f.styles,
             'x-cols': f.cols,
           })),
-        },
-      photos: s.photos.map((p) => ({
-        key: p.name,
-        label: p.label,
-        type: p.typeKey,
-        validations: p.validations,
-        maxCount: p.maxCount,
-        help: p.help,
-        'x-roles': p.roles,
-        'x-styles': p.styles,
-      })),
+        }
+    ),
+    photos: s.photos.map((p) => ({
+      key: p.name,
+      label: p.label,
+      type: p.typeKey,
+      validations: p.validations,
+      maxCount: p.maxCount,
+      help: p.help,
+      'x-roles': p.roles,
+      'x-styles': p.styles,
+    })),
     'x-cols': s.cols,
   })),
   ...(sections.value
