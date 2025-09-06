@@ -102,6 +102,7 @@ import Tooltip from '@/components/ui/Tooltip/index.vue';
 import Icon from '@/components/Icon';
 import en from '@/i18n/en.json';
 import el from '@/i18n/el.json';
+import { featureMap } from '@/constants/featureMap';
 
 interface Role {
   id: number;
@@ -123,6 +124,7 @@ const props = defineProps<{
   roles: Role[];
   canManage: boolean;
   statusCount: number;
+  features: string[];
 }>();
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
@@ -186,7 +188,7 @@ watch(
   { deep: true },
 );
 
-const abilityList = [
+const baseAbilityList = [
   { key: 'read', label: t('abilities.read') },
   { key: 'edit', label: t('abilities.edit') },
   { key: 'delete', label: t('abilities.delete') },
@@ -195,7 +197,32 @@ const abilityList = [
   { key: 'transition', label: t('abilities.transition') },
 ];
 
-const canTransition = computed(() => props.statusCount >= 2);
+const abilityMap: Record<string, string[]> = {
+  read: ['tasks.view'],
+  edit: ['tasks.update'],
+  delete: ['tasks.delete'],
+  export: ['tasks.export'],
+  assign: ['tasks.assign'],
+  transition: ['tasks.status.update'],
+};
+
+const allowedAbilities = computed(() =>
+  new Set(
+    props.features.flatMap((f) => featureMap[f]?.abilities || []),
+  ),
+);
+
+const abilityList = computed(() =>
+  baseAbilityList.filter((ability) => {
+    const req = abilityMap[ability.key];
+    return req ? req.some((a) => allowedAbilities.value.has(a)) : true;
+  }),
+);
+
+const canTransition = computed(() =>
+  props.statusCount >= 2 &&
+  abilityMap.transition.some((a) => allowedAbilities.value.has(a)),
+);
 
 watch(
   canTransition,
@@ -205,6 +232,26 @@ watch(
         p.transition = false;
       });
     }
+  },
+  { immediate: true },
+);
+
+watch(
+  abilityList,
+  (list) => {
+    const keys = list.map((a) => a.key) as (keyof Permission)[];
+    Object.values(localPermissions).forEach((perm) => {
+      Object.keys(perm).forEach((k) => {
+        if (!keys.includes(k as keyof Permission)) {
+          delete (perm as any)[k];
+        }
+      });
+      keys.forEach((k) => {
+        if (!(k in perm)) {
+          (perm as any)[k] = false;
+        }
+      });
+    });
   },
   { immediate: true },
 );
