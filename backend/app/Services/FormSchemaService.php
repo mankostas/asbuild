@@ -42,6 +42,16 @@ class FormSchemaService
                         }
                     }
                 }
+                if (isset($section['photos']) && is_array($section['photos'])) {
+                    foreach ($section['photos'] as &$photo) {
+                        if (isset($photo['label'])) {
+                            $photo['label'] = $this->normalizeI18n($photo['label']);
+                        }
+                        if (isset($photo['help'])) {
+                            $photo['help'] = $this->normalizeI18n($photo['help']);
+                        }
+                    }
+                }
             }
         }
         return $schema;
@@ -70,13 +80,32 @@ class FormSchemaService
             }
             foreach ($section['fields'] ?? [] as $field) {
                 if (isset($field['key'])) {
-                    $allKeys[] = $field['key'];
+                    if (isset($allKeys[$field['key']])) {
+                        throw ValidationException::withMessages([
+                            'schema_json' => 'duplicate field key',
+                        ]);
+                    }
+                    $allKeys[$field['key']] = true;
+                }
+            }
+            foreach ($section['photos'] ?? [] as $photo) {
+                if (isset($photo['key'])) {
+                    if (isset($allKeys[$photo['key']])) {
+                        throw ValidationException::withMessages([
+                            'schema_json' => 'duplicate field key',
+                        ]);
+                    }
+                    $allKeys[$photo['key']] = true;
                 }
             }
         }
+        $keys = array_keys($allKeys);
         foreach ($schema['sections'] as $section) {
             foreach ($section['fields'] ?? [] as $field) {
-                $this->validateField($field, $allKeys);
+                $this->validateField($field, $keys);
+            }
+            foreach ($section['photos'] ?? [] as $photo) {
+                $this->validatePhoto($photo, $keys);
             }
         }
     }
@@ -140,6 +169,37 @@ class FormSchemaService
         }
     }
 
+    protected function validatePhoto(array $photo, array $allKeys): void
+    {
+        if (! isset($photo['key'], $photo['label']) || ! $this->isI18nString($photo['label'])) {
+            throw ValidationException::withMessages([
+                'schema_json' => 'invalid photo field',
+            ]);
+        }
+        if (! in_array($photo['type'] ?? '', ['photo_single', 'photo_repeater'], true)) {
+            throw ValidationException::withMessages([
+                'schema_json' => 'invalid photo field',
+            ]);
+        }
+        if ($photo['type'] === 'photo_repeater') {
+            if (! isset($photo['maxCount']) || ! is_int($photo['maxCount']) || $photo['maxCount'] < 1) {
+                throw ValidationException::withMessages([
+                    'schema_json' => 'maxCount must be >=1',
+                ]);
+            }
+        }
+        if (isset($photo['validations']) && ! is_array($photo['validations'])) {
+            throw ValidationException::withMessages([
+                'schema_json' => 'validations must be object',
+            ]);
+        }
+        if (isset($photo['help']) && ! $this->isI18nString($photo['help'])) {
+            throw ValidationException::withMessages([
+                'schema_json' => 'help must be string or i18n object',
+            ]);
+        }
+    }
+
     /**
      * Evaluate conditional logic against form data.
      *
@@ -186,7 +246,7 @@ class FormSchemaService
     public function validateData(array $schema, array $data): void
     {
         $fields = collect($schema['sections'] ?? [])
-            ->flatMap(fn ($s) => $s['fields'] ?? []);
+            ->flatMap(fn ($s) => array_merge($s['fields'] ?? [], $s['photos'] ?? []));
 
         $logic = $this->evaluateLogic($schema, $data);
         $visible = collect($logic['visible']);

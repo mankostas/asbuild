@@ -431,7 +431,7 @@
       </template>
     </div>
     <template v-for="photo in section.photos" :key="photo.key">
-      <PhotoField
+      <PhotoUpload
         v-if="isVisible(photo.key) && photo.type === 'photo_single'"
         :photo="photo"
         :section-key="section.key"
@@ -447,6 +447,14 @@
         :model-value="local[photo.key]"
         @update:modelValue="(v) => updatePhoto(photo.key, v)"
       />
+      <p v-if="photo.help" class="text-xs text-gray-500 mt-1">{{ tr(photo.help) }}</p>
+      <div
+        v-if="errors[photo.key]"
+        class="text-red-600 text-sm mt-1"
+        role="alert"
+      >
+        {{ errors[photo.key] }}
+      </div>
     </template>
   </div>
 </template>
@@ -457,8 +465,8 @@ import AssigneePicker from '@/components/tasks/AssigneePicker.vue';
 import ReviewerPicker from '@/components/fields/ReviewerPicker.vue';
 import RichText from '@/components/fields/RichText.vue';
 import MarkdownInput from '@/components/fields/MarkdownInput.vue';
-import PhotoField from '@/components/tasks/PhotoField.vue';
-import PhotoRepeater from '@/components/tasks/PhotoRepeater.vue';
+import PhotoUpload from '@/components/fields/PhotoUpload.vue';
+import PhotoRepeater from '@/components/fields/PhotoRepeater.vue';
 import ChipsInput from '@/components/fields/ChipsInput.vue';
 import RadioGroup from '@/components/fields/RadioGroup.vue';
 import CheckboxGroup from '@/components/fields/CheckboxGroup.vue';
@@ -482,6 +490,13 @@ const allFields = props.section.tabs?.flatMap((t: any) => t.fields) || props.sec
 for (const field of allFields) {
   if (field.type === 'time' && local[field.key] === undefined) {
     local[field.key] = null;
+  }
+}
+for (const photo of props.section.photos || []) {
+  if (photo.type === 'photo_repeater') {
+    if (local[photo.key] === undefined) local[photo.key] = [];
+  } else if (local[photo.key] === undefined) {
+    local[photo.key] = null;
   }
 }
 const files = reactive<Record<string, { preview: string | null; name: string } | null>>({});
@@ -568,7 +583,9 @@ function removeFile(field: any) {
 }
 
 function updatePhoto(key: string, value: any) {
+  local[key] = value;
   emit('update', { key, value });
+  validatePhoto(key);
 }
 
 function validateField(field: any) {
@@ -583,5 +600,19 @@ function validateField(field: any) {
   }
   const msg = runValidators(val, rules);
   emit('error', { key: field.key, msg: msg || '' });
+}
+
+function validatePhoto(key: string) {
+  if (!isVisible(key)) {
+    emit('error', { key, msg: '' });
+    return;
+  }
+  const val = local[key];
+  const rules: any = {};
+  if (props.required.has(key)) {
+    rules.required = true;
+  }
+  const msg = runValidators(val, rules);
+  emit('error', { key, msg: msg || '' });
 }
 </script>

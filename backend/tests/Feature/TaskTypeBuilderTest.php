@@ -63,7 +63,7 @@ class TaskTypeBuilderTest extends TestCase
     public function test_store_task_type_with_abilities(): void
     {
         $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
-        $role = Role::create(['name' => 'Admin', 'slug' => 'admin', 'tenant_id' => $tenant->id, 'abilities' => ['task_types.create'], 'level' =​> 1]);
+        $role = Role::create(['name' => 'Admin', 'slug' => 'admin', 'tenant_id' => $tenant->id, 'abilities' => ['task_types.create'], 'level' => 1]);
         $user = User::create([
             'name' => 'U',
             'email' => 'u2@example.com',

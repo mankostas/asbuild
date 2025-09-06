@@ -16,10 +16,10 @@ vi.mock('@/components/fields/RichText.vue', () => ({
 vi.mock('@/components/fields/MarkdownInput.vue', () => ({
   default: { name: 'MarkdownInput', template: '<div />' },
 }));
-vi.mock('@/components/tasks/PhotoField.vue', () => ({
-  default: { name: 'PhotoField', template: '<div />' },
+vi.mock('@/components/fields/PhotoUpload.vue', () => ({
+  default: { name: 'PhotoUpload', template: '<div />' },
 }));
-vi.mock('@/components/tasks/PhotoRepeater.vue', () => ({
+vi.mock('@/components/fields/PhotoRepeater.vue', () => ({
   default: { name: 'PhotoRepeater', template: '<div />' },
 }));
 vi.mock('@/components/fields/ChipsInput.vue', () => ({

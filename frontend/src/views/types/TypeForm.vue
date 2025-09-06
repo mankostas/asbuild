@@ -495,7 +495,7 @@ interface Section {
   key: string;
   label: I18nString;
   fields: Field[];
-  photos: any[];
+  photos: Field[];
   cols: number;
   tabs: SectionTab[];
 }
@@ -581,6 +581,8 @@ const fieldTypes = [
   { key: 'boolean', label: 'Checkbox', group: 'Choices' },
   { key: 'assignee', label: 'Assignee', group: 'People' },
   { key: 'repeater', label: 'Repeater', group: 'Content' },
+  { key: 'photo_single', label: t('fields.photo'), group: 'Photos' },
+  { key: 'photo_repeater', label: t('fields.photoGallery'), group: 'Photos' },
 ];
 
 const paletteOpen = ref(false);
@@ -650,7 +652,7 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
   }
   if (oldId !== undefined && id !== oldId) {
     sections.value.forEach((s) =>
-      sectionFields(s).forEach((f) => {
+      sectionAllFields(s).forEach((f) => {
         f.roles.view = ['super_admin'];
         f.roles.edit = ['super_admin'];
       }),
@@ -772,6 +774,10 @@ function sectionFields(s: any) {
     : s.fields;
 }
 
+function sectionAllFields(s: any) {
+  return [...sectionFields(s), ...(s.photos || [])];
+}
+
 function loadVersion(v: any) {
   const schema = v.schema_json || { sections: [] };
   sections.value = (schema.sections || []).map((s: any, idx: number) => ({
@@ -826,11 +832,26 @@ function loadVersion(v: any) {
       })),
     })),
     cols: s['x-cols'] || 2,
-    photos: [],
+    photos: (s.photos || []).map((p: any, pid: number) => ({
+      id: pid + 1,
+      name: p.key,
+      label: typeof p.label === 'string' ? { en: p.label, el: p.label } : p.label,
+      typeKey: p.type || 'photo_single',
+      cols: 2,
+      validations: p.validations || {},
+      help:
+        typeof p.help === 'string'
+          ? { en: p.help, el: p.help }
+          : p.help || { en: '', el: '' },
+      data: { default: '', enum: [] },
+      maxCount: p.maxCount,
+      roles: p['x-roles'] || { view: ['super_admin'], edit: ['super_admin'] },
+      styles: p['x-styles'] || { fontSize: 'text-base', textColor: '#000000', backgroundColor: '#ffffff' },
+    })),
   }));
   const fieldMap: Record<string, any> = {};
   sections.value.forEach((s) =>
-    sectionFields(s).forEach((f) => (fieldMap[f.name] = f)),
+    sectionAllFields(s).forEach((f) => (fieldMap[f.name] = f)),
   );
   (schema.logic || []).forEach((rule: any) => {
     const fld = fieldMap[rule.if?.field];
@@ -932,10 +953,13 @@ function removeSection(index: number) {
 
 function removeField(
   sectionIndex: number,
-  payload: { field: Field; tabIndex?: number },
+  payload: { field: Field; tabIndex?: number; collection?: string },
 ) {
   const section = sections.value[sectionIndex];
-  if (payload.tabIndex !== undefined && section.tabs[payload.tabIndex]) {
+  if (payload.collection === 'photos') {
+    const idx = section.photos.indexOf(payload.field);
+    if (idx !== -1) section.photos.splice(idx, 1);
+  } else if (payload.tabIndex !== undefined && section.tabs[payload.tabIndex]) {
     const fields = section.tabs[payload.tabIndex].fields;
     const idx = fields.indexOf(payload.field);
     if (idx !== -1) fields.splice(idx, 1);
@@ -958,28 +982,47 @@ function onAddField(type: any) {
     target = sections.value.length - 1;
   }
   const section = sections.value[target];
-  const field = {
-    id: Date.now() + Math.random(),
-    name: `field${sectionFields(section).length + 1}`,
-    label: { en: type.label, el: type.label },
-    typeKey: type.key,
-    cols: 1,
-    validations: {},
-    fields: type.key === 'repeater' ? [] : undefined,
-    placeholder: { en: '', el: '' },
-    help: { en: '', el: '' },
-    logic: [],
-    roles: { view: ['super_admin'], edit: ['super_admin'] },
-    data: { default: '', enum: [] },
-    styles: { fontSize: 'text-base', textColor: '#000000', backgroundColor: '#ffffff' },
-  };
-  const tab = paletteSectionIndex.value?.tab;
-  if (tab !== undefined && section.tabs[tab]) {
-    section.tabs[tab].fields.push(field);
+  if (type.key.startsWith('photo')) {
+    const photo = {
+      id: Date.now() + Math.random(),
+      name: `photo${sectionAllFields(section).length + 1}`,
+      label: { en: type.label, el: type.label },
+      typeKey: type.key,
+      cols: 2,
+      validations: {},
+      help: { en: '', el: '' },
+      logic: [],
+      roles: { view: ['super_admin'], edit: ['super_admin'] },
+      data: { default: '', enum: [] },
+      styles: { fontSize: 'text-base', textColor: '#000000', backgroundColor: '#ffffff' },
+      maxCount: type.key === 'photo_repeater' ? 5 : undefined,
+    };
+    section.photos.push(photo);
+    selected.value = photo;
   } else {
-    section.fields.push(field);
+    const field = {
+      id: Date.now() + Math.random(),
+      name: `field${sectionAllFields(section).length + 1}`,
+      label: { en: type.label, el: type.label },
+      typeKey: type.key,
+      cols: 1,
+      validations: {},
+      fields: type.key === 'repeater' ? [] : undefined,
+      placeholder: { en: '', el: '' },
+      help: { en: '', el: '' },
+      logic: [],
+      roles: { view: ['super_admin'], edit: ['super_admin'] },
+      data: { default: '', enum: [] },
+      styles: { fontSize: 'text-base', textColor: '#000000', backgroundColor: '#ffffff' },
+    };
+    const tab = paletteSectionIndex.value?.tab;
+    if (tab !== undefined && section.tabs[tab]) {
+      section.tabs[tab].fields.push(field);
+    } else {
+      section.fields.push(field);
+    }
+    selected.value = field;
   }
-  selected.value = field;
   paletteSectionIndex.value = null;
 }
 
@@ -1000,7 +1043,7 @@ function selectField(field: Field) {
 async function onSubmit() {
   transitionsEditor.value?.commitPending?.();
   const logicRules = sections.value.flatMap((s) =>
-    sectionFields(s).flatMap((f) =>
+    sectionAllFields(s).flatMap((f) =>
       (f.logic || []).map((r) => ({
         if: r.if,
         then: r.then.map((a: any) => ({ [a.type]: a.target })),
@@ -1050,7 +1093,17 @@ async function onSubmit() {
                 'x-roles': f.roles,
                 'x-styles': f.styles,
               })),
-            }),
+            },
+          photos: s.photos.map((p) => ({
+            key: p.name,
+            label: p.label,
+            type: p.typeKey,
+            validations: p.validations,
+            maxCount: p.maxCount,
+            help: p.help,
+            'x-roles': p.roles,
+            'x-styles': p.styles,
+          })),
         'x-cols': s.cols,
       })),
       ...(logicRules.length ? { logic: logicRules } : {}),
@@ -1201,12 +1254,22 @@ const previewSchema = computed(() => ({
             'x-styles': f.styles,
             'x-cols': f.cols,
           })),
-        }),
+        },
+      photos: s.photos.map((p) => ({
+        key: p.name,
+        label: p.label,
+        type: p.typeKey,
+        validations: p.validations,
+        maxCount: p.maxCount,
+        help: p.help,
+        'x-roles': p.roles,
+        'x-styles': p.styles,
+      })),
     'x-cols': s.cols,
   })),
   ...(sections.value
     .flatMap((s) =>
-      sectionFields(s).flatMap((f) =>
+      sectionAllFields(s).flatMap((f) =>
         (f.logic || []).map((r) => ({
           if: r.if,
           then: r.then.map((a: any) => ({ [a.type]: a.target })),
@@ -1215,7 +1278,7 @@ const previewSchema = computed(() => ({
     ).length
     ? {
         logic: sections.value.flatMap((s) =>
-          sectionFields(s).flatMap((f) =>
+          sectionAllFields(s).flatMap((f) =>
             (f.logic || []).map((r) => ({
               if: r.if,
               then: r.then.map((a: any) => ({ [a.type]: a.target })),

@@ -7,10 +7,10 @@ import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
 vi.mock('@/components/tasks/AssigneePicker.vue', () => ({
   default: { name: 'AssigneePicker', template: '<div class="assignee-picker"></div>' },
 }));
-vi.mock('@/components/tasks/PhotoField.vue', () => ({
-  default: { name: 'PhotoField', template: '<div class="photo-field"></div>' },
+vi.mock('@/components/fields/PhotoUpload.vue', () => ({
+  default: { name: 'PhotoUpload', template: '<div class="photo-field"></div>' },
 }));
-vi.mock('@/components/tasks/PhotoRepeater.vue', () => ({
+vi.mock('@/components/fields/PhotoRepeater.vue', () => ({
   default: { name: 'PhotoRepeater', template: '<div class="photo-repeater"></div>' },
 }));
 
