@@ -22,10 +22,9 @@
                 {{ tr(field.label) }}
               </div>
               <div v-else-if="isVisible(field.key)" :class="colClass(field)">
-                <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -->
-                <label :for="field.key" :class="labelClass(field)">
+                <span :class="labelClass(field)">
                   {{ tr(field.label) }}<span v-if="isRequired(field)" class="text-red-600">*</span>
-                </label>
+                </span>
                 <input
                   v-if="isText(field.type)"
                   :id="field.key"
@@ -40,6 +39,7 @@
                 />
                 <DateInput
                   v-else-if="field.type === 'date'"
+                  :id="field.key"
                   v-model="local[field.key]"
                   :class="inputClass(field)"
                   :style="inputStyle(field)"
@@ -49,6 +49,7 @@
                 />
                 <TimeInput
                   v-else-if="field.type === 'time'"
+                  :id="field.key"
                   v-model="local[field.key]"
                   :class="inputClass(field)"
                   :style="inputStyle(field)"
@@ -58,6 +59,7 @@
                 />
                 <DateTimeInput
                   v-else-if="field.type === 'datetime'"
+                  :id="field.key"
                   v-model="local[field.key]"
                   :class="inputClass(field)"
                   :style="inputStyle(field)"
@@ -67,6 +69,7 @@
                 />
                 <DurationInput
                   v-else-if="field.type === 'duration'"
+                  :id="field.key"
                   v-model="local[field.key]"
                   :class="inputClass(field)"
                   :style="inputStyle(field)"
@@ -154,16 +157,21 @@
                 />
                 <AssigneePicker
                   v-else-if="field.type === 'assignee'"
+                  :id="field.key"
                   v-model="local[field.key]"
+                  :label="tr(field.label)"
                   @change="emitUpdate(field)"
                 />
                 <ReviewerPicker
                   v-else-if="field.type === 'reviewer'"
+                  :id="field.key"
                   v-model="local[field.key]"
+                  :label="tr(field.label)"
                   @change="emitUpdate(field)"
                 />
                 <RichText
                   v-else-if="field.type === 'richtext'"
+                  :id="field.key"
                   v-model="local[field.key]"
                   :readonly="readonly"
                   :aria-label="tr(field.label)"
@@ -171,6 +179,7 @@
                 />
                 <MarkdownInput
                   v-else-if="field.type === 'markdown'"
+                  :id="field.key"
                   v-model="local[field.key]"
                   :readonly="readonly"
                   :aria-label="tr(field.label)"
@@ -223,10 +232,9 @@
           {{ tr(field.label) }}
         </div>
         <div v-else-if="isVisible(field.key)" :class="colClass(field)">
-          <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -->
-          <label :for="field.key" :class="labelClass(field)">
+          <span :class="labelClass(field)">
             {{ tr(field.label) }}<span v-if="isRequired(field)" class="text-red-600">*</span>
-          </label>
+          </span>
           <input
             v-if="isText(field.type)"
             :id="field.key"
@@ -241,6 +249,7 @@
           />
           <DateInput
             v-else-if="field.type === 'date'"
+            :id="field.key"
             v-model="local[field.key]"
             :class="inputClass(field)"
             :style="inputStyle(field)"
@@ -250,6 +259,7 @@
           />
           <TimeInput
             v-else-if="field.type === 'time'"
+            :id="field.key"
             v-model="local[field.key]"
             :class="inputClass(field)"
             :style="inputStyle(field)"
@@ -259,6 +269,7 @@
           />
           <DateTimeInput
             v-else-if="field.type === 'datetime'"
+            :id="field.key"
             v-model="local[field.key]"
             :class="inputClass(field)"
             :style="inputStyle(field)"
@@ -268,6 +279,7 @@
           />
           <DurationInput
             v-else-if="field.type === 'duration'"
+            :id="field.key"
             v-model="local[field.key]"
             :class="inputClass(field)"
             :style="inputStyle(field)"
@@ -353,18 +365,23 @@
             :aria-label="tr(field.label)"
             @change="emitUpdate(field)"
           />
-          <AssigneePicker
-            v-else-if="field.type === 'assignee'"
-            v-model="local[field.key]"
-            @change="emitUpdate(field)"
-          />
-          <ReviewerPicker
-            v-else-if="field.type === 'reviewer'"
-            v-model="local[field.key]"
-            @change="emitUpdate(field)"
-          />
+                <AssigneePicker
+                  v-else-if="field.type === 'assignee'"
+                  :id="field.key"
+                  v-model="local[field.key]"
+                  :label="tr(field.label)"
+                  @change="emitUpdate(field)"
+                />
+                <ReviewerPicker
+                  v-else-if="field.type === 'reviewer'"
+                  :id="field.key"
+                  v-model="local[field.key]"
+                  :label="tr(field.label)"
+                  @change="emitUpdate(field)"
+                />
           <RichText
             v-else-if="field.type === 'richtext'"
+            :id="field.key"
             v-model="local[field.key]"
             :readonly="readonly"
             :aria-label="tr(field.label)"
@@ -372,6 +389,7 @@
           />
           <MarkdownInput
             v-else-if="field.type === 'markdown'"
+            :id="field.key"
             v-model="local[field.key]"
             :readonly="readonly"
             :aria-label="tr(field.label)"

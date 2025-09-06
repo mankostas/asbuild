@@ -7,23 +7,26 @@
           v-model="prefs.filters.assigneeId"
           :placeholder="t('board.assignee')"
           classInput="h-8"
+          :aria-label="t('board.assignee')"
         />
         <Select
           v-model="prefs.filters.priority"
           :options="priorityOptions"
           classInput="h-8"
+          :aria-label="t('board.priority')"
         />
         <Select
           v-model="prefs.sorting.key"
           :options="sortOptions"
           classInput="h-8"
+          :aria-label="t('board.sort')"
         />
         <Dropdown :label="densityLabel" labelClass="btn btn-light btn-sm">
           <template #menus>
             <MenuItem
               v-for="d in densityOptions"
               :key="d"
-              v-slot="{ active }"
+              #default="{ active }"
             >
               <button
                 class="block w-full text-left px-4 py-2 text-sm"

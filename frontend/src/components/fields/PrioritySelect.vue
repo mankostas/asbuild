@@ -4,7 +4,7 @@
     :label="label"
     :options="options"
     :aria-label="label"
-    @update:modelValue="(val) => emit('update:modelValue', val || null)"
+    @update:model-value="(val) => emit('update:modelValue', val || null)"
   />
 </template>
 
