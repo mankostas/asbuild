@@ -16,87 +16,45 @@ class DefaultFeatureRolesSeeder extends Seeder
         $roles = [];
 
         foreach ($features as $feature) {
-            $selected = $abilityMap[$feature] ?? [];
-
-            switch ($feature) {
-                case 'tasks':
-                case 'notifications':
-                case 'types':
-                case 'teams':
-                case 'statuses':
-                case 'employees':
-                case 'themes':
-                case 'tenants':
-                    $uc = ucfirst($feature);
-                    // viewer role
-                    $roles[] = [
-                        'slug' => "$feature\_viewer",
-                        'name' => "$uc Viewer",
-                        'abilities' => array_intersect(["$feature.view"], $selected),
-                        'level' => 3,
-                    ];
-
-                    // editor role
-                    $editorAbilities = array_intersect(
-                        ["$feature.view", "$feature.create", "$feature.update"],
-                        $selected
-                    );
-                    $roles[] = [
-                        'slug' => "$feature\_editor",
-                        'name' => "$uc Editor",
-                        'abilities' => $editorAbilities,
-                        'level' => 3,
-                    ];
-
-                    // manager role
-                    $managerAbilities = array_intersect(
-                        ["$feature.manage", "$feature.delete", "$feature.assign"],
-                        $selected
-                    );
-                    $roles[] = [
-                        'slug' => "$feature\_manager",
-                        'name' => "$uc Manager",
-                        'abilities' => $managerAbilities,
-                        'level' => 2,
-                    ];
-                    break;
-                case 'gdpr':
-                    $roles[] = [
-                        'slug' => 'gdpr_viewer',
-                        'name' => 'GDPR Viewer',
-                        'abilities' => array_intersect(['gdpr.view'], $selected),
-                        'level' => 3,
-                    ];
-                    $roles[] = [
-                        'slug' => 'gdpr_manager',
-                        'name' => 'GDPR Manager',
-                        'abilities' => array_intersect(['gdpr.view', 'gdpr.manage', 'gdpr.export', 'gdpr.delete'], $selected),
-                        'level' => 2,
-                    ];
-                    break;
-                case 'reports':
-                    $roles[] = [
-                        'slug' => 'reports_viewer',
-                        'name' => 'Reports Viewer',
-                        'abilities' => array_intersect(['reports.view'], $selected),
-                        'level' => 3,
-                    ];
-                    $roles[] = [
-                        'slug' => 'reports_manager',
-                        'name' => 'Reports Manager',
-                        'abilities' => array_intersect(['reports.manage'], $selected),
-                        'level' => 2,
-                    ];
-                    break;
-                case 'roles':
-                    $roles[] = [
-                        'slug' => 'roles_manager',
-                        'name' => 'Roles Manager',
-                        'abilities' => array_intersect(['roles.view', 'roles.manage'], $selected),
-                        'level' => 2,
-                    ];
-                    break;
+            $config = $map[$feature] ?? null;
+            if ($config === null) {
+                continue;
             }
+
+            $selected = $abilityMap[$feature] ?? [];
+            $label = $config['label'] ?? ucfirst($feature);
+            $abilities = $config['abilities'] ?? [];
+
+            $viewerAbilities = array_filter(
+                $abilities,
+                fn ($ability) => str_ends_with($ability, '.view')
+            );
+            $roles[] = [
+                'slug' => "{$feature}_viewer",
+                'name' => "$label Viewer",
+                'abilities' => array_intersect($viewerAbilities, $selected),
+                'level' => 3,
+            ];
+
+            $editorAbilities = array_filter(
+                $abilities,
+                fn ($ability) => str_ends_with($ability, '.view')
+                    || str_ends_with($ability, '.create')
+                    || str_ends_with($ability, '.update')
+            );
+            $roles[] = [
+                'slug' => "{$feature}_editor",
+                'name' => "$label Editor",
+                'abilities' => array_intersect($editorAbilities, $selected),
+                'level' => 3,
+            ];
+
+            $roles[] = [
+                'slug' => "{$feature}_manager",
+                'name' => "$label Manager",
+                'abilities' => array_intersect($abilities, $selected),
+                'level' => 2,
+            ];
         }
 
         foreach ($roles as $role) {
