@@ -123,6 +123,8 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':task_type_versions.manage');
     Route::post('task-type-versions/{task_type_version}/deprecate', [TaskTypeVersionController::class, 'deprecate'])
         ->middleware(Ability::class . ':task_type_versions.manage');
+    Route::put('task-type-versions/{task_type_version}/unpublish', [TaskTypeVersionController::class, 'unpublish'])
+        ->middleware(Ability::class . ':task_type_versions.manage');
 
     Route::get('task-types/{task_type}/sla-policies', [TaskSlaPolicyController::class, 'index'])
         ->middleware(Ability::class . ':task_sla_policies.manage');

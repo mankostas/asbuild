@@ -12,6 +12,15 @@
         />
       </VueSelect>
 
+      <VueSelect v-if="versions.length" label="Version">
+        <vSelect
+          v-model="taskTypeVersionId"
+          :options="versions"
+          label="semver"
+          :reduce="(v: any) => v.id"
+        />
+      </VueSelect>
+
       <StatusSelect
         v-if="isEdit"
         v-model="statusId"
@@ -87,6 +96,8 @@ const route = useRoute();
 const { t } = useI18n();
 
 const types = ref<any[]>([]);
+const versions = ref<any[]>([]);
+const taskTypeVersionId = ref<number | null>(null);
 const formData = ref<any>({});
 const scheduledAt = ref('');
 const slaStartAt = ref('');
@@ -138,6 +149,8 @@ onMounted(async () => {
     const res = await api.get(`/tasks/${route.params.id}`);
     const task = res.data;
     taskTypeId.value = task.type?.id || task.task_type_id;
+    await onTypeChange();
+    taskTypeVersionId.value = task.task_type_version_id || task.task_type_version?.id || taskTypeVersionId.value;
     formData.value = task.form_data || {};
     scheduledAt.value = task.scheduled_at ? toISO(task.scheduled_at) : '';
     slaStartAt.value = task.sla_start_at ? toISO(task.sla_start_at) : '';
@@ -169,8 +182,10 @@ onMounted(async () => {
   }
 });
 
-function onTypeChange() {
+async function onTypeChange() {
   formData.value = {};
+  versions.value = [];
+  taskTypeVersionId.value = null;
   const t = types.value.find((t) => t.id === taskTypeId.value);
   scheduledAt.value = t?.scheduled_at ? toISO(t.scheduled_at) : '';
   slaStartAt.value = t?.sla_start_at ? toISO(t.sla_start_at) : '';
@@ -178,11 +193,21 @@ function onTypeChange() {
   assignee.value = null;
   dueAt.value = null;
   priority.value = '';
+  if (taskTypeId.value) {
+    const { data } = await api.get('/task-type-versions', {
+      params: { task_type_id: taskTypeId.value },
+    });
+    const list = data.data || [];
+    versions.value = can('task_type_versions.manage')
+      ? list
+      : list.filter((v: any) => v.published_at);
+    taskTypeVersionId.value = versions.value[0]?.id ?? null;
+  }
 }
 
 const currentSchema = computed(() => {
-  const t = types.value.find((t) => t.id === taskTypeId.value);
-  return t ? t.form_schema : null;
+  const v = versions.value.find((vv) => vv.id === taskTypeVersionId.value);
+  return v ? v.schema_json : null;
 });
 
 const assigneeField = computed(() => {
@@ -227,6 +252,7 @@ const submitForm = handleSubmit(async () => {
     task_type_id: taskTypeId.value,
     form_data: formData.value,
   };
+  if (taskTypeVersionId.value) payload.task_type_version_id = taskTypeVersionId.value;
   if (scheduledAt.value) payload.scheduled_at = toISO(scheduledAt.value);
   if (slaStartAt.value) payload.sla_start_at = toISO(slaStartAt.value);
   if (slaEndAt.value) payload.sla_end_at = toISO(slaEndAt.value);

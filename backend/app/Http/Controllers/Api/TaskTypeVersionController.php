@@ -66,4 +66,13 @@ class TaskTypeVersionController extends Controller
         }
         return response()->json(['data' => $taskTypeVersion]);
     }
+
+    public function unpublish(string $id)
+    {
+        $version = TaskTypeVersion::findOrFail($id);
+        $this->authorize('manage', $version);
+        $version->published_at = null;
+        $version->save();
+        return response()->json(['ok' => true, 'data' => $version]);
+    }
 }

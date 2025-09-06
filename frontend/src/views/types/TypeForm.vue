@@ -91,6 +91,7 @@
           <Button
             v-if="
               isEdit &&
+              !currentVersion?.published_at &&
               (auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage')))
             "
             type="button"
@@ -99,6 +100,19 @@
             @click="publishVersion"
           >
             {{ t('actions.publish') }}
+          </Button>
+          <Button
+            v-if="
+              isEdit &&
+              currentVersion?.published_at &&
+              (auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage')))
+            "
+            type="button"
+            :aria-label="t('actions.unpublish')"
+            btnClass="btn-outline-primary text-xs px-3 py-1"
+            @click="unpublishVersion"
+          >
+            {{ t('actions.unpublish') }}
           </Button>
           <Button
             v-if="
@@ -869,6 +883,19 @@ async function publishVersion() {
   });
   if (!result.isConfirmed) return;
   await versionsStore.publish(selectedVersionId.value);
+  versions.value = await versionsStore.list(Number(route.params.id));
+}
+
+async function unpublishVersion() {
+  if (!selectedVersionId.value) return;
+  const result = await Swal.fire({
+    title: 'Unpublish this version?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, unpublish',
+  });
+  if (!result.isConfirmed) return;
+  await versionsStore.unpublish(selectedVersionId.value);
   versions.value = await versionsStore.list(Number(route.params.id));
 }
 

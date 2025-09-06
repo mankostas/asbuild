@@ -106,6 +106,48 @@ class TaskTypeVersionTest extends TestCase
         $this->assertNotNull(TaskType::find($type->id)->versions()->first()->deprecated_at);
     }
 
+    public function test_authorized_user_can_unpublish_version(): void
+    {
+        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $role = Role::create([
+            'name' => 'Admin',
+            'slug' => 'admin',
+            'tenant_id' => $tenant->id,
+            'abilities' => ['task_type_versions.manage'],
+            'level' => 1,
+        ]);
+        $user = User::create([
+            'name' => 'U4',
+            'email' => 'u4@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
+        Sanctum::actingAs($user);
+
+        $type = TaskType::create([
+            'name' => 'Type',
+            'tenant_id' => $tenant->id,
+            'schema_json' => ['sections' => []],
+            'statuses' => ['draft' => []],
+        ]);
+
+        $version = $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson("/api/task-types/{$type->id}/versions")
+            ->assertCreated()
+            ->json('data');
+
+        $this->postJson("/api/task-type-versions/{$version['id']}/publish")
+            ->assertOk();
+
+        $this->putJson("/api/task-type-versions/{$version['id']}/unpublish")
+            ->assertOk();
+
+        $this->assertNull(TaskType::find($type->id)->versions()->first()->published_at);
+    }
+
     public function test_user_without_manage_ability_cannot_manage_versions(): void
     {
         $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
@@ -150,6 +192,9 @@ class TaskTypeVersionTest extends TestCase
             ->assertForbidden();
 
         $this->postJson("/api/task-type-versions/{$version->id}/deprecate")
+            ->assertForbidden();
+
+        $this->putJson("/api/task-type-versions/{$version->id}/unpublish")
             ->assertForbidden();
     }
 }
