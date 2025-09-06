@@ -1,128 +1,104 @@
 <template>
-    <div>
+    <div class="space-y-4">
       <div class="flex items-center justify-end mb-4">
-        <RouterLink
+        <Button
           v-if="hasAny(['tasks.create', 'tasks.manage'])"
-          class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-          :to="{ name: 'tasks.create' }"
-        >
-          <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
-          {{ t('tasks.new') }}
-        </RouterLink>
+          :link="{ name: 'tasks.create' }"
+          btnClass="btn-primary flex items-center gap-2"
+          icon="heroicons-outline:plus"
+          :text="t('tasks.new')"
+        />
       </div>
 
       <div class="flex items-center gap-2 mb-4">
-          <button
-            class="btn btn-outline-dark"
-            :aria-expanded="showFilters.toString()"
-            aria-controls="task-filters"
-            @click="toggleFilters"
-          >
-            {{ t('tasks.filters.toggle', 'Filters') }}
-          </button>
-        <select
-          v-if="Object.keys(savedViews).length"
-          v-model="selectedView"
-          class="border rounded p-2"
-          :aria-label="t('tasks.filters.savedViews')"
-          @change="applyView"
+        <Button
+          btnClass="btn-outline-dark"
+          :aria-expanded="showFilters.toString()"
+          aria-controls="task-filters"
+          @click="toggleFilters"
         >
-          <option value="">{{ t('tasks.filters.savedViewsPlaceholder') }}</option>
-          <option v-for="(v, name) in savedViews" :key="name" :value="name">{{ name }}</option>
-        </select>
-        <button
-          class="btn btn-outline-dark"
+          {{ t('tasks.filters.toggle', 'Filters') }}
+        </Button>
+        <Button
+          btnClass="btn-outline-dark"
           :aria-label="t('tasks.filters.saveView')"
           @click="saveView"
         >
           {{ t('tasks.filters.saveView') }}
-        </button>
+        </Button>
       </div>
 
-      <div v-if="showFilters" id="task-filters" class="p-4 border rounded mb-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <label class="flex flex-col" for="filter-status">
-              <span class="mb-1 text-sm">{{ t('tasks.filters.status') }}</span>
-              <select
-                id="filter-status"
-                v-model="statusFilter"
-                class="border rounded p-2"
-              >
-                <option value="">{{ t('tasks.filters.allStatuses') }}</option>
-                <option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
-              </select>
-            </label>
-            <label class="flex flex-col" for="filter-type">
-              <span class="mb-1 text-sm">{{ t('tasks.filters.type') }}</span>
-              <select
-                id="filter-type"
-                v-model="typeFilter"
-                class="border rounded p-2"
-              >
-                <option value="">{{ t('tasks.filters.allTypes') }}</option>
-                <option v-for="type in typeOptions" :key="type.id" :value="type.id">{{ type.name }}</option>
-              </select>
-            </label>
-            <div class="flex flex-col sm:col-span-2 lg:col-span-1">
-              <span id="filter-assignee-label" class="mb-1 text-sm">{{ t('tasks.filters.assignee') }}</span>
-              <AssigneePicker v-model="assigneeFilter" :aria-labelledby="'filter-assignee-label'" />
-            </div>
-            <label class="flex flex-col" for="filter-priority">
-              <span class="mb-1 text-sm">{{ t('tasks.filters.priority') }}</span>
-              <select
-                id="filter-priority"
-                v-model="priorityFilter"
-                class="border rounded p-2"
-              >
-                <option value="">{{ t('tasks.filters.allPriorities') }}</option>
-                <option v-for="p in priorityOptions" :key="p.value" :value="p.value">{{ t(`tasks.priority.${p.value}`) }}</option>
-              </select>
-            </label>
-            <label class="flex flex-col" for="filter-due-start">
-              <span class="mb-1 text-sm">{{ t('tasks.filters.dueFrom') }}</span>
-              <input id="filter-due-start" v-model="dueStart" type="date" class="border rounded p-2" />
-            </label>
-            <label class="flex flex-col" for="filter-due-end">
-              <span class="mb-1 text-sm">{{ t('tasks.filters.dueTo') }}</span>
-              <input id="filter-due-end" v-model="dueEnd" type="date" class="border rounded p-2" />
-            </label>
-            <label class="flex items-center" for="filter-photos">
-              <input id="filter-photos" v-model="hasPhotos" type="checkbox" class="mr-2" />
-              <span class="text-sm">{{ t('tasks.filters.hasPhotos') }}</span>
-            </label>
-            <label class="flex items-center" for="filter-mine">
-              <input id="filter-mine" v-model="mine" type="checkbox" class="mr-2" />
-              <span class="text-sm">{{ t('tasks.filters.mine') }}</span>
-            </label>
+      <div v-if="showFilters" id="task-filters" class="p-4 bg-white rounded-2xl shadow mb-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Select
+            id="filter-status"
+            v-model="statusFilter"
+            :label="t('tasks.filters.status')"
+            :options="[{ value: '', label: t('tasks.filters.allStatuses') }, ...statusOptions.map((s) => ({ value: s, label: s }))]"
+          />
+          <Select
+            id="filter-type"
+            v-model="typeFilter"
+            :label="t('tasks.filters.type')"
+            :options="[{ value: '', label: t('tasks.filters.allTypes') }, ...typeOptions.map((type) => ({ value: type.id, label: type.name }))]"
+          />
+          <div class="flex flex-col sm:col-span-2 lg:col-span-1">
+            <span id="filter-assignee-label" class="mb-1 text-sm">{{ t('tasks.filters.assignee') }}</span>
+            <AssigneePicker v-model="assigneeFilter" :aria-labelledby="'filter-assignee-label'" />
           </div>
+          <Select
+            id="filter-priority"
+            v-model="priorityFilter"
+            :label="t('tasks.filters.priority')"
+            :options="[{ value: '', label: t('tasks.filters.allPriorities') }, ...priorityOptions.map((p) => ({ value: p.value, label: t(`tasks.priority.${p.value}`) }))]"
+          />
+          <Textinput
+            id="filter-due-start"
+            v-model="dueStart"
+            type="date"
+            :label="t('tasks.filters.dueFrom')"
+          />
+          <Textinput
+            id="filter-due-end"
+            v-model="dueEnd"
+            type="date"
+            :label="t('tasks.filters.dueTo')"
+          />
+          <Checkbox
+            id="filter-photos"
+            v-model="hasPhotos"
+            :label="t('tasks.filters.hasPhotos')"
+          />
+          <Checkbox
+            id="filter-mine"
+            v-model="mine"
+            :label="t('tasks.filters.mine')"
+          />
         </div>
+      </div>
 
         <div v-if="selected.length" class="mb-4 flex items-center gap-2">
-          <label class="flex flex-col text-sm" for="bulk-status">
-            {{ t('tasks.status.update') }}
-            <select
-              id="bulk-status"
-              v-model="bulkStatus"
-              class="border rounded p-2"
-              :aria-label="t('tasks.status.update')"
-            >
-              <option value="">{{ t('tasks.filters.selectStatus', 'Select status') }}</option>
-              <option v-for="s in bulkStatusOptions" :key="s" :value="s">{{ s }}</option>
-            </select>
-          </label>
-          <button
-            class="btn btn-dark"
+          <Select
+            id="bulk-status"
+            v-model="bulkStatus"
+            :label="t('tasks.status.update')"
+            :options="[{ value: '', label: t('tasks.filters.selectStatus', 'Select status') }, ...bulkStatusOptions.map((s) => ({ value: s, label: s }))]"
+          />
+          <Button
+            btnClass="btn-dark"
             :disabled="!bulkStatus"
             :aria-label="t('tasks.status.update')"
             @click="applyBulkStatus"
           >
             {{ t('actions.save') }}
-          </button>
+          </Button>
       </div>
     <DashcodeServerTable
       :key="tableKey"
       :columns="columns"
       :fetcher="fetchTasks"
+      :initial-sort="prefs.sort"
+      :initial-per-page="prefs.pageSize || 10"
     >
       <template #actions="{ row }">
         <div class="flex gap-2 items-center">
@@ -193,6 +169,11 @@ import Swal from 'sweetalert2';
 import { parseISO, formatDisplay } from '@/utils/datetime';
 import { hasAny, useAuthStore } from '@/stores/auth';
 import AssigneePicker from '@/components/tasks/AssigneePicker.vue';
+import Button from '@/components/ui/Button/index.vue';
+import Select from '@/components/ui/Select/index.vue';
+import Textinput from '@/components/ui/Textinput/index.vue';
+import Checkbox from '@/components/ui/Checkbox/index.vue';
+import { loadListPrefs, saveListPrefs, type ListPrefs } from '@/services/listPrefs';
 
 const router = useRouter();
 const notify = useNotify();
@@ -209,8 +190,9 @@ const dueEnd = ref('');
 const hasPhotos = ref(false);
 const mine = ref(false);
 
-const savedViews = ref<Record<string, any>>({});
-const selectedView = ref('');
+const prefs = ref<ListPrefs>(loadListPrefs(auth.user?.id || 0) || ({} as any));
+const currentSort = ref<any>(prefs.value.sort || null);
+const pageSize = ref<number>(prefs.value.pageSize || 10);
 
 const tableKey = ref(0);
 
@@ -226,9 +208,10 @@ const priorityOptions = [
 const columns = [
   { label: 'ID', field: 'id', sortable: true },
   { label: 'Type', field: 'type', sortable: false },
+  { label: 'Priority', field: 'priority', sortable: true, html: true },
   { label: 'Status', field: 'status', sortable: false, html: true },
   { label: 'Scheduled', field: 'scheduled_at', sortable: true },
-  { label: 'SLA End', field: 'sla_end_at', sortable: true },
+  { label: 'SLA End', field: 'sla_end_at', sortable: true, html: true },
   { label: 'Started', field: 'started_at', sortable: true },
   { label: 'Completed', field: 'completed_at', sortable: true },
 ];
@@ -241,6 +224,21 @@ const statusClasses: Record<string, string> = {
   rejected: 'bg-red-100 text-red-800',
   redo: 'bg-purple-100 text-purple-800',
 };
+
+const priorityClasses: Record<string, string> = {
+  low: 'bg-slate-100 text-slate-800',
+  normal: 'bg-slate-100 text-slate-800',
+  high: 'bg-orange-100 text-orange-800',
+  urgent: 'bg-red-100 text-red-800',
+};
+
+function slaBadgeClass(date: string) {
+  const due = new Date(date).getTime();
+  const now = Date.now();
+  if (due < now) return 'bg-red-100 text-red-800';
+  if (due - now < 48 * 3600 * 1000) return 'bg-yellow-100 text-yellow-800';
+  return 'bg-green-100 text-green-800';
+}
 
 const statusIcons: Record<string, string> = {
   in_progress: 'heroicons-outline:play',
@@ -273,8 +271,17 @@ onMounted(async () => {
   const statusData = statusRes.data?.data ?? statusRes.data;
   statusOptions.value = statusData.map((s: any) => s.name);
   typeOptions.value = typeRes.data?.data ?? typeRes.data;
-  const stored = localStorage.getItem('taskViews');
-  if (stored) savedViews.value = JSON.parse(stored);
+
+  if (prefs.value.filters) {
+    statusFilter.value = prefs.value.filters.status || '';
+    typeFilter.value = prefs.value.filters.type || '';
+    assigneeFilter.value = prefs.value.filters.assignee || null;
+    priorityFilter.value = prefs.value.filters.priority || '';
+    dueStart.value = prefs.value.filters.dueStart || '';
+    dueEnd.value = prefs.value.filters.dueEnd || '';
+    hasPhotos.value = prefs.value.filters.hasPhotos || false;
+    mine.value = prefs.value.filters.mine || false;
+  }
 });
 
 function toggleFilters() {
@@ -282,32 +289,23 @@ function toggleFilters() {
 }
 
 function saveView() {
-  const name = window.prompt(t('tasks.filters.saveViewPrompt'));
-  if (!name) return;
-  savedViews.value[name] = {
-    status: statusFilter.value,
-    type: typeFilter.value,
-    assignee: assigneeFilter.value,
-    priority: priorityFilter.value,
-    dueStart: dueStart.value,
-    dueEnd: dueEnd.value,
-    hasPhotos: hasPhotos.value,
-    mine: mine.value,
+  if (!auth.user) return;
+  const newPrefs: ListPrefs = {
+    filters: {
+      status: statusFilter.value,
+      type: typeFilter.value,
+      assignee: assigneeFilter.value,
+      priority: priorityFilter.value,
+      dueStart: dueStart.value,
+      dueEnd: dueEnd.value,
+      hasPhotos: hasPhotos.value,
+      mine: mine.value,
+    },
+    sort: currentSort.value,
+    pageSize: pageSize.value,
   };
-  localStorage.setItem('taskViews', JSON.stringify(savedViews.value));
-}
-
-function applyView() {
-  const v = savedViews.value[selectedView.value];
-  if (!v) return;
-  statusFilter.value = v.status || '';
-  typeFilter.value = v.type || '';
-  assigneeFilter.value = v.assignee || null;
-  priorityFilter.value = v.priority || '';
-  dueStart.value = v.dueStart || '';
-  dueEnd.value = v.dueEnd || '';
-  hasPhotos.value = v.hasPhotos || false;
-  mine.value = v.mine || false;
+  saveListPrefs(auth.user.id, newPrefs);
+  prefs.value = newPrefs;
 }
 
 function toggleSelect(id: number) {
@@ -331,6 +329,8 @@ async function applyBulkStatus() {
 }
 
 async function fetchTasks({ page, perPage, sort, search }: any) {
+  currentSort.value = sort || null;
+  pageSize.value = perPage;
   if (!all.value.length) {
     const { data } = await api.get('/tasks');
     all.value = data?.data ?? data;
@@ -385,9 +385,14 @@ async function fetchTasks({ page, perPage, sort, search }: any) {
   const paged = rows.slice(start, start + perPage).map((r) => ({
     id: r.id,
     type: r.type?.name || '—',
+    priority: r.priority
+      ? `<span class="badge ${priorityClasses[r.priority] || ''}">${t(`tasks.priority.${r.priority}`)}</span>`
+      : '',
     status: `<span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClasses[r.status] ?? ''}">${r.status.replace(/_/g, ' ')}</span>`,
     scheduled_at: r.scheduled_at ? formatDisplay(r.scheduled_at) : '',
-    sla_end_at: r.sla_end_at ? formatDisplay(r.sla_end_at) : '',
+    sla_end_at: r.sla_end_at
+      ? `<span class="badge ${slaBadgeClass(r.sla_end_at)}">${formatDisplay(r.sla_end_at)}</span>`
+      : '',
     started_at: r.started_at ? formatDisplay(r.started_at) : '',
     completed_at: r.completed_at ? formatDisplay(r.completed_at) : '',
   }));

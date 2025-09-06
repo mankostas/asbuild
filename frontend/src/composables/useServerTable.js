@@ -1,10 +1,10 @@
 import { ref, watch } from 'vue';
 
-export default function useServerTable(fetcher) {
-  const page = ref(1);
-  const perPage = ref(10);
-  const sort = ref(null);
-  const search = ref('');
+export default function useServerTable(fetcher, initial = {}) {
+  const page = ref(initial.page || 1);
+  const perPage = ref(initial.perPage || 10);
+  const sort = ref(initial.sort || null);
+  const search = ref(initial.search || '');
   const rows = ref([]);
   const total = ref(0);
   const loading = ref(false);
