@@ -28,6 +28,11 @@ class TenantController extends Controller
     {
         $this->ensureSuperAdmin($request);
         $result = $this->listQuery(Tenant::query(), $request, ['name'], ['name']);
+
+        $result['data'] = array_map(function ($tenant) {
+            return $tenant->makeVisible('feature_abilities');
+        }, $result['data']);
+
         return response()->json($result);
     }
 
@@ -77,7 +82,7 @@ class TenantController extends Controller
     public function show(Request $request, Tenant $tenant)
     {
         $this->ensureSuperAdmin($request);
-        return $tenant;
+        return $tenant->makeVisible('feature_abilities');
     }
 
     public function update(Request $request, Tenant $tenant)

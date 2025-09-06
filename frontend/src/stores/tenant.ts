@@ -22,6 +22,9 @@ export const useTenantStore = defineStore('tenant', {
         params: withListParams(params),
       });
       this.tenants = data.data;
+      data.data.forEach((t: any) => {
+        this.setAllowedAbilities(t.id, t.feature_abilities || {});
+      });
 
       if (
         this.currentTenantId &&
