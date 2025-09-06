@@ -112,6 +112,11 @@ const tenantFeatures = computed(() => {
   }
   return [];
 });
+const tenantFeatureAbilities = computed(() =>
+  tenantId.value
+    ? tenantStore.tenantAllowedAbilities(tenantId.value)
+    : {},
+);
 
 const tenantOptions = computed(() => [
   { id: '', name: 'Global' },
@@ -159,9 +164,13 @@ async function loadAbilityOptions() {
       ? { [TENANT_HEADER]: tenantId.value }
       : undefined;
     const { data } = await api.get('/lookups/abilities', { params, headers });
-    const features = tenantFeatures.value;
+    const perFeature = tenantFeatureAbilities.value;
     const allowed = new Set(
-      features.flatMap((f: string) => featureMap[f]?.abilities || []),
+      Object.keys(perFeature).length
+        ? Object.values(perFeature).flat()
+        : tenantFeatures.value.flatMap(
+            (f: string) => featureMap[f]?.abilities || [],
+          ),
     );
     abilityOptions.value = (data || [])
       .filter((a: string) => (allowed.size ? allowed.has(a) : true))
@@ -180,6 +189,15 @@ watch(tenantId, (val) => {
   }
 });
 
+watch(
+  () => tenantStore.tenantAllowedAbilities(tenantId.value || ''),
+  () => {
+    if (!auth.isSuperAdmin || tenantId.value !== null) {
+      loadAbilityOptions();
+    }
+  },
+  { deep: true },
+);
 watch(tenantFeatures, () => {
   if (!auth.isSuperAdmin || tenantId.value !== null) {
     loadAbilityOptions();

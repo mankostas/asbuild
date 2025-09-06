@@ -30,6 +30,24 @@
           />
         </template>
       </VueSelect>
+      <div v-if="form.features.length" class="grid gap-4">
+        <h3 class="font-medium">Abilities per feature</h3>
+        <VueSelect
+          v-for="f in form.features"
+          :key="f"
+          :label="featureMap[f]?.label || f"
+        >
+          <template #default="{ inputId }">
+            <vSelect
+              :id="inputId"
+              v-model="featureAbilities[f]"
+              :options="abilityOptionsFor(f)"
+              multiple
+              :reduce="(a: any) => a.value"
+            />
+          </template>
+        </VueSelect>
+      </div>
       <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
       <Button type="submit" text="Save" btnClass="btn-dark" />
     </form>
@@ -37,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api, { extractFormErrors } from '@/services/api';
 import Textinput from '@/components/ui/Textinput/index.vue';
@@ -47,6 +65,7 @@ import vSelect from 'vue-select';
 import { useForm } from 'vee-validate';
 import { useTenantStore } from '@/stores/tenant';
 import { can } from '@/stores/auth';
+import { featureMap } from '@/constants/featureMap';
 
 const route = useRoute();
 const router = useRouter();
@@ -68,6 +87,7 @@ const form = ref({
 });
 
 const featureOptions = ref<{ label: string; value: string }[]>([]);
+const featureAbilities = ref<Record<string, string[]>>({});
 
 const serverError = ref('');
 const { handleSubmit, setErrors, errors } = useForm();
@@ -93,6 +113,15 @@ onMounted(async () => {
       user_name: '',
       user_email: '',
     };
+    const stored = tenantStore.tenantAllowedAbilities(route.params.id as string);
+    featureAbilities.value = { ...stored };
+    form.value.features.forEach((f: string) => {
+      if (!featureAbilities.value[f]) {
+        featureAbilities.value[f] = [...(featureMap[f]?.abilities || [])];
+      }
+    });
+    tenantStore.setTenantFeatures(route.params.id as string, form.value.features);
+    tenantStore.setAllowedAbilities(route.params.id as string, featureAbilities.value);
   }
 });
 
@@ -129,4 +158,46 @@ const onSubmit = handleSubmit(async () => {
     }
   }
 });
+
+function abilityOptionsFor(feature: string) {
+  return (featureMap[feature]?.abilities || []).map((a) => ({
+    label: a,
+    value: a,
+  }));
+}
+
+watch(
+  () => form.value.features,
+  (features) => {
+    const selected = new Set(features);
+    Object.keys(featureAbilities.value).forEach((f) => {
+      if (!selected.has(f)) {
+        delete featureAbilities.value[f];
+      }
+    });
+    features.forEach((f) => {
+      if (!featureAbilities.value[f]) {
+        featureAbilities.value[f] = [...(featureMap[f]?.abilities || [])];
+      }
+    });
+    if (isEdit.value) {
+      tenantStore.setTenantFeatures(route.params.id as string, features);
+      tenantStore.setAllowedAbilities(
+        route.params.id as string,
+        featureAbilities.value,
+      );
+    }
+  },
+  { immediate: false },
+);
+
+watch(
+  featureAbilities,
+  (val) => {
+    if (isEdit.value) {
+      tenantStore.setAllowedAbilities(route.params.id as string, val);
+    }
+  },
+  { deep: true },
+);
 </script>
