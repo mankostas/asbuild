@@ -225,7 +225,16 @@
     "moveLeft": "Move left",
     "moveRight": "Move right",
     "addCommentPrompt": "Enter comment",
-    "errorMove": "Cannot move task"
+    "errorMove": "Cannot move task",
+    "search": "Search",
+    "hasPhotos": "Has photos",
+    "taskTypes": "Task types",
+    "sla": "SLA",
+    "myTasks": "My tasks",
+    "dueToday": "Due today",
+    "breachedOnly": "Breached only",
+    "clear": "Clear",
+    "loadMore": "Load more"
   },
   "featureGrants": {
     "title": "Feature Grants"

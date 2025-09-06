@@ -227,5 +227,50 @@ class TaskBoardTest extends TestCase
             ->assertJsonPath('data.0.meta.total', 1);
         $this->assertEquals($task1->id, $response->json('data.0.tasks.0.id'));
     }
+
+    public function test_index_filters_mine(): void
+    {
+        $user = $this->authUser();
+        $version = $this->makeVersion(['draft']);
+        $mine = $this->makeTask($user, $version, 'draft', ['assigned_user_id' => $user->id]);
+        $this->makeTask($user, $version, 'draft', ['assigned_user_id' => null, 'board_position' => 1]);
+
+        $response = $this->withHeader('X-Tenant-ID', 1)
+            ->getJson('/api/task-board?mine=1');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.0.meta.total', 1);
+        $this->assertEquals($mine->id, $response->json('data.0.tasks.0.id'));
+    }
+
+    public function test_index_filters_due_today(): void
+    {
+        $user = $this->authUser();
+        $version = $this->makeVersion(['draft']);
+        $today = $this->makeTask($user, $version, 'draft', ['due_at' => now()]);
+        $this->makeTask($user, $version, 'draft', ['due_at' => now()->addDay(), 'board_position' => 1]);
+
+        $response = $this->withHeader('X-Tenant-ID', 1)
+            ->getJson('/api/task-board?due_today=1');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.0.meta.total', 1);
+        $this->assertEquals($today->id, $response->json('data.0.tasks.0.id'));
+    }
+
+    public function test_index_filters_breached_only(): void
+    {
+        $user = $this->authUser();
+        $version = $this->makeVersion(['draft']);
+        $breached = $this->makeTask($user, $version, 'draft', ['sla_end_at' => now()->subHour()]);
+        $this->makeTask($user, $version, 'draft', ['sla_end_at' => now()->addHour(), 'board_position' => 1]);
+
+        $response = $this->withHeader('X-Tenant-ID', 1)
+            ->getJson('/api/task-board?breached_only=1');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.0.meta.total', 1);
+        $this->assertEquals($breached->id, $response->json('data.0.tasks.0.id'));
+    }
 }
 

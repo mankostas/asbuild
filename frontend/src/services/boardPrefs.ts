@@ -2,10 +2,15 @@
 export type BoardPrefs = {
   filters: {
     statusIds: string[];
-    typeId: string | null;
+    typeIds: string[];
     assigneeId: string | null;
     priority: 'low' | 'medium' | 'high' | null;
+    sla: string | null;
+    q: string | null;
     hasPhotos: boolean | null;
+    mine: boolean;
+    dueToday: boolean;
+    breachedOnly: boolean;
     dates?: { from?: string; to?: string };
   };
   sorting: { key: 'created_at' | 'due_at' | 'priority' | 'board_position'; dir: 'asc' | 'desc' };
