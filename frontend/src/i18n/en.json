@@ -234,7 +234,9 @@
     "dueToday": "Due today",
     "breachedOnly": "Breached only",
     "clear": "Clear",
-    "loadMore": "Load more"
+    "loadMore": "Load more",
+    "emptyColumn": "No tasks in this column.",
+    "noColumns": "No columns yet. Create task types to define board columns."
   },
   "featureGrants": {
     "title": "Feature Grants"

@@ -31,7 +31,7 @@
         </template>
       </Dropdown>
     </div>
-    <div class="flex space-x-6 overflow-x-auto pb-4">
+    <div v-if="columns.length" class="flex space-x-6 overflow-x-auto pb-4">
       <div
         v-for="col in columns"
         :key="col.status.slug"
@@ -46,6 +46,7 @@
             </div>
           </div>
           <draggable
+            v-if="col.tasks.length"
             v-model="col.tasks"
             group="tasks"
             item-key="id"
@@ -64,7 +65,23 @@
               />
             </template>
           </draggable>
-          <div class="p-2" v-if="col.meta?.has_more">
+          <EmptyState
+            v-else
+            :illustration="columnEmpty"
+            :message="t('board.emptyColumn')"
+            wrapperClass="m-2"
+          >
+            <template #action>
+              <Button
+                btnClass="btn-link text-sm"
+                :aria-label="t('board.clearFilters')"
+                @click="clearFilters"
+              >
+                {{ t('board.clearFilters') }}
+              </Button>
+            </template>
+          </EmptyState>
+          <div v-if="col.meta?.has_more" class="p-2">
             <Button
               btnClass="btn-outline btn-sm w-full"
               :aria-label="t('board.loadMore')"
@@ -78,12 +95,29 @@
         </Card>
       </div>
     </div>
+    <EmptyState
+      v-else
+      :illustration="boardEmpty"
+      :message="t('board.noColumns')"
+      wrapperClass="max-w-md mx-auto"
+    >
+      <template v-if="canTaskTypes" #action>
+        <Button
+          btnClass="btn-primary"
+          :aria-label="t('routes.taskTypes')"
+          @click="router.push({ name: 'taskTypes.list' })"
+        >
+          {{ t('routes.taskTypes') }}
+        </Button>
+      </template>
+    </EmptyState>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import draggable from 'vuedraggable';
 import api from '@/services/api';
 import { useNotify } from '@/plugins/notify';
@@ -94,14 +128,20 @@ import Dropdown from '@dc/components/Dropdown';
 import Button from '@dc/components/Button';
 import { MenuItem } from '@headlessui/vue';
 import { loadBoardPrefs, saveBoardPrefs, BoardPrefs } from '@/services/boardPrefs';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore, can } from '@/stores/auth';
 import BoardFilters from '@/components/Board/BoardFilters.vue';
 import QuickFilterChips from '@/components/Board/QuickFilterChips.vue';
 import TenantSwitcher from '@/components/admin/TenantSwitcher.vue';
+import EmptyState from '@/components/Board/EmptyState.vue';
+import boardEmpty from '@/assets/illustrations/board-empty.svg';
+import columnEmpty from '@/assets/illustrations/column-empty.svg';
 
 const { t } = useI18n();
 const notify = useNotify();
 const auth = useAuthStore();
+const router = useRouter();
+
+const canTaskTypes = computed(() => can('task_types.view'));
 
 interface Task {
   id: number;
@@ -121,20 +161,22 @@ interface Column {
 const columns = ref<Column[]>([]);
 const dragSnapshots = new Map<number, Column[][]>();
 
+const defaultFilters: BoardPrefs['filters'] = {
+  statusIds: [],
+  typeIds: [],
+  assigneeId: null,
+  priority: null,
+  sla: null,
+  q: null,
+  hasPhotos: null,
+  mine: false,
+  dueToday: false,
+  breachedOnly: false,
+  dates: {},
+};
+
 const prefs = reactive<BoardPrefs>({
-  filters: {
-    statusIds: [],
-    typeIds: [],
-    assigneeId: null,
-    priority: null,
-    sla: null,
-    q: null,
-    hasPhotos: null,
-    mine: false,
-    dueToday: false,
-    breachedOnly: false,
-    dates: {},
-  },
+  filters: { ...defaultFilters },
   sorting: { key: 'created_at', dir: 'asc' },
   cardDensity: 'comfortable',
 });
@@ -163,6 +205,10 @@ watch(
   load,
   { deep: true }
 );
+
+function clearFilters() {
+  Object.assign(prefs.filters, defaultFilters);
+}
 
 function updateTask(updated: Task) {
   const col = columns.value.find((c) => c.tasks.some((t) => t.id === updated.id));

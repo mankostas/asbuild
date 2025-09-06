@@ -112,6 +112,16 @@ class TaskBoardTest extends TestCase
             ->assertStatus(422);
     }
 
+    public function test_index_returns_empty_when_no_columns(): void
+    {
+        $this->authUser();
+
+        $this->withHeader('X-Tenant-ID', 1)
+            ->getJson('/api/task-board')
+            ->assertStatus(200)
+            ->assertJson(['data' => []]);
+    }
+
     public function test_index_returns_normalized_columns(): void
     {
         $user = $this->authUser();
