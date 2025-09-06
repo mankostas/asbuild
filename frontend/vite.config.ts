@@ -21,7 +21,10 @@ export default defineConfig(({ command }) => ({
   },
   preview: { cors: { origin: '*' } },
   resolve: {
-    alias: { '@': path.resolve(__dirname, 'src') },
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      '@dc': path.resolve(__dirname, '../dashcode-full-source-code/src'),
+    },
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.vue'],
   },
   css: {

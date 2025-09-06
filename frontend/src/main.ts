@@ -5,6 +5,7 @@ import { createApp, watch } from "vue";
 import "simplebar-vue/dist/simplebar.min.css";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/light.css";
+import "@dc/assets/scss/tailwind.scss"; // DC base/components/utilities
 import VueGoodTablePlugin from "vue-good-table-next";
 import "vue-good-table-next/dist/vue-good-table-next.css";
 import VueSweetalert2 from "vue-sweetalert2";
