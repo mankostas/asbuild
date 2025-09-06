@@ -707,30 +707,39 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
 
 onMounted(async () => {
   loading.value = true;
-  const [_, _featureMap, typeRes, versionsList] = await Promise.all([
-    tenantStore.loadTenants({ per_page: 100, scope: 'all' }),
-    api.get('/lookups/feature-map'),
-    isEdit.value ? api.get(`/task-types/${route.params.id}`) : Promise.resolve(null),
-    isEdit.value ? versionsStore.list(taskTypeId.value) : Promise.resolve([]),
-  ]);
-  void _featureMap;
-  if (isEdit.value && typeRes) {
-    const typeData = typeRes.data.data ?? typeRes.data;
-    name.value = typeData.name || '';
-    tenantId.value =
-      typeData.tenant_id !== null && typeData.tenant_id !== undefined
-        ? Number(typeData.tenant_id)
-        : '';
-    await refreshTenant(tenantId.value);
-    versions.value = versionsList as any[];
-    if ((versionsList as any[]).length) {
-      selectedVersionId.value = (versionsList as any[])[0].id;
-      loadVersion((versionsList as any[])[0]);
+  try {
+    const [_, _featureMap, typeRes, versionsList] = await Promise.all([
+      tenantStore.loadTenants(
+        auth.isSuperAdmin
+          ? { per_page: 100, scope: 'all' }
+          : { per_page: 100 },
+      ),
+      api.get('/lookups/feature-map'),
+      isEdit.value ? api.get(`/task-types/${route.params.id}`) : Promise.resolve(null),
+      isEdit.value ? versionsStore.list(taskTypeId.value) : Promise.resolve([]),
+    ]);
+    void _featureMap;
+    if (isEdit.value && typeRes) {
+      const typeData = typeRes.data.data ?? typeRes.data;
+      name.value = typeData.name || '';
+      tenantId.value =
+        typeData.tenant_id !== null && typeData.tenant_id !== undefined
+          ? Number(typeData.tenant_id)
+          : '';
+      await refreshTenant(tenantId.value);
+      versions.value = versionsList as any[];
+      if ((versionsList as any[]).length) {
+        selectedVersionId.value = (versionsList as any[])[0].id;
+        loadVersion((versionsList as any[])[0]);
+      }
+    } else {
+      tenantStore.setTenant('');
     }
-  } else {
+  } catch (err) {
     tenantStore.setTenant('');
+  } finally {
+    loading.value = false;
   }
-  loading.value = false;
 });
 
 watch(tenantId, (id, oldId) => {
