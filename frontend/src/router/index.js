@@ -30,19 +30,19 @@ export const routes = [
       layout: 'app',
     },
   },
-  {
-    path: '/tasks/create',
-    name: 'tasks.create',
-    component: () => import('@/views/tasks/TaskForm.vue'),
-    meta: {
-      requiresAuth: true,
-      requiredAbilities: ['tasks.create', 'tasks.manage'],
-      breadcrumb: 'routes.taskCreate',
-      title: 'Create Task',
-      layout: 'app',
-      groupParent: 'tasks.list',
+    {
+      path: '/tasks/create',
+      name: 'tasks.create',
+      component: () => import('@/views/tasks/TaskForm.vue'),
+      meta: {
+        requiresAuth: true,
+        requiredAbilities: ['tasks.create'],
+        breadcrumb: 'routes.taskCreate',
+        title: 'Create Task',
+        layout: 'app',
+        groupParent: 'tasks.list',
+      },
     },
-  },
   {
     path: '/tasks/:id/edit',
     name: 'tasks.edit',

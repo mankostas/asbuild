@@ -1,72 +1,65 @@
 <template>
   <div v-if="canAccess">
-    <form class="max-w-lg space-y-4" @submit.prevent="submitForm">
-      <VueSelect label="Type" :error="taskTypeError">
-        <vSelect
-          v-model="taskTypeId"
-          :options="types"
-          label="name"
-          :reduce="(t: any) => t.id"
-          placeholder="Select type"
-          @option:selected="onTypeChange"
+    <Card class="max-w-lg p-6 space-y-4">
+      <form class="space-y-4" @submit.prevent="submitForm">
+        <Textinput v-model="title" :label="t('tasks.form.title')" />
+
+        <FromGroup :label="t('tasks.form.type')" :error="taskTypeError">
+          <Select
+            v-model="taskTypeId"
+            :options="typeOptions"
+            :placeholder="t('tasks.form.typePlaceholder')"
+            @change="onTypeChange"
+          />
+        </FromGroup>
+
+        <FromGroup v-if="versionOptions.length" :label="t('tasks.form.version')">
+          <Select v-model="taskTypeVersionId" :options="versionOptions" />
+        </FromGroup>
+
+        <InputGroup v-model="dueAt" :label="t('tasks.form.dueAt')" type="date" />
+
+        <StatusSelect
+          v-if="isEdit"
+          v-model="status"
+          :options="statusOptions"
+          :label="t('tasks.form.status')"
+          :error="errors.status"
         />
-      </VueSelect>
 
-      <VueSelect v-if="versions.length" label="Version">
-        <vSelect
-          v-model="taskTypeVersionId"
-          :options="versions"
-          label="semver"
-          :reduce="(v: any) => v.id"
+        <AssigneePicker v-if="assigneeField && can('tasks.assign')" v-model="assignee" />
+
+        <PrioritySelect
+          v-model="priority"
+          :label="t('tasks.form.priority')"
+          :options="priorityOptions"
         />
-      </VueSelect>
 
-      <StatusSelect
-        v-if="isEdit"
-        v-model="status"
-        :options="statusOptions"
-        :label="t('tasks.form.status')"
-        :error="errors.status"
-      />
-
-      <AssigneePicker v-if="assigneeField && can('tasks.assign')" v-model="assignee" />
-
-      <PrioritySelect
-        v-model="priority"
-        :label="t('tasks.form.priority')"
-        :options="priorityOptions"
-      />
-
-      <DateTimeInput
-        id="due-at"
-        v-model="dueAt"
-        :label="t('tasks.form.dueAt')"
-      />
-
-      <JsonSchemaForm
-        v-if="currentSchemaNoAssignee"
-        :key="taskTypeId"
-        v-model="formData"
-        :schema="currentSchemaNoAssignee"
-        :task-id="0"
-      />
-
-      <div class="pt-2">
-        <Button
-          type="submit"
-          text="Submit"
-          btnClass="btn-dark"
-          :isDisabled="!meta.valid || !canSubmit"
+        <JsonSchemaForm
+          v-if="currentSchemaNoAssignee"
+          :key="taskTypeId"
+          v-model="formData"
+          :schema="currentSchemaNoAssignee"
+          :task-id="0"
         />
-      </div>
-    </form>
 
-    <Modal :activeModal="showError" title="Error" @close="showError = false">
-      <p>{{ serverError }}</p>
-      <template #footer>
-        <Button text="Close" btnClass="btn-dark" @click="showError = false" />
-      </template>
-    </Modal>
+        <div class="pt-2">
+          <Button
+            type="submit"
+            :text="t('actions.save')"
+            btnClass="btn-dark"
+            :isDisabled="!meta.valid || !canSubmit"
+          />
+        </div>
+      </form>
+
+      <Modal :activeModal="showError" :title="t('common.error')" @close="showError = false">
+        <p>{{ serverError }}</p>
+        <template #footer>
+          <Button :text="t('actions.close')" btnClass="btn-dark" @click="showError = false" />
+        </template>
+      </Modal>
+    </Card>
   </div>
 </template>
 
@@ -76,25 +69,28 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api, { extractFormErrors } from '@/services/api';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
-import Button from '@/components/ui/Button/index.vue';
-import VueSelect from '@/components/ui/Select/VueSelect.vue';
-import Modal from '@/components/ui/Modal/index.vue';
 import { useField, useForm } from 'vee-validate';
 import * as yup from 'yup';
-import vSelect from 'vue-select';
 import { useNotify } from '@/plugins/notify';
 import AssigneePicker from '@/components/tasks/AssigneePicker.vue';
 import PrioritySelect from '@/components/fields/PrioritySelect.vue';
-import DateTimeInput from '@/components/fields/DateTimeInput.vue';
 import StatusSelect from '@/components/fields/StatusSelect.vue';
 import { toISO } from '@/utils/datetime';
 import { can } from '@/stores/auth';
+import Button from '@dc/components/Button';
+import Card from '@dc/components/Card';
+import Select from '@dc/components/Select';
+import Textinput from '@dc/components/Textinput';
+import InputGroup from '@dc/components/InputGroup';
+import FromGroup from '@dc/components/FromGroup';
+import Modal from '@dc/components/Modal';
 
 const notify = useNotify();
 const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
 
+const title = ref('');
 const types = ref<any[]>([]);
 const versions = ref<any[]>([]);
 const taskTypeVersionId = ref<number | null>(null);
@@ -109,6 +105,9 @@ const originalStatus = ref<string | null>(null);
 const assignee = ref<{ id: number } | null>(null);
 const priority = ref('');
 const dueAt = ref<string | null>(null);
+
+const typeOptions = computed(() => types.value.map((t: any) => ({ value: t.id, label: t.name })));
+const versionOptions = computed(() => versions.value.map((v: any) => ({ value: v.id, label: v.semver })));
 
 const statusOptions = ref<{ label: string; value: string }[]>([]);
 const priorityOptions = computed(() => [
@@ -136,7 +135,7 @@ const canAccess = computed(() =>
 
 onMounted(async () => {
   const [typesRes, statusesRes] = await Promise.all([
-    api.get('/task-types'),
+    api.get('/task-types/options'),
     api.get('/task-statuses'),
   ]);
   types.value = typesRes.data;
@@ -240,7 +239,7 @@ const assigneeRequired = computed(() => {
 const requiredFields = computed(() => currentSchemaNoAssignee.value?.required || []);
 
 const canSubmit = computed(() => {
-  if (!taskTypeId.value) return false;
+  if (!taskTypeId.value || !title.value.trim()) return false;
   const formValid = requiredFields.value.every((f: string) => {
     const val = formData.value[f];
     return !(val === undefined || val === null || val === '');
@@ -256,6 +255,7 @@ const submitForm = handleSubmit(async () => {
     task_type_id: taskTypeId.value,
     form_data: formData.value,
   };
+  if (title.value) payload.title = title.value;
   if (taskTypeVersionId.value) payload.task_type_version_id = taskTypeVersionId.value;
   if (scheduledAt.value) payload.scheduled_at = toISO(scheduledAt.value);
   if (slaStartAt.value) payload.sla_start_at = toISO(slaStartAt.value);

@@ -42,6 +42,10 @@ return [
     'task_types' => [
         'label' => 'Task Types',
         'abilities' => [
+            'task_types.view',
+            'task_types.create',
+            'task_types.update',
+            'task_types.delete',
             'task_types.manage',
             'task_type_versions.manage',
             'task_automations.manage',

@@ -17,7 +17,13 @@ class TaskTypeBuilderTest extends TestCase
     public function test_create_task_type_with_sections(): void
     {
         $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
-        $role = Role::create(['name' => 'Admin', 'slug' => 'admin', 'tenant_id' => $tenant->id, 'abilities' => ['task_types.manage'], 'level' => 1]);
+        $role = Role::create([
+            'name' => 'Admin',
+            'slug' => 'admin',
+            'tenant_id' => $tenant->id,
+            'abilities' => ['task_types.create'],
+            'level' => 1,
+        ]);
         $user = User::create([
             'name' => 'U',
             'email' => 'u@example.com',
@@ -57,7 +63,7 @@ class TaskTypeBuilderTest extends TestCase
     public function test_store_task_type_with_abilities(): void
     {
         $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
-        $role = Role::create(['name' => 'Admin', 'slug' => 'admin', 'tenant_id' => $tenant->id, 'abilities' => ['task_types.manage'], 'level' => 1]);
+        $role = Role::create(['name' => 'Admin', 'slug' => 'admin', 'tenant_id' => $tenant->id, 'abilities' => ['task_types.create'], 'level' =​> 1]);
         $user = User::create([
             'name' => 'U',
             'email' => 'u2@example.com',
@@ -86,7 +92,13 @@ class TaskTypeBuilderTest extends TestCase
     public function test_store_task_type_with_role_permissions(): void
     {
         $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
-        $role = Role::create(['name' => 'Admin', 'slug' => 'admin', 'tenant_id' => $tenant->id, 'abilities' => ['task_types.manage'], 'level' => 1]);
+        $role = Role::create([
+            'name' => 'Admin',
+            'slug' => 'admin',
+            'tenant_id' => $tenant->id,
+            'abilities' => ['task_types.create'],
+            'level' => 1,
+        ]);
         $user = User::create([
             'name' => 'U',
             'email' => 'u3@example.com',
