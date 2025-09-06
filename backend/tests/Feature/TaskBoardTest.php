@@ -6,9 +6,9 @@ use App\Models\Role;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\TaskType;
+use App\Models\TaskTypeVersion;
 use App\Models\Tenant;
 use App\Models\User;
-use App\Services\BoardPositionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
@@ -34,7 +34,7 @@ class TaskBoardTest extends TestCase
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => 1,
-            'abilities' => ['tasks.view', 'tasks.update'],
+            'abilities' => ['tasks.view|tasks.manage', 'tasks.update'],
             'level' => 1,
         ]);
         $user = User::create([
@@ -50,30 +50,42 @@ class TaskBoardTest extends TestCase
         return $user;
     }
 
-    protected function makeTask(User $user): Task
+    protected function makeVersion(array $statuses): TaskTypeVersion
     {
         $type = TaskType::create([
-            'name' => 'Type',
+            'name' => 'Type' . uniqid(),
             'tenant_id' => 1,
-            'statuses' => ['draft' => [], 'assigned' => []],
-            'status_flow_json' => [
-                ['draft', 'assigned'],
-            ],
         ]);
+        $version = TaskTypeVersion::create([
+            'task_type_id' => $type->id,
+            'semver' => '1.0.0',
+            'statuses' => collect($statuses)->map(fn ($s) => ['slug' => $s])->all(),
+            'status_flow_json' => [[$statuses[0], $statuses[1] ?? $statuses[0]]],
+            'created_by' => 1,
+            'published_at' => now(),
+        ]);
+        $type->current_version_id = $version->id;
+        $type->save();
+        return $version;
+    }
 
-        return Task::create([
+    protected function makeTask(User $user, TaskTypeVersion $version, string $status = 'draft', array $extra = []): Task
+    {
+        return Task::create(array_merge([
             'tenant_id' => 1,
             'user_id' => $user->id,
-            'task_type_id' => $type->id,
-            'status_slug' => 'draft',
-            'board_position' => 1000,
-        ]);
+            'task_type_id' => $version->task_type_id,
+            'task_type_version_id' => $version->id,
+            'status_slug' => $status,
+            'board_position' => $extra['board_position'] ?? 1000,
+        ], $extra));
     }
 
     public function test_move_valid(): void
     {
         $user = $this->authUser();
-        $task = $this->makeTask($user);
+        $version = $this->makeVersion(['draft', 'assigned']);
+        $task = $this->makeTask($user, $version, 'draft', ['assigned_user_id' => $user->id]);
 
         $this->withHeader('X-Tenant-ID', 1)
             ->patchJson('/api/task-board/move', [
@@ -88,7 +100,8 @@ class TaskBoardTest extends TestCase
     public function test_move_invalid_transition(): void
     {
         $user = $this->authUser();
-        $task = $this->makeTask($user);
+        $version = $this->makeVersion(['draft', 'assigned']);
+        $task = $this->makeTask($user, $version, 'draft', ['assigned_user_id' => $user->id]);
 
         $this->withHeader('X-Tenant-ID', 1)
             ->patchJson('/api/task-board/move', [
@@ -102,7 +115,8 @@ class TaskBoardTest extends TestCase
     public function test_index_returns_normalized_columns(): void
     {
         $user = $this->authUser();
-        $task = $this->makeTask($user);
+        $version = $this->makeVersion(['draft', 'assigned']);
+        $task = $this->makeTask($user, $version);
 
         $this->withHeader('X-Tenant-ID', 1)
             ->getJson('/api/task-board')
@@ -128,23 +142,9 @@ class TaskBoardTest extends TestCase
     public function test_index_reports_total_and_overflow_flag(): void
     {
         $user = $this->authUser();
-        $type = TaskType::create([
-            'name' => 'Type',
-            'tenant_id' => 1,
-            'statuses' => ['draft' => [], 'assigned' => []],
-            'status_flow_json' => [
-                ['draft', 'assigned'],
-            ],
-        ]);
-
+        $version = $this->makeVersion(['draft']);
         for ($i = 0; $i < 55; $i++) {
-            Task::create([
-                'tenant_id' => 1,
-                'user_id' => $user->id,
-                'task_type_id' => $type->id,
-                'status_slug' => 'draft',
-                'board_position' => $i,
-            ]);
+            $this->makeTask($user, $version, 'draft', ['board_position' => $i]);
         }
 
         $response = $this->withHeader('X-Tenant-ID', 1)->getJson('/api/task-board');
@@ -159,14 +159,9 @@ class TaskBoardTest extends TestCase
     public function test_move_updates_board_position(): void
     {
         $user = $this->authUser();
-        $task = $this->makeTask($user);
-        Task::create([
-            'tenant_id' => 1,
-            'user_id' => $user->id,
-            'task_type_id' => $task->task_type_id,
-            'status_slug' => 'assigned',
-            'board_position' => 1000,
-        ]);
+        $version = $this->makeVersion(['draft', 'assigned']);
+        $task = $this->makeTask($user, $version, 'draft', ['assigned_user_id' => $user->id]);
+        $this->makeTask($user, $version, 'assigned', ['board_position' => 1000]);
 
         $this->withHeader('X-Tenant-ID', 1)
             ->patchJson('/api/task-board/move', [
@@ -182,4 +177,55 @@ class TaskBoardTest extends TestCase
             'status_slug' => 'assigned',
         ]);
     }
+
+    public function test_columns_union_of_statuses_across_types(): void
+    {
+        TaskStatus::create(['slug' => 'done', 'name' => 'Done', 'position' => 3]);
+        $user = $this->authUser();
+        $v1 = $this->makeVersion(['draft', 'assigned']);
+        $v2 = $this->makeVersion(['draft', 'done']);
+        $this->makeTask($user, $v1, 'assigned');
+        $this->makeTask($user, $v2, 'done');
+
+        $response = $this->withHeader('X-Tenant-ID', 1)->getJson('/api/task-board');
+
+        $response->assertStatus(200);
+        $this->assertEquals(
+            ['draft', 'assigned', 'done'],
+            collect($response->json('data'))->pluck('status.slug')->all()
+        );
+    }
+
+    public function test_column_endpoint_paginates(): void
+    {
+        $user = $this->authUser();
+        $version = $this->makeVersion(['draft']);
+        for ($i = 0; $i < 55; $i++) {
+            $this->makeTask($user, $version, 'draft', ['board_position' => $i]);
+        }
+
+        $page2 = $this->withHeader('X-Tenant-ID', 1)
+            ->getJson('/api/task-board/column?status=draft&page=2');
+
+        $page2->assertStatus(200)
+            ->assertJsonPath('meta.total', 55)
+            ->assertJsonPath('meta.has_more', false);
+        $this->assertCount(5, $page2->json('data'));
+    }
+
+    public function test_index_filters_by_assignee(): void
+    {
+        $user = $this->authUser();
+        $version = $this->makeVersion(['draft']);
+        $task1 = $this->makeTask($user, $version, 'draft', ['assigned_user_id' => $user->id]);
+        $this->makeTask($user, $version, 'draft', ['assigned_user_id' => null, 'board_position' => 1]);
+
+        $response = $this->withHeader('X-Tenant-ID', 1)
+            ->getJson('/api/task-board?assignee_id=' . $user->id);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.0.meta.total', 1);
+        $this->assertEquals($task1->id, $response->json('data.0.tasks.0.id'));
+    }
 }
+
