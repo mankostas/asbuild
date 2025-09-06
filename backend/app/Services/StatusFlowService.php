@@ -62,57 +62,84 @@ class StatusFlowService
     }
 
     /**
-     * Validate constraints for transition. Returns reason string on failure or null on success.
+     * Validate transition constraints and abort with 422 on failure.
      */
-    public function checkConstraints(Task $task, string $next): ?string
+    public function checkConstraints(Task $task, string $toSlug): void
     {
-        $type = $task->typeVersion ?? $task->type;
-        if (! $type) {
-            return null;
+        $version = $task->type?->currentVersion;
+        if (! $version) {
+            return;
         }
 
-        if ($next !== 'completed') {
-            return null;
+        $statuses = collect($version->statuses ?? []);
+        if ($statuses->isEmpty()) {
+            return;
         }
 
-        $form = $task->form_data ?? [];
-        $fields = collect($type->schema_json['sections'] ?? [])
-            ->flatMap(fn ($s) => $s['fields'] ?? []);
+        $initial = data_get($statuses->first(), 'slug');
+        $final   = data_get($statuses->last(), 'slug');
 
-        foreach ($fields as $field) {
-            if (! ($field['required'] ?? false)) {
-                continue;
-            }
-            $key = $field['key'];
-            if (! array_key_exists($key, $form)) {
-                return $this->isPhotoField($field) ? 'missing_photo' : 'missing_field';
-            }
-            $value = $form[$key];
-            if ($this->isPhotoField($field)) {
-                if (empty($value) || (is_array($value) && count($value) === 0)) {
-                    return 'missing_photo';
-                }
-            } else {
-                if ($value === null || $value === '' || (is_array($value) && count($value) === 0)) {
-                    return 'missing_field';
-                }
-            }
+        if ($toSlug !== $initial && empty($task->assigned_user_id)) {
+            $this->abort422(
+                'assignee_required',
+                __('Assignee is required to leave the initial status.')
+            );
         }
 
-        $require = $type instanceof TaskTypeVersion
-            ? ($type->taskType->require_subtasks_complete ?? false)
-            : ($type->require_subtasks_complete ?? false);
-        if ($require &&
-            $task->subtasks()->where('is_required', true)->where('is_completed', false)->exists()) {
-            return 'subtasks_incomplete';
+        if ($toSlug === $final && $this->hasIncompleteRequiredSubtasks($task)) {
+            $this->abort422(
+                'subtasks_incomplete',
+                __('Complete required subtasks before finishing.')
+            );
         }
 
-        return null;
+        if ($toSlug === $final && ! $this->hasAllRequiredPhotos($task, $version->schema_json)) {
+            $this->abort422(
+                'photos_required',
+                __('Required photos are missing.')
+            );
+        }
     }
 
-    protected function isPhotoField(array $field): bool
+    protected function abort422(string $code, string $message): void
     {
-        $type = $field['type'] ?? '';
-        return str_contains((string) $type, 'photo');
+        throw new \Illuminate\Http\Exceptions\HttpResponseException(
+            response()->json(['message' => $message, 'code' => $code], 422)
+        );
+    }
+
+    protected function hasIncompleteRequiredSubtasks(Task $task): bool
+    {
+        return $task->subtasks()
+            ->where('is_required', true)
+            ->where(function ($q) {
+                $q->where('is_completed', false)->orWhereNull('is_completed');
+            })
+            ->exists();
+    }
+
+    protected function hasAllRequiredPhotos(Task $task, $schemaJson): bool
+    {
+        $schema = is_array($schemaJson)
+            ? $schemaJson
+            : (json_decode((string) $schemaJson, true) ?? []);
+
+        $required = collect(data_get($schema, 'sections', []))
+            ->flatMap(fn ($s) => data_get($s, 'photos', []))
+            ->filter(fn ($p) => data_get($p, 'required') === true)
+            ->pluck('key')
+            ->filter()
+            ->unique();
+
+        if ($required->isEmpty()) {
+            return true;
+        }
+
+        $attached = $task->attachments()
+            ->whereIn('task_attachments.field_key', $required)
+            ->pluck('task_attachments.field_key')
+            ->unique();
+
+        return $attached->count() === $required->count();
     }
 }

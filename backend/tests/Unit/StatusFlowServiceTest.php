@@ -5,10 +5,12 @@ namespace Tests\Unit;
 use App\Models\Task;
 use App\Models\TaskType;
 use App\Models\TaskSubtask;
+use App\Models\TaskTypeVersion;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\StatusFlowService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Tests\TestCase;
 
 class StatusFlowServiceTest extends TestCase
@@ -47,103 +49,122 @@ class StatusFlowServiceTest extends TestCase
         $this->assertFalse($service->canTransition('draft', 'assigned', $type));
     }
 
-    public function test_detects_missing_required_field(): void
+    public function test_assignee_required(): void
     {
         $type = TaskType::create([
             'name' => 'Type',
             'tenant_id' => 1,
-            'schema_json' => [
-                'sections' => [
-                    ['fields' => [
-                        ['key' => 'title', 'type' => 'text', 'required' => true],
-                    ]],
-                ],
-            ],
         ]);
+        $version = TaskTypeVersion::create([
+            'task_type_id' => $type->id,
+            'semver' => '1.0.0',
+            'statuses' => [
+                ['slug' => 'initial'],
+                ['slug' => 'final'],
+            ],
+            'created_by' => 1,
+        ]);
+        $type->current_version_id = $version->id;
+        $type->save();
 
         $task = Task::create([
             'tenant_id' => 1,
             'user_id' => 1,
             'task_type_id' => $type->id,
-            'status' => 'in_progress',
-            'form_data' => [],
+            'task_type_version_id' => $version->id,
+            'status_slug' => 'initial',
         ]);
 
         $service = new StatusFlowService();
-        $this->assertSame('missing_field', $service->checkConstraints($task, 'completed'));
+        try {
+            $service->checkConstraints($task, 'final');
+            $this->fail('Expected exception not thrown');
+        } catch (HttpResponseException $e) {
+            $this->assertEquals('assignee_required', $e->getResponse()->getData(true)['code']);
+        }
     }
 
-    public function test_detects_missing_photo(): void
+    public function test_incomplete_required_subtasks_block_final(): void
     {
         $type = TaskType::create([
             'name' => 'Type',
             'tenant_id' => 1,
-            'schema_json' => [
-                'sections' => [
-                    ['fields' => [
-                        ['key' => 'after_photo', 'type' => 'photo_single', 'required' => true],
-                    ]],
-                ],
-            ],
         ]);
+        $version = TaskTypeVersion::create([
+            'task_type_id' => $type->id,
+            'semver' => '1.0.0',
+            'statuses' => [
+                ['slug' => 'initial'],
+                ['slug' => 'final'],
+            ],
+            'created_by' => 1,
+        ]);
+        $type->current_version_id = $version->id;
+        $type->save();
 
         $task = Task::create([
             'tenant_id' => 1,
             'user_id' => 1,
             'task_type_id' => $type->id,
-            'status' => 'in_progress',
-            'form_data' => ['after_photo' => []],
+            'task_type_version_id' => $version->id,
+            'status_slug' => 'initial',
+            'assigned_user_id' => 1,
+        ]);
+
+        TaskSubtask::create([
+            'task_id' => $task->id,
+            'title' => 'S',
+            'is_required' => true,
+            'is_completed' => false,
         ]);
 
         $service = new StatusFlowService();
-        $this->assertSame('missing_photo', $service->checkConstraints($task, 'completed'));
+        try {
+            $service->checkConstraints($task, 'final');
+            $this->fail('Expected exception not thrown');
+        } catch (HttpResponseException $e) {
+            $this->assertEquals('subtasks_incomplete', $e->getResponse()->getData(true)['code']);
+        }
     }
 
-    public function test_detects_missing_repeater(): void
+    public function test_missing_required_photos_block_final(): void
     {
         $type = TaskType::create([
             'name' => 'Type',
             'tenant_id' => 1,
+        ]);
+        $version = TaskTypeVersion::create([
+            'task_type_id' => $type->id,
+            'semver' => '1.0.0',
             'schema_json' => [
                 'sections' => [
-                    ['fields' => [
-                        ['key' => 'items', 'type' => 'repeater', 'required' => true],
-                    ]],
+                    ['photos' => [[ 'key' => 'p1', 'required' => true ]]],
                 ],
             ],
+            'statuses' => [
+                ['slug' => 'initial'],
+                ['slug' => 'final'],
+            ],
+            'created_by' => 1,
         ]);
+        $type->current_version_id = $version->id;
+        $type->save();
 
         $task = Task::create([
             'tenant_id' => 1,
             'user_id' => 1,
             'task_type_id' => $type->id,
-            'status' => 'in_progress',
-            'form_data' => ['items' => []],
+            'task_type_version_id' => $version->id,
+            'status_slug' => 'initial',
+            'assigned_user_id' => 1,
         ]);
 
         $service = new StatusFlowService();
-        $this->assertSame('missing_field', $service->checkConstraints($task, 'completed'));
-    }
-
-    public function test_detects_incomplete_subtasks(): void
-    {
-        $type = TaskType::create([
-            'name' => 'Type',
-            'tenant_id' => 1,
-            'schema_json' => [],
-            'require_subtasks_complete' => true,
-        ]);
-
-        $task = Task::create([
-            'tenant_id' => 1,
-            'user_id' => 1,
-            'task_type_id' => $type->id,
-            'status' => 'in_progress',
-        ]);
-
-        TaskSubtask::create(['task_id' => $task->id, 'title' => 'S', 'is_completed' => false, 'is_required' => true]);
-
-        $service = new StatusFlowService();
-        $this->assertSame('subtasks_incomplete', $service->checkConstraints($task, 'completed'));
+        try {
+            $service->checkConstraints($task, 'final');
+            $this->fail('Expected exception not thrown');
+        } catch (HttpResponseException $e) {
+            $this->assertEquals('photos_required', $e->getResponse()->getData(true)['code']);
+        }
     }
 }
