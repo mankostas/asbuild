@@ -1,12 +1,10 @@
 <template>
-  <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -->
   <div
     v-if="open"
     class="fixed inset-0 z-50 flex items-start justify-center p-4"
     role="dialog"
     aria-modal="true"
     tabindex="-1"
-    @keydown.esc="emit('close')"
   >
     <button
       type="button"
@@ -104,6 +102,9 @@ function onKey(e: KeyboardEvent) {
     e.preventDefault();
     const a = filtered.value[index.value];
     if (a) select(a);
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    emit('close');
   }
 }
 

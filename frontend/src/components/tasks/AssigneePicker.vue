@@ -1,5 +1,5 @@
 <template>
-  <VueSelect>
+  <VueSelect :id="id" :label="label" classLabel="sr-only">
     <template #default="{ inputId }">
       <vSelect
         :id="inputId"
@@ -23,7 +23,11 @@ interface AssigneeValue {
   id: number;
 }
 
-const props = defineProps<{ modelValue: AssigneeValue | null }>();
+const props = defineProps<{
+  modelValue: AssigneeValue | null;
+  id?: string;
+  label?: string;
+}>();
 const emit = defineEmits<{ (e: 'update:modelValue', value: AssigneeValue | null): void }>();
 
 const lookups = useLookupsStore();

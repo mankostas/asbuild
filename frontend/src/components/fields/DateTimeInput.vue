@@ -5,7 +5,7 @@
     :label="label"
     :modelValue="display"
     :isReadonly="readonly"
-    @update:modelValue="onChange"
+    @update:model-value="onChange"
   />
 </template>
 

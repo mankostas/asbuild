@@ -38,7 +38,7 @@
         labelClass="btn btn-light btn-xs"
       >
         <template #menus>
-          <MenuItem v-for="s in statusOptions" :key="s.slug" v-slot="{ active }">
+          <MenuItem v-for="s in statusOptions" :key="s.slug" #default="{ active }">
             <button
               class="block w-full text-left px-4 py-2 text-sm"
               :class="active ? 'bg-slate-100' : ''"

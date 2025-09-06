@@ -1,7 +1,13 @@
 <template>
   <div class="space-y-2">
     <Tabs v-model="tab" :tabs="tabs" />
-    <VueSelect v-model="selected" :options="options" label="Select reviewer" />
+    <VueSelect
+      :id="id"
+      v-model="selected"
+      :options="options"
+      :label="label"
+      classLabel="sr-only"
+    />
   </div>
 </template>
 
@@ -16,7 +22,11 @@ interface ReviewerValue {
   id: number;
 }
 
-const props = defineProps<{ modelValue: ReviewerValue | null }>();
+const props = defineProps<{
+  modelValue: ReviewerValue | null;
+  id?: string;
+  label?: string;
+}>();
 const emit = defineEmits<{ (e: 'update:modelValue', value: ReviewerValue | null): void }>();
 
 const lookups = useLookupsStore();

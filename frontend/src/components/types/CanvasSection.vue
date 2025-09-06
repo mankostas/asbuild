@@ -18,19 +18,15 @@
         class="flex-1 mx-2"
         classInput="text-sm"
       />
-      <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -->
-      <Select
+      <select
         v-model="section.cols"
-        :options="[
-          { value: 1, label: '1' },
-          { value: 2, label: '2' },
-          { value: 3, label: '3' },
-        ]"
-        :label="'Columns'"
-        class="w-20 mr-2"
-        classLabel="sr-only"
-        classInput="text-xs"
-      />
+        class="w-20 mr-2 border rounded text-xs"
+        :aria-label="t('Columns')"
+      >
+        <option :value="1">1</option>
+        <option :value="2">2</option>
+        <option :value="3">3</option>
+      </select>
       <Button
         type="button"
         btnClass="btn-outline-danger text-xs px-2 py-1"
@@ -207,7 +203,6 @@ import Textinput from '@/components/ui/Textinput/index.vue';
 import Button from '@/components/ui/Button/index.vue';
 import Card from '@/components/ui/Card/index.vue';
 import Dropdown from '@/components/ui/Dropdown/index.vue';
-import Select from '@/components/ui/Select/index.vue';
 import UiTabs from '@/components/ui/Tabs/index.vue';
 import { MenuItem, Tab, TabPanel } from '@headlessui/vue';
 
