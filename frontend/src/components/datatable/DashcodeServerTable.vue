@@ -127,12 +127,15 @@ const props = defineProps({
       { value: 50, label: '50' },
     ],
   },
+  initialSort: { type: Object as () => any, default: null },
+  initialPerPage: { type: Number, default: 10 },
 });
 
 const slots = useSlots();
 
 const { rows, total, page, perPage, sort, search, loading } = useServerTable(
   props.fetcher,
+  { perPage: props.initialPerPage, sort: props.initialSort },
 );
 
 const tableColumns = computed(() => {
