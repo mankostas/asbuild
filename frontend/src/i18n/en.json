@@ -127,7 +127,10 @@
       "dueAt": "Due",
       "type": "Type",
       "typePlaceholder": "Select type",
-      "version": "Version"
+      "version": "Version",
+      "slaStart": "SLA Start",
+      "slaEnd": "SLA End",
+      "slaTooltip": "Auto-computed from policy"
     },
     "filters": {
       "global": "Search tasks",
@@ -186,6 +189,9 @@
       "photos": "Photos",
       "subtasks": "Subtasks",
       "comments": "Comments"
+    },
+    "details": {
+      "sla": "SLA"
     },
     "subtasks": {
       "title": "Subtasks",

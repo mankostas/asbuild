@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\TaskType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -15,7 +16,7 @@ class TaskSlaPolicyTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_policy_applies_sla_end_at(): void
+    public function test_policy_applies_sla_end_at_for_non_override_user(): void
     {
         $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
         $role = Role::create([
@@ -43,7 +44,7 @@ class TaskSlaPolicyTest extends TestCase
             'statuses' => ['draft' => []],
         ]);
 
-        $policy = $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson("/api/task-types/{$type->id}/sla-policies", [
                 'priority' => 'high',
                 'resolve_within_mins' => 120,
@@ -54,17 +55,68 @@ class TaskSlaPolicyTest extends TestCase
                     ],
                     'holidays' => [],
                 ],
-            ])->assertCreated()->json('data');
+            ])->assertCreated();
+
+        Carbon::setTestNow('2025-01-01T16:00:00Z');
 
         $task = $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/tasks', [
                 'task_type_id' => $type->id,
                 'priority' => 'high',
-                'sla_start_at' => '2025-01-01T16:00:00Z',
+                'sla_start_at' => '2024-01-01T08:00:00Z',
+                'sla_end_at' => '2024-01-01T17:00:00Z',
                 'form_data' => [],
             ])->assertCreated()->json('data');
 
+        $this->assertNull($task['sla_start_at']);
         $this->assertEquals('2025-01-02T10:00:00.000000Z', $task['sla_end_at']);
+    }
+
+    public function test_override_user_can_set_sla_fields(): void
+    {
+        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $role = Role::create([
+            'name' => 'Admin',
+            'slug' => 'admin',
+            'tenant_id' => $tenant->id,
+            'abilities' => ['task_sla_policies.manage', 'tasks.create', 'tasks.manage', 'tasks.sla.override'],
+            'level' => 1,
+        ]);
+        $user = User::create([
+            'name' => 'U',
+            'email' => 'u@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
+        Sanctum::actingAs($user);
+
+        $type = TaskType::create([
+            'name' => 'Type',
+            'tenant_id' => $tenant->id,
+            'schema_json' => ['sections' => []],
+            'statuses' => ['draft' => []],
+        ]);
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson("/api/task-types/{$type->id}/sla-policies", [
+                'priority' => 'high',
+                'resolve_within_mins' => 120,
+            ])->assertCreated();
+
+        $task = $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson('/api/tasks', [
+                'task_type_id' => $type->id,
+                'priority' => 'high',
+                'sla_start_at' => '2025-01-01T08:00:00Z',
+                'sla_end_at' => '2025-01-01T17:00:00Z',
+                'form_data' => [],
+            ])->assertCreated()->json('data');
+
+        $this->assertEquals('2025-01-01T08:00:00.000000Z', $task['sla_start_at']);
+        $this->assertEquals('2025-01-01T17:00:00.000000Z', $task['sla_end_at']);
     }
 
     public function test_can_create_and_list_policies(): void

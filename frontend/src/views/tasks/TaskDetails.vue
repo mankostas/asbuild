@@ -25,7 +25,13 @@
         <li>Assignee: {{ task.assignee?.name || '—' }}</li>
         <li>Priority: {{ task.priority || '—' }}</li>
         <li>SLA End: {{ format(task.sla_end_at) || '—' }}</li>
-        <li>SLA: {{ slaStatus }}</li>
+        <li class="flex items-center gap-2">
+          <span>{{ t('tasks.details.sla') }}:</span>
+          <Badge
+            :label="t(`tasks.chips.sla.${slaStatusKey}`)"
+            :badgeClass="slaBadgeClass"
+          />
+        </li>
       </ul>
       <div class="mt-2">
         <StatusChanger
@@ -106,6 +112,7 @@ import StatusChanger from './StatusChanger.vue';
 import { useTaskStatusesStore } from '@/stores/taskStatuses';
 import { formatDisplay, parseISO, toISO } from '@/utils/datetime';
 import { can } from '@/stores/auth';
+import Badge from '@dc/components/Badge';
 
 const route = useRoute();
 const { t } = useI18n();
@@ -135,15 +142,22 @@ function format(date?: string) {
   return date ? formatDisplay(date) : '';
 }
 
-const slaStatus = computed(() => {
-  const t = task.value;
-  if (!t) return 'none';
-  if (t.sla_status) return t.sla_status;
-  if (!t.sla_end_at) return 'none';
-  const reference = t.completed_at || toISO(new Date());
-  return parseISO(reference) <= parseISO(t.sla_end_at)
-    ? 'within'
-    : 'breached';
+const slaStatusKey = computed(() => {
+  const tsk = task.value;
+  if (!tsk || !tsk.sla_end_at) return 'none';
+  const reference = tsk.completed_at || toISO(new Date());
+  return parseISO(reference) <= parseISO(tsk.sla_end_at) ? 'ok' : 'breached';
+});
+
+const slaBadgeClass = computed(() => {
+  const k = slaStatusKey.value;
+  if (k === 'ok') {
+    return 'bg-success-500 text-success-500 bg-opacity-[0.12] pill';
+  }
+  if (k === 'breached') {
+    return 'bg-danger-500 text-danger-500 bg-opacity-[0.12] pill';
+  }
+  return 'bg-secondary-500 text-secondary-500 bg-opacity-[0.12] pill';
 });
 
 function hasThumb(file: any) {
