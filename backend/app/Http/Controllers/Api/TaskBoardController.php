@@ -29,21 +29,22 @@ class TaskBoardController extends Controller
             ->orderBy('position')
             ->get();
 
-        $columns = $statuses->map(function (TaskStatus $status) use ($tenantId, $typeId) {
+        $columns = $statuses->map(function (TaskStatus $status) use ($tenantId, $typeId, $request) {
             $query = Task::where('tenant_id', $tenantId)
                 ->where('status_slug', $status->slug)
                 ->orderBy('board_position');
             if ($typeId) {
                 $query->where('task_type_id', $typeId);
             }
-            $tasks = $query->paginate(50);
+            $tasks = $query->limit(50)->get();
 
             return [
-                'status' => new TaskStatusResource($status),
-                'tasks' => TaskResource::collection($tasks),
-                'meta' => ['total' => $tasks->total()],
+                'status' => TaskStatusResource::make($status)->toArray($request),
+                'tasks' => TaskResource::collection($tasks)->toArray($request),
             ];
-        });
+        })
+            ->values()
+            ->all();
 
         return response()->json(['data' => $columns]);
     }
