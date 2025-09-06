@@ -21,13 +21,13 @@ class TaskStatusController extends Controller
         }
     }
 
-    public function index(Request $request)
+        public function index(Request $request)
     {
         $scope = $request->query('scope', $request->user()->hasRole('SuperAdmin') ? 'all' : 'tenant');
         $query = TaskStatus::query();
 
         if ($scope === 'tenant') {
-            $tenantId = $request->query('tenant_id', $request->user()->tenant_id);
+            $tenantId = $request->query('tenant_id', $request->header('X-Tenant-ID', $request->user()->tenant_id));
             $query->where(function ($q) use ($tenantId) {
                 $q->whereNull('tenant_id')->orWhere('tenant_id', $tenantId);
             });
