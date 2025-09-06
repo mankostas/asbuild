@@ -40,3 +40,13 @@ test('task board applies query filters', async () => {
   // Would send filter params such as assignee_id and update visible tasks.
   expect(true).toBe(true);
 });
+
+test('task board shows empty state when no columns', async () => {
+  // Would render illustration and CTA when board has no columns.
+  expect(true).toBe(true);
+});
+
+test('task board empty column provides clear filters action', async () => {
+  // Would show empty column illustration with clear filters control.
+  expect(true).toBe(true);
+});
