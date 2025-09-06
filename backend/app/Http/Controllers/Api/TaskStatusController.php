@@ -21,7 +21,7 @@ class TaskStatusController extends Controller
         }
     }
 
-    public function index(Request $request)
+        public function index(Request $request)
     {
         $scope = $request->query('scope', $request->user()->hasRole('SuperAdmin') ? 'all' : 'tenant');
         $query = TaskStatus::query();
