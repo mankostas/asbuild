@@ -72,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
 import Swal from 'sweetalert2';
@@ -112,7 +112,10 @@ const columns = [
 
 async function fetchStatuses({ page, perPage, sort, search }: any) {
   if (!all.value.length) {
-    const tenantId = auth.isSuperAdmin ? tenantStore.currentTenantId : undefined;
+    const tenantId =
+      auth.isSuperAdmin && scope.value !== 'all'
+        ? tenantStore.currentTenantId
+        : undefined;
     all.value = (await statusesStore.fetch(scope.value, tenantId)).data;
   }
   let rows = all.value.slice();
@@ -143,6 +146,16 @@ function changeScope() {
   all.value = [];
   reload();
 }
+
+watch(
+  () => tenantStore.currentTenantId,
+  () => {
+    if (scope.value !== 'global') {
+      all.value = [];
+      reload();
+    }
+  },
+);
 
 function edit(id: number) {
   router.push({ name: 'taskStatuses.edit', params: { id } });
