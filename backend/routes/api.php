@@ -108,9 +108,9 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->whereNumber('subtask');
 
     Route::get('task-board', [TaskBoardController::class, 'index'])
-        ->middleware(Ability::class . ':tasks.view|tasks.manage');
+        ->middleware(Ability::class . ':tasks.view');
     Route::get('task-board/column', [TaskBoardController::class, 'column'])
-        ->middleware(Ability::class . ':tasks.view|tasks.manage');
+        ->middleware(Ability::class . ':tasks.view');
     Route::patch('task-board/move', [TaskBoardController::class, 'move'])
         ->middleware(Ability::class . ':tasks.update');
 
