@@ -1,6 +1,6 @@
 <template>
-    <div v-if="canAccess">
-      <form class="max-w-lg space-y-4" @submit.prevent="submitForm">
+  <div v-if="canAccess">
+    <form class="max-w-lg space-y-4" @submit.prevent="submitForm">
       <VueSelect label="Type" :error="taskTypeError">
         <vSelect
           v-model="taskTypeId"
@@ -12,36 +12,27 @@
         />
       </VueSelect>
 
-      <VueSelect v-if="isEdit" label="Status" :error="errors.status">
-        <vSelect
-          v-model="status"
-          :options="statusOptions"
-          placeholder="Select status"
-        />
-      </VueSelect>
+      <StatusSelect
+        v-if="isEdit"
+        v-model="statusId"
+        :options="statusOptions"
+        :label="t('tasks.form.status')"
+        :error="errors.status_id"
+      />
 
       <AssigneePicker v-if="assigneeField && can('tasks.assign')" v-model="assignee" />
 
-      <VueSelect :label="t('tasks.form.priority')">
-        <vSelect
-          v-model="priority"
-          :options="priorityOptions"
-          label="label"
-          :reduce="(o: any) => o.value"
-          :placeholder="t('tasks.form.priorityPlaceholder')"
-        />
-      </VueSelect>
+      <PrioritySelect
+        v-model="priority"
+        :label="t('tasks.form.priority')"
+        :options="priorityOptions"
+      />
 
-      <div class="flex flex-col">
-        <span id="due-at-label" class="mb-1">{{ t('tasks.form.dueAt') }}</span>
-        <input
-          id="due-at"
-          v-model="dueAt"
-          type="datetime-local"
-          class="border rounded p-2"
-          :aria-labelledby="'due-at-label'"
-        />
-      </div>
+      <DateTimeInput
+        id="due-at"
+        v-model="dueAt"
+        :label="t('tasks.form.dueAt')"
+      />
 
       <JsonSchemaForm
         v-if="currentSchemaNoAssignee"
@@ -84,6 +75,9 @@ import * as yup from 'yup';
 import vSelect from 'vue-select';
 import { useNotify } from '@/plugins/notify';
 import AssigneePicker from '@/components/tasks/AssigneePicker.vue';
+import PrioritySelect from '@/components/fields/PrioritySelect.vue';
+import DateTimeInput from '@/components/fields/DateTimeInput.vue';
+import StatusSelect from '@/components/fields/StatusSelect.vue';
 import { toISO } from '@/utils/datetime';
 import { can } from '@/stores/auth';
 
@@ -97,15 +91,15 @@ const formData = ref<any>({});
 const scheduledAt = ref('');
 const slaStartAt = ref('');
 const slaEndAt = ref('');
-const status = ref('');
+const statusId = ref<number | null>(null);
 const serverError = ref('');
 const showError = ref(false);
-const originalStatus = ref('');
+const originalStatusId = ref<number | null>(null);
 const assignee = ref<{ id: number } | null>(null);
 const priority = ref('');
-const dueAt = ref('');
+const dueAt = ref<string | null>(null);
 
-const statusOptions = ref<string[]>([]);
+const statusOptions = ref<{ label: string; value: number }[]>([]);
 const priorityOptions = computed(() => [
   { label: t('tasks.priority.low'), value: 'low' },
   { label: t('tasks.priority.normal'), value: 'normal' },
@@ -135,7 +129,11 @@ onMounted(async () => {
     api.get('/task-statuses'),
   ]);
   types.value = typesRes.data;
-  statusOptions.value = statusesRes.data.map((s: any) => s.name);
+  const statusBySlug: Record<string, any> = {};
+  statusOptions.value = statusesRes.data.map((s: any) => {
+    statusBySlug[s.slug] = s;
+    return { label: s.name, value: s.id };
+  });
   if (isEdit.value) {
     const res = await api.get(`/tasks/${route.params.id}`);
     const task = res.data;
@@ -144,10 +142,10 @@ onMounted(async () => {
     scheduledAt.value = task.scheduled_at ? toISO(task.scheduled_at) : '';
     slaStartAt.value = task.sla_start_at ? toISO(task.sla_start_at) : '';
     slaEndAt.value = task.sla_end_at ? toISO(task.sla_end_at) : '';
-    dueAt.value = task.due_at ? toISO(task.due_at) : '';
+    dueAt.value = task.due_at ? toISO(task.due_at) : null;
     priority.value = task.priority || '';
-    status.value = task.status;
-    originalStatus.value = task.status;
+    statusId.value = task.status_id || statusBySlug[task.status]?.id || null;
+    originalStatusId.value = statusId.value;
     if (task.assignee) {
       assignee.value = { id: task.assignee.id };
     }
@@ -162,8 +160,12 @@ onMounted(async () => {
     } else if (flow && typeof flow === 'object') {
       graph = flow;
     }
-    const allowed = graph[task.status] || [];
-    statusOptions.value = [task.status, ...allowed];
+    const allowedSlugs = graph[task.status] || [];
+    const allowed = [task.status, ...allowedSlugs]
+      .map((slug) => statusBySlug[slug])
+      .filter(Boolean)
+      .map((s: any) => ({ label: s.name, value: s.id }));
+    if (allowed.length) statusOptions.value = allowed;
   }
 });
 
@@ -174,7 +176,7 @@ function onTypeChange() {
   slaStartAt.value = t?.sla_start_at ? toISO(t.sla_start_at) : '';
   slaEndAt.value = t?.sla_end_at ? toISO(t.sla_end_at) : '';
   assignee.value = null;
-  dueAt.value = '';
+  dueAt.value = null;
   priority.value = '';
 }
 
@@ -230,12 +232,12 @@ const submitForm = handleSubmit(async () => {
   if (slaEndAt.value) payload.sla_end_at = toISO(slaEndAt.value);
   if (dueAt.value) payload.due_at = toISO(dueAt.value);
   if (priority.value) payload.priority = priority.value;
-  if (assignee.value) payload.assignee = assignee.value;
+  if (assignee.value) payload.assigned_user_id = assignee.value.id;
+  if (statusId.value && (!isEdit.value || statusId.value !== originalStatusId.value)) {
+    payload.status_id = statusId.value;
+  }
   try {
     if (isEdit.value) {
-      if (status.value && status.value !== originalStatus.value) {
-        payload.status = status.value;
-      }
       await api.patch(`/tasks/${route.params.id}`, payload);
       notify.success('Task updated');
       router.push({
