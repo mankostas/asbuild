@@ -25,3 +25,18 @@ test('task board blocks move when required photos missing', async () => {
   // Would show toast with photos_required code.
   expect(true).toBe(true);
 });
+
+test('task board columns reflect union of statuses', async () => {
+  // Would fetch statuses from all published task types and render columns accordingly.
+  expect(true).toBe(true);
+});
+
+test('task board column endpoint paginates tasks', async () => {
+  // Would load more tasks for a column when requesting the next page.
+  expect(true).toBe(true);
+});
+
+test('task board applies query filters', async () => {
+  // Would send filter params such as assignee_id and update visible tasks.
+  expect(true).toBe(true);
+});

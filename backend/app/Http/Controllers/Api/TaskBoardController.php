@@ -7,35 +7,67 @@ use App\Http\Resources\TaskResource;
 use App\Http\Resources\TaskStatusResource;
 use App\Models\Task;
 use App\Models\TaskStatus;
+use App\Models\TaskType;
 use App\Services\BoardPositionService;
 use App\Services\StatusFlowService;
+use App\Services\TaskQueryFilters;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class TaskBoardController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, TaskQueryFilters $filters)
     {
         $request->validate([
-            'type_id' => ['sometimes', 'integer'],
+            'type_ids' => ['sometimes', 'array'],
+            'type_ids.*' => ['integer'],
+            'assignee_id' => ['sometimes', 'integer'],
+            'priority' => ['sometimes', 'integer'],
+            'q' => ['sometimes', 'string'],
+            'sla' => ['sometimes', 'string'],
+            'created_from' => ['sometimes', 'date'],
+            'created_to' => ['sometimes', 'date'],
+            'due_from' => ['sometimes', 'date'],
+            'due_to' => ['sometimes', 'date'],
+            'mine' => ['sometimes', 'boolean'],
+            'breached_only' => ['sometimes', 'boolean'],
+            'due_today' => ['sometimes', 'boolean'],
+            'has_photos' => ['sometimes', 'boolean'],
         ]);
 
         $tenantId = $request->user()->tenant_id;
-        $typeId = $request->integer('type_id');
 
-        $statuses = TaskStatus::where(function ($q) use ($tenantId) {
+        $types = TaskType::where('tenant_id', $tenantId)
+            ->whereNotNull('current_version_id')
+            ->with('currentVersion')
+            ->get();
+
+        $slugs = $types->flatMap(function (TaskType $type) {
+            $statuses = $type->currentVersion?->statuses ?? [];
+            if (array_is_list($statuses)) {
+                return collect($statuses)->pluck('slug');
+            }
+
+            return collect($statuses)->keys();
+        })
+            ->unique()
+            ->all();
+
+        $statuses = TaskStatus::whereIn('slug', $slugs)
+            ->where(function ($q) use ($tenantId) {
                 $q->whereNull('tenant_id')->orWhere('tenant_id', $tenantId);
             })
             ->orderBy('position')
+            ->orderBy('slug')
             ->get();
 
-        $columns = $statuses->map(function (TaskStatus $status) use ($tenantId, $typeId, $request) {
+        $columns = $statuses->map(function (TaskStatus $status) use ($tenantId, $request, $filters) {
             $limit = 50;
             $query = Task::where('tenant_id', $tenantId)
                 ->where('status_slug', $status->slug);
-            if ($typeId) {
-                $query->where('task_type_id', $typeId);
-            }
+
+            $filters->apply($query, $request);
+
             $total = (clone $query)->count();
             $tasks = $query->orderBy('board_position')->limit($limit + 1)->get();
 
@@ -55,6 +87,55 @@ class TaskBoardController extends Controller
             ->all();
 
         return response()->json(['data' => $columns]);
+    }
+
+    public function column(Request $request, TaskQueryFilters $filters)
+    {
+        $data = $request->validate([
+            'status' => ['required', 'string', Rule::exists('task_statuses', 'slug')],
+            'page' => ['sometimes', 'integer', 'min:1'],
+            'type_ids' => ['sometimes', 'array'],
+            'type_ids.*' => ['integer'],
+            'assignee_id' => ['sometimes', 'integer'],
+            'priority' => ['sometimes', 'integer'],
+            'q' => ['sometimes', 'string'],
+            'sla' => ['sometimes', 'string'],
+            'created_from' => ['sometimes', 'date'],
+            'created_to' => ['sometimes', 'date'],
+            'due_from' => ['sometimes', 'date'],
+            'due_to' => ['sometimes', 'date'],
+            'mine' => ['sometimes', 'boolean'],
+            'breached_only' => ['sometimes', 'boolean'],
+            'due_today' => ['sometimes', 'boolean'],
+            'has_photos' => ['sometimes', 'boolean'],
+        ]);
+
+        $tenantId = $request->user()->tenant_id;
+        $limit = 50;
+        $page = max(1, $request->integer('page', 1));
+        $offset = ($page - 1) * $limit;
+
+        $query = Task::where('tenant_id', $tenantId)
+            ->where('status_slug', $data['status']);
+
+        $filters->apply($query, $request);
+
+        $total = (clone $query)->count();
+        $tasks = $query->orderBy('board_position')
+            ->offset($offset)
+            ->limit($limit + 1)
+            ->get();
+
+        $hasMore = $tasks->count() > $limit;
+        $tasks = $tasks->take($limit);
+
+        return response()->json([
+            'data' => TaskResource::collection($tasks)->toArray($request),
+            'meta' => [
+                'total' => $total,
+                'has_more' => $hasMore,
+            ],
+        ]);
     }
 
     public function move(Request $request, BoardPositionService $positions, StatusFlowService $flow)
