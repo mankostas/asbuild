@@ -8,7 +8,7 @@ export const useCalendarStore = defineStore('calendar', {
       team_id: '',
       employee_id: '',
       type_id: '',
-      status_id: '',
+      status: '',
     } as Record<string, string>,
   }),
   actions: {

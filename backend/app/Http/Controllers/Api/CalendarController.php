@@ -15,7 +15,7 @@ class CalendarController extends Controller
             'end' => 'required|date',
             'assignee_id' => 'nullable|integer',
             'type_id' => 'nullable|integer',
-            'status_id' => 'nullable|string',
+            'status' => 'nullable|string',
         ]);
 
         $query = Task::where('tenant_id', $request->user()->tenant_id)
@@ -30,8 +30,8 @@ class CalendarController extends Controller
             $query->where('task_type_id', $request->query('type_id'));
         }
 
-        if ($request->filled('status_id')) {
-            $query->where('status', $request->query('status_id'));
+        if ($request->filled('status')) {
+            $query->where('status', $request->query('status'));
         }
 
         $events = $query->get()->map(function ($t) {
