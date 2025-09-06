@@ -29,6 +29,9 @@ export const useTenantStore = defineStore('tenant', {
 
       return data.meta;
     },
+    async searchTenants(search: string) {
+      return this.loadTenants({ search, per_page: 100 });
+    },
     setTenant(id: string | number) {
       const normalized = id ? String(id) : '';
       const changed = this.currentTenantId !== normalized;

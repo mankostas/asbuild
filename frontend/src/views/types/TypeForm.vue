@@ -124,9 +124,7 @@
       </header>
       <TypeMetaBar
         v-model:name="name"
-        v-model:search="search"
         v-model:tenant-id="tenantId"
-        :tenant-options="tenantOptions"
         class="border-b mb-4"
       />
       <template v-if="tenantId || !isCreate">
@@ -503,7 +501,6 @@ interface Permission {
 }
 
 const name = ref('');
-const search = ref('');
 const tenantId = ref<number | ''>('');
 const transitionsEditor = ref<any>(null);
 const automationsEditor = ref<any>(null);
@@ -572,10 +569,6 @@ const fieldTypeGroups = computed(() => {
   return Object.values(groups);
 });
 
-const tenants = computed(() => tenantStore.tenants);
-const tenantOptions = computed(() =>
-  tenants.value.map((t) => ({ value: t.id, label: t.name }))
-);
 const visibleSections = computed(() => sections.value);
 
 function openPalette(sectionIndex?: number, tabIndex?: number) {
@@ -586,14 +579,6 @@ function openPalette(sectionIndex?: number, tabIndex?: number) {
   paletteOpen.value = true;
   nextTick(() => window.scrollTo({ top: scrollY }));
 }
-
-watch(search, async (q) => {
-  if (q.length >= 3) {
-    await tenantStore.loadTenants({ per_page: 100, search: q });
-  } else if (q.length === 0) {
-    await tenantStore.loadTenants({ per_page: 100 });
-  }
-});
 
 const isEdit = computed(() => route.name === 'taskTypes.edit');
 const isCreate = computed(
