@@ -114,12 +114,46 @@ class TaskBoardTest extends TestCase
                         'tasks' => [
                             ['id', 'status_slug', 'board_position'],
                         ],
+                        'meta' => ['total', 'has_more'],
                     ],
                 ],
             ])
             ->assertJsonPath('data.0.status.slug', 'draft')
             ->assertJsonPath('data.0.tasks.0.id', $task->id)
+            ->assertJsonPath('data.0.meta.total', 1)
+            ->assertJsonPath('data.0.meta.has_more', false)
             ->assertJsonMissingPath('data.0.tasks.data');
+    }
+
+    public function test_index_reports_total_and_overflow_flag(): void
+    {
+        $user = $this->authUser();
+        $type = TaskType::create([
+            'name' => 'Type',
+            'tenant_id' => 1,
+            'statuses' => ['draft' => [], 'assigned' => []],
+            'status_flow_json' => [
+                ['draft', 'assigned'],
+            ],
+        ]);
+
+        for ($i = 0; $i < 55; $i++) {
+            Task::create([
+                'tenant_id' => 1,
+                'user_id' => $user->id,
+                'task_type_id' => $type->id,
+                'status_slug' => 'draft',
+                'board_position' => $i,
+            ]);
+        }
+
+        $response = $this->withHeader('X-Tenant-ID', 1)->getJson('/api/task-board');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.0.meta.total', 55)
+            ->assertJsonPath('data.0.meta.has_more', true);
+
+        $this->assertCount(50, $response->json('data.0.tasks'));
     }
 
     public function test_move_updates_board_position(): void
