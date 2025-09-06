@@ -86,6 +86,7 @@ class TaskController extends Controller
             }
         }
         $data['status'] = $version && $version->statuses ? array_key_first($version->statuses) : Task::STATUS_DRAFT;
+        $data['status_slug'] = $data['status'];
         $this->validateAgainstSchema($version, $data['form_data'] ?? [], null);
         $this->formSchemaService->mapAssignee($version->schema_json ?? [], $data);
         $this->formSchemaService->mapReviewer($version->schema_json ?? [], $data);
