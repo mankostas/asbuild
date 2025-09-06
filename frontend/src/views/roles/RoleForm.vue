@@ -118,6 +118,14 @@ const tenantFeatureAbilities = computed(() =>
     : {},
 );
 
+const hasAbilityMap = computed(() =>
+  tenantId.value !== null &&
+  Object.prototype.hasOwnProperty.call(
+    tenantStore.allowedAbilities,
+    tenantId.value,
+  ),
+);
+
 const tenantOptions = computed(() => [
   { id: '', name: 'Global' },
   ...tenantStore.tenants.map((t: any) => ({ id: t.id, name: t.name })),
@@ -166,7 +174,7 @@ async function loadAbilityOptions() {
     const { data } = await api.get('/lookups/abilities', { params, headers });
     const perFeature = tenantFeatureAbilities.value;
     const allowed = new Set(
-      Object.keys(perFeature).length
+      hasAbilityMap.value
         ? Object.values(perFeature).flat()
         : tenantFeatures.value.flatMap(
             (f: string) => featureMap[f]?.abilities || [],
@@ -199,7 +207,7 @@ watch(
   { deep: true },
 );
 watch(tenantFeatures, () => {
-  if (!auth.isSuperAdmin || tenantId.value !== null) {
+  if (!hasAbilityMap.value && (!auth.isSuperAdmin || tenantId.value !== null)) {
     loadAbilityOptions();
   }
 });

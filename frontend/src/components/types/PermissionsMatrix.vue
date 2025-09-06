@@ -209,7 +209,7 @@ const abilityMap: Record<string, string[]> = {
 
 const allowedAbilities = computed(() =>
   new Set(
-    props.featureAbilities && Object.keys(props.featureAbilities).length
+    props.featureAbilities !== undefined
       ? Object.values(props.featureAbilities).flat()
       : props.features.flatMap((f) => featureMap[f]?.abilities || []),
   ),
