@@ -16,7 +16,7 @@ return new class extends Migration
                 $tenant->save();
             }
 
-            DefaultFeatureRolesSeeder::syncDefaultRolesForFeatures($tenant);
+            DefaultFeatureRolesSeeder::syncDefaultRolesForFeatures($tenant, $tenant->selectedFeatureAbilities());
         });
     }
 
