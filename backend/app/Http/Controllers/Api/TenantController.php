@@ -38,6 +38,7 @@ class TenantController extends Controller
             'name' => 'required|string',
             'quota_storage_mb' => 'integer',
             'features' => 'array',
+            'feature_abilities' => 'array',
             'phone' => 'nullable|string',
             'address' => 'nullable|string',
             'user_name' => 'required|string',
@@ -48,6 +49,7 @@ class TenantController extends Controller
                 'name' => $data['name'],
                 'quota_storage_mb' => $data['quota_storage_mb'] ?? null,
                 'features' => $data['features'] ?? ['tasks'],
+                'feature_abilities' => $data['feature_abilities'] ?? [],
                 'phone' => $data['phone'] ?? null,
                 'address' => $data['address'] ?? null,
             ]);
@@ -85,6 +87,7 @@ class TenantController extends Controller
             'name' => 'sometimes|string',
             'quota_storage_mb' => 'integer',
             'features' => 'array',
+            'feature_abilities' => 'array',
             'phone' => 'sometimes|nullable|string',
             'address' => 'sometimes|nullable|string',
         ]);

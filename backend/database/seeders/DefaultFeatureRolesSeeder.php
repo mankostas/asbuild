@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class DefaultFeatureRolesSeeder extends Seeder
 {
-    public static function syncDefaultRolesForFeatures(Tenant $tenant): void
+    public static function syncDefaultRolesForFeatures(Tenant $tenant, array $abilityMap = []): void
     {
         $features = $tenant->features ?? [];
         $map = config('feature_map', []);
@@ -16,6 +16,8 @@ class DefaultFeatureRolesSeeder extends Seeder
         $roles = [];
 
         foreach ($features as $feature) {
+            $selected = $abilityMap[$feature] ?? [];
+
             switch ($feature) {
                 case 'tasks':
                 case 'notifications':
@@ -30,40 +32,31 @@ class DefaultFeatureRolesSeeder extends Seeder
                     $roles[] = [
                         'slug' => "$feature\_viewer",
                         'name' => "$uc Viewer",
-                        'abilities' => ["$feature.view"],
+                        'abilities' => array_intersect(["$feature.view"], $selected),
                         'level' => 3,
                     ];
 
                     // editor role
-                    $abilities = ["$feature.view"];
-                    if (in_array("$feature.create", $map[$feature]['abilities'] ?? [])) {
-                        $abilities[] = "$feature.create";
-                    }
-                    if (in_array("$feature.update", $map[$feature]['abilities'] ?? [])) {
-                        $abilities[] = "$feature.update";
-                    }
+                    $editorAbilities = array_intersect(
+                        ["$feature.view", "$feature.create", "$feature.update"],
+                        $selected
+                    );
                     $roles[] = [
                         'slug' => "$feature\_editor",
                         'name' => "$uc Editor",
-                        'abilities' => $abilities,
+                        'abilities' => $editorAbilities,
                         'level' => 3,
                     ];
 
                     // manager role
-                    $abilities = [];
-                    if (in_array("$feature.manage", $map[$feature]['abilities'] ?? [])) {
-                        $abilities[] = "$feature.manage";
-                    }
-                    if (in_array("$feature.delete", $map[$feature]['abilities'] ?? [])) {
-                        $abilities[] = "$feature.delete";
-                    }
-                    if (in_array("$feature.assign", $map[$feature]['abilities'] ?? [])) {
-                        $abilities[] = "$feature.assign";
-                    }
+                    $managerAbilities = array_intersect(
+                        ["$feature.manage", "$feature.delete", "$feature.assign"],
+                        $selected
+                    );
                     $roles[] = [
                         'slug' => "$feature\_manager",
                         'name' => "$uc Manager",
-                        'abilities' => $abilities,
+                        'abilities' => $managerAbilities,
                         'level' => 2,
                     ];
                     break;
@@ -71,13 +64,13 @@ class DefaultFeatureRolesSeeder extends Seeder
                     $roles[] = [
                         'slug' => 'gdpr_viewer',
                         'name' => 'GDPR Viewer',
-                        'abilities' => ['gdpr.view'],
+                        'abilities' => array_intersect(['gdpr.view'], $selected),
                         'level' => 3,
                     ];
                     $roles[] = [
                         'slug' => 'gdpr_manager',
                         'name' => 'GDPR Manager',
-                        'abilities' => ['gdpr.view', 'gdpr.manage', 'gdpr.export', 'gdpr.delete'],
+                        'abilities' => array_intersect(['gdpr.view', 'gdpr.manage', 'gdpr.export', 'gdpr.delete'], $selected),
                         'level' => 2,
                     ];
                     break;
@@ -85,13 +78,13 @@ class DefaultFeatureRolesSeeder extends Seeder
                     $roles[] = [
                         'slug' => 'reports_viewer',
                         'name' => 'Reports Viewer',
-                        'abilities' => ['reports.view'],
+                        'abilities' => array_intersect(['reports.view'], $selected),
                         'level' => 3,
                     ];
                     $roles[] = [
                         'slug' => 'reports_manager',
                         'name' => 'Reports Manager',
-                        'abilities' => ['reports.manage'],
+                        'abilities' => array_intersect(['reports.manage'], $selected),
                         'level' => 2,
                     ];
                     break;
@@ -99,7 +92,7 @@ class DefaultFeatureRolesSeeder extends Seeder
                     $roles[] = [
                         'slug' => 'roles_manager',
                         'name' => 'Roles Manager',
-                        'abilities' => ['roles.view', 'roles.manage'],
+                        'abilities' => array_intersect(['roles.view', 'roles.manage'], $selected),
                         'level' => 2,
                     ];
                     break;
