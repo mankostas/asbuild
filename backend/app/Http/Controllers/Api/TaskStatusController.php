@@ -28,7 +28,9 @@ class TaskStatusController extends Controller
 
         if ($scope === 'tenant') {
             $tenantId = $request->query('tenant_id', $request->user()->tenant_id);
-            $query->where('tenant_id', $tenantId);
+            $query->where(function ($q) use ($tenantId) {
+                $q->whereNull('tenant_id')->orWhere('tenant_id', $tenantId);
+            });
         } elseif ($scope === 'global') {
             $query->whereNull('tenant_id');
         } else {
