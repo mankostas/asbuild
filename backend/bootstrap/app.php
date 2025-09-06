@@ -27,6 +27,7 @@ return Application::configure(
         $middleware->alias([
             'tenant' => \App\Http\Middleware\ResolveTenant::class,
             'signed.url' => \App\Http\Middleware\SignedUrl::class,
+            'ability' => \App\Http\Middleware\Ability::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
