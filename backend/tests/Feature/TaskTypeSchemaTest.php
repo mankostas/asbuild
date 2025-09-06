@@ -93,4 +93,43 @@ class TaskTypeSchemaTest extends TestCase
         $this->expectException(ValidationException::class);
         $service->validate($schema);
     }
+
+    public function test_photo_fields_validation(): void
+    {
+        $service = new FormSchemaService();
+        $schema = [
+            'sections' => [
+                [
+                    'key' => 'main',
+                    'label' => 'Main',
+                    'photos' => [
+                        ['key' => 'p1', 'label' => 'P1', 'type' => 'photo_repeater', 'maxCount' => 0],
+                    ],
+                ],
+            ],
+        ];
+        $this->expectException(ValidationException::class);
+        $service->validate($schema);
+    }
+
+    public function test_photo_keys_must_be_unique(): void
+    {
+        $service = new FormSchemaService();
+        $schema = [
+            'sections' => [
+                [
+                    'key' => 'main',
+                    'label' => 'Main',
+                    'fields' => [
+                        ['key' => 'f1', 'label' => 'F1', 'type' => 'text'],
+                    ],
+                    'photos' => [
+                        ['key' => 'f1', 'label' => 'P1', 'type' => 'photo_single'],
+                    ],
+                ],
+            ],
+        ];
+        $this->expectException(ValidationException::class);
+        $service->validate($schema);
+    }
 }

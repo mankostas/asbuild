@@ -341,7 +341,9 @@
     "placeholder": "Placeholder",
     "help": "Help",
     "default": "Default",
-    "reorderHint": "Use Alt+Arrow keys to reorder"
+    "reorderHint": "Use Alt+Arrow keys to reorder",
+    "photo": "Photo",
+    "photoGallery": "Photo Gallery"
   },
   "roles": {
     "label": "Roles",

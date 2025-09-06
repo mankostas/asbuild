@@ -157,6 +157,47 @@
           </Card>
         </template>
       </draggable>
+      <draggable
+        v-model="section.photos"
+        item-key="id"
+        handle=".field-handle"
+        group="photos"
+        class="p-2 grid gap-2"
+        :class="`grid-cols-${section.cols}`"
+        aria-describedby="fieldReorderHint"
+      >
+        <template #item="{ element }">
+          <Card
+            bodyClass="p-2 flex items-center gap-2 cursor-pointer"
+            tabindex="0"
+            role="button"
+            :class="`col-span-${element.cols}`"
+            @click="$emit('select', element)"
+            @keydown.enter.prevent="$emit('select', element)"
+            @keydown.space.prevent="$emit('select', element)"
+          >
+            <Button
+              type="button"
+              btnClass="btn-light p-1 field-handle cursor-move"
+              aria-label="Drag field"
+              aria-describedby="fieldReorderHint"
+              @keydown.enter.prevent="noop"
+              @keydown.space.prevent="noop"
+            >
+              <Icon icon="heroicons-outline:bars-3" />
+            </Button>
+            <span class="flex-1">{{ resolveI18n(element.label) }}</span>
+            <Button
+              type="button"
+              btnClass="btn-outline-danger text-xs px-1 py-1"
+              :aria-label="t('actions.delete')"
+              @click.stop="$emit('remove-field', { field: element, collection: 'photos' })"
+            >
+              ✕
+            </Button>
+          </Card>
+        </template>
+      </draggable>
     </div>
     <div class="p-2">
       <Dropdown align="left">
