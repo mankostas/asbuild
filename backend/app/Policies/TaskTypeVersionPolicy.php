@@ -19,5 +19,10 @@ class TaskTypeVersionPolicy extends TenantOwnedPolicy
     {
         return Gate::allows('task_type_versions.manage') && $this->view($user, $version);
     }
+
+    public function unpublish(User $user, TaskTypeVersion $version): bool
+    {
+        return $this->manage($user, $version);
+    }
 }
 
