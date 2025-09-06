@@ -30,17 +30,25 @@ class TaskBoardController extends Controller
             ->get();
 
         $columns = $statuses->map(function (TaskStatus $status) use ($tenantId, $typeId, $request) {
+            $limit = 50;
             $query = Task::where('tenant_id', $tenantId)
-                ->where('status_slug', $status->slug)
-                ->orderBy('board_position');
+                ->where('status_slug', $status->slug);
             if ($typeId) {
                 $query->where('task_type_id', $typeId);
             }
-            $tasks = $query->limit(50)->get();
+            $total = (clone $query)->count();
+            $tasks = $query->orderBy('board_position')->limit($limit + 1)->get();
+
+            $hasMore = $tasks->count() > $limit;
+            $tasks = $tasks->take($limit);
 
             return [
                 'status' => TaskStatusResource::make($status)->toArray($request),
                 'tasks' => TaskResource::collection($tasks)->toArray($request),
+                'meta' => [
+                    'total' => $total,
+                    'has_more' => $hasMore,
+                ],
             ];
         })
             ->values()
