@@ -12,6 +12,7 @@
     "delete": "Delete",
     "save": "Save",
     "publish": "Publish",
+    "unpublish": "Unpublish",
     "duplicate": "Duplicate",
     "addSection": "Add Section",
     "addField": "Add Field",

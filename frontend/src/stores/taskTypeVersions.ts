@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import api from '@/services/api';
+import { unpublishTaskTypeVersion } from '@/services/types';
 
 export const useTaskTypeVersionsStore = defineStore('taskTypeVersions', {
   actions: {
@@ -17,6 +18,10 @@ export const useTaskTypeVersionsStore = defineStore('taskTypeVersions', {
     },
     async deprecate(id: number) {
       const { data } = await api.post(`/task-type-versions/${id}/deprecate`);
+      return data.data;
+    },
+    async unpublish(id: number) {
+      const data = await unpublishTaskTypeVersion(id);
       return data.data;
     },
   },
