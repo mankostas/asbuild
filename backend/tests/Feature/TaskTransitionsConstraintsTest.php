@@ -7,6 +7,7 @@ use App\Models\Task;
 use App\Models\TaskSubtask;
 use App\Models\TaskType;
 use App\Models\TaskTypeVersion;
+use App\Models\TaskStatus;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,6 +23,8 @@ class TaskTransitionsConstraintsTest extends TestCase
     {
         parent::setUp();
         Tenant::create(['id' => 1, 'name' => 'T', 'features' => ['tasks']]);
+        TaskStatus::create(['slug' => 'initial', 'name' => 'Initial']);
+        TaskStatus::create(['slug' => 'final', 'name' => 'Final']);
     }
 
     protected function authUser(): User
@@ -65,6 +68,8 @@ class TaskTransitionsConstraintsTest extends TestCase
             'published_at' => now(),
         ]);
         $type->current_version_id = $version->id;
+        $type->statuses = $version->statuses;
+        $type->status_flow_json = $version->status_flow_json;
         $type->save();
         return $version;
     }
