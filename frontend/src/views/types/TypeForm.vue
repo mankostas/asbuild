@@ -1,6 +1,15 @@
 <template>
   <div v-if="canAccess" ref="builder" class="type-builder">
-    <form @submit.prevent="onSubmit">
+    <div v-if="loading" class="space-y-4 p-4">
+      <Skeleton class="h-10 w-1/3 rounded-2xl shadow" />
+      <Skeleton class="h-24 w-full rounded-2xl shadow" />
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Skeleton class="h-48 rounded-2xl shadow" />
+        <Skeleton class="hidden h-48 rounded-2xl shadow lg:block" />
+        <Skeleton class="hidden h-48 rounded-2xl shadow lg:block" />
+      </div>
+    </div>
+    <form v-else @submit.prevent="onSubmit">
       <header
         v-if="tenantId || !isCreate"
         class="builder-header flex items-center justify-between px-4 py-2 shadow bg-white"
@@ -431,6 +440,7 @@ import FieldPalette from '@/components/types/FieldPalette.vue';
 import TypeMetaBar from '@/components/types/TypeMetaBar.vue';
 import Dropdown from '@/components/ui/Dropdown/index.vue';
 import Icon from '@/components/ui/Icon/index.vue';
+import Skeleton from '@/components/ui/Skeleton.vue';
 import { Tab, TabPanel, MenuItem } from '@headlessui/vue';
 import { can, useAuthStore } from '@/stores/auth';
 import api from '@/services/api';
@@ -448,6 +458,7 @@ const versionsStore = useTaskTypeVersionsStore();
 const tenantStore = useTenantStore();
 const auth = useAuthStore();
 const taskTypeId = computed(() => Number(route.params.id ?? 0));
+const loading = ref(true);
 
 interface Field {
   id: number;
@@ -618,92 +629,103 @@ const viewportClass = computed(() => {
   }
 });
 
+async function refreshTenant(id: number | '', oldId?: number | '') {
+  const normalized = id ? String(id) : '';
+  const prev = oldId ? String(oldId) : '';
+
+  if (normalized === prev) return;
+
+  if (tenantStore.tenantId !== normalized) {
+    tenantStore.setTenant(normalized);
+  }
+  if (oldId !== undefined && id !== oldId) {
+    sections.value.forEach((s) =>
+      sectionFields(s).forEach((f) => {
+        f.roles.view = ['super_admin'];
+        f.roles.edit = ['super_admin'];
+      }),
+    );
+    statuses.value = [];
+    statusFlow.value = [];
+  }
+  if (id) {
+    try {
+      const params: Record<string, any> = auth.isSuperAdmin
+        ? { scope: 'all' }
+        : { tenant_id: Number(id) };
+      const { data } = await api.get('/roles', { params });
+      let roles = data.data ?? data;
+      if (auth.isSuperAdmin) {
+        const tid = Number(id);
+        roles = roles.filter((r: any) => r.tenant_id === null || r.tenant_id === tid);
+      }
+      tenantRoles.value = roles;
+      tenantRoles.value.forEach((r: any) => {
+        if (!permissions.value[r.slug]) {
+          permissions.value[r.slug] = {
+            read: false,
+            edit: false,
+            delete: false,
+            export: false,
+            assign: false,
+            transition: false,
+          };
+        } else if (permissions.value[r.slug].transition === undefined) {
+          permissions.value[r.slug].transition = false;
+        }
+      });
+      const validSlugs = tenantRoles.value.map((r: any) => r.slug);
+      if (selected.value) {
+        selected.value.roles.view = selected.value.roles.view.filter((s: string) =>
+          validSlugs.includes(s),
+        );
+        selected.value.roles.edit = selected.value.roles.edit.filter((s: string) =>
+          validSlugs.includes(s),
+        );
+      }
+    } catch {
+      tenantRoles.value = [];
+      permissions.value = {};
+    }
+  } else {
+    tenantRoles.value = [];
+    permissions.value = {};
+    statuses.value = [];
+    statusFlow.value = [];
+  }
+}
+
 onMounted(async () => {
-  await tenantStore.loadTenants({ per_page: 100 });
-  if (isEdit.value) {
-    const { data } = await api.get(`/task-types/${route.params.id}`);
-    const typeData = data.data ?? data;
+  loading.value = true;
+  const [_, _featureMap, typeRes, versionsList] = await Promise.all([
+    tenantStore.loadTenants({ per_page: 100, scope: 'all' }),
+    api.get('/lookups/feature-map'),
+    isEdit.value ? api.get(`/task-types/${route.params.id}`) : Promise.resolve(null),
+    isEdit.value ? versionsStore.list(taskTypeId.value) : Promise.resolve([]),
+  ]);
+  void _featureMap;
+  if (isEdit.value && typeRes) {
+    const typeData = typeRes.data.data ?? typeRes.data;
     name.value = typeData.name || '';
     tenantId.value =
       typeData.tenant_id !== null && typeData.tenant_id !== undefined
         ? Number(typeData.tenant_id)
         : '';
-    const list = await versionsStore.list(Number(route.params.id));
-    versions.value = list;
-    if (list.length) {
-      selectedVersionId.value = list[0].id;
-      loadVersion(list[0]);
+    await refreshTenant(tenantId.value);
+    versions.value = versionsList as any[];
+    if ((versionsList as any[]).length) {
+      selectedVersionId.value = (versionsList as any[])[0].id;
+      loadVersion((versionsList as any[])[0]);
     }
   } else {
     tenantStore.setTenant('');
   }
+  loading.value = false;
 });
 
-  watch(
-    tenantId,
-    async (id, oldId) => {
-      const normalized = id ? String(id) : '';
-      const prev = oldId ? String(oldId) : '';
-
-      // Avoid triggering the watcher again when the value hasn't actually changed
-      if (normalized === prev) return;
-
-      if (tenantStore.tenantId !== normalized) {
-        tenantStore.setTenant(normalized);
-      }
-      if (oldId !== undefined && id !== oldId) {
-        sections.value.forEach((s) =>
-          sectionFields(s).forEach((f) => {
-            f.roles.view = ['super_admin'];
-            f.roles.edit = ['super_admin'];
-          }),
-        );
-        statuses.value = [];
-        statusFlow.value = [];
-      }
-      if (id) {
-        try {
-          const params: Record<string, any> = auth.isSuperAdmin
-            ? { scope: 'all' }
-            : { tenant_id: Number(id) };
-          const { data } = await api.get('/roles', { params });
-          let roles = data.data ?? data;
-          if (auth.isSuperAdmin) {
-            const tid = Number(id);
-            roles = roles.filter((r: any) => r.tenant_id === null || r.tenant_id === tid);
-          }
-          tenantRoles.value = roles;
-          tenantRoles.value.forEach((r: any) => {
-            if (!permissions.value[r.slug]) {
-              permissions.value[r.slug] = {
-                read: false,
-                edit: false,
-                delete: false,
-                export: false,
-                assign: false,
-                transition: false,
-              };
-            } else if (permissions.value[r.slug].transition === undefined) {
-              permissions.value[r.slug].transition = false;
-            }
-          });
-          const validSlugs = tenantRoles.value.map((r: any) => r.slug);
-          if (selected.value) {
-            selected.value.roles.view = selected.value.roles.view.filter((s: string) => validSlugs.includes(s));
-            selected.value.roles.edit = selected.value.roles.edit.filter((s: string) => validSlugs.includes(s));
-          }
-        } catch {
-          tenantRoles.value = [];
-          permissions.value = {};
-        }
-      } else {
-        tenantRoles.value = [];
-        permissions.value = {};
-        statuses.value = [];
-        statusFlow.value = [];
-      }
-    },
-  );
+watch(tenantId, (id, oldId) => {
+  refreshTenant(id, oldId);
+});
 
 function addSection(afterIndex?: number) {
   const newSection = {
