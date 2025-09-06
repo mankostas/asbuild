@@ -20,12 +20,15 @@
         <InputGroup v-model="dueAt" :label="t('tasks.form.dueAt')" type="date" />
 
         <div class="flex space-x-6">
-          <InputGroup
-            v-model="slaStartAt"
-            :label="t('tasks.form.slaStart')"
-            type="datetime-local"
-            :isReadonly="!can('tasks.sla.override')"
-          >
+          <InputGroup :label="t('tasks.form.slaStart')" :disabled="!can('tasks.sla.override')">
+            <template #default="{ id }">
+              <Textinput
+                :id="id"
+                v-model="slaStartAt"
+                type="datetime-local"
+                :disabled="!can('tasks.sla.override')"
+              />
+            </template>
             <template #append>
               <Tooltip theme="light" trigger="mouseenter focus">
                 <template #button>
@@ -39,12 +42,15 @@
               </Tooltip>
             </template>
           </InputGroup>
-          <InputGroup
-            v-model="slaEndAt"
-            :label="t('tasks.form.slaEnd')"
-            type="datetime-local"
-            :isReadonly="!can('tasks.sla.override')"
-          >
+          <InputGroup :label="t('tasks.form.slaEnd')" :disabled="!can('tasks.sla.override')">
+            <template #default="{ id }">
+              <Textinput
+                :id="id"
+                v-model="slaEndAt"
+                type="datetime-local"
+                :disabled="!can('tasks.sla.override')"
+              />
+            </template>
             <template #append>
               <Tooltip theme="light" trigger="mouseenter focus">
                 <template #button>
@@ -61,11 +67,11 @@
         </div>
 
         <StatusSelect
-          v-if="isEdit"
           v-model="status"
           :options="statusOptions"
           :label="t('tasks.form.status')"
           :error="errors.status"
+          :disabled="isEdit && !can('tasks.status.update')"
         />
 
         <AssigneePicker v-if="assigneeField && can('tasks.assign')" v-model="assignee" />
@@ -105,7 +111,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api, { extractFormErrors } from '@/services/api';
@@ -153,6 +159,7 @@ const typeOptions = computed(() => types.value.map((t: any) => ({ value: t.id, l
 const versionOptions = computed(() => versions.value.map((v: any) => ({ value: v.id, label: v.semver })));
 
 const statusOptions = ref<{ label: string; value: string }[]>([]);
+const statusBySlug: Record<string, any> = {};
 const priorityOptions = computed(() => [
   { label: t('tasks.priority.low'), value: 'low' },
   { label: t('tasks.priority.normal'), value: 'normal' },
@@ -182,17 +189,16 @@ onMounted(async () => {
     api.get('/task-statuses'),
   ]);
   types.value = typesRes.data;
-  const statusBySlug: Record<string, any> = {};
-  statusOptions.value = statusesRes.data.map((s: any) => {
+  statusesRes.data.forEach((s: any) => {
     statusBySlug[s.slug] = s;
-    return { label: s.name, value: s.slug };
   });
   if (isEdit.value) {
     const res = await api.get(`/tasks/${route.params.id}`);
     const task = res.data;
     taskTypeId.value = task.type?.id || task.task_type_id;
     await onTypeChange();
-    taskTypeVersionId.value = task.task_type_version_id || task.task_type_version?.id || taskTypeVersionId.value;
+    taskTypeVersionId.value =
+      task.task_type_version_id || task.task_type_version?.id || taskTypeVersionId.value;
     formData.value = task.form_data || {};
     scheduledAt.value = task.scheduled_at ? toISO(task.scheduled_at) : '';
     slaStartAt.value = task.sla_start_at ? toISO(task.sla_start_at) : '';
@@ -204,23 +210,7 @@ onMounted(async () => {
     if (task.assignee) {
       assignee.value = { id: task.assignee.id };
     }
-    const flow = task.type?.status_flow_json || [];
-    let graph: Record<string, string[]> = {};
-    if (Array.isArray(flow)) {
-      flow.forEach((e: [string, string]) => {
-        const [from, to] = e;
-        if (!graph[from]) graph[from] = [];
-        graph[from].push(to);
-      });
-    } else if (flow && typeof flow === 'object') {
-      graph = flow;
-    }
-    const allowedSlugs = graph[task.status] || [];
-    const allowed = [task.status, ...allowedSlugs]
-      .map((slug) => statusBySlug[slug])
-      .filter(Boolean)
-      .map((s: any) => ({ label: s.name, value: s.slug }));
-    if (allowed.length) statusOptions.value = allowed;
+    updateStatusOptions(task.status);
   }
 });
 
@@ -248,6 +238,35 @@ async function onTypeChange() {
     }
     versions.value = manageVersions ? list : list.filter((v: any) => v.published_at);
     taskTypeVersionId.value = versions.value[0]?.id ?? null;
+  }
+  updateStatusOptions();
+}
+
+function updateStatusOptions(current?: string | null) {
+  const version = versions.value.find((v) => v.id === taskTypeVersionId.value);
+  const versionStatuses = version?.statuses || [];
+  let opts = versionStatuses.map((s: any) => ({
+    value: s.slug,
+    label: statusBySlug[s.slug]?.name || s.slug,
+  }));
+  if (isEdit.value && current) {
+    const flow = version?.status_flow_json || [];
+    let graph: Record<string, string[]> = {};
+    if (Array.isArray(flow)) {
+      flow.forEach((e: [string, string]) => {
+        const [from, to] = e;
+        if (!graph[from]) graph[from] = [];
+        graph[from].push(to);
+      });
+    } else if (flow && typeof flow === 'object') {
+      graph = flow as Record<string, string[]>;
+    }
+    const allowed = [current, ...(graph[current] || [])];
+    opts = opts.filter((o) => allowed.includes(o.value));
+  }
+  statusOptions.value = opts;
+  if (!status.value && opts.length) {
+    status.value = opts[0].value;
   }
 }
 
@@ -291,6 +310,13 @@ const canSubmit = computed(() => {
   if (assigneeRequired.value && !assignee.value) return false;
   return true;
 });
+
+watch(
+  () => taskTypeVersionId.value,
+  () => {
+    updateStatusOptions();
+  },
+);
 
 const submitForm = handleSubmit(async () => {
   serverError.value = '';

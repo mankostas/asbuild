@@ -24,7 +24,8 @@
         <li>Completed: {{ format(task.completed_at) || '—' }}</li>
         <li>Assignee: {{ task.assignee?.name || '—' }}</li>
         <li>Priority: {{ task.priority || '—' }}</li>
-        <li>SLA End: {{ format(task.sla_end_at) || '—' }}</li>
+        <li>{{ t('tasks.form.slaStart') }}: {{ format(task.sla_start_at) || '—' }}</li>
+        <li>{{ t('tasks.form.slaEnd') }}: {{ format(task.sla_end_at) || '—' }}</li>
         <li class="flex items-center gap-2">
           <span>{{ t('tasks.details.sla') }}:</span>
           <Badge
@@ -155,7 +156,7 @@ const slaBadgeClass = computed(() => {
     return 'bg-success-500 text-success-500 bg-opacity-[0.12] pill';
   }
   if (k === 'breached') {
-    return 'bg-danger-500 text-danger-500 bg-opacity-[0.12] pill';
+    return 'bg-danger-500 text-white pill';
   }
   return 'bg-secondary-500 text-secondary-500 bg-opacity-[0.12] pill';
 });
