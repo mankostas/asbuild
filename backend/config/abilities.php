@@ -34,6 +34,10 @@ return [
     'roles.manage',
 
     // Task Types
+    'task_types.view',
+    'task_types.create',
+    'task_types.update',
+    'task_types.delete',
     'task_types.manage',
     'task_type_versions.manage',
     'task_sla_policies.manage',

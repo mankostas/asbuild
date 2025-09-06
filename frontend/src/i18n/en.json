@@ -28,7 +28,8 @@
     "helloToast": "Hello from toast"
   },
   "common": {
-    "select": "Select..."
+    "select": "Select...",
+    "error": "Error"
   },
   "none": "None",
   "a11y": {
@@ -123,7 +124,10 @@
       "status": "Status",
       "priority": "Priority",
       "priorityPlaceholder": "Select priority",
-      "dueAt": "Due"
+      "dueAt": "Due",
+      "type": "Type",
+      "typePlaceholder": "Select type",
+      "version": "Version"
     },
     "filters": {
       "global": "Search tasks",

@@ -22,7 +22,7 @@ class StatusFlowEditorTest extends TestCase
             'name' => 'ClientAdmin',
             'slug' => 'client_admin',
             'tenant_id' => $tenant->id,
-            'abilities' => ['task_types.manage', 'task_type_versions.manage'],
+            'abilities' => ['task_types.update', 'task_type_versions.manage'],
             'level' => 1,
         ]);
         $user = User::create([
