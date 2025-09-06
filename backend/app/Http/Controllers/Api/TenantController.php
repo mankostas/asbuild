@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\TenantUpsertRequest;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\AuditLog;
@@ -36,19 +37,10 @@ class TenantController extends Controller
         return response()->json($result);
     }
 
-    public function store(Request $request)
+    public function store(TenantUpsertRequest $request)
     {
         $this->ensureSuperAdmin($request);
-        $data = $request->validate([
-            'name' => 'required|string',
-            'quota_storage_mb' => 'integer',
-            'features' => 'array',
-            'feature_abilities' => 'array',
-            'phone' => 'nullable|string',
-            'address' => 'nullable|string',
-            'user_name' => 'required|string',
-            'user_email' => 'required|email',
-        ]);
+        $data = $request->validated();
         $tenant = DB::transaction(function () use ($data) {
             $tenant = Tenant::create([
                 'name' => $data['name'],
@@ -85,17 +77,10 @@ class TenantController extends Controller
         return $tenant->makeVisible('feature_abilities');
     }
 
-    public function update(Request $request, Tenant $tenant)
+    public function update(TenantUpsertRequest $request, Tenant $tenant)
     {
         $this->ensureSuperAdmin($request);
-        $data = $request->validate([
-            'name' => 'sometimes|string',
-            'quota_storage_mb' => 'integer',
-            'features' => 'array',
-            'feature_abilities' => 'array',
-            'phone' => 'sometimes|nullable|string',
-            'address' => 'sometimes|nullable|string',
-        ]);
+        $data = $request->validated();
         $tenant->update($data);
         return $tenant->load('roles');
     }
