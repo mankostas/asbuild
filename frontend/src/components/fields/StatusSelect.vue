@@ -1,25 +1,23 @@
 <template>
-  <select
-    class="form-select"
+  <Select
+    :modelValue="modelValue ?? ''"
+    :label="label"
+    :options="options"
     :aria-label="label"
-    :value="modelValue"
-    @change="onChange"
-  >
-    <option v-for="opt in options" :key="opt.value" :value="opt.value">
-      {{ opt.label }}
-    </option>
-  </select>
+    @update:modelValue="(val) => emit('update:modelValue', val ? Number(val) : null)"
+  />
 </template>
 
 <script setup lang="ts">
-interface Option { label: string; value: string }
+import Select from '@/components/ui/Select/index.vue';
+
+interface Option { label: string; value: number }
+
 const props = defineProps<{
   label: string;
-  modelValue: string | null;
+  modelValue: number | null;
   options: Option[];
 }>();
-const emit = defineEmits<{ 'update:modelValue': [string | null] }>();
-function onChange(e: Event) {
-  emit('update:modelValue', (e.target as HTMLSelectElement).value);
-}
+
+const emit = defineEmits<{ 'update:modelValue': [number | null] }>();
 </script>
