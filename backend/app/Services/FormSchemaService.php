@@ -594,7 +594,7 @@ class FormSchemaService
         $defaults = $schema['roles'] ?? [];
 
         foreach ($schema['sections'] ?? [] as $section) {
-            foreach ($section['fields'] ?? [] as $field) {
+            foreach (array_merge($section['fields'] ?? [], $section['photos'] ?? []) as $field) {
                 $key = $field['key'] ?? null;
                 if (! $key || ! array_key_exists($key, $data)) {
                     continue;

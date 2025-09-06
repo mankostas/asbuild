@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\FormSchemaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -67,6 +68,14 @@ class TaskPhotoRolesTest extends TestCase
         ];
         $filteredData = $service->filterDataForRoles($this->schema, $data, $user);
         $this->assertSame(['note' => ['mime' => 'image/jpeg']], $filteredData);
+    }
+
+    public function test_assert_can_edit_blocks_read_only(): void
+    {
+        $user = $this->makeViewer();
+        $service = new FormSchemaService();
+        $this->expectException(ValidationException::class);
+        $service->assertCanEdit($this->schema, ['note' => ['mime' => 'image/jpeg']], $user);
     }
 }
 
