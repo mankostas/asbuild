@@ -116,7 +116,7 @@ interface Column {
 }
 
 const columns = ref<Column[]>([]);
-let dragSnapshot: Column[] | null = null;
+const dragSnapshots = new Map<number, Column[][]>();
 
 const prefs = reactive<BoardPrefs>({
   filters: {
@@ -216,6 +216,9 @@ async function performMove(task: Task, statusSlug: string, index: number) {
 
 async function onDrop(evt: any, column: Column) {
   const task: Task = evt.item.__draggable_context.element;
+  const snapshots = dragSnapshots.get(task.id);
+  const snapshot = snapshots?.pop();
+  if (!snapshots?.length) dragSnapshots.delete(task.id);
   try {
     await api.patch('/task-board/move', {
       task_id: task.id,
@@ -223,16 +226,17 @@ async function onDrop(evt: any, column: Column) {
       index: evt.newIndex,
     });
   } catch {
-    if (dragSnapshot) {
-      columns.value = dragSnapshot;
+    if (snapshot) {
+      columns.value = snapshot;
     }
     notify.error(t('board.errorMove'));
-  } finally {
-    dragSnapshot = null;
   }
 }
 
-function onDragStart() {
-  dragSnapshot = columns.value.map((c) => ({ ...c, tasks: [...c.tasks] }));
+function onDragStart(evt: any) {
+  const task: Task = evt.item.__draggable_context.element;
+  const snapshots = dragSnapshots.get(task.id) ?? [];
+  snapshots.push(columns.value.map((c) => ({ ...c, tasks: [...c.tasks] })));
+  dragSnapshots.set(task.id, snapshots);
 }
 </script>
