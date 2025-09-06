@@ -190,13 +190,25 @@
     "watch": "Watch",
     "unwatch": "Unwatch",
     "unassigned": "Unassigned",
-    "noTeam": "No team"
+    "noTeam": "No team",
+    "chips": {
+      "priority": "Priority",
+      "sla": {
+        "ok": "SLA OK",
+        "dueSoon": "Due soon",
+        "breached": "Breached"
+      },
+      "due": "Due"
+    }
   },
   "board": {
     "swimlane": "Swimlane",
     "none": "None",
     "assignee": "Assignee",
     "team": "Team",
+    "priority": "Priority",
+    "sort": "Sort",
+    "clearFilters": "Clear filters",
     "assignMe": "Assign to me",
     "changeStatus": "Change status",
     "addComment": "Add comment",
@@ -204,6 +216,15 @@
     "moveRight": "Move right",
     "addCommentPrompt": "Enter comment",
     "errorMove": "Cannot move task"
+  },
+  "featureGrants": {
+    "title": "Feature Grants"
+  },
+  "versionActions": {
+    "duplicate": "Duplicate version",
+    "publish": "Publish version",
+    "unpublish": "Unpublish version",
+    "delete": "Delete version"
   },
   "types": {
     "workflow": {
