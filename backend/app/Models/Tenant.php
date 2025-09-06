@@ -36,15 +36,30 @@ class Tenant extends Model
         });
     }
 
+    public function selectedFeatureAbilities(): array
+    {
+        $map = config('feature_map', []);
+        $selected = $this->feature_abilities;
+
+        if ($selected === null) {
+            $selected = [];
+            foreach ($this->features ?? [] as $feature) {
+                $selected[$feature] = $map[$feature]['abilities'] ?? [];
+            }
+        }
+
+        return $selected;
+    }
+
     public function allowedAbilities(): array
     {
         $map = config('feature_map', []);
         $abilities = [];
-        $selected = $this->feature_abilities ?? [];
+        $selected = $this->selectedFeatureAbilities();
 
         foreach ($this->features ?? [] as $feature) {
             $featureAbilities = $map[$feature]['abilities'] ?? [];
-            $chosen = $selected[$feature] ?? [];
+            $chosen = $selected[$feature] ?? $featureAbilities;
             $abilities = array_merge(
                 $abilities,
                 array_intersect($featureAbilities, $chosen)

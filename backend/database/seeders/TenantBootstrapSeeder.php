@@ -40,7 +40,8 @@ class TenantBootstrapSeeder extends Seeder
         $tenantId = DB::table('tenants')->where('id', 1)->value('id');
 
         // Tenant roles
-        $tenantAbilities = \App\Models\Tenant::find($tenantId)->allowedAbilities();
+        $tenant = \App\Models\Tenant::find($tenantId);
+        $tenantAbilities = $tenant->allowedAbilities();
         DB::table('roles')->updateOrInsert(
             ['tenant_id' => $tenantId, 'slug' => 'tenant'],
             [
@@ -53,7 +54,7 @@ class TenantBootstrapSeeder extends Seeder
             ]
         );
 
-        DefaultFeatureRolesSeeder::syncDefaultRolesForFeatures(\App\Models\Tenant::find($tenantId));
+        DefaultFeatureRolesSeeder::syncDefaultRolesForFeatures($tenant, $tenant->selectedFeatureAbilities());
 
         $managerAbilities = array_intersect(
             ['tasks.manage', 'teams.manage', 'task_statuses.manage', 'task_types.manage'],
