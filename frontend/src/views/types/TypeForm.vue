@@ -708,17 +708,16 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
 onMounted(async () => {
   loading.value = true;
   try {
-    const [_, _featureMap, typeRes, versionsList] = await Promise.all([
+    const [_, , typeRes, versionsList] = await Promise.all([
       tenantStore.loadTenants(
         auth.isSuperAdmin
           ? { per_page: 100, scope: 'all' }
           : { per_page: 100 },
       ),
-      api.get('/lookups/feature-map'),
+      api.get('/lookups/features'),
       isEdit.value ? api.get(`/task-types/${route.params.id}`) : Promise.resolve(null),
       isEdit.value ? versionsStore.list(taskTypeId.value) : Promise.resolve([]),
     ]);
-    void _featureMap;
     if (isEdit.value && typeRes) {
       const typeData = typeRes.data.data ?? typeRes.data;
       name.value = typeData.name || '';
