@@ -23,8 +23,8 @@ class TaskBoardTest extends TestCase
         parent::setUp();
         Tenant::create(['id' => 1, 'name' => 'T', 'features' => ['tasks']]);
         TaskStatus::insert([
-            ['slug' => 'draft', 'name' => 'Draft'],
-            ['slug' => 'assigned', 'name' => 'Assigned'],
+            ['slug' => 'draft', 'name' => 'Draft', 'position' => 1],
+            ['slug' => 'assigned', 'name' => 'Assigned', 'position' => 2],
         ]);
     }
 
@@ -97,5 +97,55 @@ class TaskBoardTest extends TestCase
                 'index' => 0,
             ])
             ->assertStatus(422);
+    }
+
+    public function test_index_returns_normalized_columns(): void
+    {
+        $user = $this->authUser();
+        $task = $this->makeTask($user);
+
+        $this->withHeader('X-Tenant-ID', 1)
+            ->getJson('/api/task-board')
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    [
+                        'status' => ['slug', 'name'],
+                        'tasks' => [
+                            ['id', 'status_slug', 'board_position'],
+                        ],
+                    ],
+                ],
+            ])
+            ->assertJsonPath('data.0.status.slug', 'draft')
+            ->assertJsonPath('data.0.tasks.0.id', $task->id)
+            ->assertJsonMissingPath('data.0.tasks.data');
+    }
+
+    public function test_move_updates_board_position(): void
+    {
+        $user = $this->authUser();
+        $task = $this->makeTask($user);
+        Task::create([
+            'tenant_id' => 1,
+            'user_id' => $user->id,
+            'task_type_id' => $task->task_type_id,
+            'status_slug' => 'assigned',
+            'board_position' => 1000,
+        ]);
+
+        $this->withHeader('X-Tenant-ID', 1)
+            ->patchJson('/api/task-board/move', [
+                'task_id' => $task->id,
+                'status_slug' => 'assigned',
+                'index' => 0,
+            ])
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('tasks', [
+            'id' => $task->id,
+            'board_position' => 0,
+            'status_slug' => 'assigned',
+        ]);
     }
 }
