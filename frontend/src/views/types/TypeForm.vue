@@ -209,6 +209,7 @@
           :can-manage="canManage"
           :status-count="statuses.length"
           :features="tenantFeatures"
+          :feature-abilities="tenantFeatureAbilities"
           class="p-4 border-b"
         />
         <div class="h-[calc(100vh-3rem)] p-4">
@@ -523,6 +524,9 @@ const tenantFeatures = computed(() => {
   );
   return tenant?.features || [];
 });
+const tenantFeatureAbilities = computed(() =>
+  tenantStore.tenantAllowedAbilities(String(tenantId.value) || ''),
+);
 const transitionsEditor = ref<any>(null);
 const automationsEditor = ref<any>(null);
 const slaPolicyEditor = ref<any>(null);

@@ -9,9 +9,12 @@ export const useTenantStore = defineStore('tenant', {
   state: () => ({
     currentTenantId: initialTenant as string,
     tenants: [] as any[],
+    allowedAbilities: {} as Record<string, Record<string, string[]>>,
   }),
   getters: {
     tenantId: (state) => state.currentTenantId,
+    tenantAllowedAbilities: (state) =>
+      (id: string | number) => state.allowedAbilities[String(id)] || {},
   },
   actions: {
     async loadTenants(params: ListParams = {}) {
@@ -31,6 +34,13 @@ export const useTenantStore = defineStore('tenant', {
     },
     async searchTenants(search: string) {
       return this.loadTenants({ search, per_page: 100 });
+    },
+    setTenantFeatures(id: string | number, features: string[]) {
+      const tenant = this.tenants.find((t) => String(t.id) === String(id));
+      if (tenant) tenant.features = features;
+    },
+    setAllowedAbilities(id: string | number, abilities: Record<string, string[]>) {
+      this.allowedAbilities[String(id)] = JSON.parse(JSON.stringify(abilities));
     },
     setTenant(id: string | number) {
       const normalized = id ? String(id) : '';

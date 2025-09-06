@@ -125,6 +125,7 @@ const props = defineProps<{
   canManage: boolean;
   statusCount: number;
   features: string[];
+  featureAbilities?: Record<string, string[]>;
 }>();
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
@@ -208,7 +209,9 @@ const abilityMap: Record<string, string[]> = {
 
 const allowedAbilities = computed(() =>
   new Set(
-    props.features.flatMap((f) => featureMap[f]?.abilities || []),
+    props.featureAbilities && Object.keys(props.featureAbilities).length
+      ? Object.values(props.featureAbilities).flat()
+      : props.features.flatMap((f) => featureMap[f]?.abilities || []),
   ),
 );
 
