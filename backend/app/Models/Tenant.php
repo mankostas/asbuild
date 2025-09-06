@@ -14,12 +14,14 @@ class Tenant extends Model
         'name',
         'quota_storage_mb',
         'features',
+        'feature_abilities',
         'phone',
         'address',
     ];
 
     protected $casts = [
         'features' => 'array',
+        'feature_abilities' => 'array',
     ];
 
     protected static function booted(): void
@@ -38,9 +40,15 @@ class Tenant extends Model
     {
         $map = config('feature_map', []);
         $abilities = [];
+        $selected = $this->feature_abilities ?? [];
 
         foreach ($this->features ?? [] as $feature) {
-            $abilities = array_merge($abilities, $map[$feature]['abilities'] ?? []);
+            $featureAbilities = $map[$feature]['abilities'] ?? [];
+            $chosen = $selected[$feature] ?? [];
+            $abilities = array_merge(
+                $abilities,
+                array_intersect($featureAbilities, $chosen)
+            );
         }
 
         return array_values(array_unique($abilities));

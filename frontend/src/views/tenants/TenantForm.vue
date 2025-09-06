@@ -113,8 +113,7 @@ onMounted(async () => {
       user_name: '',
       user_email: '',
     };
-    const stored = tenantStore.tenantAllowedAbilities(route.params.id as string);
-    featureAbilities.value = { ...stored };
+    featureAbilities.value = { ...(data.feature_abilities || {}) };
     form.value.features.forEach((f: string) => {
       if (!featureAbilities.value[f]) {
         featureAbilities.value[f] = [...(featureMap[f]?.abilities || [])];
@@ -136,6 +135,7 @@ const onSubmit = handleSubmit(async () => {
     phone: form.value.phone,
     address: form.value.address,
     features: form.value.features,
+    feature_abilities: featureAbilities.value,
   };
   if (!isEdit.value) {
     payload.user_name = form.value.user_name;
