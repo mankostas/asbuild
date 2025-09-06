@@ -34,7 +34,7 @@ class TaskBoardTest extends TestCase
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => 1,
-            'abilities' => ['tasks.view|tasks.manage', 'tasks.update'],
+            'abilities' => ['tasks.view', 'tasks.update'],
             'level' => 1,
         ]);
         $user = User::create([
