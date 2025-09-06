@@ -63,6 +63,7 @@
           class="flex flex-col gap-2"
           :data-status="col.status.slug"
           @end="(e) => onDrop(e, col)"
+          @start="onDragStart"
         >
           <template #item="{ element }">
             <TaskCard
@@ -115,6 +116,7 @@ interface Column {
 }
 
 const columns = ref<Column[]>([]);
+let dragSnapshot: Column[] | null = null;
 
 const prefs = reactive<BoardPrefs>({
   filters: {
@@ -214,7 +216,6 @@ async function performMove(task: Task, statusSlug: string, index: number) {
 
 async function onDrop(evt: any, column: Column) {
   const task: Task = evt.item.__draggable_context.element;
-  const snapshot = columns.value.map((c) => ({ ...c, tasks: [...c.tasks] }));
   try {
     await api.patch('/task-board/move', {
       task_id: task.id,
@@ -222,8 +223,16 @@ async function onDrop(evt: any, column: Column) {
       index: evt.newIndex,
     });
   } catch {
-    columns.value = snapshot;
+    if (dragSnapshot) {
+      columns.value = dragSnapshot;
+    }
     notify.error(t('board.errorMove'));
+  } finally {
+    dragSnapshot = null;
   }
+}
+
+function onDragStart() {
+  dragSnapshot = columns.value.map((c) => ({ ...c, tasks: [...c.tasks] }));
 }
 </script>
