@@ -1,57 +1,74 @@
 <template>
-  <div class="bg-white p-2 rounded shadow flex flex-col gap-1">
+  <div
+    :class="[
+      'bg-white rounded shadow flex flex-col gap-1',
+      density === 'compact' ? 'p-1 text-sm' : 'p-2',
+    ]"
+  >
     <div class="font-medium">{{ task.title }}</div>
     <div class="text-xs flex flex-wrap gap-1 items-center">
-      <span v-if="task.assignee" class="px-1 bg-gray-200 rounded">{{ task.assignee.name }}</span>
-      <span v-if="task.priority" class="px-1" :class="priorityClass">
-        {{ t(`tasks.priority.${priorityLabel}`) }}
+      <span v-if="task.assignee" class="flex items-center gap-1">
+        <span
+          class="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[10px]"
+          >{{ initials }}</span
+        >
+        <span>{{ task.assignee.name }}</span>
       </span>
-      <span v-if="task.sla_chip" class="px-1 bg-yellow-100 rounded">{{ task.sla_chip }}</span>
+      <Badge
+        v-if="task.priority"
+        :label="t(`tasks.priority.${priorityLabel}`)"
+        :badgeClass="priorityBadgeClass"
+      />
+      <Badge v-if="slaText" :label="slaText" :badgeClass="slaBadgeClass" />
       <span v-if="task.due_at" class="px-1">{{ formatDate(task.due_at) }}</span>
     </div>
     <div class="flex flex-wrap gap-1 mt-1">
-      <button
-        class="btn btn-xs btn-light"
+      <Button
+        v-if="auth.can('tasks.assign')"
+        btnClass="btn-xs btn-light"
         :aria-label="t('board.assignMe')"
         @click="assignMe"
         @keyup.enter="assignMe"
-      >{{ t('board.assignMe') }}</button>
-      <button
-        v-if="!showStatus"
-        class="btn btn-xs btn-light"
-        :aria-label="t('board.changeStatus')"
-        @click="showStatus = true"
-        @keyup.enter="showStatus = true"
-      >{{ t('board.changeStatus') }}</button>
-      <select
-        v-else
-        v-model="statusSlug"
-        :aria-label="t('board.changeStatus')"
-        class="border rounded text-xs"
-        @change="applyStatus"
+        @keyup.space.prevent="assignMe"
+        >{{ t('board.assignMe') }}</Button
       >
-        <option v-for="s in statusOptions" :key="s.slug" :value="s.slug">
-          {{ s.name }}
-        </option>
-      </select>
-      <button
-        class="btn btn-xs btn-light"
-        :aria-label="t('board.addComment')"
-        @click="addComment"
-        @keyup.enter="addComment"
-      >{{ t('board.addComment') }}</button>
-      <button
-        class="btn btn-xs btn-light"
+      <Dropdown
+        v-if="auth.can('tasks.status.update')"
+        :label="t('board.changeStatus')"
+        labelClass="btn btn-light btn-xs"
+      >
+        <template #menus>
+          <MenuItem v-for="s in statusOptions" :key="s.slug" v-slot="{ active }">
+            <button
+              class="block w-full text-left px-4 py-2 text-sm"
+              :class="active ? 'bg-slate-100' : ''"
+              @click="changeStatus(s.slug)"
+            >
+              {{ s.name }}
+            </button>
+          </MenuItem>
+        </template>
+      </Dropdown>
+      <Button
+        v-if="auth.can('tasks.update')"
+        btnClass="btn-xs btn-light"
+        icon="heroicons-outline:chevron-left"
+        iconClass="text-sm"
         :aria-label="t('board.moveLeft')"
         @click="() => move(-1)"
         @keyup.enter="() => move(-1)"
-      >&larr;</button>
-      <button
-        class="btn btn-xs btn-light"
+        @keyup.space.prevent="() => move(-1)"
+      />
+      <Button
+        v-if="auth.can('tasks.update')"
+        btnClass="btn-xs btn-light"
+        icon="heroicons-outline:chevron-right"
+        iconClass="text-sm"
         :aria-label="t('board.moveRight')"
         @click="() => move(1)"
         @keyup.enter="() => move(1)"
-      >&rarr;</button>
+        @keyup.space.prevent="() => move(1)"
+      />
     </div>
   </div>
 </template>
@@ -62,6 +79,10 @@ import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useNotify } from '@/plugins/notify';
 import { useAuthStore } from '@/stores/auth';
+import Button from '@/components/ui/Button/index.vue';
+import Dropdown from '@/components/ui/Dropdown/index.vue';
+import Badge from '@/components/ui/Badge/index.vue';
+import { MenuItem } from '@headlessui/vue';
 
 interface Task {
   id: number;
@@ -81,15 +102,13 @@ const props = defineProps<{
   task: Task;
   columns: Column[];
   onMove: (task: Task, statusSlug: string, index: number) => Promise<void>;
+  density: 'comfortable' | 'compact';
 }>();
 const emit = defineEmits<{ (e: 'assigned', task: Task): void }>();
 
 const { t } = useI18n();
 const notify = useNotify();
 const auth = useAuthStore();
-
-const showStatus = ref(false);
-const statusSlug = ref('');
 
 const statusOptions = computed(() => props.columns.map((c) => c.status));
 
@@ -108,14 +127,42 @@ const priorityLabel = computed(() => {
   }
 });
 
-const priorityClass = computed(() => {
+const priorityBadgeClass = computed(() => {
   switch (props.task.priority) {
     case 3:
-      return 'text-orange-600';
+      return 'bg-orange-100 text-orange-800';
     case 4:
-      return 'text-red-600';
+      return 'bg-red-100 text-red-800';
     default:
-      return 'text-gray-600';
+      return 'bg-slate-100 text-slate-800';
+  }
+});
+
+const initials = computed(() =>
+  props.task.assignee?.name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2) || ''
+);
+
+const slaText = computed(() => {
+  if (!props.task.due_at) return '';
+  const due = new Date(props.task.due_at).getTime();
+  const now = Date.now();
+  if (due < now) return 'Breached';
+  if (due - now < 48 * 3600 * 1000) return 'Due soon';
+  return 'SLA OK';
+});
+
+const slaBadgeClass = computed(() => {
+  switch (slaText.value) {
+    case 'Breached':
+      return 'bg-red-100 text-red-800';
+    case 'Due soon':
+      return 'bg-yellow-100 text-yellow-800';
+    default:
+      return 'bg-green-100 text-green-800';
   }
 });
 
@@ -132,22 +179,10 @@ async function assignMe() {
   }
 }
 
-async function applyStatus() {
-  showStatus.value = false;
-  const target = statusSlug.value;
-  const column = props.columns.find((c) => c.status.slug === target);
+function changeStatus(slug: string) {
+  const column = props.columns.find((c) => c.status.slug === slug);
   const index = column ? column.tasks.length : 0;
-  await props.onMove(props.task, target, index);
-}
-
-async function addComment() {
-  const body = window.prompt(t('board.addCommentPrompt'));
-  if (!body) return;
-  try {
-    await api.post(`/tasks/${props.task.id}/comments`, { body });
-  } catch {
-    notify.error(t('tasks.messages.error'));
-  }
+  props.onMove(props.task, slug, index);
 }
 
 function move(dir: number) {

@@ -43,6 +43,7 @@ export const useAuthStore = defineStore('auth', {
       abilities.length === 0 ||
       state.abilities.includes('*') ||
       abilities.some((a) => state.abilities.includes(a)),
+    userId: (state) => state.user?.id,
   },
   actions: {
     async login(payload: LoginPayload) {
@@ -121,6 +122,10 @@ export function hasAny(abilities: string[]): boolean {
 
 export function hasFeature(feature: string): boolean {
   return useAuthStore().features.includes(feature);
+}
+
+export function userId(): string | number | undefined {
+  return useAuthStore().userId;
 }
 
 registerAuthStore(() => useAuthStore());

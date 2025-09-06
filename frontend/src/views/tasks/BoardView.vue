@@ -3,23 +3,57 @@
     <div class="flex items-center justify-between mb-4">
       <h1 class="text-xl font-semibold">{{ t('routes.taskBoard') }}</h1>
       <div class="flex items-center gap-2">
-        <span id="swimlane-label">{{ t('board.swimlane') }}</span>
-        <select v-model="swimlane" :aria-labelledby="'swimlane-label'" class="border rounded p-1">
-          <option value="none">{{ t('board.none') }}</option>
-          <option value="assignee">{{ t('board.assignee') }}</option>
-          <option value="team">{{ t('board.team') }}</option>
-        </select>
+        <InputGroup
+          v-model="prefs.filters.assigneeId"
+          :placeholder="t('board.assignee')"
+          classInput="h-8"
+        />
+        <Select
+          v-model="prefs.filters.priority"
+          :options="priorityOptions"
+          classInput="h-8"
+        />
+        <Select
+          v-model="prefs.sorting.key"
+          :options="sortOptions"
+          classInput="h-8"
+        />
+        <Dropdown :label="densityLabel" labelClass="btn btn-light btn-sm">
+          <template #menus>
+            <MenuItem
+              v-for="d in densityOptions"
+              :key="d"
+              v-slot="{ active }"
+            >
+              <button
+                class="block w-full text-left px-4 py-2 text-sm"
+                :class="active ? 'bg-slate-100' : ''"
+                @click="setDensity(d)"
+              >
+                {{ d }}
+              </button>
+            </MenuItem>
+          </template>
+        </Dropdown>
+        <Button
+          btnClass="btn-sm btn-light"
+          :aria-label="t('board.clearFilters')"
+          @click="clearFilters"
+          @keyup.enter="clearFilters"
+          @keyup.space.prevent="clearFilters"
+          >{{ t('board.clearFilters') }}</Button
+        >
       </div>
     </div>
     <div class="flex gap-4 overflow-x-auto">
-      <div
+      <Card
         v-for="col in columns"
         :key="col.status.slug"
         class="w-72 flex-shrink-0"
+        :title="col.status.name"
+        bodyClass="p-2"
       >
-        <h2 class="font-semibold mb-2">{{ col.status.name }}</h2>
         <draggable
-          v-if="swimlane === 'none'"
           v-model="col.tasks"
           group="tasks"
           item-key="id"
@@ -28,38 +62,39 @@
           @end="(e) => onDrop(e, col)"
         >
           <template #item="{ element }">
-            <TaskCard :task="element" :columns="columns" :onMove="performMove" @assigned="updateTask" />
+            <TaskCard
+              :task="element"
+              :columns="columns"
+              :onMove="performMove"
+              :density="prefs.cardDensity"
+              @assigned="updateTask"
+            />
           </template>
         </draggable>
-        <div v-else class="flex flex-col gap-4">
-          <div v-for="(tasks, lane) in grouped(col.tasks)" :key="lane">
-            <h3 class="text-sm font-medium mb-1">{{ lane }}</h3>
-            <div class="flex flex-col gap-2">
-              <TaskCard
-                v-for="taskItem in tasks"
-                :key="taskItem.id"
-                :task="taskItem"
-                :columns="columns"
-                :onMove="performMove" @assigned="updateTask"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      </Card>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, reactive, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
 import api from '@/services/api';
 import { useNotify } from '@/plugins/notify';
 import TaskCard from './TaskCard.vue';
+import Card from '@/components/ui/Card/index.vue';
+import Select from '@/components/ui/Select/index.vue';
+import InputGroup from '@/components/ui/InputGroup/index.vue';
+import Dropdown from '@/components/ui/Dropdown/index.vue';
+import Button from '@/components/ui/Button/index.vue';
+import { MenuItem } from '@headlessui/vue';
+import { loadBoardPrefs, saveBoardPrefs, BoardPrefs } from '@/services/boardPrefs';
+import { useAuthStore } from '@/stores/auth';
 
 const { t } = useI18n();
 const notify = useNotify();
+const auth = useAuthStore();
 
 interface Task {
   id: number;
@@ -77,7 +112,60 @@ interface Column {
 }
 
 const columns = ref<Column[]>([]);
-const swimlane = ref<'none' | 'assignee' | 'team'>('none');
+
+const prefs = reactive<BoardPrefs>({
+  filters: {
+    statusIds: [],
+    typeId: null,
+    assigneeId: null,
+    priority: null,
+    hasPhotos: null,
+    dates: {},
+  },
+  sorting: { key: 'created_at', dir: 'asc' },
+  cardDensity: 'comfortable',
+});
+
+const sortOptions = [
+  { value: 'created_at', label: 'Created' },
+  { value: 'due_at', label: 'Due' },
+  { value: 'priority', label: 'Priority' },
+  { value: 'board_position', label: 'Board Position' },
+];
+
+const priorityOptions = [
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' },
+];
+
+const densityOptions: BoardPrefs['cardDensity'][] = ['comfortable', 'compact'];
+const densityLabel = computed(() => prefs.cardDensity);
+function setDensity(d: BoardPrefs['cardDensity']) {
+  prefs.cardDensity = d;
+}
+function clearFilters() {
+  prefs.filters = {
+    statusIds: [],
+    typeId: null,
+    assigneeId: null,
+    priority: null,
+    hasPhotos: null,
+    dates: {},
+  };
+}
+
+watch(
+  () => prefs,
+  (val) => saveBoardPrefs(auth.userId || auth.user?.id || 0, val),
+  { deep: true }
+);
+
+watch(
+  [() => prefs.filters, () => prefs.sorting],
+  load,
+  { deep: true }
+);
 
 function updateTask(updated: Task) {
   const col = columns.value.find((c) => c.tasks.some((t) => t.id === updated.id));
@@ -85,26 +173,9 @@ function updateTask(updated: Task) {
   const idx = col.tasks.findIndex((t) => t.id === updated.id);
   col.tasks[idx] = updated;
 }
-function grouped(tasks: Task[]) {
-  const groups: Record<string, Task[]> = {};
-  tasks.forEach((task) => {
-    const key =
-      swimlane.value === 'assignee'
-        ? task.assignee?.name || t('tasks.unassigned')
-        : t('tasks.noTeam');
-    (groups[key] ||= []).push(task);
-  });
-  return groups;
-}
 
 async function load() {
   const { data } = await api.get('/task-board');
-  // The `/task-board` endpoint responds with an object that wraps the
-  // columns array in a `data` property, and each column's `tasks` array is
-  // also wrapped in its own `data` property. Previously we assigned these
-  // objects directly which caused Vue to iterate over object keys like `data`
-  // and `meta` instead of the actual task items. Unwrap both layers before
-  // updating state.
   const cols = (data.data ?? data).map((col: any) => ({
     ...col,
     tasks: col.tasks?.data ?? col.tasks ?? [],
@@ -112,24 +183,44 @@ async function load() {
   columns.value = cols;
 }
 
-onMounted(load);
+onMounted(() => {
+  Object.assign(prefs, loadBoardPrefs(auth.userId || auth.user?.id || 0));
+  load();
+});
 
 async function performMove(task: Task, statusSlug: string, index: number) {
+  const snapshot = columns.value.map((c) => ({ ...c, tasks: [...c.tasks] }));
+  const fromCol = columns.value.find((c) => c.tasks.some((t) => t.id === task.id));
+  if (fromCol) {
+    const taskIndex = fromCol.tasks.findIndex((t) => t.id === task.id);
+    fromCol.tasks.splice(taskIndex, 1);
+  }
+  const toCol = columns.value.find((c) => c.status.slug === statusSlug);
+  toCol?.tasks.splice(index, 0, task);
   try {
     await api.patch('/task-board/move', {
       task_id: task.id,
       status_slug: statusSlug,
       index,
     });
-    await load();
   } catch {
+    columns.value = snapshot;
     notify.error(t('board.errorMove'));
-    await load();
   }
 }
 
 async function onDrop(evt: any, column: Column) {
   const task: Task = evt.item.__draggable_context.element;
-  await performMove(task, column.status.slug, evt.newIndex);
+  const snapshot = columns.value.map((c) => ({ ...c, tasks: [...c.tasks] }));
+  try {
+    await api.patch('/task-board/move', {
+      task_id: task.id,
+      status_slug: column.status.slug,
+      index: evt.newIndex,
+    });
+  } catch {
+    columns.value = snapshot;
+    notify.error(t('board.errorMove'));
+  }
 }
 </script>
