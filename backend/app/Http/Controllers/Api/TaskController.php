@@ -175,10 +175,7 @@ class TaskController extends Controller
             return response()->json(['message' => 'invalid_transition'], 422);
         }
 
-        $reason = $this->statusFlow->checkConstraints($task, $next);
-        if ($reason) {
-            return response()->json(['message' => 'constraint_failed', 'reason' => $reason], 422);
-        }
+        $this->statusFlow->checkConstraints($task, $next);
 
         $task->status = $next;
         if ($next === Task::STATUS_IN_PROGRESS && ! $task->started_at) {
