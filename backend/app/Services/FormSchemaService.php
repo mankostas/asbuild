@@ -259,6 +259,7 @@ class FormSchemaService
                 continue;
             }
             $rules = $field['validations'] ?? [];
+            $type = $field['type'] ?? null;
 
             $hasShow = $showTargets->contains($key);
             $isVisible = ! $hasShow || $visible->contains($key);
@@ -270,6 +271,50 @@ class FormSchemaService
             $val = $present ? $data[$key] : null;
 
             $isRequired = ($rules['required'] ?? false) || $requiredOverride->contains($key);
+
+            if ($type === 'photo_repeater') {
+                if ($isRequired && (! $present || ! is_array($val) || count($val) === 0)) {
+                    throw ValidationException::withMessages([
+                        "form_data.$key" => 'required',
+                    ]);
+                }
+                if (! $present) {
+                    continue;
+                }
+                if (! is_array($val)) {
+                    throw ValidationException::withMessages([
+                        "form_data.$key" => 'invalid',
+                    ]);
+                }
+                if (isset($field['maxCount']) && count($val) > $field['maxCount']) {
+                    throw ValidationException::withMessages([
+                        "form_data.$key" => 'max_count',
+                    ]);
+                }
+                foreach ($val as $item) {
+                    if (! is_array($item)) {
+                        throw ValidationException::withMessages([
+                            "form_data.$key" => 'invalid',
+                        ]);
+                    }
+                    if (isset($rules['mime']) && is_array($rules['mime'])) {
+                        if (! isset($item['mime']) || ! in_array($item['mime'], $rules['mime'], true)) {
+                            throw ValidationException::withMessages([
+                                "form_data.$key" => 'mime',
+                            ]);
+                        }
+                    }
+                    if (isset($rules['size'])) {
+                        if (! isset($item['size']) || $item['size'] > $rules['size']) {
+                            throw ValidationException::withMessages([
+                                "form_data.$key" => 'size',
+                            ]);
+                        }
+                    }
+                }
+                continue;
+            }
+
             if ($isRequired && ! $present) {
                 throw ValidationException::withMessages([
                     "form_data.$key" => 'required',
@@ -484,8 +529,30 @@ class FormSchemaService
                 }
                 $fields[] = $field;
             }
-            if ($fields) {
-                $section['fields'] = $fields;
+
+            $photos = [];
+            foreach ($section['photos'] ?? [] as $photo) {
+                $access = $this->resolveAccess($photo['roles'] ?? [], $defaults, $roles);
+                if ($access === 'hidden') {
+                    continue;
+                }
+                if ($access === 'read') {
+                    $photo['readOnly'] = true;
+                }
+                $photos[] = $photo;
+            }
+
+            if ($fields || $photos) {
+                if ($fields) {
+                    $section['fields'] = $fields;
+                } else {
+                    unset($section['fields']);
+                }
+                if ($photos) {
+                    $section['photos'] = $photos;
+                } else {
+                    unset($section['photos']);
+                }
                 $sections[] = $section;
             }
         }
@@ -503,7 +570,7 @@ class FormSchemaService
         $defaults = $schema['roles'] ?? [];
 
         foreach ($schema['sections'] ?? [] as $section) {
-            foreach ($section['fields'] ?? [] as $field) {
+            foreach (array_merge($section['fields'] ?? [], $section['photos'] ?? []) as $field) {
                 $key = $field['key'] ?? null;
                 if (! $key) {
                     continue;
