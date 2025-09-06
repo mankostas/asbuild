@@ -194,13 +194,17 @@ async function onTypeChange() {
   dueAt.value = null;
   priority.value = '';
   if (taskTypeId.value) {
-    const { data } = await api.get('/task-type-versions', {
-      params: { task_type_id: taskTypeId.value },
-    });
-    const list = data.data || [];
-    versions.value = can('task_type_versions.manage')
-      ? list
-      : list.filter((v: any) => v.published_at);
+    let list: any[] = [];
+    const manageVersions = can('task_type_versions.manage');
+    if (manageVersions) {
+      const { data } = await api.get('/task-type-versions', {
+        params: { task_type_id: taskTypeId.value },
+      });
+      list = data.data || [];
+    } else if (t?.current_version) {
+      list = [t.current_version];
+    }
+    versions.value = manageVersions ? list : list.filter((v: any) => v.published_at);
     taskTypeVersionId.value = versions.value[0]?.id ?? null;
   }
 }
