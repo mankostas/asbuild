@@ -471,7 +471,7 @@ const router = useRouter();
 const versionsStore = useTaskTypeVersionsStore();
 const tenantStore = useTenantStore();
 const auth = useAuthStore();
-const taskTypeId = computed(() => Number(route.params.id ?? 0));
+const taskTypeId = computed(() => Number(route.params.id ?? route.query.id ?? 0));
 const loading = ref(true);
 
 interface Field {
@@ -607,7 +607,9 @@ function openPalette(sectionIndex?: number, tabIndex?: number) {
   nextTick(() => window.scrollTo({ top: scrollY }));
 }
 
-const isEdit = computed(() => route.name === 'taskTypes.edit');
+const isEdit = computed(
+  () => route.name === 'taskTypes.edit' || !!(route.query.id || route.params.id),
+);
 const isCreate = computed(
   () => route.name === 'taskTypes.create' && auth.isSuperAdmin,
 );
@@ -717,7 +719,7 @@ onMounted(async () => {
           : { per_page: 100 },
       ),
       api.get('/lookups/features'),
-      isEdit.value ? api.get(`/task-types/${route.params.id}`) : Promise.resolve(null),
+      isEdit.value ? api.get(`/task-types/${taskTypeId.value}`) : Promise.resolve(null),
       isEdit.value ? versionsStore.list(taskTypeId.value) : Promise.resolve([]),
     ]);
     if (isEdit.value && typeRes) {
@@ -900,9 +902,9 @@ function onVersionChange() {
 }
 
 async function duplicateVersion() {
-  if (!route.params.id) return;
-  await versionsStore.create(Number(route.params.id));
-  versions.value = await versionsStore.list(Number(route.params.id));
+  if (!taskTypeId.value) return;
+  await versionsStore.create(taskTypeId.value);
+  versions.value = await versionsStore.list(taskTypeId.value);
   selectedVersionId.value = versions.value[0]?.id ?? null;
 }
 
@@ -916,7 +918,7 @@ async function publishVersion() {
   });
   if (!result.isConfirmed) return;
   await versionsStore.publish(selectedVersionId.value);
-  versions.value = await versionsStore.list(Number(route.params.id));
+  versions.value = await versionsStore.list(taskTypeId.value);
 }
 
 async function unpublishVersion() {
@@ -929,7 +931,7 @@ async function unpublishVersion() {
   });
   if (!result.isConfirmed) return;
   await versionsStore.unpublish(selectedVersionId.value);
-  versions.value = await versionsStore.list(Number(route.params.id));
+  versions.value = await versionsStore.list(taskTypeId.value);
 }
 
 async function deleteVersion() {
@@ -942,7 +944,7 @@ async function deleteVersion() {
   });
   if (!result.isConfirmed) return;
   await versionsStore.deprecate(selectedVersionId.value);
-  versions.value = await versionsStore.list(Number(route.params.id));
+  versions.value = await versionsStore.list(taskTypeId.value);
   selectedVersionId.value = versions.value[0]?.id ?? null;
 }
 
@@ -1114,7 +1116,7 @@ async function onSubmit() {
     abilities_json: JSON.stringify(permissions.value),
   };
   if (isEdit.value) {
-    await api.patch(`/task-types/${route.params.id}`, payload);
+    await api.patch(`/task-types/${taskTypeId.value}`, payload);
   } else {
     const res = await api.post('/task-types', payload);
     const newId = res.data?.data?.id ?? res.data?.id;
@@ -1181,7 +1183,7 @@ function runValidation() {
     return;
   }
   const url = isEdit.value
-    ? `/task-types/${route.params.id}/validate`
+    ? `/task-types/${taskTypeId.value}/validate`
     : '/task-types/validate';
   api
     .post(url, {
