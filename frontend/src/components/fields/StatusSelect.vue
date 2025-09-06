@@ -4,20 +4,22 @@
     :label="label"
     :options="options"
     :aria-label="label"
-    @update:model-value="(val) => emit('update:modelValue', val ? Number(val) : null)"
+    :error="error"
+    @update:model-value="(val) => emit('update:modelValue', val || null)"
   />
 </template>
 
 <script setup lang="ts">
 import Select from '@/components/ui/Select/index.vue';
 
-interface Option { label: string; value: number }
+interface Option { label: string; value: string }
 
 const props = defineProps<{
   label: string;
-  modelValue: number | null;
+  modelValue: string | null;
   options: Option[];
+  error?: any;
 }>();
 
-const emit = defineEmits<{ 'update:modelValue': [number | null] }>();
+const emit = defineEmits<{ 'update:modelValue': [string | null] }>();
 </script>

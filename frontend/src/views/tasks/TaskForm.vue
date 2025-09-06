@@ -23,10 +23,10 @@
 
       <StatusSelect
         v-if="isEdit"
-        v-model="statusId"
+        v-model="status"
         :options="statusOptions"
         :label="t('tasks.form.status')"
-        :error="errors.status_id"
+        :error="errors.status"
       />
 
       <AssigneePicker v-if="assigneeField && can('tasks.assign')" v-model="assignee" />
@@ -102,15 +102,15 @@ const formData = ref<any>({});
 const scheduledAt = ref('');
 const slaStartAt = ref('');
 const slaEndAt = ref('');
-const statusId = ref<number | null>(null);
+const status = ref<string | null>(null);
 const serverError = ref('');
 const showError = ref(false);
-const originalStatusId = ref<number | null>(null);
+const originalStatus = ref<string | null>(null);
 const assignee = ref<{ id: number } | null>(null);
 const priority = ref('');
 const dueAt = ref<string | null>(null);
 
-const statusOptions = ref<{ label: string; value: number }[]>([]);
+const statusOptions = ref<{ label: string; value: string }[]>([]);
 const priorityOptions = computed(() => [
   { label: t('tasks.priority.low'), value: 'low' },
   { label: t('tasks.priority.normal'), value: 'normal' },
@@ -143,7 +143,7 @@ onMounted(async () => {
   const statusBySlug: Record<string, any> = {};
   statusOptions.value = statusesRes.data.map((s: any) => {
     statusBySlug[s.slug] = s;
-    return { label: s.name, value: s.id };
+    return { label: s.name, value: s.slug };
   });
   if (isEdit.value) {
     const res = await api.get(`/tasks/${route.params.id}`);
@@ -157,8 +157,8 @@ onMounted(async () => {
     slaEndAt.value = task.sla_end_at ? toISO(task.sla_end_at) : '';
     dueAt.value = task.due_at ? toISO(task.due_at) : null;
     priority.value = task.priority || '';
-    statusId.value = task.status_id || statusBySlug[task.status]?.id || null;
-    originalStatusId.value = statusId.value;
+    status.value = task.status || null;
+    originalStatus.value = status.value;
     if (task.assignee) {
       assignee.value = { id: task.assignee.id };
     }
@@ -177,7 +177,7 @@ onMounted(async () => {
     const allowed = [task.status, ...allowedSlugs]
       .map((slug) => statusBySlug[slug])
       .filter(Boolean)
-      .map((s: any) => ({ label: s.name, value: s.id }));
+      .map((s: any) => ({ label: s.name, value: s.slug }));
     if (allowed.length) statusOptions.value = allowed;
   }
 });
@@ -263,8 +263,8 @@ const submitForm = handleSubmit(async () => {
   if (dueAt.value) payload.due_at = toISO(dueAt.value);
   if (priority.value) payload.priority = priority.value;
   if (assignee.value) payload.assigned_user_id = assignee.value.id;
-  if (statusId.value && (!isEdit.value || statusId.value !== originalStatusId.value)) {
-    payload.status_id = statusId.value;
+  if (status.value && (!isEdit.value || status.value !== originalStatus.value)) {
+    payload.status = status.value;
   }
   try {
     if (isEdit.value) {
