@@ -24,8 +24,16 @@ class TenantUpsertRequest extends FormRequest
             'feature_abilities' => ['array'],
             'feature_abilities.*' => ['array'],
             'feature_abilities.*.*' => ['string'],
-            'phone' => [$this->isMethod('POST') ? 'nullable|string' : 'sometimes|nullable|string'],
-            'address' => [$this->isMethod('POST') ? 'nullable|string' : 'sometimes|nullable|string'],
+            'phone' => array_filter([
+                $this->isMethod('POST') ? null : 'sometimes',
+                'nullable',
+                'string',
+            ]),
+            'address' => array_filter([
+                $this->isMethod('POST') ? null : 'sometimes',
+                'nullable',
+                'string',
+            ]),
         ];
 
         if ($this->isMethod('POST')) {
