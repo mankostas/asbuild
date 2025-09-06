@@ -8,162 +8,77 @@
         class="flex-1 min-w-[150px]"
         classInput="text-sm"
       />
-      <div class="flex-1 min-w-[150px] relative">
-        <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -->
-        <label
-          for="typeSearch"
-          class="input-label inline-flex items-center gap-1"
-        >
-          {{ t('types.form.search') }}
-          <Icon
-            v-tippy="{
-              theme: 'light',
-              trigger: 'mouseenter focus click',
-              content: t('types.form.searchHelp'),
-            }"
-            icon="heroicons-outline:question-mark-circle"
-            class="w-4 h-4"
-            aria-hidden="true"
-          />
-        </label>
-        <InputGroup id="typeSearch" v-model="localSearch" classInput="text-sm">
-          <template #append>
-              <Button
-                v-if="localSearch"
-                type="button"
-                btnClass="btn-light px-2 py-1"
-                :aria-label="t('actions.clear')"
-                @click="clearSearch"
-              >
-                ✕
-              </Button>
-          </template>
-        </InputGroup>
-        <ul
-          v-if="tenantSearchResults.length"
-          class="absolute z-10 w-full bg-white border rounded mt-1 max-h-60 overflow-auto"
-        >
-          <li
-            v-for="opt in tenantSearchResults"
-            :key="opt.value"
-            role="button"
-            tabindex="0"
-            class="px-2 py-1 cursor-pointer hover:bg-slate-100"
-            @click="selectTenant(opt)"
-            @keydown.enter="selectTenant(opt)"
-            @keydown.space.prevent="selectTenant(opt)"
-          >
-            {{ opt.label }}
-          </li>
-        </ul>
-      </div>
-      <Select
-        id="tenantSelect"
-        v-model="localTenantId"
-        :label="t('types.form.tenant')"
-        :options="tenantOptions"
-        :placeholder="t('none')"
+      <VueSelect
         class="flex-1 min-w-[150px]"
-        classInput="text-sm"
-      />
-    </div>
-    <div class="flex gap-2 mt-2">
-      <Badge
-        v-if="localSearch"
-        badgeClass="bg-primary-50 text-primary-700 flex items-center gap-1"
+        :label="t('types.form.tenant')"
       >
-        <span>{{ t('types.form.search') }}: {{ localSearch }}</span>
-        <Button
-          type="button"
-          btnClass="btn-light px-1 py-0"
-          :aria-label="t('actions.clear')"
-          @click="clearSearch"
-        >
-          ✕
-        </Button>
-      </Badge>
-      <Badge
-        v-if="selectedTenant"
-        badgeClass="bg-primary-50 text-primary-700 flex items-center gap-1"
-      >
-        <span>{{ t('types.form.tenant') }}: {{ selectedTenant.label }}</span>
-        <Button
-          type="button"
-          btnClass="btn-light px-1 py-0"
-          :aria-label="t('actions.clear')"
-          @click="clearTenant"
-        >
-          ✕
-        </Button>
-      </Badge>
+        <template #default="{ inputId }">
+          <vSelect
+            :id="inputId"
+            v-model="localTenantId"
+            :options="tenantOptions"
+            :reduce="(o: Option) => o.value"
+            label="label"
+            :clearable="true"
+            @search="onTenantSearch"
+          />
+        </template>
+      </VueSelect>
     </div>
   </Card>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Card from '@/components/ui/Card/index.vue';
 import Textinput from '@/components/ui/Textinput/index.vue';
-import InputGroup from '@/components/ui/InputGroup/index.vue';
-import Select from '@/components/ui/Select/index.vue';
-import Badge from '@/components/ui/Badge/index.vue';
-import Button from '@/components/ui/Button/index.vue';
-import Icon from '@/components/Icon';
+import VueSelect from '@/components/ui/Select/VueSelect.vue';
+import vSelect from 'vue-select';
+import { useTenantStore } from '@/stores/tenant';
 
 interface Option {
-  value: number;
+  value: number | null;
   label: string;
 }
 
-const props = defineProps<{
-  name: string;
-  search: string;
-  tenantId: number | '';
-  tenantOptions: Option[];
-}>();
-
+const props = defineProps<{ name: string; tenantId: number | '' }>();
 const emit = defineEmits<{
   (e: 'update:name', value: string): void;
-  (e: 'update:search', value: string): void;
   (e: 'update:tenantId', value: number | ''): void;
 }>();
 
 const { t } = useI18n();
+const tenantStore = useTenantStore();
+
+const tenantOptions = ref<Option[]>([]);
+
+watch(
+  () => tenantStore.tenants,
+  (tenants) => {
+    tenantOptions.value = [
+      { value: null, label: 'Global' },
+      ...tenants.map((t: any) => ({ value: t.id, label: t.name })),
+    ];
+  },
+  { immediate: true },
+);
 
 const localName = computed({
   get: () => props.name,
   set: (v: string) => emit('update:name', v),
 });
 
-const localSearch = computed({
-  get: () => props.search,
-  set: (v: string) => emit('update:search', v),
+const localTenantId = computed<any>({
+  get: () => (props.tenantId === '' ? null : props.tenantId),
+  set: (v: number | null) => emit('update:tenantId', v === null ? '' : Number(v)),
 });
 
-const localTenantId = computed({
-  get: () => props.tenantId,
-  set: (v: any) => emit('update:tenantId', v === '' ? '' : Number(v)),
-});
-
-const selectedTenant = computed(() =>
-  props.tenantOptions.find((o) => o.value === localTenantId.value)
-);
-
-const tenantSearchResults = computed(() =>
-  localSearch.value.length >= 3 ? props.tenantOptions : []
-);
-
-function clearSearch() {
-  emit('update:search', '');
-}
-
-function clearTenant() {
-  emit('update:tenantId', '');
-}
-
-function selectTenant(opt: Option) {
-  emit('update:tenantId', opt.value);
-  emit('update:search', '');
+async function onTenantSearch(search: string) {
+  if (search.length >= 3) {
+    await tenantStore.searchTenants(search);
+  } else if (search.length === 0) {
+    await tenantStore.loadTenants({ per_page: 100 });
+  }
 }
 </script>
