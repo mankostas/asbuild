@@ -3,8 +3,8 @@
 namespace Tests\Unit;
 
 use App\Models\Task;
-use App\Models\TaskType;
 use App\Models\TaskSubtask;
+use App\Models\TaskType;
 use App\Models\TaskTypeVersion;
 use App\Models\Tenant;
 use App\Models\User;
@@ -42,7 +42,7 @@ class StatusFlowServiceTest extends TestCase
             ],
         ]);
 
-        $service = new StatusFlowService();
+        $service = new StatusFlowService;
 
         $this->assertSame(['review'], $service->allowedTransitions('draft', $type));
         $this->assertTrue($service->canTransition('review', 'done', $type));
@@ -75,7 +75,7 @@ class StatusFlowServiceTest extends TestCase
             'status_slug' => 'initial',
         ]);
 
-        $service = new StatusFlowService();
+        $service = new StatusFlowService;
         try {
             $service->checkConstraints($task, 'final');
             $this->fail('Expected exception not thrown');
@@ -118,7 +118,7 @@ class StatusFlowServiceTest extends TestCase
             'is_completed' => false,
         ]);
 
-        $service = new StatusFlowService();
+        $service = new StatusFlowService;
         try {
             $service->checkConstraints($task, 'final');
             $this->fail('Expected exception not thrown');
@@ -138,7 +138,7 @@ class StatusFlowServiceTest extends TestCase
             'semver' => '1.0.0',
             'schema_json' => [
                 'sections' => [
-                    ['photos' => [[ 'key' => 'p1', 'required' => true ]]],
+                    ['photos' => [['key' => 'p1', 'required' => true]]],
                 ],
             ],
             'statuses' => [
@@ -159,9 +159,67 @@ class StatusFlowServiceTest extends TestCase
             'assigned_user_id' => 1,
         ]);
 
-        $service = new StatusFlowService();
+        $service = new StatusFlowService;
         try {
             $service->checkConstraints($task, 'final');
+            $this->fail('Expected exception not thrown');
+        } catch (HttpResponseException $e) {
+            $this->assertEquals('photos_required', $e->getResponse()->getData(true)['code']);
+        }
+    }
+
+    public function test_uses_tasks_own_version_for_constraints(): void
+    {
+        $type = TaskType::create([
+            'name' => 'Type',
+            'tenant_id' => 1,
+        ]);
+
+        $v1 = TaskTypeVersion::create([
+            'task_type_id' => $type->id,
+            'semver' => '1.0.0',
+            'schema_json' => [
+                'sections' => [
+                    ['photos' => [['key' => 'p1', 'required' => true]]],
+                ],
+            ],
+            'statuses' => [
+                ['slug' => 'initial'],
+                ['slug' => 'final1'],
+            ],
+            'created_by' => 1,
+        ]);
+
+        // Task was created when v1 was current
+        $type->current_version_id = $v1->id;
+        $type->save();
+
+        $task = Task::create([
+            'tenant_id' => 1,
+            'user_id' => 1,
+            'task_type_id' => $type->id,
+            'task_type_version_id' => $v1->id,
+            'status_slug' => 'initial',
+            'assigned_user_id' => 1,
+        ]);
+
+        // New version becomes current with different final slug and no photo requirement
+        $v2 = TaskTypeVersion::create([
+            'task_type_id' => $type->id,
+            'semver' => '2.0.0',
+            'statuses' => [
+                ['slug' => 'initial'],
+                ['slug' => 'final2'],
+            ],
+            'created_by' => 1,
+        ]);
+        $type->current_version_id = $v2->id;
+        $type->save();
+
+        $service = new StatusFlowService;
+
+        try {
+            $service->checkConstraints($task, 'final1');
             $this->fail('Expected exception not thrown');
         } catch (HttpResponseException $e) {
             $this->assertEquals('photos_required', $e->getResponse()->getData(true)['code']);

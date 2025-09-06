@@ -37,10 +37,13 @@ class StatusFlowService
                         $graph[$from][] = $to;
                     }
                 }
+
                 return $graph;
             }
+
             return $map;
         }
+
         return self::DEFAULT_TRANSITIONS;
     }
 
@@ -50,6 +53,7 @@ class StatusFlowService
     public function allowedTransitions(string $status, TaskType|TaskTypeVersion|null $type = null): array
     {
         $map = $this->transitions($type);
+
         return $map[$status] ?? [];
     }
 
@@ -66,7 +70,7 @@ class StatusFlowService
      */
     public function checkConstraints(Task $task, string $toSlug): void
     {
-        $version = $task->type?->currentVersion;
+        $version = $task->typeVersion ?? $task->type?->currentVersion;
         if (! $version) {
             return;
         }
@@ -77,7 +81,7 @@ class StatusFlowService
         }
 
         $initial = data_get($statuses->first(), 'slug');
-        $final   = data_get($statuses->last(), 'slug');
+        $final = data_get($statuses->last(), 'slug');
 
         if ($toSlug !== $initial && empty($task->assigned_user_id)) {
             $this->abort422(
