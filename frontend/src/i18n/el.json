@@ -127,7 +127,10 @@
       "dueAt": "Προθεσμία",
       "type": "Τύπος",
       "typePlaceholder": "Επιλογή τύπου",
-      "version": "Έκδοση"
+      "version": "Έκδοση",
+      "slaStart": "Έναρξη SLA",
+      "slaEnd": "Λήξη SLA",
+      "slaTooltip": "Υπολογίζεται αυτόματα από την πολιτική"
     },
     "filters": {
       "global": "Αναζήτηση εργασιών",
@@ -186,6 +189,9 @@
       "photos": "Φωτογραφίες",
       "subtasks": "Υποεργασίες",
       "comments": "Σχόλια"
+    },
+    "details": {
+      "sla": "SLA"
     },
     "subtasks": {
       "title": "Υποεργασίες",

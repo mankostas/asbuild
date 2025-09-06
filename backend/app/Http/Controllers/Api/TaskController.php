@@ -73,6 +73,10 @@ class TaskController extends Controller
         $this->authorize('create', Task::class);
 
         $data = $request->validated();
+        $canOverride = auth()->user()->can('tasks.sla.override');
+        if (! $canOverride) {
+            unset($data['sla_start_at'], $data['sla_end_at']);
+        }
 
         $data['tenant_id'] = $request->user()->tenant_id;
 
@@ -94,7 +98,11 @@ class TaskController extends Controller
             $this->formSchemaService->sanitizeRichText($version->schema_json ?? [], $data['form_data']);
         }
 
-        $task = Task::create($data);
+        $task = new Task($data);
+        if (! $canOverride || ! $task->sla_end_at) {
+            app(\App\Services\TaskSlaService::class)->apply($task);
+        }
+        $task->save();
         $task->watchers()->firstOrCreate(['user_id' => $request->user()->id]);
         if ($task->assigned_user_id) {
             $task->watchers()->firstOrCreate(['user_id' => $task->assigned_user_id]);
@@ -117,6 +125,10 @@ class TaskController extends Controller
         $this->authorize('update', $task);
 
         $data = $request->validated();
+        $canOverride = auth()->user()->can('tasks.sla.override');
+        if (! $canOverride) {
+            unset($data['sla_start_at'], $data['sla_end_at']);
+        }
 
         unset($data['status']);
 
@@ -133,6 +145,9 @@ class TaskController extends Controller
             $this->formSchemaService->sanitizeRichText($version->schema_json ?? [], $data['form_data']);
         }
         $task->fill($data);
+        if (! $canOverride || ! $task->sla_end_at) {
+            app(\App\Services\TaskSlaService::class)->apply($task);
+        }
         $task->save();
         if ($task->assigned_user_id) {
             $task->watchers()->firstOrCreate(['user_id' => $task->assigned_user_id]);

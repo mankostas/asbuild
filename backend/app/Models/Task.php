@@ -126,10 +126,6 @@ class Task extends Model
 
     protected static function booted(): void
     {
-        static::saving(function (Task $task) {
-            App::make(\App\Services\TaskSlaService::class)->apply($task);
-        });
-
         static::updated(function (Task $task) {
             if ($task->wasChanged('status_slug')) {
                 TaskAutomation::run($task, 'status_changed');

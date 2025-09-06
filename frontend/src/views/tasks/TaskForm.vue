@@ -19,6 +19,47 @@
 
         <InputGroup v-model="dueAt" :label="t('tasks.form.dueAt')" type="date" />
 
+        <div class="flex space-x-6">
+          <InputGroup
+            v-model="slaStartAt"
+            :label="t('tasks.form.slaStart')"
+            type="datetime-local"
+            :isReadonly="!can('tasks.sla.override')"
+          >
+            <template #append>
+              <Tooltip theme="light" trigger="mouseenter focus">
+                <template #button>
+                  <Icon
+                    icon="heroicons-outline:question-mark-circle"
+                    class="w-4 h-4 text-slate-500 cursor-help"
+                    :aria-label="t('tasks.form.slaTooltip')"
+                  />
+                </template>
+                {{ t('tasks.form.slaTooltip') }}
+              </Tooltip>
+            </template>
+          </InputGroup>
+          <InputGroup
+            v-model="slaEndAt"
+            :label="t('tasks.form.slaEnd')"
+            type="datetime-local"
+            :isReadonly="!can('tasks.sla.override')"
+          >
+            <template #append>
+              <Tooltip theme="light" trigger="mouseenter focus">
+                <template #button>
+                  <Icon
+                    icon="heroicons-outline:question-mark-circle"
+                    class="w-4 h-4 text-slate-500 cursor-help"
+                    :aria-label="t('tasks.form.slaTooltip')"
+                  />
+                </template>
+                {{ t('tasks.form.slaTooltip') }}
+              </Tooltip>
+            </template>
+          </InputGroup>
+        </div>
+
         <StatusSelect
           v-if="isEdit"
           v-model="status"
@@ -84,6 +125,8 @@ import Textinput from '@dc/components/Textinput';
 import InputGroup from '@dc/components/InputGroup';
 import FromGroup from '@dc/components/FromGroup';
 import Modal from '@dc/components/Modal';
+import Tooltip from '@dc/components/Tooltip';
+import Icon from '@dc/components/Icon';
 
 const notify = useNotify();
 const router = useRouter();
