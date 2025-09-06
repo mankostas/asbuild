@@ -1,16 +1,22 @@
 <template>
-  <Select
-    :modelValue="modelValue ?? ''"
-    :label="label"
-    :options="options"
-    :aria-label="label"
-    :error="error"
-    @update:model-value="(val) => emit('update:modelValue', val || null)"
-  />
+  <InputGroup :label="label" :error="error" :disabled="disabled">
+    <template #default="{ id }">
+      <Select
+        :id="id"
+        :modelValue="modelValue ?? ''"
+        :options="options"
+        :placeholder="placeholder"
+        :disabled="disabled"
+        :aria-label="label"
+        @update:modelValue="(val) => emit('update:modelValue', val || null)"
+      />
+    </template>
+  </InputGroup>
 </template>
 
 <script setup lang="ts">
-import Select from '@/components/ui/Select/index.vue';
+import InputGroup from '@dc/components/InputGroup';
+import Select from '@dc/components/Select';
 
 interface Option { label: string; value: string }
 
@@ -19,6 +25,8 @@ const props = defineProps<{
   modelValue: string | null;
   options: Option[];
   error?: any;
+  disabled?: boolean;
+  placeholder?: string;
 }>();
 
 const emit = defineEmits<{ 'update:modelValue': [string | null] }>();
