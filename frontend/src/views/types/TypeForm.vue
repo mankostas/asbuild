@@ -620,6 +620,8 @@ const canAccess = computed(
       (isEdit.value ? can('task_types.view') : can('task_types.create'))),
 );
 
+const skipTenantWatch = ref(isEdit.value);
+
 watch(previewLang, (lang) => {
   locale.value = lang;
 });
@@ -734,6 +736,10 @@ onMounted(async () => {
       if ((versionsList as any[]).length) {
         selectedVersionId.value = (versionsList as any[])[0].id;
         loadVersion((versionsList as any[])[0]);
+      } else {
+        // If no versions exist yet, load the data directly from the task type
+        // so previously saved schema and statuses are rendered when editing.
+        loadVersion(typeData);
       }
     } else {
       tenantStore.setTenant('');
@@ -746,6 +752,10 @@ onMounted(async () => {
 });
 
 watch(tenantId, (id, oldId) => {
+  if (skipTenantWatch.value) {
+    skipTenantWatch.value = false;
+    return;
+  }
   refreshTenant(id, oldId);
 });
 
