@@ -49,10 +49,11 @@ class TaskStatusFlowTest extends TestCase
         $type = TaskType::create([
             'name' => 'Type',
             'tenant_id' => 1,
-            'statuses' => ['draft' => [], 'assigned' => [], 'completed' => []],
+            'statuses' => ['draft' => [], 'assigned' => [], 'in_progress' => [], 'completed' => []],
             'status_flow_json' => [
                 ['draft', 'assigned'],
-                ['assigned', 'completed'],
+                ['assigned', 'in_progress'],
+                ['in_progress', 'completed'],
             ],
         ]);
 
@@ -93,7 +94,7 @@ class TaskStatusFlowTest extends TestCase
         $type = TaskType::create([
             'name' => 'Type',
             'tenant_id' => 1,
-            'statuses' => ['draft' => [], 'assigned' => [], 'completed' => []],
+            'statuses' => ['draft' => [], 'assigned' => [], 'in_progress' => [], 'completed' => []],
             'status_flow_json' => null,
         ]);
         $task = Task::create([
@@ -121,11 +122,13 @@ class TaskStatusFlowTest extends TestCase
             'statuses' => [
                 ['slug' => 'draft'],
                 ['slug' => 'assigned'],
+                ['slug' => 'in_progress'],
                 ['slug' => 'completed'],
             ],
             'status_flow_json' => [
                 [ ['slug' => 'draft'], ['slug' => 'assigned'] ],
-                [ ['slug' => 'assigned'], ['slug' => 'completed'] ],
+                [ ['slug' => 'assigned'], ['slug' => 'in_progress'] ],
+                [ ['slug' => 'in_progress'], ['slug' => 'completed'] ],
             ],
         ]);
         $task = Task::create([

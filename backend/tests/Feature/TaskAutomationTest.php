@@ -20,7 +20,7 @@ class TaskAutomationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_status_done_notifies_team(): void
+    public function test_status_completed_notifies_team(): void
     {
         Queue::fake();
         $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
@@ -43,16 +43,16 @@ class TaskAutomationTest extends TestCase
         Sanctum::actingAs($user);
 
         TaskStatus::insert([
-            ['slug' => 'open', 'name' => 'Open'],
-            ['slug' => 'done', 'name' => 'Done'],
+            ['slug' => 'draft', 'name' => 'Draft'],
+            ['slug' => 'completed', 'name' => 'Completed'],
         ]);
 
         $type = TaskType::create([
             'name' => 'Type',
             'tenant_id' => $tenant->id,
             'schema_json' => ['sections' => []],
-            'statuses' => ['open' => [], 'done' => []],
-            'status_flow_json' => [ ['open', 'done'] ],
+            'statuses' => ['draft' => [], 'completed' => []],
+            'status_flow_json' => [ ['draft', 'completed'] ],
         ]);
 
         $team = Team::create(['tenant_id' => $tenant->id, 'name' => 'Team X']);
@@ -60,7 +60,7 @@ class TaskAutomationTest extends TestCase
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson("/api/task-types/{$type->id}/automations", [
                 'event' => 'status_changed',
-                'conditions_json' => ['status' => 'done'],
+                'conditions_json' => ['status' => 'completed'],
                 'actions_json' => [['type' => 'notify_team', 'team_id' => $team->id]],
                 'enabled' => true,
             ])->assertCreated();
@@ -69,14 +69,14 @@ class TaskAutomationTest extends TestCase
             'tenant_id' => $tenant->id,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
-            'status_slug' => 'open',
+            'status_slug' => 'draft',
             'board_position' => 1,
         ]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->patchJson('/api/task-board/move', [
                 'task_id' => $task->id,
-                'status_slug' => 'done',
+                'status_slug' => 'completed',
                 'index' => 0,
             ])->assertOk();
 

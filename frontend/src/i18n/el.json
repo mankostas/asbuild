@@ -261,7 +261,7 @@
       "noCondition": "Πάντα",
       "transition": "Μετάβαση",
       "quickPresets": "Γρήγορες προεπιλογές",
-      "presetBasic": "Βασικό: todo → in_progress → completed"
+      "presetBasic": "Βασικό: draft → assigned → in_progress → completed"
     },
     "form": {
       "name": "Όνομα",

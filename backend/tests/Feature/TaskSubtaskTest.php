@@ -43,15 +43,20 @@ class TaskSubtaskTest extends TestCase
         $type = TaskType::create([
             'name' => 'T',
             'tenant_id' => 1,
-            'statuses' => ['draft' => [], 'completed' => []],
-            'status_flow_json' => [ ['draft', 'completed'] ],
+            'statuses' => ['draft' => [], 'assigned' => [], 'in_progress' => [], 'completed' => []],
+            'status_flow_json' => [
+                ['draft', 'assigned'],
+                ['assigned', 'in_progress'],
+                ['in_progress', 'completed'],
+            ],
             'require_subtasks_complete' => true,
         ]);
         $this->task = Task::create([
             'tenant_id' => 1,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
-            'status' => 'draft',
+            'status' => 'in_progress',
+            'assigned_user_id' => $user->id,
         ]);
     }
 
