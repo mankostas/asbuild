@@ -117,22 +117,26 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::get('task-types', [TaskTypeController::class, 'index'])
         ->middleware('ability:task_types.view');
     Route::get('task-types/{task_type}', [TaskTypeController::class, 'show'])
-        ->middleware('ability:task_types.view');
+        ->middleware('ability:task_types.view')
+        ->whereNumber('task_type');
     Route::post('task-types', [TaskTypeController::class, 'store'])
         ->middleware('ability:task_types.create')
         ->name('task-types.store');
     Route::match(['put', 'patch'], 'task-types/{task_type}', [TaskTypeController::class, 'update'])
         ->middleware('ability:task_types.update')
-        ->name('task-types.update');
+        ->name('task-types.update')
+        ->whereNumber('task_type');
     Route::delete('task-types/{task_type}', [TaskTypeController::class, 'destroy'])
         ->middleware('ability:task_types.delete')
-        ->name('task-types.destroy');
+        ->name('task-types.destroy')
+        ->whereNumber('task_type');
     Route::get('task-types/options', [TaskTypeController::class, 'options'])
         ->middleware('ability:tasks.create|task_types.view');
     Route::get('task-type-versions', [TaskTypeVersionController::class, 'index'])
         ->middleware(Ability::class . ':task_type_versions.manage');
     Route::post('task-types/{task_type}/versions', [TaskTypeVersionController::class, 'store'])
-        ->middleware(Ability::class . ':task_type_versions.manage');
+        ->middleware(Ability::class . ':task_type_versions.manage')
+        ->whereNumber('task_type');
     Route::post('task-type-versions/{task_type_version}/publish', [TaskTypeVersionController::class, 'publish'])
         ->middleware(Ability::class . ':task_type_versions.manage');
     Route::post('task-type-versions/{task_type_version}/deprecate', [TaskTypeVersionController::class, 'deprecate'])
@@ -141,25 +145,33 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':task_type_versions.manage');
 
     Route::get('task-types/{task_type}/sla-policies', [TaskSlaPolicyController::class, 'index'])
-        ->middleware(Ability::class . ':task_sla_policies.manage');
+        ->middleware(Ability::class . ':task_sla_policies.manage')
+        ->whereNumber('task_type');
     Route::post('task-types/{task_type}/sla-policies', [TaskSlaPolicyController::class, 'store'])
-        ->middleware(Ability::class . ':task_sla_policies.manage');
+        ->middleware(Ability::class . ':task_sla_policies.manage')
+        ->whereNumber('task_type');
     Route::put('task-types/{task_type}/sla-policies/{task_sla_policy}', [TaskSlaPolicyController::class, 'update'])
         ->middleware(Ability::class . ':task_sla_policies.manage')
+        ->whereNumber('task_type')
         ->whereNumber('task_sla_policy');
     Route::delete('task-types/{task_type}/sla-policies/{task_sla_policy}', [TaskSlaPolicyController::class, 'destroy'])
         ->middleware(Ability::class . ':task_sla_policies.manage')
+        ->whereNumber('task_type')
         ->whereNumber('task_sla_policy');
 
     Route::get('task-types/{task_type}/automations', [TaskAutomationController::class, 'index'])
-        ->middleware(Ability::class . ':task_automations.manage');
+        ->middleware(Ability::class . ':task_automations.manage')
+        ->whereNumber('task_type');
     Route::post('task-types/{task_type}/automations', [TaskAutomationController::class, 'store'])
-        ->middleware(Ability::class . ':task_automations.manage');
+        ->middleware(Ability::class . ':task_automations.manage')
+        ->whereNumber('task_type');
     Route::put('task-types/{task_type}/automations/{task_automation}', [TaskAutomationController::class, 'update'])
         ->middleware(Ability::class . ':task_automations.manage')
+        ->whereNumber('task_type')
         ->whereNumber('task_automation');
     Route::delete('task-types/{task_type}/automations/{task_automation}', [TaskAutomationController::class, 'destroy'])
         ->middleware(Ability::class . ':task_automations.manage')
+        ->whereNumber('task_type')
         ->whereNumber('task_automation');
     Route::apiResource('roles', RoleController::class)
         ->only(['index', 'show'])
@@ -175,7 +187,8 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
 
     Route::post('task-types/{task_type}/copy-to-tenant', [TaskTypeController::class, 'copyToTenant'])
         ->middleware('ability:task_types.manage')
-        ->name('task-types.copy');
+        ->name('task-types.copy')
+        ->whereNumber('task_type');
 
     Route::post('task-types/validate', [TaskTypeController::class, 'validateSchema'])
         ->middleware('ability:task_types.create')
@@ -183,11 +196,13 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
 
     Route::post('task-types/{task_type}/validate', [TaskTypeController::class, 'previewValidate'])
         ->middleware('ability:task_types.manage')
-        ->name('task-types.validate');
+        ->name('task-types.validate')
+        ->whereNumber('task_type');
 
     Route::post('task-types/{task_type}/export', [TaskTypeController::class, 'export'])
         ->middleware('ability:task_types.manage')
-        ->name('task-types.export');
+        ->name('task-types.export')
+        ->whereNumber('task_type');
 
     Route::post('task-types/import', [TaskTypeController::class, 'import'])
         ->middleware('ability:task_types.manage')
