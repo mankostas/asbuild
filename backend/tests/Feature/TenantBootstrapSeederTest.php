@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use App\Support\TenantDefaults;
 use Tests\TestCase;
 
 class TenantBootstrapSeederTest extends TestCase
@@ -15,9 +16,10 @@ class TenantBootstrapSeederTest extends TestCase
         Artisan::call('db:seed', ['--class' => \Database\Seeders\TenantBootstrapSeeder::class]);
 
         $this->assertDatabaseCount('task_statuses', 4);
+        $first = TenantDefaults::TASK_STATUSES[0];
         $this->assertDatabaseHas('task_statuses', [
-            'slug' => 'todo',
-            'color' => '#9ca3af',
+            'slug' => $first['slug'],
+            'color' => $first['color'],
             'position' => 1,
         ]);
         $this->assertDatabaseHas('task_types', ['name' => 'General Task']);
