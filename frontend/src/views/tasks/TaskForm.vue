@@ -230,6 +230,15 @@ async function loadPriorities() {
   }
 }
 
+async function loadTypes() {
+  const headers =
+    auth.isSuperAdmin && tenantId.value
+      ? { [TENANT_HEADER]: tenantId.value }
+      : undefined;
+  const { data } = await api.get('/task-types/options', { headers });
+  types.value = data;
+}
+
 const schema = yup.object({
   task_type_id: yup.mixed().required('Type is required'),
 });
@@ -251,6 +260,7 @@ onMounted(async () => {
     await tenantStore.loadTenants();
   }
   await Promise.all([loadTypes(), loadStatuses()]);
+
   if (isEdit.value) {
     const res = await api.get(`/tasks/${route.params.id}`);
     const task = res.data;
@@ -383,6 +393,7 @@ watch(
     await Promise.all([loadTypes(), loadStatuses()]);
     taskTypeId.value = '' as any;
     priorityOptions.value = [];
+
     await onTypeChange();
   },
 );
