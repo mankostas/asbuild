@@ -131,7 +131,7 @@ import Textinput from '@dc/components/Textinput';
 import InputGroup from '@dc/components/InputGroup';
 import FromGroup from '@dc/components/FromGroup';
 import Modal from '@dc/components/Modal';
-import Tooltip from '@dc/components/Tooltip';
+import Tooltip from '@/components/ui/Tooltip/index.vue';
 import Icon from '@dc/components/Icon';
 
 const notify = useNotify();

@@ -49,18 +49,10 @@
   </tippy>
 </template>
 <script>
-import "tippy.js/animations/perspective-extreme.css";
-import "tippy.js/animations/perspective-subtle.css";
-import "tippy.js/animations/perspective.css";
-import "tippy.js/animations/scale-extreme.css";
-import "tippy.js/animations/scale-subtle.css";
-import "tippy.js/animations/scale.css";
-import "tippy.js/animations/shift-away-extreme.css";
-import "tippy.js/animations/shift-away-subtle.css";
-import "tippy.js/animations/shift-away.css";
-import "tippy.js/animations/shift-toward-extreme.css";
-import "tippy.js/animations/shift-toward-subtle.css";
-import "tippy.js/animations/shift-toward.css";
+// Optional animation styles from tippy.js can fail to resolve when the
+// component is consumed outside of the package's build context. The core
+// tippy stylesheet already includes animation definitions, so we only load
+// the base and light theme styles here.
 import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/light.css";
 
