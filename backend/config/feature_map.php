@@ -47,7 +47,6 @@ return [
             'task_types.update',
             'task_types.delete',
             'task_types.manage',
-            'task_type_versions.manage',
             'task_automations.manage',
             'task_field_snippets.manage',
         ],

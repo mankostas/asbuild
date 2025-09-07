@@ -54,21 +54,8 @@ class TaskTypeController extends Controller
 
         $types = TaskType::query()
             ->where('tenant_id', $tenantId)
-            ->whereNotNull('current_version_id')
-            ->with(['currentVersion:id,task_type_id,semver,published_at'])
-            ->whereHas('currentVersion', fn($q) => $q->whereNotNull('published_at'))
-            ->select(['id', 'name', 'current_version_id'])
             ->orderBy('name')
-            ->get()
-            ->map(fn ($t) => [
-                'id' => $t->id,
-                'name' => $t->name,
-                'current_version' => $t->currentVersion ? [
-                    'id' => $t->currentVersion->id,
-                    'semver' => $t->currentVersion->semver,
-                    'published_at' => $t->currentVersion->published_at,
-                ] : null,
-            ]);
+            ->get(['id', 'name']);
 
         return response()->json($types);
     }

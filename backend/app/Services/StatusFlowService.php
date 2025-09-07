@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Task;
 use App\Models\TaskType;
-use App\Models\TaskTypeVersion;
 
 class StatusFlowService
 {
@@ -25,7 +24,7 @@ class StatusFlowService
     /**
      * Build transition map for given task type.
      */
-    public function transitions(TaskType|TaskTypeVersion|null $type = null): array
+    public function transitions(TaskType|null $type = null): array
     {
         $map = $type?->status_flow_json;
         if (is_array($map) && count($map) > 0) {
@@ -50,7 +49,7 @@ class StatusFlowService
     /**
      * Get allowed transitions for a given status.
      */
-    public function allowedTransitions(string $status, TaskType|TaskTypeVersion|null $type = null): array
+    public function allowedTransitions(string $status, TaskType|null $type = null): array
     {
         $map = $this->transitions($type);
 
@@ -60,7 +59,7 @@ class StatusFlowService
     /**
      * Determine if transition is allowed.
      */
-    public function canTransition(string $from, string $to, TaskType|TaskTypeVersion|null $type = null): bool
+    public function canTransition(string $from, string $to, TaskType|null $type = null): bool
     {
         return in_array($to, $this->allowedTransitions($from, $type), true);
     }
@@ -70,12 +69,12 @@ class StatusFlowService
      */
     public function checkConstraints(Task $task, string $toSlug): void
     {
-        $version = $task->typeVersion ?? $task->type?->currentVersion;
-        if (! $version) {
+        $type = $task->type;
+        if (! $type) {
             return;
         }
 
-        $statuses = collect($version->statuses ?? []);
+        $statuses = collect($type->statuses ?? []);
         if ($statuses->isEmpty()) {
             return;
         }
@@ -97,7 +96,7 @@ class StatusFlowService
             );
         }
 
-        if ($toSlug === $final && ! $this->hasAllRequiredPhotos($task, $version->schema_json)) {
+        if ($toSlug === $final && ! $this->hasAllRequiredPhotos($task, $type->schema_json)) {
             $this->abort422(
                 'photos_required',
                 __('Required photos are missing.')

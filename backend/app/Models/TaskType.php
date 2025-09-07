@@ -21,7 +21,6 @@ class TaskType extends Model
         'status_flow_json',
         'tenant_id',
         'require_subtasks_complete',
-        'current_version_id',
         'abilities_json',
     ];
 
@@ -31,23 +30,12 @@ class TaskType extends Model
         'status_flow_json' => 'array',
         'tenant_id' => 'integer',
         'require_subtasks_complete' => 'boolean',
-        'current_version_id' => 'integer',
         'abilities_json' => 'array',
     ];
 
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
-    }
-
-    public function versions(): HasMany
-    {
-        return $this->hasMany(TaskTypeVersion::class);
-    }
-
-    public function currentVersion(): BelongsTo
-    {
-        return $this->belongsTo(TaskTypeVersion::class, 'current_version_id');
     }
 
     public function slaPolicies(): HasMany

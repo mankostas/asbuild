@@ -41,10 +41,10 @@ class TaskResource extends JsonResource
             ? $this->watchers->contains('user_id', $request->user()->id)
             : false;
 
-        if ($this->typeVersion && $this->typeVersion->schema_json) {
+        if ($this->type && $this->type->schema_json) {
             $service = app(FormSchemaService::class);
             $data['form_data'] = $service->filterDataForRoles(
-                $this->typeVersion->schema_json,
+                $this->type->schema_json,
                 $data['form_data'] ?? [],
                 $request->user()
             );

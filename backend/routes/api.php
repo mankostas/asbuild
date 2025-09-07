@@ -8,7 +8,6 @@ use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Api\TaskWatcherController;
 use App\Http\Controllers\Api\TaskTypeController;
-use App\Http\Controllers\Api\TaskTypeVersionController;
 use App\Http\Controllers\Api\TaskBoardController;
 use App\Http\Controllers\Api\ManualController;
 use App\Http\Controllers\Api\NotificationController;
@@ -132,17 +131,6 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->whereNumber('task_type');
     Route::get('task-types/options', [TaskTypeController::class, 'options'])
         ->middleware('ability:tasks.create|task_types.view');
-    Route::get('task-type-versions', [TaskTypeVersionController::class, 'index'])
-        ->middleware(Ability::class . ':task_type_versions.manage');
-    Route::post('task-types/{task_type}/versions', [TaskTypeVersionController::class, 'store'])
-        ->middleware(Ability::class . ':task_type_versions.manage')
-        ->whereNumber('task_type');
-    Route::post('task-type-versions/{task_type_version}/publish', [TaskTypeVersionController::class, 'publish'])
-        ->middleware(Ability::class . ':task_type_versions.manage');
-    Route::post('task-type-versions/{task_type_version}/deprecate', [TaskTypeVersionController::class, 'deprecate'])
-        ->middleware(Ability::class . ':task_type_versions.manage');
-    Route::put('task-type-versions/{task_type_version}/unpublish', [TaskTypeVersionController::class, 'unpublish'])
-        ->middleware(Ability::class . ':task_type_versions.manage');
 
     Route::get('task-types/{task_type}/sla-policies', [TaskSlaPolicyController::class, 'index'])
         ->middleware(Ability::class . ':task_sla_policies.manage')
