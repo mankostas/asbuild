@@ -734,6 +734,10 @@ onMounted(async () => {
       if ((versionsList as any[]).length) {
         selectedVersionId.value = (versionsList as any[])[0].id;
         loadVersion((versionsList as any[])[0]);
+      } else {
+        // If no versions exist yet, load the data directly from the task type
+        // so previously saved schema and statuses are rendered when editing.
+        loadVersion(typeData);
       }
     } else {
       tenantStore.setTenant('');
