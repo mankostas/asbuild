@@ -1114,6 +1114,7 @@ async function onSubmit() {
 
         return section;
       }),
+
       ...(logicRules.length ? { logic: logicRules } : {}),
     }),
     statuses: JSON.stringify(statuses.value.reduce((acc: any, s) => ({ ...acc, [s]: [] }), {})),
@@ -1281,6 +1282,7 @@ const previewSchema = computed(() => ({
 
     return section;
   }),
+
   ...(sections.value
     .flatMap((s) =>
       sectionAllFields(s).flatMap((f) =>
