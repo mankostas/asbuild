@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\TaskStatus;
 use App\Models\TaskType;
+use App\Support\TenantDefaults;
 
 class TenantBootstrapSeeder extends Seeder
 {
@@ -148,12 +149,7 @@ class TenantBootstrapSeeder extends Seeder
         }
 
         // Default task statuses
-        $defaultStatuses = [
-            ['slug' => 'todo', 'name' => 'To Do', 'color' => '#9ca3af'],
-            ['slug' => 'in_progress', 'name' => 'In Progress', 'color' => '#3b82f6'],
-            ['slug' => 'qa', 'name' => 'QA', 'color' => '#f59e0b'],
-            ['slug' => 'done', 'name' => 'Done', 'color' => '#10b981'],
-        ];
+        $defaultStatuses = TenantDefaults::TASK_STATUSES;
 
         foreach ($defaultStatuses as $index => $status) {
             DB::table('task_statuses')->updateOrInsert(
@@ -189,18 +185,13 @@ class TenantBootstrapSeeder extends Seeder
             ],
         ];
 
-        $typeStatuses = [
-            'todo' => [],
-            'in_progress' => [],
-            'qa' => [],
-            'done' => [],
-        ];
+        $typeStatuses = array_fill_keys(array_column($defaultStatuses, 'slug'), []);
 
-        $transitions = [
-            ['todo', 'in_progress'],
-            ['in_progress', 'qa'],
-            ['qa', 'done'],
-        ];
+        $slugs = array_column($defaultStatuses, 'slug');
+        $transitions = [];
+        for ($i = 0; $i < count($slugs) - 1; $i++) {
+            $transitions[] = [$slugs[$i], $slugs[$i + 1]];
+        }
 
         DB::table('task_types')->updateOrInsert(
             ['tenant_id' => $tenantId, 'name' => 'General Task'],

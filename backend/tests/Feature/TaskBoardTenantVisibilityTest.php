@@ -8,6 +8,7 @@ use App\Models\TaskStatus;
 use App\Models\TaskType;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\TenantDefaults;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
@@ -22,10 +23,11 @@ class TaskBoardTenantVisibilityTest extends TestCase
         $tenant1 = Tenant::create(['id' => 1, 'name' => 'T1', 'features' => ['tasks']]);
         $tenant2 = Tenant::create(['id' => 2, 'name' => 'T2', 'features' => ['tasks']]);
 
-        TaskStatus::create(['slug' => 'todo', 'name' => 'To Do', 'position' => 1]);
+        $status = TenantDefaults::TASK_STATUSES[0];
+        TaskStatus::create(['slug' => $status['slug'], 'name' => $status['name'], 'position' => 1]);
 
-        $type1 = TaskType::create(['tenant_id' => $tenant1->id, 'name' => 'Type1', 'statuses' => ['todo' => []]]);
-        $type2 = TaskType::create(['tenant_id' => $tenant2->id, 'name' => 'Type2', 'statuses' => ['todo' => []]]);
+        $type1 = TaskType::create(['tenant_id' => $tenant1->id, 'name' => 'Type1', 'statuses' => [$status['slug'] => []]]);
+        $type2 = TaskType::create(['tenant_id' => $tenant2->id, 'name' => 'Type2', 'statuses' => [$status['slug'] => []]]);
 
         $u1 = User::create([
             'name' => 'U1',
@@ -44,8 +46,22 @@ class TaskBoardTenantVisibilityTest extends TestCase
             'address' => 'A',
         ]);
 
-        Task::create(['tenant_id' => $tenant1->id, 'user_id' => $u1->id, 'task_type_id' => $type1->id, 'status' => 'todo', 'status_slug' => 'todo', 'title' => 'T1 Task']);
-        Task::create(['tenant_id' => $tenant2->id, 'user_id' => $u2->id, 'task_type_id' => $type2->id, 'status' => 'todo', 'status_slug' => 'todo', 'title' => 'T2 Task']);
+        Task::create([
+            'tenant_id' => $tenant1->id,
+            'user_id' => $u1->id,
+            'task_type_id' => $type1->id,
+            'status' => $status['name'],
+            'status_slug' => $status['slug'],
+            'title' => 'T1 Task'
+        ]);
+        Task::create([
+            'tenant_id' => $tenant2->id,
+            'user_id' => $u2->id,
+            'task_type_id' => $type2->id,
+            'status' => $status['name'],
+            'status_slug' => $status['slug'],
+            'title' => 'T2 Task'
+        ]);
 
         $root = Tenant::create(['id' => 999, 'name' => 'Root']);
         $role = Role::create([

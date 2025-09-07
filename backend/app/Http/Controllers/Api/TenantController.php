@@ -7,6 +7,7 @@ use App\Http\Requests\TenantUpsertRequest;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\AuditLog;
+use App\Services\TenantSetupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -67,6 +68,8 @@ class TenantController extends Controller
 
             return $tenant;
         });
+
+        app(TenantSetupService::class)->createDefaultTaskStatuses($tenant);
 
         return response()->json($tenant->load('roles'), 201);
     }
