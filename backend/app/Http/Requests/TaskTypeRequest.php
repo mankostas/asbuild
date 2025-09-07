@@ -19,8 +19,8 @@ class TaskTypeRequest extends FormRequest
         return [
             'name' => [$required, 'string', 'max:255'],
             'schema_json' => ['nullable', 'json'],
-            'statuses' => [$required, 'json'],
-            'status_flow_json' => ['nullable', 'json'],
+            'statuses' => ['sometimes', 'json'],
+            'status_flow_json' => ['sometimes', 'json'],
             'tenant_id' => ['sometimes', 'integer'],
             'abilities_json' => ['nullable', 'json'],
         ];
