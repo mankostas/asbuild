@@ -129,6 +129,7 @@ import Button from '@dc/components/Button';
 import { MenuItem } from '@headlessui/vue';
 import { loadBoardPrefs, saveBoardPrefs, BoardPrefs } from '@/services/boardPrefs';
 import { useAuthStore, can } from '@/stores/auth';
+import { useTenantStore } from '@/stores/tenant';
 import BoardFilters from '@/components/Board/BoardFilters.vue';
 import QuickFilterChips from '@/components/Board/QuickFilterChips.vue';
 import TenantSwitcher from '@/components/admin/TenantSwitcher.vue';
@@ -140,6 +141,7 @@ const { t } = useI18n();
 const notify = useNotify();
 const auth = useAuthStore();
 const router = useRouter();
+const tenantStore = useTenantStore();
 
 const canTaskTypes = computed(() => can('task_types.view'));
 
@@ -204,6 +206,13 @@ watch(
   [() => prefs.filters, () => prefs.sorting],
   load,
   { deep: true }
+);
+
+watch(
+  () => tenantStore.currentTenantId,
+  () => {
+    load();
+  },
 );
 
 function clearFilters() {
