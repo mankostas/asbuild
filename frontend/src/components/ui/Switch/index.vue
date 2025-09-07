@@ -83,7 +83,7 @@
 </template>
 <script>
 import Icon from "@/components/Icon";
-import { computed, defineComponent, ref } from "vue";
+import { computed, defineComponent } from "vue";
 export default defineComponent({
   name: "Checkbox",
   components: {
@@ -117,21 +117,21 @@ export default defineComponent({
   },
   emits: ["update:modelValue", "input", "change"],
 
-  setup(props, context) {
-    const ck = ref(props.active);
-    const uid = `fld-${Math.random().toString(36).slice(2)}`;
-    const inputId = computed(() => props.id || uid);
+    setup(props, context) {
+      const uid = `fld-${Math.random().toString(36).slice(2)}`;
+      const inputId = computed(() => props.id || uid);
 
-    const onChange = (e) => {
-      ck.value = !ck.value;
-      context.emit("change", e);
-      context.emit("input", e);
-    };
+      const localValue = computed({
+        get: () => (props.modelValue === "" ? props.active : props.modelValue),
+        set: (newValue) => context.emit("update:modelValue", newValue),
+      });
 
-    const localValue = computed({
-      get: () => props.modelValue,
-      set: (newValue) => context.emit("update:modelValue", newValue),
-    });
+      const ck = computed(() => !!localValue.value);
+
+      const onChange = (e) => {
+        context.emit("change", e);
+        context.emit("input", e);
+      };
 
     // normalize error to string
     const errorText = computed(() => {
