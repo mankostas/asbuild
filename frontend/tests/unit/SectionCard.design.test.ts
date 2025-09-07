@@ -84,7 +84,7 @@ describe('SectionCard design settings', () => {
     const div = document.createElement('div');
     app.mount(div);
 
-    const label = div.querySelector('label');
+    const label = div.querySelector('span');
     expect(label?.className).toContain('text-lg');
   });
 });
