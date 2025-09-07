@@ -1056,63 +1056,65 @@ async function onSubmit() {
     name: name.value,
     tenant_id: tenantId.value || undefined,
     schema_json: JSON.stringify({
-      sections: sections.value.map((s) => ({
-        key: s.key,
-        label: s.label,
-        ...(s.tabs.length
-          ? {
-              tabs: s.tabs.map((t) => ({
-                key: t.key,
-                label: t.label,
-                fields: t.fields.map((f) => ({
-                  key: f.name,
-                  label: f.label,
-                  type: f.typeKey,
-                  validations: f.validations,
-                  'x-cols': f.cols,
-                  placeholder: f.placeholder,
-                  help: f.help,
-                  fields: f.fields,
-                  default: f.data.default || undefined,
-                  enum: f.data.enum.length ? f.data.enum : undefined,
-                  'x-roles': f.roles,
-                  'x-styles': f.styles,
-                })),
-              })),
-            }
-          : {
-              fields: s.fields.map((f) => ({
-                key: f.name,
-                label: f.label,
-                type: f.typeKey,
-                validations: f.validations,
-                'x-cols': f.cols,
-                placeholder: f.placeholder,
-                help: f.help,
-                fields: f.fields,
-                default: f.data.default || undefined,
-                enum: f.data.enum.length ? f.data.enum : undefined,
-                'x-roles': f.roles,
-                'x-styles': f.styles,
-              })),
-            }
-          ),
-          ...(s.photos.length
-            ? {
-                photos: s.photos.map((p) => ({
-                  key: p.name,
-                  label: p.label,
-                  type: p.typeKey,
-                  validations: p.validations,
-                  maxCount: p.maxCount,
-                  help: p.help,
-                  'x-roles': p.roles,
-                  'x-styles': p.styles,
-                })),
-              }
-            : {}),
+      sections: sections.value.map((s) => {
+        const section: any = {
+          key: s.key,
+          label: s.label,
           'x-cols': s.cols,
-        })),
+        };
+
+        if (s.tabs.length) {
+          section.tabs = s.tabs.map((t) => ({
+            key: t.key,
+            label: t.label,
+            fields: t.fields.map((f) => ({
+              key: f.name,
+              label: f.label,
+              type: f.typeKey,
+              validations: f.validations,
+              'x-cols': f.cols,
+              placeholder: f.placeholder,
+              help: f.help,
+              fields: f.fields,
+              default: f.data.default || undefined,
+              enum: f.data.enum.length ? f.data.enum : undefined,
+              'x-roles': f.roles,
+              'x-styles': f.styles,
+            })),
+          }));
+        } else {
+          section.fields = s.fields.map((f) => ({
+            key: f.name,
+            label: f.label,
+            type: f.typeKey,
+            validations: f.validations,
+            'x-cols': f.cols,
+            placeholder: f.placeholder,
+            help: f.help,
+            fields: f.fields,
+            default: f.data.default || undefined,
+            enum: f.data.enum.length ? f.data.enum : undefined,
+            'x-roles': f.roles,
+            'x-styles': f.styles,
+          }));
+        }
+
+        if (s.photos.length) {
+          section.photos = s.photos.map((p) => ({
+            key: p.name,
+            label: p.label,
+            type: p.typeKey,
+            validations: p.validations,
+            maxCount: p.maxCount,
+            help: p.help,
+            'x-roles': p.roles,
+            'x-styles': p.styles,
+          }));
+        }
+
+        return section;
+      }),
+
       ...(logicRules.length ? { logic: logicRules } : {}),
     }),
     statuses: JSON.stringify(statuses.value.reduce((acc: any, s) => ({ ...acc, [s]: [] }), {})),
@@ -1216,69 +1218,71 @@ function runValidation() {
 }
 
 const previewSchema = computed(() => ({
-  sections: sections.value.map((s) => ({
-    key: s.key,
-    label: s.label,
-    ...(s.tabs.length
-      ? {
-          tabs: s.tabs.map((t) => ({
-            key: t.key,
-            label: t.label,
-            fields: t.fields.map((f) => ({
-              key: f.name,
-              label: f.label,
-              type: f.typeKey,
-              validations: f.validations,
-              placeholder: f.placeholder,
-              help: f.help,
-              fields: f.fields,
-              default:
-                f.data.default === '' || f.data.default === undefined || f.data.default === null
-                  ? undefined
-                  : f.data.default,
-              enum: f.data.enum.length ? f.data.enum : undefined,
-              'x-roles': f.roles,
-              'x-styles': f.styles,
-              'x-cols': f.cols,
-            })),
-          })),
-        }
-      : {
-          fields: s.fields.map((f) => ({
-            key: f.name,
-            label: f.label,
-            type: f.typeKey,
-            validations: f.validations,
-            placeholder: f.placeholder,
-            help: f.help,
-            fields: f.fields,
-            default:
-              f.data.default === '' || f.data.default === undefined || f.data.default === null
-                ? undefined
-                : f.data.default,
-            enum: f.data.enum.length ? f.data.enum : undefined,
-            'x-roles': f.roles,
-            'x-styles': f.styles,
-            'x-cols': f.cols,
-          })),
-        }
-      ),
-      ...(s.photos.length
-        ? {
-            photos: s.photos.map((p) => ({
-              key: p.name,
-              label: p.label,
-              type: p.typeKey,
-              validations: p.validations,
-              maxCount: p.maxCount,
-              help: p.help,
-              'x-roles': p.roles,
-              'x-styles': p.styles,
-            })),
-          }
-        : {}),
+  sections: sections.value.map((s) => {
+    const section: any = {
+      key: s.key,
+      label: s.label,
       'x-cols': s.cols,
-    })),
+    };
+
+    if (s.tabs.length) {
+      section.tabs = s.tabs.map((t) => ({
+        key: t.key,
+        label: t.label,
+        fields: t.fields.map((f) => ({
+          key: f.name,
+          label: f.label,
+          type: f.typeKey,
+          validations: f.validations,
+          placeholder: f.placeholder,
+          help: f.help,
+          fields: f.fields,
+          default:
+            f.data.default === '' || f.data.default === undefined || f.data.default === null
+              ? undefined
+              : f.data.default,
+          enum: f.data.enum.length ? f.data.enum : undefined,
+          'x-roles': f.roles,
+          'x-styles': f.styles,
+          'x-cols': f.cols,
+        })),
+      }));
+    } else {
+      section.fields = s.fields.map((f) => ({
+        key: f.name,
+        label: f.label,
+        type: f.typeKey,
+        validations: f.validations,
+        placeholder: f.placeholder,
+        help: f.help,
+        fields: f.fields,
+        default:
+          f.data.default === '' || f.data.default === undefined || f.data.default === null
+            ? undefined
+            : f.data.default,
+        enum: f.data.enum.length ? f.data.enum : undefined,
+        'x-roles': f.roles,
+        'x-styles': f.styles,
+        'x-cols': f.cols,
+      }));
+    }
+
+    if (s.photos.length) {
+      section.photos = s.photos.map((p) => ({
+        key: p.name,
+        label: p.label,
+        type: p.typeKey,
+        validations: p.validations,
+        maxCount: p.maxCount,
+        help: p.help,
+        'x-roles': p.roles,
+        'x-styles': p.styles,
+      }));
+    }
+
+    return section;
+  }),
+
   ...(sections.value
     .flatMap((s) =>
       sectionAllFields(s).flatMap((f) =>
