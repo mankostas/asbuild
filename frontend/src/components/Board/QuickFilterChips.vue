@@ -5,8 +5,8 @@
       :key="chip.key"
       type="button"
       :aria-pressed="local[chip.key]"
-      @click="toggle(chip.key)"
       class="focus:outline-none"
+      @click="toggle(chip.key)"
     >
       <Badge
         :label="t(chip.label)"
