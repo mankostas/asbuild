@@ -48,10 +48,14 @@
         </MenuItem>
       </template>
     </Dropdown>
-    <label class="inline-flex items-center gap-2">
-      <Checkbox v-model="local.hasPhotos" :aria-label="t('board.hasPhotos')" />
+    <div class="inline-flex items-center gap-2">
+      <Checkbox
+        id="has-photos"
+        v-model="local.hasPhotos"
+        :aria-label="t('board.hasPhotos')"
+      />
       <span>{{ t('board.hasPhotos') }}</span>
-    </label>
+    </div>
   </div>
 </template>
 

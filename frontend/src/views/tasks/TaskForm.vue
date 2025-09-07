@@ -3,21 +3,34 @@
     <Card class="max-w-lg p-6 space-y-4">
       <form class="space-y-4" @submit.prevent="submitForm">
         <FromGroup v-if="auth.isSuperAdmin && !isEdit" :label="t('tenant')">
-          <Select v-model="tenantId" :options="tenantOptions" />
+          <Select
+            v-model="tenantId"
+            :options="tenantOptions"
+            :aria-label="t('tenant')"
+          />
         </FromGroup>
-        <Textinput v-model="title" :label="t('tasks.form.title')" />
+        <Textinput
+          v-model="title"
+          :label="t('tasks.form.title')"
+          :aria-label="t('tasks.form.title')"
+        />
 
         <FromGroup :label="t('tasks.form.type')" :error="taskTypeError">
           <Select
             v-model="taskTypeId"
             :options="typeOptions"
             :placeholder="t('tasks.form.typePlaceholder')"
+            :aria-label="t('tasks.form.type')"
             @change="onTypeChange"
           />
         </FromGroup>
 
         <FromGroup v-if="versionOptions.length" :label="t('tasks.form.version')">
-          <Select v-model="taskTypeVersionId" :options="versionOptions" />
+          <Select
+            v-model="taskTypeVersionId"
+            :options="versionOptions"
+            :aria-label="t('tasks.form.version')"
+          />
         </FromGroup>
 
         <InputGroup v-model="dueAt" :label="t('tasks.form.dueAt')" type="date" />
@@ -172,12 +185,50 @@ const versionOptions = computed(() => versions.value.map((v: any) => ({ value: v
 
 const statusOptions = ref<{ label: string; value: string }[]>([]);
 const statusBySlug: Record<string, any> = {};
-const priorityOptions = computed(() => [
-  { label: t('tasks.priority.low'), value: 'low' },
-  { label: t('tasks.priority.normal'), value: 'normal' },
-  { label: t('tasks.priority.high'), value: 'high' },
-  { label: t('tasks.priority.urgent'), value: 'urgent' },
-]);
+const priorityOptions = ref<{ label: string; value: string }[]>([]);
+
+async function loadTypes() {
+  const headers =
+    auth.isSuperAdmin && tenantId.value
+      ? { [TENANT_HEADER]: tenantId.value }
+      : undefined;
+  const { data } = await api.get('/task-types/options', { headers });
+  types.value = data;
+}
+
+async function loadStatuses() {
+  const headers =
+    auth.isSuperAdmin && tenantId.value
+      ? { [TENANT_HEADER]: tenantId.value }
+      : undefined;
+  const { data } = await api.get('/task-statuses', { headers });
+  Object.keys(statusBySlug).forEach((k) => delete statusBySlug[k]);
+  data.forEach((s: any) => {
+    statusBySlug[s.slug] = s;
+  });
+}
+
+async function loadPriorities() {
+  priorityOptions.value = [];
+  if (!taskTypeId.value) return;
+  const headers =
+    auth.isSuperAdmin && tenantId.value
+      ? { [TENANT_HEADER]: tenantId.value }
+      : undefined;
+  const { data } = await api.get(
+    `/task-types/${taskTypeId.value}/sla-policies`,
+    { headers },
+  );
+  const policies = data.data || data;
+  const uniques = Array.from(new Set(policies.map((p: any) => p.priority)));
+  priorityOptions.value = uniques.map((p: string) => ({
+    value: p,
+    label: t(`tasks.priority.${p}`),
+  }));
+  if (!priority.value && priorityOptions.value.length) {
+    priority.value = priorityOptions.value[0].value;
+  }
+}
 
 const schema = yup.object({
   task_type_id: yup.mixed().required('Type is required'),
@@ -199,14 +250,7 @@ onMounted(async () => {
   if (auth.isSuperAdmin && tenantStore.tenants.length === 0) {
     await tenantStore.loadTenants();
   }
-  const [typesRes, statusesRes] = await Promise.all([
-    api.get('/task-types/options'),
-    api.get('/task-statuses'),
-  ]);
-  types.value = typesRes.data;
-  statusesRes.data.forEach((s: any) => {
-    statusBySlug[s.slug] = s;
-  });
+  await Promise.all([loadTypes(), loadStatuses()]);
   if (isEdit.value) {
     const res = await api.get(`/tasks/${route.params.id}`);
     const task = res.data;
@@ -244,8 +288,13 @@ async function onTypeChange() {
     let list: any[] = [];
     const manageVersions = can('task_type_versions.manage');
     if (manageVersions) {
+      const headers =
+        auth.isSuperAdmin && tenantId.value
+          ? { [TENANT_HEADER]: tenantId.value }
+          : undefined;
       const { data } = await api.get('/task-type-versions', {
         params: { task_type_id: taskTypeId.value },
+        headers,
       });
       list = data.data || [];
     } else if (t?.current_version) {
@@ -254,6 +303,7 @@ async function onTypeChange() {
     versions.value = manageVersions ? list : list.filter((v: any) => v.published_at);
     taskTypeVersionId.value = versions.value[0]?.id ?? null;
   }
+  await loadPriorities();
   updateStatusOptions();
 }
 
@@ -326,6 +376,16 @@ const canSubmit = computed(() => {
   if (assigneeRequired.value && !assignee.value) return false;
   return true;
 });
+
+watch(
+  () => tenantId.value,
+  async () => {
+    await Promise.all([loadTypes(), loadStatuses()]);
+    taskTypeId.value = '' as any;
+    priorityOptions.value = [];
+    await onTypeChange();
+  },
+);
 
 watch(
   () => taskTypeVersionId.value,
