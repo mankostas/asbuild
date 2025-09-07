@@ -33,7 +33,13 @@ class StatusFlowService
                 foreach ($map as $edge) {
                     if (is_array($edge) && count($edge) === 2) {
                         [$from, $to] = $edge;
-                        $graph[$from][] = $to;
+
+                        $from = is_array($from) ? ($from['slug'] ?? null) : $from;
+                        $to = is_array($to) ? ($to['slug'] ?? null) : $to;
+
+                        if (is_scalar($from) && is_scalar($to)) {
+                            $graph[(string) $from][] = (string) $to;
+                        }
                     }
                 }
 

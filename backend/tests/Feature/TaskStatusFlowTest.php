@@ -28,7 +28,7 @@ class TaskStatusFlowTest extends TestCase
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => 1,
-            'abilities' => ['tasks.status.update', 'tasks.manage'],
+            'abilities' => ['tasks.status.update', 'tasks.manage', 'tasks.update'],
             'level' => 1,
         ]);
         $user = User::create([
@@ -61,6 +61,7 @@ class TaskStatusFlowTest extends TestCase
             'user_id' => $user->id,
             'task_type_id' => $type->id,
             'status' => 'draft',
+            'assigned_user_id' => $user->id,
         ]);
     }
 
@@ -100,6 +101,7 @@ class TaskStatusFlowTest extends TestCase
             'user_id' => $user->id,
             'task_type_id' => $type->id,
             'status' => 'draft',
+            'assigned_user_id' => $user->id,
         ]);
 
         $this->withHeader('X-Tenant-ID', 1)
@@ -108,5 +110,35 @@ class TaskStatusFlowTest extends TestCase
         $this->withHeader('X-Tenant-ID', 1)
             ->postJson("/api/tasks/{$task->id}/status", ['status' => 'completed'])
             ->assertStatus(422);
+    }
+
+    public function test_handles_object_edges_in_flow(): void
+    {
+        $user = $this->authUser();
+        $type = TaskType::create([
+            'name' => 'Type',
+            'tenant_id' => 1,
+            'statuses' => [
+                ['slug' => 'draft'],
+                ['slug' => 'assigned'],
+                ['slug' => 'completed'],
+            ],
+            'status_flow_json' => [
+                [ ['slug' => 'draft'], ['slug' => 'assigned'] ],
+                [ ['slug' => 'assigned'], ['slug' => 'completed'] ],
+            ],
+        ]);
+        $task = Task::create([
+            'tenant_id' => 1,
+            'user_id' => $user->id,
+            'task_type_id' => $type->id,
+            'status' => 'draft',
+            'assigned_user_id' => $user->id,
+        ]);
+
+        $this->withHeader('X-Tenant-ID', 1)
+            ->postJson("/api/tasks/{$task->id}/status", ['status' => 'assigned'])
+            ->assertStatus(200)
+            ->assertJsonPath('data.status', 'assigned');
     }
 }
