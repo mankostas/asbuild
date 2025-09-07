@@ -170,8 +170,21 @@ watch(
   () => props.modelValue,
   (val) => {
     updatingFromParent = true;
-    Object.keys(val).forEach((k) => {
-      localPermissions[k] = { transition: false, ...val[k] } as Permission;
+    // remove permissions for roles no longer present
+    Object.keys(localPermissions).forEach((k) => {
+      if (!(k in val)) delete localPermissions[k];
+    });
+    // normalize incoming values to booleans
+    Object.entries(val).forEach(([k, v]) => {
+      const perms = v as Record<keyof Permission, any>;
+      localPermissions[k] = {
+        read: !!perms.read,
+        edit: !!perms.edit,
+        delete: !!perms.delete,
+        export: !!perms.export,
+        assign: !!perms.assign,
+        transition: !!perms.transition,
+      };
     });
     nextTick(() => {
       updatingFromParent = false;

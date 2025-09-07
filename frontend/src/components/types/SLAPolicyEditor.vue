@@ -64,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import Card from '@/components/ui/Card/index.vue';
@@ -87,6 +87,7 @@ interface Policy {
 const props = defineProps<{ taskTypeId?: number }>();
 const { t } = useI18n();
 const policies = ref<Policy[]>([]);
+const initialized = ref(false);
 const priorityOptions = [
   { value: 'low', label: t('slaPolicies.low') },
   { value: 'medium', label: t('slaPolicies.medium') },
@@ -96,8 +97,19 @@ const priorityOptions = [
 onMounted(() => {
   if (props.taskTypeId) {
     load();
+    initialized.value = true;
   }
 });
+
+watch(
+  () => props.taskTypeId,
+  (id) => {
+    if (id && !initialized.value) {
+      load();
+      initialized.value = true;
+    }
+  },
+);
 
 async function load() {
   if (!props.taskTypeId) return;
@@ -157,5 +169,6 @@ async function save(p: Policy) {
 
 defineExpose({
   getPolicies: () => policies.value,
+  reload: () => load(),
 });
 </script>
