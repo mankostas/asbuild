@@ -132,6 +132,76 @@ class TaskTypeBuilderTest extends TestCase
             ->assertJsonPath('data.abilities_json.admin.edit', false);
     }
 
+    public function test_permissions_persist_on_edit(): void
+    {
+        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $role = Role::create([
+            'name' => 'Admin',
+            'slug' => 'admin',
+            'tenant_id' => $tenant->id,
+            'abilities' => ['task_types.create'],
+            'level' => 1,
+        ]);
+        $user = User::create([
+            'name' => 'U',
+            'email' => 'u4@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
+        Sanctum::actingAs($user);
+
+        $payload = [
+            'name' => 'Permissions Persist',
+            'schema_json' => json_encode(['sections' => []]),
+            'statuses' => json_encode([]),
+            'abilities_json' => json_encode([
+                'admin' => [
+                    'read' => true,
+                    'edit' => false,
+                    'delete' => false,
+                    'export' => false,
+                    'assign' => false,
+                ],
+            ]),
+        ];
+
+        $id = $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson('/api/task-types', $payload)
+            ->assertCreated()
+            ->json('data.id');
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->getJson("/api/task-types/{$id}")
+            ->assertOk()
+            ->assertJsonPath('data.abilities_json.admin.read', true)
+            ->assertJsonPath('data.abilities_json.admin.edit', false);
+
+        $update = [
+            'abilities_json' => json_encode([
+                'admin' => [
+                    'read' => true,
+                    'edit' => true,
+                    'delete' => false,
+                    'export' => false,
+                    'assign' => false,
+                ],
+            ]),
+        ];
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->patchJson("/api/task-types/{$id}", $update)
+            ->assertOk()
+            ->assertJsonPath('data.abilities_json.admin.edit', true);
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->getJson("/api/task-types/{$id}")
+            ->assertOk()
+            ->assertJsonPath('data.abilities_json.admin.edit', true);
+    }
+
     public function test_builder_requires_auth(): void
     {
         $this->postJson('/api/task-types', [])

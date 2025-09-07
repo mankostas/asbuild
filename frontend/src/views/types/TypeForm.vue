@@ -563,7 +563,7 @@ const versionStatusClass = computed(() => {
 const statuses = ref<string[]>([]);
 const statusFlow = ref<[string, string][]>([]);
 const permissions = ref<Record<string, Permission>>({});
-const tenantRoles = ref<{ slug: string }[]>([]);
+const tenantRoles = ref<{ id: number; slug: string }[]>([]);
 const canManage = computed(() => auth.isSuperAdmin || can('task_types.manage'));
 const canManageSLA = computed(
   () => auth.isSuperAdmin || can('task_sla_policies.manage'),
@@ -675,7 +675,7 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
         const tid = Number(id);
         roles = roles.filter((r: any) => r.tenant_id === null || r.tenant_id === tid);
       }
-      tenantRoles.value = roles as { slug: string }[];
+      tenantRoles.value = roles as { id: number; slug: string }[];
       tenantRoles.value.forEach((r) => {
         if (!permissions.value[r.slug]) {
           permissions.value[r.slug] = {
@@ -897,9 +897,12 @@ function loadVersion(v: any) {
     abilities = {};
   }
   // ensure all ability flags are boolean values
+  const roleSlugMap = Object.fromEntries(
+    tenantRoles.value.map((r: any) => [String(r.id), r.slug]),
+  );
   permissions.value = Object.fromEntries(
     Object.entries(abilities).map(([role, perms]) => [
-      role,
+      roleSlugMap[role] || role,
       {
         read: !!(perms as any).read,
         edit: !!(perms as any).edit,
