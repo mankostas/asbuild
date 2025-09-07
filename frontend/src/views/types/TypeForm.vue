@@ -620,6 +620,8 @@ const canAccess = computed(
       (isEdit.value ? can('task_types.view') : can('task_types.create'))),
 );
 
+const skipTenantWatch = ref(isEdit.value);
+
 watch(previewLang, (lang) => {
   locale.value = lang;
 });
@@ -750,6 +752,10 @@ onMounted(async () => {
 });
 
 watch(tenantId, (id, oldId) => {
+  if (skipTenantWatch.value) {
+    skipTenantWatch.value = false;
+    return;
+  }
   refreshTenant(id, oldId);
 });
 
