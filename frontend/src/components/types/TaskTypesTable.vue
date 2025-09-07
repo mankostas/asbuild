@@ -47,7 +47,7 @@
                   <button
                     type="button"
                     class="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm flex space-x-2 items-center rtl:space-x-reverse"
-                    @click="$emit('deprecate', rowProps.row.id)"
+                    @click="$emit('unpublish', rowProps.row.id)"
                   >
                     <span class="text-base"><Icon icon="heroicons-outline:x-mark" /></span>
                     <span>Unpublish</span>
@@ -128,7 +128,7 @@ const emit = defineEmits<{
   (e: 'delete', id: number): void;
   (e: 'copy', id: number): void;
   (e: 'publish', id: number): void;
-  (e: 'deprecate', id: number): void;
+  (e: 'unpublish', id: number): void;
 }>();
 
 const searchTerm = ref('');

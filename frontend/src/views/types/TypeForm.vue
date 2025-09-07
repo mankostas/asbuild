@@ -948,7 +948,8 @@ async function duplicateVersion() {
 }
 
 async function publishVersion() {
-  if (!selectedVersionId.value) return;
+  const versionId = selectedVersionId.value ?? versions.value[0]?.id;
+  if (!versionId) return;
   const result = await Swal.fire({
     title: 'Publish this version?',
     icon: 'warning',
@@ -956,12 +957,14 @@ async function publishVersion() {
     confirmButtonText: 'Yes, publish',
   });
   if (!result.isConfirmed) return;
-  await versionsStore.publish(selectedVersionId.value);
+  await versionsStore.publish(versionId);
   versions.value = await versionsStore.list(taskTypeId.value);
+  selectedVersionId.value = versionId;
 }
 
 async function unpublishVersion() {
-  if (!selectedVersionId.value) return;
+  const versionId = selectedVersionId.value ?? versions.value[0]?.id;
+  if (!versionId) return;
   const result = await Swal.fire({
     title: 'Unpublish this version?',
     icon: 'warning',
@@ -969,8 +972,9 @@ async function unpublishVersion() {
     confirmButtonText: 'Yes, unpublish',
   });
   if (!result.isConfirmed) return;
-  await versionsStore.unpublish(selectedVersionId.value);
+  await versionsStore.unpublish(versionId);
   versions.value = await versionsStore.list(taskTypeId.value);
+  selectedVersionId.value = versionId;
 }
 
 async function deleteVersion() {
