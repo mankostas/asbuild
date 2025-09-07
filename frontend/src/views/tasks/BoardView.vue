@@ -211,6 +211,8 @@ watch(
 watch(
   () => tenantStore.currentTenantId,
   () => {
+    columns.value = [];
+    Object.assign(prefs.filters, defaultFilters);
     load();
   },
 );
