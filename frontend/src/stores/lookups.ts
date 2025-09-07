@@ -14,12 +14,15 @@ export const useLookupsStore = defineStore('lookups', {
     },
   }),
   actions: {
-    async fetchAssignees(type: 'all' | 'teams' | 'employees' = 'all') {
+    async fetchAssignees(
+      type: 'all' | 'teams' | 'employees' = 'all',
+      force = false,
+    ) {
       const ttl = 5 * 60 * 1000; // 5 minutes
       const now = Date.now();
 
       const cacheValid = (t: 'teams' | 'employees') =>
-        this.assignees[t].length && now - this.assigneeFetchedAt[t] < ttl;
+        !force && this.assignees[t].length && now - this.assigneeFetchedAt[t] < ttl;
 
       if (type === 'all') {
         if (cacheValid('teams') && cacheValid('employees')) {
