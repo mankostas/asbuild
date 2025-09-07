@@ -42,7 +42,7 @@ class TaskReportsTest extends TestCase
         Sanctum::actingAs($user);
 
         $type = TaskType::create(['name' => 'Type', 'tenant_id' => $tenant->id]);
-        $status = TaskStatus::create(['slug' => 'done', 'name' => 'Done', 'tenant_id' => $tenant->id]);
+        $status = TaskStatus::create(['slug' => 'completed', 'name' => 'Completed', 'tenant_id' => $tenant->id]);
 
         Task::create([
             'tenant_id' => $tenant->id,

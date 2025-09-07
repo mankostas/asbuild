@@ -261,7 +261,7 @@
       "noCondition": "Always",
       "transition": "Transition",
       "quickPresets": "Quick presets",
-      "presetBasic": "Basic: todo → in_progress → completed"
+      "presetBasic": "Basic: draft → assigned → in_progress → completed"
     },
     "form": {
       "name": "Name",
