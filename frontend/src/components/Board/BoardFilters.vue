@@ -70,6 +70,7 @@ import Checkbox from '@dc/components/Checkbox';
 import Icon from '@dc/components/Icon';
 import { MenuItem } from '@headlessui/vue';
 import { useLookupsStore } from '@/stores/lookups';
+import { useTenantStore } from '@/stores/tenant';
 
 interface Option { value: any; label: string }
 interface Filters {
@@ -89,6 +90,7 @@ const emit = defineEmits<{ (e: 'update:modelValue', v: Filters): void }>();
 const { t } = useI18n();
 
 const lookups = useLookupsStore();
+const tenantStore = useTenantStore();
 const assigneeOptions = ref<Option[]>([]);
 const taskTypeOptions = ref<Option[]>([]);
 const priorityOptions: Option[] = [
@@ -113,18 +115,27 @@ const local = ref<Filters>({
   breachedOnly: false,
 });
 
-onMounted(async () => {
-  if (!lookups.assignees.employees.length) {
-    await lookups.fetchAssignees('employees');
-  }
+async function loadOptions(force = false) {
+  await lookups.fetchAssignees('employees', force);
   assigneeOptions.value = lookups.assignees.employees.map((a: any) => ({
     value: String(a.id),
     label: a.name,
   }));
   const { data } = await api.get('/task-types/options');
   taskTypeOptions.value = data.map((t: any) => ({ value: String(t.id), label: t.name }));
+}
+
+onMounted(async () => {
+  await loadOptions();
   Object.assign(local.value, props.modelValue);
 });
+
+watch(
+  () => tenantStore.currentTenantId,
+  async () => {
+    await loadOptions(true);
+  },
+);
 
 watch(
   () => props.modelValue,
