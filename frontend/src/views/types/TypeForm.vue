@@ -620,6 +620,8 @@ const canAccess = computed(
       (isEdit.value ? can('task_types.view') : can('task_types.create'))),
 );
 
+const skipTenantWatch = ref(isEdit.value);
+
 watch(previewLang, (lang) => {
   locale.value = lang;
 });
@@ -734,6 +736,10 @@ onMounted(async () => {
       if ((versionsList as any[]).length) {
         selectedVersionId.value = (versionsList as any[])[0].id;
         loadVersion((versionsList as any[])[0]);
+      } else {
+        // If no versions exist yet, load the data directly from the task type
+        // so previously saved schema and statuses are rendered when editing.
+        loadVersion(typeData);
       }
     } else {
       tenantStore.setTenant('');
@@ -746,6 +752,10 @@ onMounted(async () => {
 });
 
 watch(tenantId, (id, oldId) => {
+  if (skipTenantWatch.value) {
+    skipTenantWatch.value = false;
+    return;
+  }
   refreshTenant(id, oldId);
 });
 
@@ -877,7 +887,16 @@ function loadVersion(v: any) {
   } else {
     statusFlow.value = [];
   }
-  permissions.value = { ...(v.abilities_json || {}) };
+  let abilities: Record<string, Permission> = {};
+  try {
+    abilities =
+      typeof v.abilities_json === 'string'
+        ? JSON.parse(v.abilities_json)
+        : v.abilities_json || {};
+  } catch {
+    abilities = {};
+  }
+  permissions.value = { ...abilities };
   tenantRoles.value.forEach((r) => {
     if (!permissions.value[r.slug]) {
       permissions.value[r.slug] = {
@@ -891,6 +910,10 @@ function loadVersion(v: any) {
     } else if (permissions.value[r.slug].transition === undefined) {
       permissions.value[r.slug].transition = false;
     }
+  });
+  nextTick(() => {
+    automationsEditor.value?.reload?.(tenantId.value as number | string);
+    slaPolicyEditor.value?.reload?.();
   });
 }
 

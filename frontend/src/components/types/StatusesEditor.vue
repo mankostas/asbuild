@@ -110,12 +110,8 @@ watch(
   async (id: number | '' | undefined) => {
     if (id) {
       await fetchStatuses(id);
-      localStatuses.value = [];
-      if (props.modelValue.length) emitStatuses();
     } else {
       allStatuses.value = [];
-      localStatuses.value = [];
-      if (props.modelValue.length) emitStatuses();
     }
   },
   { immediate: true },

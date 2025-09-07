@@ -128,13 +128,15 @@ const automations = ref<Automation[]>([]);
 const statusOptions = ref<{ value: string; label: string }[]>([]);
 const allStatusOptions = ref<{ value: string; label: string }[]>([]);
 const teamOptions = ref<{ value: number; label: string }[]>([]);
+const initialized = ref(false);
 
 watch(
   () => props.tenantId,
   async (id: number | '' | undefined) => {
     if (id) {
       await load(id);
-    } else {
+      initialized.value = true;
+    } else if (initialized.value) {
       statusOptions.value = [];
       allStatusOptions.value = [];
       teamOptions.value = [];
@@ -207,6 +209,12 @@ async function save(a: Automation) {
 
 defineExpose({
   getAutomations: () => automations.value,
+  reload: (id?: number | string) => {
+    if (id || props.tenantId) {
+      load(id || (props.tenantId as number | string));
+      initialized.value = true;
+    }
+  },
 });
 
 watch(

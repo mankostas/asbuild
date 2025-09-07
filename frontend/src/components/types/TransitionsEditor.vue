@@ -154,12 +154,8 @@ watch(
   async (id: number | '' | undefined) => {
     if (id) {
       await fetchStatuses(id);
-      edges.value = [];
-      if (props.modelValue.length) emitEdges();
     } else {
       allStatuses.value = [];
-      edges.value = [];
-      if (props.modelValue.length) emitEdges();
     }
   },
   { immediate: true },
