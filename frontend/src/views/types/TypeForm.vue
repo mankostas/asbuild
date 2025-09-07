@@ -1096,19 +1096,23 @@ async function onSubmit() {
                 'x-styles': f.styles,
               })),
             }
-        ),
-        photos: s.photos.map((p) => ({
-          key: p.name,
-          label: p.label,
-          type: p.typeKey,
-          validations: p.validations,
-          maxCount: p.maxCount,
-          help: p.help,
-          'x-roles': p.roles,
-          'x-styles': p.styles,
+          ),
+          ...(s.photos.length
+            ? {
+                photos: s.photos.map((p) => ({
+                  key: p.name,
+                  label: p.label,
+                  type: p.typeKey,
+                  validations: p.validations,
+                  maxCount: p.maxCount,
+                  help: p.help,
+                  'x-roles': p.roles,
+                  'x-styles': p.styles,
+                })),
+              }
+            : {}),
+          'x-cols': s.cols,
         })),
-        'x-cols': s.cols,
-      })),
       ...(logicRules.length ? { logic: logicRules } : {}),
     }),
     statuses: JSON.stringify(statuses.value.reduce((acc: any, s) => ({ ...acc, [s]: [] }), {})),
@@ -1258,19 +1262,23 @@ const previewSchema = computed(() => ({
             'x-cols': f.cols,
           })),
         }
-    ),
-    photos: s.photos.map((p) => ({
-      key: p.name,
-      label: p.label,
-      type: p.typeKey,
-      validations: p.validations,
-      maxCount: p.maxCount,
-      help: p.help,
-      'x-roles': p.roles,
-      'x-styles': p.styles,
+      ),
+      ...(s.photos.length
+        ? {
+            photos: s.photos.map((p) => ({
+              key: p.name,
+              label: p.label,
+              type: p.typeKey,
+              validations: p.validations,
+              maxCount: p.maxCount,
+              help: p.help,
+              'x-roles': p.roles,
+              'x-styles': p.styles,
+            })),
+          }
+        : {}),
+      'x-cols': s.cols,
     })),
-    'x-cols': s.cols,
-  })),
   ...(sections.value
     .flatMap((s) =>
       sectionAllFields(s).flatMap((f) =>
