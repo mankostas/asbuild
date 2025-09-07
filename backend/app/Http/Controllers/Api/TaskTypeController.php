@@ -7,6 +7,8 @@ use App\Http\Requests\TaskTypeRequest;
 use App\Http\Resources\TaskTypeResource;
 use App\Models\TaskType;
 use App\Services\FormSchemaService;
+use App\Services\StatusFlowService;
+use App\Support\TenantDefaults;
 use App\Support\ListQuery;
 use Illuminate\Http\Request;
 
@@ -67,6 +69,17 @@ class TaskTypeController extends Controller
             $this->formSchemaService->validate($data['schema_json']);
         }
 
+        if (! array_key_exists('statuses', $data)) {
+            $data['statuses'] = array_fill_keys(
+                array_column(TenantDefaults::TASK_STATUSES, 'slug'),
+                []
+            );
+        }
+
+        if (! array_key_exists('status_flow_json', $data)) {
+            $data['status_flow_json'] = StatusFlowService::DEFAULT_TRANSITIONS;
+        }
+
         if ($request->user()->hasRole('SuperAdmin')) {
             $data['tenant_id'] = $data['tenant_id'] ?? null;
         } else {
@@ -92,6 +105,17 @@ class TaskTypeController extends Controller
         $data = $request->validated();
         if (isset($data['schema_json'])) {
             $this->formSchemaService->validate($data['schema_json']);
+        }
+
+        if (! array_key_exists('statuses', $data)) {
+            $data['statuses'] = $taskType->statuses ?? array_fill_keys(
+                array_column(TenantDefaults::TASK_STATUSES, 'slug'),
+                []
+            );
+        }
+
+        if (! array_key_exists('status_flow_json', $data)) {
+            $data['status_flow_json'] = $taskType->status_flow_json ?? StatusFlowService::DEFAULT_TRANSITIONS;
         }
 
         if ($request->user()->hasRole('SuperAdmin')) {
