@@ -179,6 +179,15 @@ const priorityOptions = computed(() => [
   { label: t('tasks.priority.urgent'), value: 'urgent' },
 ]);
 
+async function loadTypes() {
+  const headers =
+    auth.isSuperAdmin && tenantId.value
+      ? { [TENANT_HEADER]: tenantId.value }
+      : undefined;
+  const { data } = await api.get('/task-types/options', { headers });
+  types.value = data;
+}
+
 const schema = yup.object({
   task_type_id: yup.mixed().required('Type is required'),
 });
@@ -199,11 +208,10 @@ onMounted(async () => {
   if (auth.isSuperAdmin && tenantStore.tenants.length === 0) {
     await tenantStore.loadTenants();
   }
-  const [typesRes, statusesRes] = await Promise.all([
-    api.get('/task-types/options'),
+  const [_, statusesRes] = await Promise.all([
+    loadTypes(),
     api.get('/task-statuses'),
   ]);
-  types.value = typesRes.data;
   statusesRes.data.forEach((s: any) => {
     statusBySlug[s.slug] = s;
   });
@@ -326,6 +334,15 @@ const canSubmit = computed(() => {
   if (assigneeRequired.value && !assignee.value) return false;
   return true;
 });
+
+watch(
+  () => tenantId.value,
+  async () => {
+    await loadTypes();
+    taskTypeId.value = '' as any;
+    await onTypeChange();
+  },
+);
 
 watch(
   () => taskTypeVersionId.value,
