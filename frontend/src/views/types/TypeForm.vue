@@ -466,6 +466,16 @@ const validationErrors = ref<Record<string, string>>({});
 const validationStatus = ref<'idle' | 'success' | 'error'>('idle');
 const formRef = ref<any>(null);
 const currentVersion = ref<any | null>(null);
+const DEFAULT_STATUSES = ['draft', 'assigned', 'in_progress', 'completed'];
+const DEFAULT_FLOW: [string, string][] = [
+  ['draft', 'assigned'],
+  ['assigned', 'in_progress'],
+  ['in_progress', 'completed'],
+  ['completed', 'rejected'],
+  ['completed', 'redo'],
+  ['rejected', 'assigned'],
+  ['redo', 'assigned'],
+];
 const statuses = ref<string[]>([]);
 const statusFlow = ref<[string, string][]>([]);
 const permissions = ref<Record<string, Permission>>({});
@@ -567,8 +577,13 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
         f.roles.edit = ['super_admin'];
       }),
     );
-    statuses.value = [];
-    statusFlow.value = [];
+    if (id && !isEdit.value) {
+      statuses.value = [...DEFAULT_STATUSES];
+      statusFlow.value = DEFAULT_FLOW.map(([a, b]) => [a, b]);
+    } else {
+      statuses.value = [];
+      statusFlow.value = [];
+    }
   }
   if (id) {
     try {
