@@ -7,6 +7,10 @@ vi.mock('@/services/api', () => ({
   },
 }));
 
+vi.mock('@/stores/lookups', () => ({
+  useLookupsStore: vi.fn(() => ({ $reset: vi.fn() })),
+}));
+
 import api from '@/services/api';
 import { TENANT_ID_KEY } from '@/config/app';
 

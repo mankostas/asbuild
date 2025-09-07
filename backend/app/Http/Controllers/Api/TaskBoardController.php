@@ -16,6 +16,11 @@ use Illuminate\Validation\Rule;
 
 class TaskBoardController extends Controller
 {
+    protected function tenantId(Request $request): int
+    {
+        return (int) $request->attributes->get('tenant_id', $request->user()->tenant_id);
+    }
+
     public function index(Request $request, TaskQueryFilters $filters)
     {
         $request->validate([
@@ -35,7 +40,7 @@ class TaskBoardController extends Controller
             'has_photos' => ['sometimes', 'boolean'],
         ]);
 
-        $tenantId = $request->user()->tenant_id;
+        $tenantId = $this->tenantId($request);
 
         $types = TaskType::where('tenant_id', $tenantId)
             ->get();
@@ -108,7 +113,7 @@ class TaskBoardController extends Controller
             'has_photos' => ['sometimes', 'boolean'],
         ]);
 
-        $tenantId = $request->user()->tenant_id;
+        $tenantId = $this->tenantId($request);
         $limit = 50;
         $page = max(1, $request->integer('page', 1));
         $offset = ($page - 1) * $limit;
@@ -144,7 +149,8 @@ class TaskBoardController extends Controller
             'index' => ['required', 'integer', 'min:0'],
         ]);
 
-        $task = Task::where('tenant_id', $request->user()->tenant_id)
+        $tenantId = $this->tenantId($request);
+        $task = Task::where('tenant_id', $tenantId)
             ->findOrFail($data['task_id']);
         $status = TaskStatus::where('slug', $data['status_slug'])->firstOrFail();
 

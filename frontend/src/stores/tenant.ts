@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import api from '@/services/api';
 import { TENANT_ID_KEY } from '@/config/app';
 import { withListParams, type ListParams } from './list';
+import { useLookupsStore } from '@/stores/lookups';
 
 const initialTenant = localStorage.getItem(TENANT_ID_KEY) || '';
 
@@ -53,6 +54,10 @@ export const useTenantStore = defineStore('tenant', {
         localStorage.setItem(TENANT_ID_KEY, normalized);
       } else {
         localStorage.removeItem(TENANT_ID_KEY);
+      }
+      if (changed) {
+        const lookups = useLookupsStore();
+        lookups.$reset();
       }
       // The store no longer forces a hard page reload. Callers that need a
       // full refresh (such as impersonation) can check the return value and

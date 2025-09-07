@@ -44,6 +44,7 @@ class LookupController extends Controller
 
         if ($type === 'all' || $type === 'employees') {
             $employees = User::where('tenant_id', $tenantId)
+                ->whereDoesntHave('roles', fn ($q) => $q->where('slug', 'tenant'))
                 ->orderBy('name')
                 ->get(['id', 'name'])
                 ->map(fn ($user) => [
