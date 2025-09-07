@@ -902,6 +902,10 @@ function loadVersion(v: any) {
       permissions.value[r.slug].transition = false;
     }
   });
+  nextTick(() => {
+    automationsEditor.value?.reload?.(tenantId.value as number | string);
+    slaPolicyEditor.value?.reload?.();
+  });
 }
 
 function onVersionChange() {
