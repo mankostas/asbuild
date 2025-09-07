@@ -3,20 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\TaskTypeRequest;
+use App\Http\Resources\TaskTypeResource;
 use App\Models\TaskType;
 use App\Services\FormSchemaService;
-use Illuminate\Http\Request;
-use App\Http\Resources\TaskTypeResource;
 use App\Support\ListQuery;
-use App\Http\Requests\TaskTypeRequest;
+use Illuminate\Http\Request;
 
 class TaskTypeController extends Controller
 {
     use ListQuery;
 
-    public function __construct(private FormSchemaService $formSchemaService)
-    {
-    }
+    public function __construct(private FormSchemaService $formSchemaService) {}
 
     protected function ensureAdmin(Request $request): void
     {
@@ -28,7 +26,8 @@ class TaskTypeController extends Controller
     public function index(Request $request)
     {
         $scope = $request->query('scope', $request->user()->hasRole('SuperAdmin') ? 'all' : 'tenant');
-        $query = TaskType::query()->with(['currentVersion', 'tenant']);
+        // Task types are no longer versioned, so we only eager load the tenant
+        $query = TaskType::query()->with(['tenant']);
 
         if ($scope === 'tenant') {
             $tenantId = $request->query('tenant_id', $request->user()->tenant_id);
@@ -75,6 +74,7 @@ class TaskTypeController extends Controller
         }
 
         $type = TaskType::create($data);
+
         return (new TaskTypeResource($type))->response()->setStatusCode(201);
     }
 
@@ -103,6 +103,7 @@ class TaskTypeController extends Controller
         }
 
         $taskType->update($data);
+
         return new TaskTypeResource($taskType);
     }
 
@@ -113,6 +114,7 @@ class TaskTypeController extends Controller
             abort(403);
         }
         $taskType->delete();
+
         return response()->json(['message' => 'deleted']);
     }
 
