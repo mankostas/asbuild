@@ -14,9 +14,8 @@ class TaskTypeVersionController extends Controller
         if ($request->user()->cannot('task_type_versions.manage')) {
             abort(403);
         }
-        $query = TaskTypeVersion::query()->whereHas('taskType', function ($q) use ($request) {
-            $q->where('tenant_id', $request->user()->tenant_id);
-        });
+        $tenantId = $request->attributes->get('tenant_id', $request->user()->tenant_id);
+        $query = TaskTypeVersion::query()->whereHas('taskType', fn ($q) => $q->where('tenant_id', $tenantId));
         if ($id = $request->query('task_type_id')) {
             $query->where('task_type_id', $id);
         }
