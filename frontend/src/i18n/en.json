@@ -371,5 +371,6 @@
   "Label": "Label",
   "Required": "Required",
   "Columns": "Columns",
-  "Select a field": "Select a field"
+  "Select a field": "Select a field",
+  "tenant": "Tenant"
 }

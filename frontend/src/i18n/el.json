@@ -371,5 +371,6 @@
   "Label": "Ετικέτα",
   "Required": "Υποχρεωτικό",
   "Columns": "Στήλες",
-  "Select a field": "Επιλέξτε πεδίο"
+  "Select a field": "Επιλέξτε πεδίο",
+  "tenant": "Μισθωτής"
 }
