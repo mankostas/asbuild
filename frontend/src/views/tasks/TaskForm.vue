@@ -2,6 +2,9 @@
   <div v-if="canAccess">
     <Card class="max-w-lg p-6 space-y-4">
       <form class="space-y-4" @submit.prevent="submitForm">
+        <FromGroup v-if="auth.isSuperAdmin && !isEdit" :label="t('tenant')">
+          <Select v-model="tenantId" :options="tenantOptions" />
+        </FromGroup>
         <Textinput v-model="title" :label="t('tasks.form.title')" />
 
         <FromGroup :label="t('tasks.form.type')" :error="taskTypeError">
@@ -123,7 +126,9 @@ import AssigneePicker from '@/components/tasks/AssigneePicker.vue';
 import PrioritySelect from '@/components/fields/PrioritySelect.vue';
 import StatusSelect from '@/components/fields/StatusSelect.vue';
 import { toISO } from '@/utils/datetime';
-import { can } from '@/stores/auth';
+import { useAuthStore, can } from '@/stores/auth';
+import { useTenantStore } from '@/stores/tenant';
+import { TENANT_HEADER } from '@/config/app';
 import Button from '@dc/components/Button';
 import Card from '@dc/components/Card';
 import Select from '@dc/components/Select';
@@ -138,6 +143,13 @@ const notify = useNotify();
 const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
+
+const auth = useAuthStore();
+const tenantStore = useTenantStore();
+const tenantId = ref<string | number | null>(tenantStore.currentTenantId || null);
+const tenantOptions = computed(() =>
+  tenantStore.tenants.map((t: any) => ({ value: String(t.id), label: t.name })),
+);
 
 const title = ref('');
 const types = ref<any[]>([]);
@@ -184,6 +196,9 @@ const canAccess = computed(() =>
 );
 
 onMounted(async () => {
+  if (auth.isSuperAdmin && tenantStore.tenants.length === 0) {
+    await tenantStore.loadTenants();
+  }
   const [typesRes, statusesRes] = await Promise.all([
     api.get('/task-types/options'),
     api.get('/task-statuses'),
@@ -301,6 +316,7 @@ const assigneeRequired = computed(() => {
 const requiredFields = computed(() => currentSchemaNoAssignee.value?.required || []);
 
 const canSubmit = computed(() => {
+  if (auth.isSuperAdmin && !isEdit.value && !tenantId.value) return false;
   if (!taskTypeId.value || !title.value.trim()) return false;
   const formValid = requiredFields.value.every((f: string) => {
     const val = formData.value[f];
@@ -344,7 +360,11 @@ const submitForm = handleSubmit(async () => {
         params: { id: route.params.id },
       });
     } else {
-      const res = await api.post('/tasks', payload);
+      const headers =
+        auth.isSuperAdmin && tenantId.value
+          ? { [TENANT_HEADER]: tenantId.value }
+          : undefined;
+      const res = await api.post('/tasks', payload, { headers });
       notify.success('Task created');
       router.push({
         name: 'tasks.details',

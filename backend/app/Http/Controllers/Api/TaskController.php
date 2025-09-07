@@ -78,7 +78,11 @@ class TaskController extends Controller
             unset($data['sla_start_at'], $data['sla_end_at']);
         }
 
-        $data['tenant_id'] = $request->user()->tenant_id;
+        $tenantId = $request->user()->tenant_id;
+        if ($request->user()->isSuperAdmin()) {
+            $tenantId = $request->attributes->get('tenant_id', $tenantId);
+        }
+        $data['tenant_id'] = $tenantId;
 
         $type = null;
         $version = null;
