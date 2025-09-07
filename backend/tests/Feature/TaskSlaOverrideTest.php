@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Role;
 use App\Models\TaskType;
-use App\Models\TaskTypeVersion;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,7 +21,7 @@ class TaskSlaOverrideTest extends TestCase
         Tenant::create(['id' => 1, 'name' => 'T', 'features' => ['tasks']]);
     }
 
-    protected function makeVersion(): TaskTypeVersion
+    protected function makeType(): TaskType
     {
         if (! User::find(1)) {
             User::create([
@@ -36,21 +35,13 @@ class TaskSlaOverrideTest extends TestCase
             ]);
         }
 
-        $type = TaskType::create([
+        return TaskType::create([
             'name' => 'Type',
             'tenant_id' => 1,
-        ]);
-        $version = TaskTypeVersion::create([
-            'task_type_id' => $type->id,
-            'semver' => '1.0.0',
+            'schema_json' => ['sections' => []],
             'statuses' => [['slug' => 'draft']],
             'status_flow_json' => [],
-            'created_by' => 1,
-            'published_at' => now(),
         ]);
-        $type->current_version_id = $version->id;
-        $type->save();
-        return $version;
     }
 
     protected function makeUser(array $abilities): User
@@ -77,7 +68,7 @@ class TaskSlaOverrideTest extends TestCase
 
     public function test_override_fields_ignored_without_ability_on_create(): void
     {
-        $this->makeVersion();
+        $this->makeType();
         $this->makeUser(['tasks.create']);
 
         $response = $this->withHeader('X-Tenant-ID', 1)
@@ -94,7 +85,7 @@ class TaskSlaOverrideTest extends TestCase
 
     public function test_override_fields_respected_with_ability_on_create(): void
     {
-        $this->makeVersion();
+        $this->makeType();
         $this->makeUser(['tasks.create', 'tasks.sla.override']);
 
         $response = $this->withHeader('X-Tenant-ID', 1)

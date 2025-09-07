@@ -26,33 +26,10 @@
           <span v-if="rowProps.column.field === 'tenant'">
             {{ rowProps.row.tenant?.name || '—' }}
           </span>
-          <span v-else-if="rowProps.column.field === 'published'">
-            {{ rowProps.row.current_version?.published_at ? 'Yes' : 'No' }}
-          </span>
           <span v-else-if="rowProps.column.field === 'actions'">
             <Dropdown classMenuItems=" w-[140px]">
               <span class="text-xl"><Icon icon="heroicons-outline:dots-vertical" /></span>
               <template #menus>
-                <MenuItem v-if="!rowProps.row.current_version?.published_at">
-                  <button
-                    type="button"
-                    class="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm flex space-x-2 items-center rtl:space-x-reverse"
-                    @click="$emit('publish', rowProps.row.id)"
-                  >
-                    <span class="text-base"><Icon icon="heroicons-outline:check" /></span>
-                    <span>Publish</span>
-                  </button>
-                </MenuItem>
-                <MenuItem v-else>
-                  <button
-                    type="button"
-                    class="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm flex space-x-2 items-center rtl:space-x-reverse"
-                    @click="$emit('unpublish', rowProps.row.id)"
-                  >
-                    <span class="text-base"><Icon icon="heroicons-outline:x-mark" /></span>
-                    <span>Unpublish</span>
-                  </button>
-                </MenuItem>
                 <MenuItem>
                   <button
                     type="button"
@@ -119,7 +96,6 @@ interface TaskType {
   id: number;
   name: string;
   tenant?: { id: number; name: string } | null;
-  current_version?: { id: number; published_at?: string | null } | null;
 }
 
 const props = defineProps<{ rows: TaskType[] }>();
@@ -127,8 +103,6 @@ const emit = defineEmits<{
   (e: 'edit', id: number): void;
   (e: 'delete', id: number): void;
   (e: 'copy', id: number): void;
-  (e: 'publish', id: number): void;
-  (e: 'unpublish', id: number): void;
 }>();
 
 const searchTerm = ref('');
@@ -155,7 +129,6 @@ const columns = [
   { label: 'ID', field: 'id' },
   { label: 'Name', field: 'name' },
   { label: 'Tenant', field: 'tenant' },
-  { label: 'Published', field: 'published' },
   { label: 'Actions', field: 'actions' },
 ];
 

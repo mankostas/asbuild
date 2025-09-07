@@ -25,14 +25,6 @@
           />
         </FromGroup>
 
-        <FromGroup v-if="versionOptions.length" :label="t('tasks.form.version')">
-          <Select
-            v-model="taskTypeVersionId"
-            :options="versionOptions"
-            :aria-label="t('tasks.form.version')"
-          />
-        </FromGroup>
-
         <InputGroup v-model="dueAt" :label="t('tasks.form.dueAt')" type="date" />
 
         <div class="flex space-x-6">
@@ -166,8 +158,7 @@ const tenantOptions = computed(() =>
 
 const title = ref('');
 const types = ref<any[]>([]);
-const versions = ref<any[]>([]);
-const taskTypeVersionId = ref<number | null>(null);
+const currentType = ref<any | null>(null);
 const formData = ref<any>({});
 const scheduledAt = ref('');
 const slaStartAt = ref('');
@@ -181,8 +172,6 @@ const priority = ref('');
 const dueAt = ref<string | null>(null);
 
 const typeOptions = computed(() => types.value.map((t: any) => ({ value: t.id, label: t.name })));
-const versionOptions = computed(() => versions.value.map((v: any) => ({ value: v.id, label: v.semver })));
-
 const statusOptions = ref<{ label: string; value: string }[]>([]);
 const statusBySlug: Record<string, any> = {};
 const priorityOptions = ref<{ label: string; value: string }[]>([]);
@@ -229,16 +218,6 @@ async function loadPriorities() {
     priority.value = priorityOptions.value[0].value;
   }
 }
-
-async function loadTypes() {
-  const headers =
-    auth.isSuperAdmin && tenantId.value
-      ? { [TENANT_HEADER]: tenantId.value }
-      : undefined;
-  const { data } = await api.get('/task-types/options', { headers });
-  types.value = data;
-}
-
 const schema = yup.object({
   task_type_id: yup.mixed().required('Type is required'),
 });
@@ -266,8 +245,6 @@ onMounted(async () => {
     const task = res.data;
     taskTypeId.value = task.type?.id || task.task_type_id;
     await onTypeChange();
-    taskTypeVersionId.value =
-      task.task_type_version_id || task.task_type_version?.id || taskTypeVersionId.value;
     formData.value = task.form_data || {};
     scheduledAt.value = task.scheduled_at ? toISO(task.scheduled_at) : '';
     slaStartAt.value = task.sla_start_at ? toISO(task.sla_start_at) : '';
@@ -285,47 +262,38 @@ onMounted(async () => {
 
 async function onTypeChange() {
   formData.value = {};
-  versions.value = [];
-  taskTypeVersionId.value = null;
-  const t = types.value.find((t) => t.id === taskTypeId.value);
-  scheduledAt.value = t?.scheduled_at ? toISO(t.scheduled_at) : '';
-  slaStartAt.value = t?.sla_start_at ? toISO(t.sla_start_at) : '';
-  slaEndAt.value = t?.sla_end_at ? toISO(t.sla_end_at) : '';
+  currentType.value = null;
   assignee.value = null;
   dueAt.value = null;
   priority.value = '';
   if (taskTypeId.value) {
-    let list: any[] = [];
-    const manageVersions = can('task_type_versions.manage');
-    if (manageVersions) {
-      const headers =
-        auth.isSuperAdmin && tenantId.value
-          ? { [TENANT_HEADER]: tenantId.value }
-          : undefined;
-      const { data } = await api.get('/task-type-versions', {
-        params: { task_type_id: taskTypeId.value },
-        headers,
-      });
-      list = data.data || [];
-    } else if (t?.current_version) {
-      list = [t.current_version];
-    }
-    versions.value = manageVersions ? list : list.filter((v: any) => v.published_at);
-    taskTypeVersionId.value = versions.value[0]?.id ?? null;
+    const headers =
+      auth.isSuperAdmin && tenantId.value
+        ? { [TENANT_HEADER]: tenantId.value }
+        : undefined;
+    const { data } = await api.get(`/task-types/${taskTypeId.value}`, { headers });
+    currentType.value = data.data ?? data;
+    scheduledAt.value = currentType.value?.scheduled_at ? toISO(currentType.value.scheduled_at) : '';
+    slaStartAt.value = currentType.value?.sla_start_at ? toISO(currentType.value.sla_start_at) : '';
+    slaEndAt.value = currentType.value?.sla_end_at ? toISO(currentType.value.sla_end_at) : '';
+  } else {
+    scheduledAt.value = '';
+    slaStartAt.value = '';
+    slaEndAt.value = '';
   }
   await loadPriorities();
   updateStatusOptions();
 }
 
 function updateStatusOptions(current?: string | null) {
-  const version = versions.value.find((v) => v.id === taskTypeVersionId.value);
-  const versionStatuses = version?.statuses || [];
-  let opts = versionStatuses.map((s: any) => ({
+  const type = currentType.value;
+  const typeStatuses = type?.statuses || [];
+  let opts = typeStatuses.map((s: any) => ({
     value: s.slug,
     label: statusBySlug[s.slug]?.name || s.slug,
   }));
   if (isEdit.value && current) {
-    const flow = version?.status_flow_json || [];
+    const flow = type?.status_flow_json || [];
     let graph: Record<string, string[]> = {};
     if (Array.isArray(flow)) {
       flow.forEach((e: [string, string]) => {
@@ -345,10 +313,7 @@ function updateStatusOptions(current?: string | null) {
   }
 }
 
-const currentSchema = computed(() => {
-  const v = versions.value.find((vv) => vv.id === taskTypeVersionId.value);
-  return v ? v.schema_json : null;
-});
+const currentSchema = computed(() => currentType.value?.schema_json || null);
 
 const assigneeField = computed(() => {
   const props = currentSchema.value?.properties || {};
@@ -398,13 +363,6 @@ watch(
   },
 );
 
-watch(
-  () => taskTypeVersionId.value,
-  () => {
-    updateStatusOptions();
-  },
-);
-
 const submitForm = handleSubmit(async () => {
   serverError.value = '';
   const payload: any = {
@@ -412,7 +370,6 @@ const submitForm = handleSubmit(async () => {
     form_data: formData.value,
   };
   if (title.value) payload.title = title.value;
-  if (taskTypeVersionId.value) payload.task_type_version_id = taskTypeVersionId.value;
   if (scheduledAt.value) payload.scheduled_at = toISO(scheduledAt.value);
   if (slaStartAt.value) payload.sla_start_at = toISO(slaStartAt.value);
   if (slaEndAt.value) payload.sla_end_at = toISO(slaEndAt.value);

@@ -86,7 +86,7 @@ const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
 
 const auth = useAuthStore();
-const editable = computed(() => auth.isSuperAdmin || can('task_type_versions.manage'));
+const editable = computed(() => auth.isSuperAdmin || can('task_types.manage'));
 
 const localStatuses = ref<string[]>([...props.modelValue]);
 watch(

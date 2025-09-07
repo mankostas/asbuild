@@ -32,7 +32,6 @@ export const featureMap: Record<string, { label: string; abilities: string[] }> 
     label: 'Task Types',
     abilities: [
       'task_types.manage',
-      'task_type_versions.manage',
       'task_automations.manage',
       'task_field_snippets.manage',
     ],

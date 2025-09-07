@@ -12,24 +12,12 @@ return new class extends Migration {
                 $table->json('abilities_json')->nullable();
             }
         });
-
-        Schema::table('task_type_versions', function (Blueprint $table) {
-            if (! Schema::hasColumn('task_type_versions', 'abilities_json')) {
-                $table->json('abilities_json')->nullable();
-            }
-        });
     }
 
     public function down(): void
     {
         Schema::table('task_types', function (Blueprint $table) {
             if (Schema::hasColumn('task_types', 'abilities_json')) {
-                $table->dropColumn('abilities_json');
-            }
-        });
-
-        Schema::table('task_type_versions', function (Blueprint $table) {
-            if (Schema::hasColumn('task_type_versions', 'abilities_json')) {
                 $table->dropColumn('abilities_json');
             }
         });

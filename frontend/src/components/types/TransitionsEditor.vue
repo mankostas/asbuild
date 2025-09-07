@@ -133,7 +133,7 @@ const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
 
 const auth = useAuthStore();
-const editable = computed(() => auth.isSuperAdmin || can('task_type_versions.manage'));
+const editable = computed(() => auth.isSuperAdmin || can('task_types.manage'));
 
 const edges = ref<[string, string][]>(props.modelValue ? props.modelValue.map((e) => [e[0], e[1]]) : []);
 watch(

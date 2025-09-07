@@ -16,29 +16,7 @@
       >
         <Breadcrumbs />
         <div class="flex items-center gap-3">
-          <Select
-            v-if="versions.length"
-            id="versionSelect"
-            v-model="selectedVersionId"
-            :options="versions.map((v) => ({ value: v.id, label: `v${v.semver}` }))"
-            :label="t('Version')"
-            class="w-24"
-            classLabel="sr-only"
-            classInput="text-xs"
-            @change="onVersionChange"
-          />
-          <span
-            v-else
-            class="text-xs px-2 py-1 border rounded"
-            :aria-label="t('Version')"
-          >
-            {{ t('version.fallback', { n: 1 }) }}
-          </span>
-          <Badge
-            v-if="currentVersion"
-            :label="t(`versionStatus.${versionStatusLabel}`)"
-            :badgeClass="versionStatusClass"
-          />
+          
           <Select
             id="localeSelect"
             v-model="previewLang"
@@ -76,56 +54,7 @@
             classLabel="sr-only"
             classInput="text-xs"
           />
-          <Button
-            v-if="
-              isEdit &&
-              (auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage')))
-            "
-            type="button"
-            :aria-label="t('actions.duplicate')"
-            btnClass="btn-outline-primary text-xs px-3 py-1"
-            @click="duplicateVersion"
-          >
-            {{ t('actions.duplicate') }}
-          </Button>
-          <Button
-            v-if="
-              isEdit &&
-              !currentVersion?.published_at &&
-              (auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage')))
-            "
-            type="button"
-            :aria-label="t('actions.publish')"
-            btnClass="btn-outline-primary text-xs px-3 py-1"
-            @click="publishVersion"
-          >
-            {{ t('actions.publish') }}
-          </Button>
-          <Button
-            v-if="
-              isEdit &&
-              currentVersion?.published_at &&
-              (auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage')))
-            "
-            type="button"
-            :aria-label="t('actions.unpublish')"
-            btnClass="btn-outline-primary text-xs px-3 py-1"
-            @click="unpublishVersion"
-          >
-            {{ t('actions.unpublish') }}
-          </Button>
-          <Button
-            v-if="
-              isEdit &&
-              (auth.isSuperAdmin || (can('task_types.manage') && can('task_type_versions.manage')))
-            "
-            type="button"
-            :aria-label="t('actions.delete')"
-            btnClass="btn-outline-danger text-xs px-3 py-1"
-            @click="deleteVersion"
-          >
-            {{ t('actions.delete') }}
-          </Button>
+          
           <Button
             v-if="auth.isSuperAdmin || can('task_types.manage')"
             type="submit"
@@ -446,7 +375,6 @@ import PermissionsMatrix from '@/components/types/PermissionsMatrix.vue';
 import Breadcrumbs from '@/components/ui/Breadcrumbs/index.vue';
 import Button from '@/components/ui/Button/index.vue';
 import Select from '@/components/ui/Select/index.vue';
-import Badge from '@/components/ui/Badge/index.vue';
 import Card from '@/components/ui/Card/index.vue';
 import UiTabs from '@/components/ui/Tabs/index.vue';
 import Drawer from '@/components/ui/Drawer/index.vue';
@@ -458,7 +386,6 @@ import Skeleton from '@/components/ui/Skeleton.vue';
 import { Tab, TabPanel, MenuItem } from '@headlessui/vue';
 import { can, useAuthStore } from '@/stores/auth';
 import api from '@/services/api';
-import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
 import { useTenantStore } from '@/stores/tenant';
 import '@/styles/types-builder.css';
 import { type I18nString } from '@/utils/i18n';
@@ -468,7 +395,6 @@ const { t, locale } = useI18n();
 const builder = ref<HTMLElement | null>(null);
 const route = useRoute();
 const router = useRouter();
-const versionsStore = useTaskTypeVersionsStore();
 const tenantStore = useTenantStore();
 const auth = useAuthStore();
 const taskTypeId = computed(() => Number(route.params.id ?? route.query.id ?? 0));
@@ -539,27 +465,7 @@ const previewViewport = ref<'mobile' | 'tablet' | 'desktop'>((localStorage.getIt
 const validationErrors = ref<Record<string, string>>({});
 const validationStatus = ref<'idle' | 'success' | 'error'>('idle');
 const formRef = ref<any>(null);
-const versions = ref<any[]>([]);
-const selectedVersionId = ref<number | null>(null);
-const currentVersion = computed(() =>
-  versions.value.find((v) => v.id === selectedVersionId.value) || null,
-);
-const versionStatusLabel = computed(() => {
-  if (!currentVersion.value) return '';
-  if (currentVersion.value.deprecated_at) return 'deprecated';
-  if (currentVersion.value.published_at) return 'published';
-  return 'draft';
-});
-const versionStatusClass = computed(() => {
-  switch (versionStatusLabel.value) {
-    case 'published':
-      return 'bg-success-500 text-white';
-    case 'deprecated':
-      return 'bg-danger-500 text-white';
-    default:
-      return 'bg-warning-500 text-white';
-  }
-});
+const currentVersion = ref<any | null>(null);
 const statuses = ref<string[]>([]);
 const statusFlow = ref<[string, string][]>([]);
 const permissions = ref<Record<string, Permission>>({});
@@ -714,7 +620,7 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
 onMounted(async () => {
   loading.value = true;
   try {
-    const [_, , typeRes, versionsList] = await Promise.all([
+    const [_, , typeRes] = await Promise.all([
       tenantStore.loadTenants(
         auth.isSuperAdmin
           ? { per_page: 100, scope: 'all' }
@@ -722,7 +628,6 @@ onMounted(async () => {
       ),
       api.get('/lookups/features'),
       isEdit.value ? api.get(`/task-types/${taskTypeId.value}`) : Promise.resolve(null),
-      isEdit.value ? versionsStore.list(taskTypeId.value) : Promise.resolve([]),
     ]);
     if (isEdit.value && typeRes) {
       const typeData = typeRes.data.data ?? typeRes.data;
@@ -732,15 +637,8 @@ onMounted(async () => {
           ? Number(typeData.tenant_id)
           : '';
       await refreshTenant(tenantId.value);
-      versions.value = versionsList as any[];
-      if ((versionsList as any[]).length) {
-        selectedVersionId.value = (versionsList as any[])[0].id;
-        loadVersion((versionsList as any[])[0]);
-      } else {
-        // If no versions exist yet, load the data directly from the task type
-        // so previously saved schema and statuses are rendered when editing.
-        loadVersion(typeData);
-      }
+      currentVersion.value = typeData;
+      loadVersion(typeData);
     } else {
       tenantStore.setTenant('');
     }
@@ -933,63 +831,6 @@ function loadVersion(v: any) {
   });
 }
 
-function onVersionChange() {
-  const v = versions.value.find((vv) => vv.id === selectedVersionId.value);
-  if (v) {
-    loadVersion(v);
-  }
-}
-
-async function duplicateVersion() {
-  if (!taskTypeId.value) return;
-  await versionsStore.create(taskTypeId.value);
-  versions.value = await versionsStore.list(taskTypeId.value);
-  selectedVersionId.value = versions.value[0]?.id ?? null;
-}
-
-async function publishVersion() {
-  const versionId = selectedVersionId.value ?? versions.value[0]?.id;
-  if (!versionId) return;
-  const result = await Swal.fire({
-    title: 'Publish this version?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, publish',
-  });
-  if (!result.isConfirmed) return;
-  await versionsStore.publish(versionId);
-  versions.value = await versionsStore.list(taskTypeId.value);
-  selectedVersionId.value = versionId;
-}
-
-async function unpublishVersion() {
-  const versionId = selectedVersionId.value ?? versions.value[0]?.id;
-  if (!versionId) return;
-  const result = await Swal.fire({
-    title: 'Unpublish this version?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, unpublish',
-  });
-  if (!result.isConfirmed) return;
-  await versionsStore.unpublish(versionId);
-  versions.value = await versionsStore.list(taskTypeId.value);
-  selectedVersionId.value = versionId;
-}
-
-async function deleteVersion() {
-  if (!selectedVersionId.value) return;
-  const result = await Swal.fire({
-    title: 'Deprecate this version?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, deprecate',
-  });
-  if (!result.isConfirmed) return;
-  await versionsStore.deprecate(selectedVersionId.value);
-  versions.value = await versionsStore.list(taskTypeId.value);
-  selectedVersionId.value = versions.value[0]?.id ?? null;
-}
 
 function removeSection(index: number) {
   sections.value.splice(index, 1);
