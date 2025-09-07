@@ -20,7 +20,7 @@
         @delete="remove"
         @copy="copy"
         @publish="publish"
-        @deprecate="deprecate"
+        @unpublish="unpublish"
       >
         <template #header-actions>
           <button
@@ -167,11 +167,17 @@ async function publish(id: number) {
   reload();
 }
 
-async function deprecate(id: number) {
+async function unpublish(id: number) {
   const type = all.value.find((t) => t.id === id);
   const versionId = type?.current_version?.id;
   if (!versionId) return;
-  await versionsStore.deprecate(versionId);
+  const res = await Swal.fire({
+    title: 'Unpublish type?',
+    icon: 'warning',
+    showCancelButton: true,
+  });
+  if (!res.isConfirmed) return;
+  await versionsStore.unpublish(versionId);
   reload();
 }
 </script>
