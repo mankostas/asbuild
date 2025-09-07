@@ -31,7 +31,6 @@ export const menuItems = [
     requiredAbilities: [
       "task_types.view",
       "task_types.manage",
-      "task_type_versions.manage",
       "task_sla_policies.manage",
       "task_automations.manage",
       "task_field_snippets.manage",
@@ -141,7 +140,6 @@ export const topMenu = [
     requiredAbilities: [
       "task_types.view",
       "task_types.manage",
-      "task_type_versions.manage",
       "task_sla_policies.manage",
       "task_automations.manage",
       "task_field_snippets.manage",
@@ -239,7 +237,6 @@ export const addNewOptions = [
     requiredAbilities: [
       'task_types.create',
       'task_types.manage',
-      'task_type_versions.manage',
       'task_sla_policies.manage',
       'task_automations.manage',
       'task_field_snippets.manage',

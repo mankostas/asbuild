@@ -102,7 +102,6 @@ export const routes = [
       requiredAbilities: [
         'task_types.view',
         'task_types.manage',
-        'task_type_versions.manage',
         'task_sla_policies.manage',
         'task_automations.manage',
         'task_field_snippets.manage',

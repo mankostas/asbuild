@@ -5,7 +5,6 @@ use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\TaskType;
-use App\Models\TaskTypeVersion;
 use App\Http\Middleware\Ability;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -24,22 +23,13 @@ class TaskTypeOptionsTest extends TestCase
 
     private function seedType(Tenant $tenant, User $user): void
     {
-        $type = TaskType::create([
+        TaskType::create([
             'name' => 'Type',
             'tenant_id' => $tenant->id,
-            'current_version_id' => null,
-        ]);
-        $version = TaskTypeVersion::create([
-            'task_type_id' => $type->id,
-            'semver' => '1.0.0',
             'schema_json' => ['sections' => []],
-            'statuses' => ['draft' => []],
+            'statuses' => [['slug' => 'draft']],
             'status_flow_json' => [],
-            'created_by' => $user->id,
-            'published_at' => now(),
         ]);
-        $type->current_version_id = $version->id;
-        $type->save();
     }
 
     public function test_tasks_create_user_can_fetch_options(): void

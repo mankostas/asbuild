@@ -70,7 +70,6 @@ class TaskTypeAbilityTest extends TestCase
     public static function abilityProvider(): array
     {
         return [
-            'versions index' => ['GET', fn($type) => ['/api/task-type-versions', ['task_type_id' => $type->id]], 'task_type_versions.manage'],
             'automations store' => [
                 'POST',
                 fn($type) => ["/api/task-types/{$type->id}/automations", [

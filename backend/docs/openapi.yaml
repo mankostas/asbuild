@@ -651,71 +651,6 @@ paths:
           description: OK
         '422':
           description: Validation errors
-  /task-type-versions:
-    get:
-      summary: List task type versions
-      parameters:
-        - name: task_type_id
-          in: query
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: List of versions
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TaskTypeVersion'
-  /task-types/{id}/versions:
-    post:
-      summary: Create task type draft version
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '201':
-          description: Version
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TaskTypeVersion'
-  /task-type-versions/{id}/publish:
-    post:
-      summary: Publish task type version
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Version
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TaskTypeVersion'
-  /task-type-versions/{id}/deprecate:
-    post:
-      summary: Deprecate task type version
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Version
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TaskTypeVersion'
 
   /task-types/{task_type}/sla-policies:
     get:
@@ -1286,46 +1221,6 @@ components:
           nullable: true
         abilities_json:
           type: object
-          nullable: true
-    TaskTypeVersion:
-      type: object
-      properties:
-        id:
-          type: integer
-        task_type_id:
-          type: integer
-        semver:
-          type: string
-        schema_json:
-          type: object
-          nullable: true
-          description: "Form schema. Text fields support string or {en,el} objects."
-        statuses:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              type: string
-          nullable: true
-        status_flow_json:
-          type: array
-          items:
-            type: array
-            items:
-              type: string
-          nullable: true
-        abilities_json:
-          type: object
-          nullable: true
-        created_by:
-          type: integer
-        published_at:
-          type: string
-          format: date-time
-          nullable: true
-        deprecated_at:
-          type: string
-          format: date-time
           nullable: true
     TaskStatus:
       type: object

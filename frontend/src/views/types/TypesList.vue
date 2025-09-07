@@ -19,8 +19,6 @@
         @edit="edit"
         @delete="remove"
         @copy="copy"
-        @publish="publish"
-        @unpublish="unpublish"
       >
         <template #header-actions>
           <button
@@ -65,7 +63,6 @@
   import { useAuthStore, can } from '@/stores/auth';
   import { useTenantStore } from '@/stores/tenant';
   import { useTaskTypesStore } from '@/stores/taskTypes';
-  import { useTaskTypeVersionsStore } from '@/stores/taskTypeVersions';
   import TemplatesDrawer from '@/components/types/TemplatesDrawer.vue';
 
 const router = useRouter();
@@ -74,7 +71,6 @@ const scope = ref<'tenant' | 'global' | 'all'>("tenant");
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
 const typesStore = useTaskTypesStore();
-const versionsStore = useTaskTypeVersionsStore();
 const templatesOpen = ref(false);
 const loading = ref(true);
 
@@ -127,7 +123,7 @@ async function remove(id: number) {
     }
   }
 
-  async function copy(id: number) {
+async function copy(id: number) {
   let tenantId: string | number | undefined;
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
@@ -146,38 +142,9 @@ async function remove(id: number) {
   }
     await typesStore.copyToTenant(id, tenantId);
     reload();
-  }
-
+}
 function onImported() {
   templatesOpen.value = false;
-  reload();
-}
-
-async function publish(id: number) {
-  const versions = await versionsStore.list(id);
-  const versionId = versions[0]?.id;
-  if (!versionId) return;
-  const res = await Swal.fire({
-    title: 'Publish type?',
-    icon: 'warning',
-    showCancelButton: true,
-  });
-  if (!res.isConfirmed) return;
-  await versionsStore.publish(versionId);
-  reload();
-}
-
-async function unpublish(id: number) {
-  const type = all.value.find((t) => t.id === id);
-  const versionId = type?.current_version?.id;
-  if (!versionId) return;
-  const res = await Swal.fire({
-    title: 'Unpublish type?',
-    icon: 'warning',
-    showCancelButton: true,
-  });
-  if (!res.isConfirmed) return;
-  await versionsStore.unpublish(versionId);
   reload();
 }
 </script>

@@ -7,14 +7,12 @@ use App\Models\Role;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\TaskType;
-use App\Models\TaskTypeVersion;
 use App\Models\Team;
 use App\Policies\ManualPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\TaskPolicy;
 use App\Policies\TaskStatusPolicy;
 use App\Policies\TaskTypePolicy;
-use App\Policies\TaskTypeVersionPolicy;
 use App\Policies\TeamPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -24,7 +22,6 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Task::class => TaskPolicy::class,
         TaskType::class => TaskTypePolicy::class,
-        TaskTypeVersion::class => TaskTypeVersionPolicy::class,
         TaskStatus::class => TaskStatusPolicy::class,
         Manual::class => ManualPolicy::class,
         Role::class => RolePolicy::class,
