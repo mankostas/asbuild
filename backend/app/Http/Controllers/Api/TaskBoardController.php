@@ -38,12 +38,10 @@ class TaskBoardController extends Controller
         $tenantId = $request->user()->tenant_id;
 
         $types = TaskType::where('tenant_id', $tenantId)
-            ->whereNotNull('current_version_id')
-            ->with('currentVersion')
             ->get();
 
         $slugs = $types->flatMap(function (TaskType $type) {
-            $statuses = $type->currentVersion?->statuses ?? [];
+            $statuses = $type->statuses ?? [];
             if (array_is_list($statuses)) {
                 return collect($statuses)->pluck('slug');
             }

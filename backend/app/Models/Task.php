@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Models\File;
-use App\Models\TaskTypeVersion;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -30,7 +29,6 @@ class Task extends Model
         'kau_notes',
         'form_data',
         'task_type_id',
-        'task_type_version_id',
         'assigned_user_id',
         'title',
         'description',
@@ -75,11 +73,6 @@ class Task extends Model
     public function type(): BelongsTo
     {
         return $this->belongsTo(TaskType::class, 'task_type_id');
-    }
-
-    public function typeVersion(): BelongsTo
-    {
-        return $this->belongsTo(TaskTypeVersion::class, 'task_type_version_id');
     }
 
     public function status(): BelongsTo
