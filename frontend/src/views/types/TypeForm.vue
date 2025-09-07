@@ -896,7 +896,20 @@ function loadVersion(v: any) {
   } catch {
     abilities = {};
   }
-  permissions.value = { ...abilities };
+  // ensure all ability flags are boolean values
+  permissions.value = Object.fromEntries(
+    Object.entries(abilities).map(([role, perms]) => [
+      role,
+      {
+        read: !!(perms as any).read,
+        edit: !!(perms as any).edit,
+        delete: !!(perms as any).delete,
+        export: !!(perms as any).export,
+        assign: !!(perms as any).assign,
+        transition: !!(perms as any).transition,
+      } as Permission,
+    ]),
+  );
   tenantRoles.value.forEach((r) => {
     if (!permissions.value[r.slug]) {
       permissions.value[r.slug] = {
