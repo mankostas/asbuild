@@ -111,6 +111,7 @@ interface Task {
   due_at?: string | null;
   assignee?: { id: number; name: string } | null;
   status_slug: string;
+  previous_status_slug?: string | null;
   type?: {
     statuses?: Record<string, string[]>;
     status_flow_json?: [string, string][];
@@ -135,13 +136,19 @@ const notify = useNotify();
 const auth = useAuthStore();
 
 function allowedTransitions(from: string): string[] {
+  if (auth.can('tasks.manage')) {
+    return props.columns.map((c) => c.status.slug).filter((s) => s !== from);
+  }
   const direct = props.task.type?.statuses?.[from];
-  if (direct && direct.length) return direct;
-  return (
-    props.task.type?.status_flow_json
-      ?.filter(([f]) => f === from)
-      .map(([, to]) => to) ?? []
-  );
+  let allowed = direct && direct.length
+    ? direct
+    : props.task.type?.status_flow_json
+        ?.filter(([f]) => f === from)
+        .map(([, to]) => to) ?? [];
+  if (props.task.previous_status_slug && props.task.previous_status_slug !== from) {
+    allowed = [...allowed, props.task.previous_status_slug];
+  }
+  return Array.from(new Set(allowed));
 }
 
 const statusOptions = computed(() => {

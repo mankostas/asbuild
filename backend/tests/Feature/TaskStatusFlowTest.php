@@ -28,7 +28,7 @@ class TaskStatusFlowTest extends TestCase
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => 1,
-            'abilities' => ['tasks.status.update', 'tasks.manage', 'tasks.update'],
+            'abilities' => ['tasks.status.update', 'tasks.update'],
             'level' => 1,
         ]);
         $user = User::create([
@@ -62,6 +62,7 @@ class TaskStatusFlowTest extends TestCase
             'user_id' => $user->id,
             'task_type_id' => $type->id,
             'status' => 'draft',
+            'status_slug' => 'draft',
             'assigned_user_id' => $user->id,
         ]);
     }
