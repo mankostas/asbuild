@@ -394,9 +394,10 @@ const submitForm = handleSubmit(async () => {
           : undefined;
       const res = await api.post('/tasks', payload, { headers });
       notify.success('Task created');
+      const taskId = res.data?.data?.id ?? res.data?.id;
       router.push({
         name: 'tasks.details',
-        params: { id: res.data.id },
+        params: { id: taskId },
       });
     }
   } catch (e: any) {
