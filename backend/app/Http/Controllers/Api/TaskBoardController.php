@@ -154,10 +154,12 @@ class TaskBoardController extends Controller
             ->findOrFail($data['task_id']);
         $status = TaskStatus::where('slug', $data['status_slug'])->firstOrFail();
 
-        if (! $flow->canTransition($task->status_slug, $status->slug, $task->type)) {
-            return response()->json(['message' => 'invalid_transition'], 422);
+        if ($task->status_slug !== $status->slug) {
+            if (! $flow->canTransition($task->status_slug, $status->slug, $task->type)) {
+                return response()->json(['message' => 'invalid_transition'], 422);
+            }
+            $flow->checkConstraints($task, $status->slug);
         }
-        $flow->checkConstraints($task, $status->slug);
 
         $positions->move($task, $status->slug, $data['index']);
 
