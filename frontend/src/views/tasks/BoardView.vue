@@ -52,7 +52,7 @@
             class="px-2 pt-4 flex flex-col gap-2 min-h-[100px]"
             :data-status="col.status.slug"
             :move="onDragMove"
-            @end="(e) => onDrop(e, col)"
+            @end="onDrop"
             @start="onDragStart"
           >
             <template #item="{ element }">
@@ -153,7 +153,10 @@ interface Task {
   due_at?: string | null;
   sla_chip?: string | null;
   assignee?: { id: number; name: string };
-  type?: { statuses?: Record<string, string[]> };
+  type?: {
+    statuses?: Record<string, string[]>;
+    status_flow_json?: [string, string][];
+  };
 }
 
 interface Column {
@@ -164,6 +167,7 @@ interface Column {
 
 const columns = ref<Column[]>([]);
 const dragSnapshots = new Map<number, Column[][]>();
+const invalidMoveTasks = new Set<number>();
 
 const defaultFilters: BoardPrefs['filters'] = {
   statusIds: [],
@@ -281,30 +285,31 @@ async function performMove(task: Task, statusSlug: string, index: number) {
   const toCol = columns.value.find((c) => c.status.slug === statusSlug);
   toCol?.tasks.splice(index, 0, task);
   try {
-    await api.patch('/task-board/move', {
+    const { data } = await api.patch('/task-board/move', {
       task_id: task.id,
       status_slug: statusSlug,
       index,
     });
-    task.status_slug = statusSlug;
+    Object.assign(task, data.data);
   } catch {
     columns.value = snapshot;
     notify.error(t('board.errorMove'));
   }
 }
 
-async function onDrop(evt: any, column: Column) {
+async function onDrop(evt: any) {
   const task: Task = evt.item.__draggable_context.element;
   const snapshots = dragSnapshots.get(task.id);
   const snapshot = snapshots?.pop();
   if (!snapshots?.length) dragSnapshots.delete(task.id);
   try {
-    await api.patch('/task-board/move', {
+    const statusSlug = evt.to?.dataset.status;
+    const { data } = await api.patch('/task-board/move', {
       task_id: task.id,
-      status_slug: column.status.slug,
+      status_slug: statusSlug,
       index: evt.newIndex,
     });
-    task.status_slug = column.status.slug;
+    Object.assign(task, data.data);
   } catch {
     if (snapshot) {
       columns.value = snapshot;
@@ -315,18 +320,32 @@ async function onDrop(evt: any, column: Column) {
 
 function onDragStart(evt: any) {
   const task: Task = evt.item.__draggable_context.element;
+  invalidMoveTasks.delete(task.id);
   const snapshots = dragSnapshots.get(task.id) ?? [];
   snapshots.push(columns.value.map((c) => ({ ...c, tasks: [...c.tasks] })));
   dragSnapshots.set(task.id, snapshots);
+}
+
+function allowedTransitions(task: Task, from: string): string[] {
+  const direct = task.type?.statuses?.[from];
+  if (direct && direct.length) return direct;
+  return (
+    task.type?.status_flow_json
+      ?.filter(([f]) => f === from)
+      .map(([, to]) => to) ?? []
+  );
 }
 
 function onDragMove(evt: any) {
   const task: Task = evt.draggedContext.element;
   const toStatus = evt.to?.dataset.status;
   if (!toStatus || toStatus === task.status_slug) return true;
-  const allowed = task.type?.statuses?.[task.status_slug] ?? [];
+  const allowed = allowedTransitions(task, task.status_slug);
   if (!allowed.includes(toStatus)) {
-    notify.error(t('board.errorMove'));
+    if (!invalidMoveTasks.has(task.id)) {
+      notify.error(t('board.errorMove'));
+      invalidMoveTasks.add(task.id);
+    }
     return false;
   }
   return true;

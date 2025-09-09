@@ -111,7 +111,10 @@ interface Task {
   due_at?: string | null;
   assignee?: { id: number; name: string } | null;
   status_slug: string;
-  type?: { statuses?: Record<string, string[]> };
+  type?: {
+    statuses?: Record<string, string[]>;
+    status_flow_json?: [string, string][];
+  };
 }
 
 interface Column {
@@ -131,12 +134,22 @@ const { t } = useI18n();
 const notify = useNotify();
 const auth = useAuthStore();
 
+function allowedTransitions(from: string): string[] {
+  const direct = props.task.type?.statuses?.[from];
+  if (direct && direct.length) return direct;
+  return (
+    props.task.type?.status_flow_json
+      ?.filter(([f]) => f === from)
+      .map(([, to]) => to) ?? []
+  );
+}
+
 const statusOptions = computed(() => {
   const map: Record<string, string> = Object.fromEntries(
     props.columns.map((c) => [c.status.slug, c.status.name]),
   );
   const from = props.task.status_slug;
-  const allowed = props.task.type?.statuses?.[from] ?? [];
+  const allowed = allowedTransitions(from);
   return allowed
     .map((slug: string) => ({ slug, name: map[slug] }))
     .filter((s) => !!s.name);
@@ -150,7 +163,7 @@ const canMoveLeft = computed(() => {
   const targetIndex = colIndex - 1;
   if (targetIndex < 0) return false;
   const targetSlug = props.columns[targetIndex].status.slug;
-  const allowed = props.task.type?.statuses?.[from] ?? [];
+  const allowed = allowedTransitions(from);
   return allowed.includes(targetSlug);
 });
 
@@ -162,7 +175,7 @@ const canMoveRight = computed(() => {
   const targetIndex = colIndex + 1;
   if (targetIndex >= props.columns.length) return false;
   const targetSlug = props.columns[targetIndex].status.slug;
-  const allowed = props.task.type?.statuses?.[from] ?? [];
+  const allowed = allowedTransitions(from);
   return allowed.includes(targetSlug);
 });
 
@@ -223,7 +236,7 @@ function move(dir: number) {
   const targetIndex = colIndex + dir;
   if (targetIndex < 0 || targetIndex >= props.columns.length) return;
   const targetSlug = props.columns[targetIndex].status.slug;
-  const allowed = props.task.type?.statuses?.[props.task.status_slug] ?? [];
+  const allowed = allowedTransitions(props.task.status_slug);
   if (!allowed.includes(targetSlug)) {
     notify.error(t('board.errorMove'));
     return;
