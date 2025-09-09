@@ -1,10 +1,10 @@
 <template>
   <div
- :class="
+    :class="
       cn('card rounded-md bg-white dark:bg-slate-800', props.class, {
         ' border border-gray-5002 dark:border-slate-700':
-          this.$store.themeSettingsStore.skin === 'bordered',
-        'shadow-base': this.$store.themeSettingsStore.skin !== 'bordered',
+          themeSettingsStore.skin === 'bordered',
+        'shadow-base': themeSettingsStore.skin !== 'bordered',
       })
     "
     v-if="!overlay"
@@ -83,6 +83,8 @@
 </template>
 <script setup>
 import { cn } from "@/lib/utils";
+import { useThemeSettingsStore } from "@/store/themeSettings";
+
 const props = defineProps({
   class: {
     type: String,
@@ -141,6 +143,8 @@ const props = defineProps({
     default: "",
   },
 });
+
+const themeSettingsStore = useThemeSettingsStore();
 </script>
 <style lang="scss" scoped>
 .card-title {
