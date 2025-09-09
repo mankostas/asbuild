@@ -154,6 +154,12 @@ interface Task {
   due_at?: string | null;
   sla_chip?: string | null;
   assignee?: { id: number; name: string };
+  counts?: {
+    comments?: number;
+    attachments?: number;
+    watchers?: number;
+    subtasks?: number;
+  };
   type?: {
     statuses?: Record<string, string[]>;
     status_flow_json?: [string, string][];
