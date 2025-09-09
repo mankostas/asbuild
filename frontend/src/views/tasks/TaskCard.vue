@@ -106,6 +106,39 @@
         </span>
       </div>
     </div>
+    <div
+      v-if="hasCounts"
+      class="flex flex-wrap gap-4 mt-6 text-slate-500 dark:text-slate-400 text-xs"
+    >
+      <div
+        v-if="task.counts?.comments"
+        class="flex items-center gap-1 rtl:space-x-reverse"
+      >
+        <Icon icon="heroicons-outline:chat-alt-2" class="w-4 h-4" />
+        <span>{{ task.counts.comments }}</span>
+      </div>
+      <div
+        v-if="task.counts?.attachments"
+        class="flex items-center gap-1 rtl:space-x-reverse"
+      >
+        <Icon icon="heroicons-outline:paper-clip" class="w-4 h-4" />
+        <span>{{ task.counts.attachments }}</span>
+      </div>
+      <div
+        v-if="task.counts?.watchers"
+        class="flex items-center gap-1 rtl:space-x-reverse"
+      >
+        <Icon icon="heroicons-outline:eye" class="w-4 h-4" />
+        <span>{{ task.counts.watchers }}</span>
+      </div>
+      <div
+        v-if="task.counts?.subtasks"
+        class="flex items-center gap-1 rtl:space-x-reverse"
+      >
+        <Icon icon="heroicons-outline:collection" class="w-4 h-4" />
+        <span>{{ task.counts.subtasks }}</span>
+      </div>
+    </div>
   </Card>
 </template>
 
@@ -130,6 +163,12 @@ interface Task {
   sla_chip?: 'ok' | 'dueSoon' | 'breached' | null;
   status_slug: string;
   previous_status_slug?: string | null;
+  counts?: {
+    comments?: number;
+    attachments?: number;
+    watchers?: number;
+    subtasks?: number;
+  };
   type?: {
     statuses?: Record<string, string[]>;
     status_flow_json?: [string, string][];
@@ -228,6 +267,11 @@ const daysLeft = computed(() => {
   const due = new Date(props.task.due_at).getTime();
   const now = Date.now();
   return Math.max(0, Math.ceil((due - now) / (1000 * 60 * 60 * 24)));
+});
+
+const hasCounts = computed(() => {
+  const c = props.task.counts;
+  return !!c && (c.comments || c.attachments || c.watchers || c.subtasks);
 });
 
 function formatDate(d: string) {

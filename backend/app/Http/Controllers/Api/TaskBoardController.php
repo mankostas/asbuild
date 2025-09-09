@@ -72,7 +72,9 @@ class TaskBoardController extends Controller
             $filters->apply($query, $request);
 
             $total = (clone $query)->count();
-            $tasks = $query->with('type')
+            $tasks = $query
+                ->with(['type', 'assignee'])
+                ->withCount(['comments', 'attachments', 'watchers', 'subtasks'])
                 ->orderBy('board_position')
                 ->limit($limit + 1)
                 ->get();
@@ -127,7 +129,9 @@ class TaskBoardController extends Controller
         $filters->apply($query, $request);
 
         $total = (clone $query)->count();
-        $tasks = $query->with('type')
+        $tasks = $query
+            ->with(['type', 'assignee'])
+            ->withCount(['comments', 'attachments', 'watchers', 'subtasks'])
             ->orderBy('board_position')
             ->offset($offset)
             ->limit($limit + 1)
