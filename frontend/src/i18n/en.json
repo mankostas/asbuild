@@ -226,6 +226,8 @@
     "addComment": "Add comment",
     "moveLeft": "Move left",
     "moveRight": "Move right",
+    "assignedTo": "Assigned to",
+    "daysLeft": "days left",
     "addCommentPrompt": "Enter comment",
     "errorMove": "Cannot move task",
     "search": "Search",
