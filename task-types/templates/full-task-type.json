@@ -24,6 +24,7 @@
             "key": "priority",
             "label": "Priority",
             "type": "select",
+            "enum": ["low", "medium", "high"],
             "options": [
               { "value": "low", "label": "Low" },
               { "value": "medium", "label": "Medium" },
