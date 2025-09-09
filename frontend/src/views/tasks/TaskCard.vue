@@ -1,96 +1,115 @@
 <template>
-  <div
-    :class="[
-      'bg-white rounded shadow flex flex-col gap-1',
-      density === 'compact' ? 'p-1 text-sm' : 'p-2',
-    ]"
-  >
-    <div class="font-medium">{{ task.title }}</div>
-    <div class="text-xs flex flex-wrap gap-1 items-center">
-      <span v-if="task.assignee" class="flex items-center gap-1">
-        <span
-          class="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[10px]"
-          >{{ initials }}</span
-        >
-        <span>{{ task.assignee.name }}</span>
-      </span>
-      <Badge
-        v-if="task.priority"
-        :label="t(`tasks.priority.${priorityLabel}`)"
-        :badgeClass="priorityBadgeClass"
-      />
-      <Badge v-if="slaText" :label="slaText" :badgeClass="slaBadgeClass" />
-      <span v-if="task.due_at" class="px-1">{{ formatDate(task.due_at) }}</span>
-    </div>
-    <div class="flex flex-wrap gap-1 mt-1">
-      <Button
-        v-if="auth.can('tasks.assign')"
-        btnClass="btn-xs btn-light"
-        :aria-label="t('board.assignMe')"
-        @click="assignMe"
-        @keyup.enter="assignMe"
-        @keyup.space.prevent="assignMe"
-        >{{ t('board.assignMe') }}</Button
-      >
-      <Dropdown
-        v-if="auth.can('tasks.status.update')"
-        :label="t('board.changeStatus')"
-        labelClass="btn btn-light btn-xs"
-      >
-        <template #menus>
-          <MenuItem v-for="s in statusOptions" :key="s.slug" #default="{ active }">
-            <button
-              class="block w-full text-left px-4 py-2 text-sm"
-              :class="active ? 'bg-slate-100' : ''"
-              @click="changeStatus(s.slug)"
+  <Card class="cursor-move">
+    <header class="flex justify-between items-center">
+      <div class="flex space-x-3 items-center rtl:space-x-reverse">
+        <div class="flex-none">
+          <div
+            class="h-10 w-10 rounded-md text-lg bg-slate-100 text-slate-900 dark:bg-slate-600 dark:text-slate-200 flex flex-col items-center justify-center font-normal capitalize"
+          >
+            {{ titleInitials }}
+          </div>
+        </div>
+        <div class="flex-1 font-medium text-base leading-6">
+          <div class="dark:text-slate-200 text-slate-900 max-w-[160px] truncate">
+            {{ task.title }}
+          </div>
+        </div>
+      </div>
+      <div>
+        <Dropdown classMenuItems="w-[180px]">
+          <span
+            class="text-lg inline-flex flex-col items-center justify-center h-8 w-8 rounded-full bg-gray-500/10 dark:bg-slate-900 dark:text-slate-400"
+            ><Icon icon="heroicons-outline:dots-vertical" /></span
+          >
+          <template #menus>
+            <MenuItem v-if="auth.can('tasks.assign')" #default="{ active }">
+              <button :class="menuClass(active)" @click="assignMe" @keyup.enter="assignMe" @keyup.space.prevent="assignMe">
+                <Icon icon="heroicons-outline:user-add" />
+                <span>{{ t('board.assignMe') }}</span>
+              </button>
+            </MenuItem>
+            <MenuItem
+              v-for="s in statusOptions"
+              :key="s.slug"
+              #default="{ active }"
             >
-              {{ s.name }}
-            </button>
-          </MenuItem>
-        </template>
-      </Dropdown>
-      <Button
-        v-if="auth.can('tasks.update')"
-        btnClass="btn-xs btn-light"
-        icon="heroicons-outline:chevron-left"
-        iconClass="text-sm"
-        :aria-label="t('board.moveLeft')"
-        @click="() => move(-1)"
-        @keyup.enter="() => move(-1)"
-        @keyup.space.prevent="() => move(-1)"
-      />
-      <Button
-        v-if="auth.can('tasks.update')"
-        btnClass="btn-xs btn-light"
-        icon="heroicons-outline:chevron-right"
-        iconClass="text-sm"
-        :aria-label="t('board.moveRight')"
-        @click="() => move(1)"
-        @keyup.enter="() => move(1)"
-        @keyup.space.prevent="() => move(1)"
-      />
+              <button :class="menuClass(active)" @click="changeStatus(s.slug)" @keyup.enter="changeStatus(s.slug)" @keyup.space.prevent="changeStatus(s.slug)">
+                <Icon icon="heroicons-outline:arrow-right" />
+                <span>{{ s.name }}</span>
+              </button>
+            </MenuItem>
+            <MenuItem v-if="auth.can('tasks.update')" #default="{ active }">
+              <button :class="menuClass(active)" @click="() => move(-1)" @keyup.enter="() => move(-1)" @keyup.space.prevent="() => move(-1)">
+                <Icon icon="heroicons-outline:chevron-left" />
+                <span>{{ t('board.moveLeft') }}</span>
+              </button>
+            </MenuItem>
+            <MenuItem v-if="auth.can('tasks.update')" #default="{ active }">
+              <button :class="menuClass(active)" @click="() => move(1)" @keyup.enter="() => move(1)" @keyup.space.prevent="() => move(1)">
+                <Icon icon="heroicons-outline:chevron-right" />
+                <span>{{ t('board.moveRight') }}</span>
+              </button>
+            </MenuItem>
+          </template>
+        </Dropdown>
+      </div>
+    </header>
+    <div
+      v-if="task.description"
+      class="text-slate-600 dark:text-slate-400 text-sm pt-4 pb-4"
+    >
+      {{ task.description }}
     </div>
-  </div>
+    <div v-if="task.due_at" class="flex space-x-4 rtl:space-x-reverse">
+      <div>
+        <span class="block date-label">{{ t('tasks.due') }}</span>
+        <span class="block date-text">{{ formatDate(task.due_at) }}</span>
+      </div>
+    </div>
+    <div v-if="task.assignee || task.due_at" class="grid grid-cols-2 gap-4 mt-6">
+      <div v-if="task.assignee">
+        <div class="text-slate-400 dark:text-slate-400 text-sm font-normal mb-3">
+          {{ t('board.assignedTo') }}
+        </div>
+        <div class="flex justify-start -space-x-1.5">
+          <div class="h-6 w-6 rounded-full ring-1 ring-slate-100">
+            <span
+              class="w-full h-full rounded-full bg-slate-200 flex flex-col items-center justify-center text-xs"
+              >{{ assigneeInitials }}</span
+            >
+          </div>
+        </div>
+      </div>
+      <div v-if="task.due_at" class="ltr:text-right rtl:text-left">
+        <span
+          class="inline-flex items-center space-x-1 bg-danger-500 bg-opacity-[0.16] text-danger-500 text-xs font-normal px-2 py-1 rounded-full rtl:space-x-reverse"
+        >
+          <span><Icon icon="heroicons-outline:clock" /></span>
+          <span>{{ daysLeft }}</span>
+          <span>{{ t('board.daysLeft') }}</span>
+        </span>
+      </div>
+    </div>
+  </Card>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useNotify } from '@/plugins/notify';
 import { useAuthStore } from '@/stores/auth';
-import Button from '@/components/ui/Button/index.vue';
+import Card from '@/components/ui/Card/index.vue';
 import Dropdown from '@/components/ui/Dropdown/index.vue';
-import Badge from '@/components/ui/Badge/index.vue';
+import Icon from '@/components/ui/Icon';
 import { MenuItem } from '@headlessui/vue';
 
 interface Task {
   id: number;
   title: string;
-  priority?: number | null;
+  description?: string | null;
   due_at?: string | null;
-  sla_chip?: string | null;
-  assignee?: { id: number; name: string };
+  assignee?: { id: number; name: string } | null;
 }
 
 interface Column {
@@ -112,58 +131,27 @@ const auth = useAuthStore();
 
 const statusOptions = computed(() => props.columns.map((c) => c.status));
 
-const priorityLabel = computed(() => {
-  switch (props.task.priority) {
-    case 1:
-      return 'low';
-    case 2:
-      return 'normal';
-    case 3:
-      return 'high';
-    case 4:
-      return 'urgent';
-    default:
-      return 'normal';
-  }
-});
-
-const priorityBadgeClass = computed(() => {
-  switch (props.task.priority) {
-    case 3:
-      return 'bg-orange-100 text-orange-800';
-    case 4:
-      return 'bg-red-100 text-red-800';
-    default:
-      return 'bg-slate-100 text-slate-800';
-  }
-});
-
-const initials = computed(() =>
-  props.task.assignee?.name
+const titleInitials = computed(() =>
+  props.task.title
     .split(' ')
     .map((n) => n[0])
     .join('')
-    .slice(0, 2) || ''
+    .slice(0, 2),
 );
 
-const slaText = computed(() => {
-  if (!props.task.due_at) return '';
+const assigneeInitials = computed(() =>
+  props.task.assignee?.name
+    ?.split(' ')
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2) || '',
+);
+
+const daysLeft = computed(() => {
+  if (!props.task.due_at) return 0;
   const due = new Date(props.task.due_at).getTime();
   const now = Date.now();
-  if (due < now) return 'Breached';
-  if (due - now < 48 * 3600 * 1000) return 'Due soon';
-  return 'SLA OK';
-});
-
-const slaBadgeClass = computed(() => {
-  switch (slaText.value) {
-    case 'Breached':
-      return 'bg-red-100 text-red-800';
-    case 'Due soon':
-      return 'bg-yellow-100 text-yellow-800';
-    default:
-      return 'bg-green-100 text-green-800';
-  }
+  return Math.max(0, Math.ceil((due - now) / (1000 * 60 * 60 * 24)));
 });
 
 function formatDate(d: string) {
@@ -172,8 +160,13 @@ function formatDate(d: string) {
 
 async function assignMe() {
   try {
-    await api.patch(`/tasks/${props.task.id}`, { assigned_user_id: auth.user.id });
-    emit('assigned', { ...props.task, assignee: { id: auth.user.id, name: auth.user.name } });
+    await api.patch(`/tasks/${props.task.id}`, {
+      assigned_user_id: auth.user.id,
+    });
+    emit('assigned', {
+      ...props.task,
+      assignee: { id: auth.user.id, name: auth.user.name },
+    });
   } catch {
     notify.error(t('tasks.messages.error'));
   }
@@ -195,4 +188,23 @@ function move(dir: number) {
   const index = props.columns[targetIndex].tasks.length;
   props.onMove(props.task, targetSlug, index);
 }
+
+function menuClass(active: boolean) {
+  return (
+    (active
+      ? 'bg-slate-900 dark:bg-slate-600 dark:bg-opacity-70 text-white'
+      : '') +
+    ' w-full border-b border-b-gray-500 dark:border-b-slate-700 dark:text-slate-200 border-opacity-10 px-4 py-2 text-sm cursor-pointer flex space-x-2 items-center rtl:space-x-reverse'
+  );
+}
 </script>
+
+<style scoped>
+.date-label {
+  @apply text-xs text-slate-400 dark:text-slate-400 mb-1;
+}
+.date-text {
+  @apply text-xs text-slate-600 dark:text-slate-300 font-medium;
+}
+</style>
+
