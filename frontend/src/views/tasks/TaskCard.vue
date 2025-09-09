@@ -131,13 +131,16 @@ const auth = useAuthStore();
 
 const statusOptions = computed(() => props.columns.map((c) => c.status));
 
-const titleInitials = computed(() =>
-  props.task.title
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2),
-);
+const titleInitials = computed(() => {
+  const title = props.task.title;
+  return title
+    ? title
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .slice(0, 2)
+    : '';
+});
 
 const assigneeInitials = computed(() =>
   props.task.assignee?.name
