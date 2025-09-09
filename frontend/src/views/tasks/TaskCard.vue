@@ -38,13 +38,13 @@
                 <span>{{ s.name }}</span>
               </button>
             </MenuItem>
-            <MenuItem v-if="auth.can('tasks.update')" #default="{ active }">
+            <MenuItem v-if="auth.can('tasks.update') && canMoveLeft" #default="{ active }">
               <button :class="menuClass(active)" @click="() => move(-1)" @keyup.enter="() => move(-1)" @keyup.space.prevent="() => move(-1)">
                 <Icon icon="heroicons-outline:chevron-left" />
                 <span>{{ t('board.moveLeft') }}</span>
               </button>
             </MenuItem>
-            <MenuItem v-if="auth.can('tasks.update')" #default="{ active }">
+            <MenuItem v-if="auth.can('tasks.update') && canMoveRight" #default="{ active }">
               <button :class="menuClass(active)" @click="() => move(1)" @keyup.enter="() => move(1)" @keyup.space.prevent="() => move(1)">
                 <Icon icon="heroicons-outline:chevron-right" />
                 <span>{{ t('board.moveRight') }}</span>
@@ -110,6 +110,8 @@ interface Task {
   description?: string | null;
   due_at?: string | null;
   assignee?: { id: number; name: string } | null;
+  status_slug: string;
+  type?: { statuses?: Record<string, string[]> };
 }
 
 interface Column {
@@ -129,7 +131,40 @@ const { t } = useI18n();
 const notify = useNotify();
 const auth = useAuthStore();
 
-const statusOptions = computed(() => props.columns.map((c) => c.status));
+const statusOptions = computed(() => {
+  const map: Record<string, string> = Object.fromEntries(
+    props.columns.map((c) => [c.status.slug, c.status.name]),
+  );
+  const from = props.task.status_slug;
+  const allowed = props.task.type?.statuses?.[from] ?? [];
+  return allowed
+    .map((slug: string) => ({ slug, name: map[slug] }))
+    .filter((s) => !!s.name);
+});
+
+const canMoveLeft = computed(() => {
+  const from = props.task.status_slug;
+  const colIndex = props.columns.findIndex((c) =>
+    c.tasks.some((t) => t.id === props.task.id),
+  );
+  const targetIndex = colIndex - 1;
+  if (targetIndex < 0) return false;
+  const targetSlug = props.columns[targetIndex].status.slug;
+  const allowed = props.task.type?.statuses?.[from] ?? [];
+  return allowed.includes(targetSlug);
+});
+
+const canMoveRight = computed(() => {
+  const from = props.task.status_slug;
+  const colIndex = props.columns.findIndex((c) =>
+    c.tasks.some((t) => t.id === props.task.id),
+  );
+  const targetIndex = colIndex + 1;
+  if (targetIndex >= props.columns.length) return false;
+  const targetSlug = props.columns[targetIndex].status.slug;
+  const allowed = props.task.type?.statuses?.[from] ?? [];
+  return allowed.includes(targetSlug);
+});
 
 const titleInitials = computed(() => {
   const title = props.task.title;
@@ -188,6 +223,11 @@ function move(dir: number) {
   const targetIndex = colIndex + dir;
   if (targetIndex < 0 || targetIndex >= props.columns.length) return;
   const targetSlug = props.columns[targetIndex].status.slug;
+  const allowed = props.task.type?.statuses?.[props.task.status_slug] ?? [];
+  if (!allowed.includes(targetSlug)) {
+    notify.error(t('board.errorMove'));
+    return;
+  }
   const index = props.columns[targetIndex].tasks.length;
   props.onMove(props.task, targetSlug, index);
 }
