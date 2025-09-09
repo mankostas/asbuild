@@ -21,6 +21,7 @@
           :label="t('types.workflow.from')"
           class="w-40"
           classLabel="sr-only"
+          :reduce="(o: any) => o.value"
           :placeholder="t('actions.select')"
         />
         <span aria-hidden="true">→</span>
@@ -31,6 +32,7 @@
           :label="t('types.workflow.to')"
           class="w-40"
           classLabel="sr-only"
+          :reduce="(o: any) => o.value"
           :placeholder="t('actions.select')"
         />
         <Button

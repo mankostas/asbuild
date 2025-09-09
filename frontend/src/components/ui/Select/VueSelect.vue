@@ -22,6 +22,7 @@
             :disabled="disabled"
             :multiple="multiple"
             :options="options"
+            :reduce="reduce"
             :aria-labelledby="label ? `${inputId}-label` : null"
             @update:model-value="$emit('update:modelValue', $event)"
             @input="$emit('input', $event)"
@@ -108,6 +109,7 @@ export default {
     msgTooltip: { type: Boolean, default: false },
     multiple: { type: Boolean, default: false },
     options: { type: Array, default: () => [] },
+    reduce: { type: Function, default: undefined },
   },
   emits: ["update:modelValue", "input", "change"],
   data() {
