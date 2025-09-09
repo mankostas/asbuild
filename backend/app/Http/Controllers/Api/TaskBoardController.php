@@ -162,6 +162,11 @@ class TaskBoardController extends Controller
             if (! $flow->canTransition($task->status_slug, $status->slug, $task->type)) {
                 return response()->json(['message' => 'invalid_transition'], 422);
             }
+
+            if ($status->slug === 'assigned' && empty($task->assigned_user_id)) {
+                $task->assigned_user_id = $request->user()->id;
+            }
+
             $flow->checkConstraints($task, $status->slug);
         }
 
