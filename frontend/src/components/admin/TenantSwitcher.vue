@@ -20,6 +20,9 @@ import Select from '@dc/components/Select';
 const { t } = useI18n();
 const tenantStore = useTenantStore();
 const authStore = useAuthStore();
+const props = defineProps({
+  impersonate: { type: Boolean, default: true },
+});
 const selected = ref<string | number | null>(tenantStore.currentTenantId);
 const options = computed(() =>
   tenantStore.tenants.map((t) => ({ value: String(t.id), label: t.name })),
@@ -34,8 +37,12 @@ onMounted(async () => {
 watch(selected, async (val) => {
   const tenant = tenantStore.tenants.find((t) => String(t.id) === String(val));
   if (tenant && String(tenant.id) !== tenantStore.currentTenantId) {
-    await authStore.impersonate(tenant.id, tenant.name);
-    window.location.reload();
+    if (props.impersonate) {
+      await authStore.impersonate(tenant.id, tenant.name);
+      window.location.reload();
+    } else {
+      tenantStore.setTenant(tenant.id);
+    }
   }
 });
 </script>

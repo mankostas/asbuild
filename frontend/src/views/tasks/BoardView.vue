@@ -2,7 +2,7 @@
   <div class="p-4">
     <div class="flex items-center justify-between mb-4">
       <h1 class="text-xl font-semibold">{{ t('routes.taskBoard') }}</h1>
-      <TenantSwitcher v-if="auth.isSuperAdmin" />
+      <TenantSwitcher v-if="auth.isSuperAdmin" :impersonate="false" />
     </div>
     <BoardFilters v-model="prefs.filters" />
     <QuickFilterChips v-model="prefs.filters" class="mt-4" />
