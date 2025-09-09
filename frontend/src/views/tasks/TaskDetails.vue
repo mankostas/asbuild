@@ -7,7 +7,7 @@
           class="px-2 py-1 rounded-full text-xs font-semibold"
           :class="statusClasses[task.status]"
         >
-          {{ task.status.replace(/_/g, ' ') }}
+          {{ statusLabel }}
         </span>
         <Button
           class="ml-auto"
@@ -138,6 +138,11 @@ const tabs = computed(() => [
   { id: 'comments', label: t('tasks.tabs.comments') },
 ]);
 const activeTab = ref('details');
+
+const statusLabel = computed(() => {
+  const s = task.value?.status;
+  return s ? s.replace(/_/g, ' ') : '—';
+});
 
 function format(date?: string) {
   return date ? formatDisplay(date) : '';
