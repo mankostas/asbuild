@@ -167,20 +167,27 @@ class TaskController extends Controller
         $next = $data['status'];
         $type = $task->type;
 
-        if (! $this->statusFlow->canTransition($task->status, $next, $type)) {
-            return response()->json(['message' => 'invalid_transition'], 422);
-        }
+        if ($task->status !== $next) {
+            $canManage = $request->user()->can('tasks.manage');
+            if (! $canManage && $next !== $task->previous_status_slug && ! $this->statusFlow->canTransition($task->status, $next, $type)) {
+                return response()->json(['message' => 'invalid_transition'], 422);
+            }
+            if (! $canManage) {
+                $this->statusFlow->checkConstraints($task, $next);
+            }
 
-        $this->statusFlow->checkConstraints($task, $next);
-
-        $task->status = $next;
-        if ($next === Task::STATUS_IN_PROGRESS && ! $task->started_at) {
-            $task->started_at = now();
+            $prev = $task->status;
+            $task->status = $next;
+            $task->status_slug = $next;
+            $task->previous_status_slug = $prev;
+            if ($next === Task::STATUS_IN_PROGRESS && ! $task->started_at) {
+                $task->started_at = now();
+            }
+            if ($next === Task::STATUS_COMPLETED && ! $task->completed_at) {
+                $task->completed_at = now();
+            }
+            $task->save();
         }
-        if ($next === Task::STATUS_COMPLETED && ! $task->completed_at) {
-            $task->completed_at = now();
-        }
-        $task->save();
 
         return new TaskResource($task->load('type', 'assignee'));
     }

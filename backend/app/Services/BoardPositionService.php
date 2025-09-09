@@ -15,6 +15,7 @@ class BoardPositionService
     public function move(Task $task, string $statusSlug, int $index): void
     {
         $tenantId = $task->tenant_id;
+        $previous = $task->status_slug;
 
         // Get ordered tasks in target column
         $siblings = Task::where('tenant_id', $tenantId)
@@ -40,6 +41,7 @@ class BoardPositionService
 
         $task->status_slug = $statusSlug;
         $task->board_position = $position ?? 1000;
+        $task->previous_status_slug = $previous;
         $task->save();
     }
 

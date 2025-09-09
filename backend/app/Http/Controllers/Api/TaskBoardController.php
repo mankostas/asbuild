@@ -159,7 +159,9 @@ class TaskBoardController extends Controller
         $status = TaskStatus::where('slug', $data['status_slug'])->firstOrFail();
 
         if ($task->status_slug !== $status->slug) {
-            if (! $flow->canTransition($task->status_slug, $status->slug, $task->type)) {
+            $canManage = $request->user()->can('tasks.manage');
+
+            if (! $canManage && $status->slug !== $task->previous_status_slug && ! $flow->canTransition($task->status_slug, $status->slug, $task->type)) {
                 return response()->json(['message' => 'invalid_transition'], 422);
             }
 
@@ -167,7 +169,9 @@ class TaskBoardController extends Controller
                 $task->assigned_user_id = $request->user()->id;
             }
 
-            $flow->checkConstraints($task, $status->slug);
+            if (! $canManage) {
+                $flow->checkConstraints($task, $status->slug);
+            }
         }
 
         $positions->move($task, $status->slug, $data['index']);

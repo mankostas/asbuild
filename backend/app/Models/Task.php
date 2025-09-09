@@ -37,6 +37,7 @@ class Task extends Model
         'estimate_minutes',
         'reporter_user_id',
         'status_slug',
+        'previous_status_slug',
         'board_position',
     ];
 

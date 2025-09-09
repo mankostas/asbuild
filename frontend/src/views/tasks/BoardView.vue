@@ -149,6 +149,7 @@ interface Task {
   id: number;
   title: string;
   status_slug: string;
+  previous_status_slug?: string | null;
   priority?: number | null;
   due_at?: string | null;
   sla_chip?: string | null;
@@ -327,13 +328,19 @@ function onDragStart(evt: any) {
 }
 
 function allowedTransitions(task: Task, from: string): string[] {
+  if (auth.can('tasks.manage')) {
+    return columns.value.map((c) => c.status.slug);
+  }
   const direct = task.type?.statuses?.[from];
-  if (direct && direct.length) return direct;
-  return (
-    task.type?.status_flow_json
-      ?.filter(([f]) => f === from)
-      .map(([, to]) => to) ?? []
-  );
+  let allowed = direct && direct.length
+    ? direct
+    : task.type?.status_flow_json
+        ?.filter(([f]) => f === from)
+        .map(([, to]) => to) ?? [];
+  if (task.previous_status_slug && task.previous_status_slug !== from) {
+    allowed = [...allowed, task.previous_status_slug];
+  }
+  return Array.from(new Set(allowed));
 }
 
 function onDragMove(evt: any) {
