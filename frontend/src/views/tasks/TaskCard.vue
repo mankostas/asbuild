@@ -60,6 +60,22 @@
     >
       {{ task.description }}
     </div>
+    <div v-if="task.priority || task.sla_chip" class="flex flex-wrap gap-2 mt-4">
+      <span
+        v-if="task.priority"
+        class="px-2 py-1 rounded-full text-xs font-medium"
+        :class="priorityClasses[task.priority]"
+      >
+        {{ t(`tasks.priority.${task.priority}`) }}
+      </span>
+      <span
+        v-if="task.sla_chip"
+        class="px-2 py-1 rounded-full text-xs font-medium"
+        :class="slaClasses[task.sla_chip]"
+      >
+        {{ t(`tasks.chips.sla.${task.sla_chip}`) }}
+      </span>
+    </div>
     <div v-if="task.due_at" class="flex space-x-4 rtl:space-x-reverse">
       <div>
         <span class="block date-label">{{ t('tasks.due') }}</span>
@@ -110,6 +126,8 @@ interface Task {
   description?: string | null;
   due_at?: string | null;
   assignee?: { id: number; name: string } | null;
+  priority?: string | null;
+  sla_chip?: 'ok' | 'dueSoon' | 'breached' | null;
   status_slug: string;
   previous_status_slug?: string | null;
   type?: {
@@ -260,6 +278,20 @@ function menuClass(active: boolean) {
     ' w-full border-b border-b-gray-500 dark:border-b-slate-700 dark:text-slate-200 border-opacity-10 px-4 py-2 text-sm cursor-pointer flex space-x-2 items-center rtl:space-x-reverse'
   );
 }
+
+const priorityClasses: Record<string, string> = {
+  low: 'bg-slate-100 text-slate-800',
+  medium: 'bg-slate-100 text-slate-800',
+  normal: 'bg-slate-100 text-slate-800',
+  high: 'bg-warning-500 bg-opacity-[0.16] text-warning-500',
+  urgent: 'bg-danger-500 bg-opacity-[0.16] text-danger-500',
+};
+
+const slaClasses: Record<string, string> = {
+  ok: 'bg-success-500 bg-opacity-[0.16] text-success-500',
+  dueSoon: 'bg-warning-500 bg-opacity-[0.16] text-warning-500',
+  breached: 'bg-danger-500 bg-opacity-[0.16] text-danger-500',
+};
 </script>
 
 <style scoped>
