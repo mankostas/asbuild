@@ -13,12 +13,14 @@ class StatusFlowService
      * @var array<string, array<int, string>>
      */
     public const DEFAULT_TRANSITIONS = [
-        'draft' => ['assigned'],
-        'assigned' => ['in_progress'],
-        'in_progress' => ['completed'],
-        'completed' => ['rejected', 'redo'],
-        'rejected' => ['assigned'],
-        'redo' => ['assigned'],
+        'draft' => ['assigned', 'blocked'],
+        'assigned' => ['in_progress', 'blocked'],
+        'in_progress' => ['review', 'blocked'],
+        'blocked' => ['assigned'],
+        'review' => ['completed', 'redo', 'rejected'],
+        'redo' => ['in_progress'],
+        'rejected' => [],
+        'completed' => [],
     ];
 
     /**

@@ -15,7 +15,7 @@ class TenantBootstrapSeederTest extends TestCase
     {
         Artisan::call('db:seed', ['--class' => \Database\Seeders\TenantBootstrapSeeder::class]);
 
-        $this->assertDatabaseCount('task_statuses', 4);
+        $this->assertDatabaseCount('task_statuses', 8);
         $first = TenantDefaults::TASK_STATUSES[0];
         $this->assertDatabaseHas('task_statuses', [
             'slug' => $first['slug'],

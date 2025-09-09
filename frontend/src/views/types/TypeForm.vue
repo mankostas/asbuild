@@ -466,15 +466,28 @@ const validationErrors = ref<Record<string, string>>({});
 const validationStatus = ref<'idle' | 'success' | 'error'>('idle');
 const formRef = ref<any>(null);
 const currentVersion = ref<any | null>(null);
-const DEFAULT_STATUSES = ['draft', 'assigned', 'in_progress', 'completed'];
+const DEFAULT_STATUSES = [
+  'draft',
+  'assigned',
+  'in_progress',
+  'blocked',
+  'review',
+  'completed',
+  'rejected',
+  'redo',
+];
 const DEFAULT_FLOW: [string, string][] = [
   ['draft', 'assigned'],
+  ['draft', 'blocked'],
   ['assigned', 'in_progress'],
-  ['in_progress', 'completed'],
-  ['completed', 'rejected'],
-  ['completed', 'redo'],
-  ['rejected', 'assigned'],
-  ['redo', 'assigned'],
+  ['assigned', 'blocked'],
+  ['in_progress', 'review'],
+  ['in_progress', 'blocked'],
+  ['blocked', 'assigned'],
+  ['review', 'completed'],
+  ['review', 'redo'],
+  ['review', 'rejected'],
+  ['redo', 'in_progress'],
 ];
 const statuses = ref<string[]>([]);
 const statusFlow = ref<[string, string][]>([]);
