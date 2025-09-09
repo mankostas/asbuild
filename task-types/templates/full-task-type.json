@@ -1,0 +1,157 @@
+{
+  "name": "Example Task Type",
+  "schema_json": {
+    "sections": [
+      {
+        "key": "general",
+        "label": "General Information",
+        "fields": [
+          {
+            "key": "title",
+            "label": "Title",
+            "type": "text",
+            "required": true,
+            "help": "Short title of the task",
+            "validations": { "min": 3, "max": 100 }
+          },
+          {
+            "key": "description",
+            "label": "Description",
+            "type": "textarea",
+            "required": true,
+            "help": "Detailed task description",
+            "validations": { "max": 1000 }
+          },
+          {
+            "key": "priority",
+            "label": "Priority",
+            "type": "select",
+            "enum": ["low", "medium", "high", "urgent"],
+            "options": [
+              { "value": "low", "label": "Low" },
+              { "value": "medium", "label": "Medium" },
+              { "value": "high", "label": "High" },
+              { "value": "urgent", "label": "Urgent" }
+            ],
+            "default": "medium",
+            "required": true
+          },
+          {
+            "key": "due_date",
+            "label": "Due Date",
+            "type": "date",
+            "required": true
+          },
+          {
+            "key": "start_time",
+            "label": "Start Time",
+            "type": "time",
+            "required": false
+          },
+          {
+            "key": "estimate_hours",
+            "label": "Estimated Hours",
+            "type": "number",
+            "required": true,
+            "validations": { "min": 1, "max": 100 }
+          },
+          {
+            "key": "approved",
+            "label": "Approved",
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          {
+            "key": "assignee",
+            "label": "Assignee",
+            "type": "assignee",
+            "required": true
+          },
+          {
+            "key": "serial_number",
+            "label": "Serial Number",
+            "type": "text",
+            "required": true,
+            "help": "Unique identifier",
+            "validations": { "unique": true, "regex": "^[A-Z0-9-]+$" }
+          }
+        ]
+      },
+      {
+        "key": "photos",
+        "label": "Photos",
+        "fields": [
+          {
+            "key": "before_photo",
+            "label": "Before Photo",
+            "type": "photo_single",
+            "required": false
+          },
+          {
+            "key": "after_photos",
+            "label": "After Photos",
+            "type": "photo_repeater",
+            "required": false,
+            "validations": { "max": 5 }
+          }
+        ]
+      }
+    ]
+  },
+  "statuses": {
+    "draft": [],
+    "assigned": [],
+    "in_progress": [],
+    "blocked": [],
+    "review": [],
+    "completed": [],
+    "rejected": [],
+    "redo": []
+  },
+  "status_flow_json": {
+    "draft": ["assigned", "blocked"],
+    "assigned": ["in_progress", "blocked"],
+    "in_progress": ["review", "blocked"],
+    "blocked": ["assigned"],
+    "review": ["completed", "redo", "rejected"],
+    "redo": ["in_progress"],
+    "rejected": [],
+    "completed": []
+  },
+  "require_subtasks_complete": true,
+  "abilities_json": {
+    "tenant": {
+      "read": true,
+      "edit": true,
+      "delete": true,
+      "export": true,
+      "assign": true,
+      "transition": true
+    },
+    "manager": {
+      "read": true,
+      "edit": true,
+      "delete": true,
+      "export": true,
+      "assign": true,
+      "transition": true
+    },
+    "agent": {
+      "read": true,
+      "edit": true,
+      "delete": false,
+      "export": false,
+      "assign": false,
+      "transition": true
+    },
+    "viewer": {
+      "read": true,
+      "edit": false,
+      "delete": false,
+      "export": false,
+      "assign": false,
+      "transition": false
+    }
+  }
+}

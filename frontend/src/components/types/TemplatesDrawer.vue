@@ -25,6 +25,14 @@
           @input="onFile"
         />
       </div>
+      <div v-if="exampleTemplates.length">
+        <p class="mb-2">{{ t('templates.examples') }}</p>
+        <ul class="space-y-2">
+          <li v-for="tmpl in exampleTemplates" :key="tmpl.name">
+            <Button :text="tmpl.name" @click="importExample(tmpl.data)" />
+          </li>
+        </ul>
+      </div>
       <Button
         btn-class="btn-outline-secondary"
         :text="t('actions.close')"
@@ -43,6 +51,7 @@ import Button from '@/components/ui/Button/index.vue';
 import Fileinput from '@/components/ui/Fileinput/index.vue';
 import { can } from '@/stores/auth';
 import { useTaskTypesStore } from '@/stores/taskTypes';
+import fullTemplate from '../../../../task-types/templates/full-task-type.json';
 
 interface Props {
   open: boolean;
@@ -54,6 +63,7 @@ const emit = defineEmits(['close', 'imported']);
 const exportId = ref<number>();
 const typesStore = useTaskTypesStore();
 const { t } = useI18n();
+const exampleTemplates = [{ name: 'Full Task Type', data: fullTemplate }];
 
 const selectOptions = computed(() =>
   props.types.map((t: any) => ({ value: t.id, label: t.name }))
@@ -82,6 +92,11 @@ async function onFile(file: File) {
   const text = await file.text();
   const json = JSON.parse(text);
   await typesStore.import(json);
+  emit('imported');
+}
+
+async function importExample(data: any) {
+  await typesStore.import(data);
   emit('imported');
 }
 </script>
