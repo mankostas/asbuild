@@ -369,7 +369,8 @@
     "title": "Πρότυπα",
     "export": "Εξαγωγή JSON",
     "import": "Εισαγωγή JSON",
-    "selectType": "Επιλέξτε τύπο"
+    "selectType": "Επιλέξτε τύπο",
+    "examples": "Παραδείγματα"
   },
   "Section label": "Ετικέτα ενότητας",
   "Label": "Ετικέτα",

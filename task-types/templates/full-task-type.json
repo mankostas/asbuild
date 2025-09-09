@@ -1,0 +1,58 @@
+{
+  "name": "Example Task Type",
+  "schema_json": {
+    "sections": [
+      {
+        "key": "general",
+        "label": "General Information",
+        "fields": [
+          {
+            "key": "title",
+            "label": "Title",
+            "type": "text",
+            "required": true,
+            "help": "Short title of the task"
+          },
+          {
+            "key": "description",
+            "label": "Description",
+            "type": "textarea",
+            "required": false,
+            "help": "Detailed task description"
+          },
+          {
+            "key": "priority",
+            "label": "Priority",
+            "type": "select",
+            "options": [
+              { "value": "low", "label": "Low" },
+              { "value": "medium", "label": "Medium" },
+              { "value": "high", "label": "High" }
+            ],
+            "default": "medium"
+          }
+        ]
+      }
+    ]
+  },
+  "statuses": [
+    { "key": "draft", "label": "Draft" },
+    { "key": "in_progress", "label": "In Progress" },
+    { "key": "blocked", "label": "Blocked" },
+    { "key": "completed", "label": "Completed" }
+  ],
+  "status_flow_json": {
+    "draft": ["in_progress", "blocked"],
+    "in_progress": ["blocked", "completed"],
+    "blocked": ["in_progress"],
+    "completed": []
+  },
+  "require_subtasks_complete": false,
+  "abilities_json": {
+    "read": true,
+    "create": true,
+    "update": true,
+    "delete": false,
+    "assign": true
+  }
+}
