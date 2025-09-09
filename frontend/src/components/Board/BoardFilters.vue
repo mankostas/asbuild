@@ -95,7 +95,7 @@ const assigneeOptions = ref<Option[]>([]);
 const taskTypeOptions = ref<Option[]>([]);
 const priorityOptions: Option[] = [
   { value: 'low', label: t('tasks.priority.low') },
-  { value: 'medium', label: t('tasks.priority.medium') },
+  { value: 'normal', label: t('tasks.priority.normal') },
   { value: 'high', label: t('tasks.priority.high') },
 ];
 const slaOptions: Option[] = [
