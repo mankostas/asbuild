@@ -200,7 +200,7 @@ const statusOptions = ref<string[]>([]);
 const typeOptions = ref<any[]>([]);
 const priorityOptions = [
   { value: 'low' },
-  { value: 'normal' },
+  { value: 'medium' },
   { value: 'high' },
   { value: 'urgent' },
 ];
@@ -227,7 +227,7 @@ const statusClasses: Record<string, string> = {
 
 const priorityClasses: Record<string, string> = {
   low: 'bg-slate-100 text-slate-800',
-  normal: 'bg-slate-100 text-slate-800',
+  medium: 'bg-slate-100 text-slate-800',
   high: 'bg-orange-100 text-orange-800',
   urgent: 'bg-red-100 text-red-800',
 };
