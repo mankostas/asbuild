@@ -369,7 +369,8 @@
     "title": "Templates",
     "export": "Export JSON",
     "import": "Import JSON",
-    "selectType": "Select type"
+    "selectType": "Select type",
+    "examples": "Examples"
   },
   "Section label": "Section label",
   "Label": "Label",
