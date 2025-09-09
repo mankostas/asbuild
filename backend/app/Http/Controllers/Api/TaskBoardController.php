@@ -72,7 +72,10 @@ class TaskBoardController extends Controller
             $filters->apply($query, $request);
 
             $total = (clone $query)->count();
-            $tasks = $query->orderBy('board_position')->limit($limit + 1)->get();
+            $tasks = $query->with('type')
+                ->orderBy('board_position')
+                ->limit($limit + 1)
+                ->get();
 
             $hasMore = $tasks->count() > $limit;
             $tasks = $tasks->take($limit);
@@ -124,7 +127,8 @@ class TaskBoardController extends Controller
         $filters->apply($query, $request);
 
         $total = (clone $query)->count();
-        $tasks = $query->orderBy('board_position')
+        $tasks = $query->with('type')
+            ->orderBy('board_position')
             ->offset($offset)
             ->limit($limit + 1)
             ->get();
@@ -163,6 +167,6 @@ class TaskBoardController extends Controller
 
         $positions->move($task, $status->slug, $data['index']);
 
-        return new TaskResource($task->fresh());
+        return new TaskResource($task->fresh(['type']));
     }
 }

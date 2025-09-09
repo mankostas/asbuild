@@ -46,12 +46,12 @@
             </div>
           </div>
           <draggable
-            v-if="col.tasks.length"
             v-model="col.tasks"
             group="tasks"
             item-key="id"
-            class="px-2 pt-4 flex flex-col gap-2"
+            class="px-2 pt-4 flex flex-col gap-2 min-h-[100px]"
             :data-status="col.status.slug"
+            :move="onDragMove"
             @end="(e) => onDrop(e, col)"
             @start="onDragStart"
           >
@@ -66,7 +66,7 @@
             </template>
           </draggable>
           <EmptyState
-            v-else
+            v-if="!col.tasks.length"
             :illustration="columnEmpty"
             :message="t('board.emptyColumn')"
             wrapperClass="m-2"
@@ -148,10 +148,12 @@ const canTaskTypes = computed(() => can('task_types.view'));
 interface Task {
   id: number;
   title: string;
+  status_slug: string;
   priority?: number | null;
   due_at?: string | null;
   sla_chip?: string | null;
   assignee?: { id: number; name: string };
+  type?: { statuses?: Record<string, string[]> };
 }
 
 interface Column {
@@ -284,6 +286,7 @@ async function performMove(task: Task, statusSlug: string, index: number) {
       status_slug: statusSlug,
       index,
     });
+    task.status_slug = statusSlug;
   } catch {
     columns.value = snapshot;
     notify.error(t('board.errorMove'));
@@ -301,6 +304,7 @@ async function onDrop(evt: any, column: Column) {
       status_slug: column.status.slug,
       index: evt.newIndex,
     });
+    task.status_slug = column.status.slug;
   } catch {
     if (snapshot) {
       columns.value = snapshot;
@@ -314,5 +318,17 @@ function onDragStart(evt: any) {
   const snapshots = dragSnapshots.get(task.id) ?? [];
   snapshots.push(columns.value.map((c) => ({ ...c, tasks: [...c.tasks] })));
   dragSnapshots.set(task.id, snapshots);
+}
+
+function onDragMove(evt: any) {
+  const task: Task = evt.draggedContext.element;
+  const toStatus = evt.to?.dataset.status;
+  if (!toStatus || toStatus === task.status_slug) return true;
+  const allowed = task.type?.statuses?.[task.status_slug] ?? [];
+  if (!allowed.includes(toStatus)) {
+    notify.error(t('board.errorMove'));
+    return false;
+  }
+  return true;
 }
 </script>
