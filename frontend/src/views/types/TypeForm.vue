@@ -825,10 +825,18 @@ function loadVersion(v: any) {
     }
   });
   statuses.value = Object.keys(v.statuses || {});
-  if (Array.isArray(v.status_flow_json)) {
-    statusFlow.value = v.status_flow_json as [string, string][];
-  } else if (v.status_flow_json) {
-    statusFlow.value = Object.entries(v.status_flow_json).flatMap(([from, tos]: any) =>
+  let flow = v.status_flow_json;
+  if (typeof flow === 'string') {
+    try {
+      flow = JSON.parse(flow);
+    } catch {
+      flow = [];
+    }
+  }
+  if (Array.isArray(flow)) {
+    statusFlow.value = flow as [string, string][];
+  } else if (flow && typeof flow === 'object') {
+    statusFlow.value = Object.entries(flow).flatMap(([from, tos]: any) =>
       (tos as string[]).map((to) => [from, to] as [string, string])
     );
   } else {
