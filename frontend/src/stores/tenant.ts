@@ -37,7 +37,7 @@ export const useTenantStore = defineStore('tenant', {
 
         return data.meta;
       } catch (error: any) {
-        if (error?.response?.status === 403) {
+        if (error?.status === 403) {
           this.tenants = [];
           return { total: 0 } as any;
         }
