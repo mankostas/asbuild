@@ -28,6 +28,12 @@
                 <span>{{ t('board.assignMe') }}</span>
               </button>
             </MenuItem>
+            <MenuItem v-if="auth.hasAny(['tasks.update', 'tasks.manage'])" #default="{ active }">
+              <button :class="menuClass(active)" @click="editTask" @keyup.enter="editTask" @keyup.space.prevent="editTask">
+                <Icon icon="heroicons-outline:pencil-square" />
+                <span>{{ t('actions.edit') }}</span>
+              </button>
+            </MenuItem>
             <MenuItem
               v-for="s in statusOptions"
               :key="s.slug"
@@ -144,6 +150,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { useNotify } from '@/plugins/notify';
@@ -191,6 +198,7 @@ const emit = defineEmits<{ (e: 'assigned', task: Task): void }>();
 const { t } = useI18n();
 const notify = useNotify();
 const auth = useAuthStore();
+const router = useRouter();
 
 function allowedTransitions(from: string): string[] {
   if (auth.can('tasks.manage')) {
@@ -312,6 +320,10 @@ function move(dir: number) {
   }
   const index = props.columns[targetIndex].tasks.length;
   props.onMove(props.task, targetSlug, index);
+}
+
+function editTask() {
+  router.push({ name: 'tasks.edit', params: { id: props.task.id } });
 }
 
 function menuClass(active: boolean) {

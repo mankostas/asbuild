@@ -22,7 +22,10 @@ class TaskPolicy extends TenantOwnedPolicy
     public function update(User $user, Model $task): bool
     {
         return $task instanceof Task
-            && Gate::allows('tasks.update')
-            && $user->tenant_id === $task->tenant_id;
+            && $user->tenant_id === $task->tenant_id
+            && (
+                Gate::allows('tasks.update')
+                || Gate::allows('tasks.manage')
+            );
     }
 }
