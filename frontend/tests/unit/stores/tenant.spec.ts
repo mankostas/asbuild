@@ -53,4 +53,12 @@ describe('tenant store', () => {
     expect(store.setTenant('123')).toBe(true);
     expect(store.setTenant('123')).toBe(false);
   });
+
+  it('handles 403 errors when loading tenants', async () => {
+    const { useTenantStore } = await import('@/stores/tenant');
+    (api.get as any).mockRejectedValue({ response: { status: 403 } });
+    const store = useTenantStore();
+    await expect(store.loadTenants()).resolves.toEqual({ total: 0 });
+    expect(store.tenants).toEqual([]);
+  });
 });
