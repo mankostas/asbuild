@@ -9,6 +9,7 @@
         classInput="text-sm"
       />
       <VueSelect
+        v-if="props.showTenantSelect"
         class="flex-1 min-w-[150px]"
         :label="t('types.form.tenant')"
       >
@@ -42,7 +43,10 @@ interface Option {
   label: string;
 }
 
-const props = defineProps<{ name: string; tenantId: number | '' }>();
+const props = withDefaults(
+  defineProps<{ name: string; tenantId: number | ''; showTenantSelect?: boolean }>(),
+  { showTenantSelect: true },
+);
 const emit = defineEmits<{
   (e: 'update:name', value: string): void;
   (e: 'update:tenantId', value: number | ''): void;
