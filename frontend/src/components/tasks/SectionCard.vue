@@ -488,7 +488,10 @@ const { t, locale } = useI18n();
 const local = reactive<any>(props.form);
 const allFields = props.section.tabs?.flatMap((t: any) => t.fields) || props.section.fields;
 for (const field of allFields) {
-  if (field.type === 'time' && local[field.key] === undefined) {
+  if (
+    ['time', 'date', 'datetime', 'duration', 'assignee', 'reviewer'].includes(field.type) &&
+    local[field.key] === undefined
+  ) {
     local[field.key] = null;
   }
 }
