@@ -19,22 +19,30 @@ export const useTenantStore = defineStore('tenant', {
   },
   actions: {
     async loadTenants(params: ListParams = {}) {
-      const { data } = await api.get('/tenants', {
-        params: withListParams(params),
-      });
-      this.tenants = data.data;
-      data.data.forEach((t: any) => {
-        this.setAllowedAbilities(t.id, t.feature_abilities || {});
-      });
+      try {
+        const { data } = await api.get('/tenants', {
+          params: withListParams(params),
+        });
+        this.tenants = data.data;
+        data.data.forEach((t: any) => {
+          this.setAllowedAbilities(t.id, t.feature_abilities || {});
+        });
 
-      if (
-        this.currentTenantId &&
-        !this.tenants.some((t) => String(t.id) === this.currentTenantId)
-      ) {
-        this.setTenant('');
+        if (
+          this.currentTenantId &&
+          !this.tenants.some((t) => String(t.id) === this.currentTenantId)
+        ) {
+          this.setTenant('');
+        }
+
+        return data.meta;
+      } catch (error: any) {
+        if (error?.response?.status === 403) {
+          this.tenants = [];
+          return { total: 0 } as any;
+        }
+        throw error;
       }
-
-      return data.meta;
     },
     async searchTenants(search: string) {
       return this.loadTenants({ search, per_page: 100 });

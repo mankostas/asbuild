@@ -3,7 +3,7 @@
       <div class="flex items-center justify-end mb-4">
         <Button
           v-if="hasAny(['tasks.create', 'tasks.manage'])"
-          :link="{ name: 'tasks.create' }"
+          link="/tasks/create"
           btnClass="btn-primary flex items-center gap-2"
           icon="heroicons-outline:plus"
           :text="t('tasks.new')"
@@ -386,20 +386,25 @@ async function fetchTasks({ page, perPage, sort, search }: any) {
   }
   const total = rows.length;
   const start = (page - 1) * perPage;
-  const paged = rows.slice(start, start + perPage).map((r) => ({
-    id: r.id,
-    type: r.type?.name || '—',
-    priority: r.priority
-      ? `<span class="badge ${priorityClasses[r.priority] || ''}">${t(`tasks.priority.${r.priority}`)}</span>`
-      : '',
-    status: `<span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClasses[r.status] ?? ''}">${r.status.replace(/_/g, ' ')}</span>`,
-    scheduled_at: r.scheduled_at ? formatDisplay(r.scheduled_at) : '',
-    sla_end_at: r.sla_end_at
-      ? `<span class="badge ${slaBadgeClass(r.sla_end_at)}">${formatDisplay(r.sla_end_at)}</span>`
-      : '',
-    started_at: r.started_at ? formatDisplay(r.started_at) : '',
-    completed_at: r.completed_at ? formatDisplay(r.completed_at) : '',
-  }));
+  const paged = rows.slice(start, start + perPage).map((r) => {
+    const statusKey = typeof r.status === 'string' ? r.status : r.status?.slug || '';
+    const statusLabel =
+      typeof r.status === 'string' ? r.status : r.status?.name || '';
+    return {
+      id: r.id,
+      type: r.type?.name || '—',
+      priority: r.priority
+        ? `<span class="badge ${priorityClasses[r.priority] || ''}">${t(`tasks.priority.${r.priority}`)}</span>`
+        : '',
+      status: `<span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClasses[statusKey] ?? ''}">${statusLabel.replace(/_/g, ' ')}</span>`,
+      scheduled_at: r.scheduled_at ? formatDisplay(r.scheduled_at) : '',
+      sla_end_at: r.sla_end_at
+        ? `<span class="badge ${slaBadgeClass(r.sla_end_at)}">${formatDisplay(r.sla_end_at)}</span>`
+        : '',
+      started_at: r.started_at ? formatDisplay(r.started_at) : '',
+      completed_at: r.completed_at ? formatDisplay(r.completed_at) : '',
+    };
+  });
   return { rows: paged, total };
 }
 
