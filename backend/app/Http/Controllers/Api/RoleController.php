@@ -25,7 +25,7 @@ class RoleController extends Controller
 
     public function index(Request $request)
     {
-        $this->ensureAdmin($request);
+        Gate::authorize('roles.view');
 
         $scope = $request->query('scope');
         $tenantId = $request->query('tenant_id');
