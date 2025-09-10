@@ -514,7 +514,7 @@ const canManageSLA = computed(
   () => auth.isSuperAdmin || can('task_sla_policies.manage'),
 );
 const canManageAutomations = computed(
-  () => auth.isSuperAdmin || can('task_automations.manage'),
+  () => auth.isSuperAdmin || (can('task_automations.manage') && can('teams.view')),
 );
 const isFormValid = computed(() => name.value.trim().length > 0 && tenantId.value !== '');
 

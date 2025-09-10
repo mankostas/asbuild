@@ -104,6 +104,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { can } from '@/stores/auth';
 import api from '@/services/api';
 import Select from '@/components/ui/Select/index.vue';
 import Switch from '@/components/ui/Switch/index.vue';
@@ -147,26 +148,37 @@ watch(
 );
 
 async function load(id: number | string) {
-  const [statusRes, teamRes] = await Promise.all([
-    api.get('/task-statuses', {
+  try {
+    const statusRes = await api.get('/task-statuses', {
       params: { scope: 'tenant', tenant_id: id, per_page: 100 },
-    }),
-    api.get('/teams', { params: { tenant_id: id } }),
-  ]);
-  const statusData = statusRes.data.data ?? statusRes.data;
-  allStatusOptions.value = statusData.map((s: any) => ({
-    value: s.slug,
-    label: s.name,
-  }));
-  filterStatuses();
-  const teamData = teamRes.data.data ?? teamRes.data;
-  teamOptions.value = teamData.map((t: any) => ({
-    value: t.id,
-    label: t.name,
-  }));
-  if (props.taskTypeId) {
-    const res = await api.get(`/task-types/${props.taskTypeId}/automations`);
-    automations.value = res.data.data ?? res.data;
+    });
+    const statusData = statusRes.data.data ?? statusRes.data;
+    allStatusOptions.value = statusData.map((s: any) => ({
+      value: s.slug,
+      label: s.name,
+    }));
+    filterStatuses();
+
+    if (can('teams.view')) {
+      const teamRes = await api.get('/teams', { params: { tenant_id: id } });
+      const teamData = teamRes.data.data ?? teamRes.data;
+      teamOptions.value = teamData.map((t: any) => ({
+        value: t.id,
+        label: t.name,
+      }));
+    } else {
+      teamOptions.value = [];
+    }
+
+    if (props.taskTypeId) {
+      const res = await api.get(`/task-types/${props.taskTypeId}/automations`);
+      automations.value = res.data.data ?? res.data;
+    }
+  } catch (e) {
+    statusOptions.value = [];
+    allStatusOptions.value = [];
+    teamOptions.value = [];
+    automations.value = [];
   }
 }
 
