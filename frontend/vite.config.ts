@@ -24,6 +24,10 @@ export default defineConfig(({ command }) => ({
     alias: {
       '@': path.resolve(__dirname, 'src'),
       '@dc': path.resolve(__dirname, '../dashcode-full-source-code/src'),
+      '@headlessui/vue': path.resolve(
+        __dirname,
+        'node_modules/@headlessui/vue',
+      ),
     },
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.vue'],
   },
@@ -39,9 +43,9 @@ export default defineConfig(({ command }) => ({
       options: {
         from: 'src/assets/main.css',
         // Suppress missing `from` warnings from third-party plugins
-        logger: { warn: () => {}, warnOnce: () => {} }
-      }
-    }
+        logger: { warn: () => {}, warnOnce: () => {} },
+      },
+    },
   },
   build: {
     outDir: '../public/build',
