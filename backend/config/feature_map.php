@@ -36,6 +36,9 @@ return [
         'label' => 'Roles & Permissions',
         'abilities' => [
             'roles.view',
+            'roles.create',
+            'roles.update',
+            'roles.delete',
             'roles.manage',
         ],
     ],
@@ -47,6 +50,7 @@ return [
             'task_types.update',
             'task_types.delete',
             'task_types.manage',
+            'task_sla_policies.manage',
             'task_automations.manage',
             'task_field_snippets.manage',
         ],

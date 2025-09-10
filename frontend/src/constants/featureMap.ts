@@ -26,12 +26,23 @@ export const featureMap: Record<string, { label: string; abilities: string[] }> 
   },
   roles: {
     label: 'Roles & Permissions',
-    abilities: ['roles.view', 'roles.manage'],
+    abilities: [
+      'roles.view',
+      'roles.create',
+      'roles.update',
+      'roles.delete',
+      'roles.manage',
+    ],
   },
   task_types: {
     label: 'Task Types',
     abilities: [
+      'task_types.view',
+      'task_types.create',
+      'task_types.update',
+      'task_types.delete',
       'task_types.manage',
+      'task_sla_policies.manage',
       'task_automations.manage',
       'task_field_snippets.manage',
     ],
