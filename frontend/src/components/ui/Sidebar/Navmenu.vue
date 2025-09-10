@@ -143,23 +143,22 @@ export default {
         .map((it) => {
           const child = it.child
             ? it.child.filter((ci) => {
-                const req = ci.requiredAbilities || [];
                 const features = ci.requiredFeatures || [];
-                return (
-                  auth.hasAny(req) &&
-                  features.every((f) => auth.features.includes(f))
-                );
+                if (!features.every((f) => auth.features.includes(f))) {
+                  return false;
+                }
+                const req = ci.requiredAbilities || [];
+                return auth.hasAny(req);
               })
             : null;
           return { ...it, child };
         })
         .filter((it) => {
+          const features = it.requiredFeatures || [];
+          if (!features.every((f) => auth.features.includes(f))) return false;
           if (it.admin && !auth.isSuperAdmin) return false;
           const req = it.requiredAbilities || [];
-          const features = it.requiredFeatures || [];
-          const allowed =
-            auth.hasAny(req) &&
-            features.every((f) => auth.features.includes(f));
+          const allowed = auth.hasAny(req);
           if (it.child) {
             return allowed && it.child.length > 0;
           }
