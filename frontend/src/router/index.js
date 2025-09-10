@@ -604,18 +604,18 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.admin && !auth.isSuperAdmin) {
-    return next('/');
+    return next('/not-found');
   }
 
   if (to.meta.requiredAbilities?.length && !auth.hasAny(to.meta.requiredAbilities)) {
-    return next('/');
+    return next('/not-found');
   }
 
   if (
     to.meta.requiredFeatures?.length &&
     !to.meta.requiredFeatures.every((f) => auth.features.includes(f))
   ) {
-    return next('/');
+    return next('/not-found');
   }
 
   if (to.path === '/auth/login' && auth.isAuthenticated) {
