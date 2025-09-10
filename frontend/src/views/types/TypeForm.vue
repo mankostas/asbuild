@@ -68,6 +68,7 @@
       <TypeMetaBar
         v-model:name="name"
         v-model:tenant-id="tenantId"
+        :show-tenant-select="auth.isSuperAdmin"
         class="border-b mb-4"
       />
       <template v-if="tenantId || !isCreate">
@@ -648,15 +649,23 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
 onMounted(async () => {
   loading.value = true;
   try {
-    const [_, , typeRes] = await Promise.all([
-      tenantStore.loadTenants(
-        auth.isSuperAdmin
-          ? { per_page: 100, scope: 'all' }
-          : { per_page: 100 },
-      ),
-      api.get('/lookups/features'),
-      isEdit.value ? api.get(`/task-types/${taskTypeId.value}`) : Promise.resolve(null),
-    ]);
+    const lookupsPromise = api.get('/lookups/features');
+    const typePromise = isEdit.value
+      ? api.get(`/task-types/${taskTypeId.value}`)
+      : Promise.resolve(null);
+
+    let typeRes: any = null;
+    if (auth.isSuperAdmin) {
+      await tenantStore.loadTenants({ per_page: 100, scope: 'all' });
+      typeRes = await typePromise;
+    } else {
+      skipTenantWatch.value = true;
+      tenantId.value = (auth.user as any)?.tenant_id ?? '';
+      typeRes = await typePromise;
+    }
+
+    await lookupsPromise;
+
     if (isEdit.value && typeRes) {
       const typeData = typeRes.data.data ?? typeRes.data;
       name.value = typeData.name || '';
@@ -667,12 +676,16 @@ onMounted(async () => {
       await refreshTenant(tenantId.value);
       currentVersion.value = typeData;
       loadVersion(typeData);
+    } else if (!auth.isSuperAdmin) {
+      await refreshTenant(tenantId.value);
+      tenantStore.setTenant(String(tenantId.value));
     } else {
       tenantStore.setTenant('');
     }
   } catch (err) {
     tenantStore.setTenant('');
   } finally {
+    skipTenantWatch.value = false;
     loading.value = false;
   }
 });
