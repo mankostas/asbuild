@@ -42,6 +42,9 @@ export const useAuthStore = defineStore('auth', {
     hasAny: (state) => (abilities: string[]) =>
       abilities.length === 0 ||
       state.abilities.includes('*') ||
+      state.user?.roles?.some(
+        (r: any) => r.name === 'SuperAdmin' || r.slug === 'super_admin',
+      ) ||
       abilities.some((a) => state.abilities.includes(a)),
     userId: (state) => state.user?.id,
   },
