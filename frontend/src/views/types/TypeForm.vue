@@ -120,19 +120,8 @@
             <p class="text-sm">{{ t('types.noAutomationsPermissions') }}</p>
           </Card>
         </template>
-        <Card
-          v-if="!tenantId"
-          class="p-4 border-b flex flex-col items-center text-center gap-2"
-        >
-          <Icon
-            icon="heroicons-outline:information-circle"
-            class="w-6 h-6 text-slate-400"
-            aria-hidden="true"
-          />
-          <p class="text-sm">{{ t('types.selectTenantToSetPermissions') }}</p>
-        </Card>
         <PermissionsMatrix
-          v-else
+          v-if="tenantId && canViewRoles"
           :key="`perm-${tenantId}`"
           v-model="permissions"
           :roles="tenantRoles"
@@ -142,6 +131,28 @@
           :feature-abilities="tenantFeatureAbilities"
           class="p-4 border-b"
         />
+        <Card
+          v-else-if="!tenantId"
+          class="p-4 border-b flex flex-col items-center text-center gap-2"
+        >
+          <Icon
+            icon="heroicons-outline:information-circle"
+            class="w-6 h-6 text-slate-400"
+            aria-hidden="true"
+          />
+          <p class="text-sm">{{ t('types.selectTenantToSetPermissions') }}</p>
+        </Card>
+        <Card
+          v-else
+          class="p-4 border-b flex flex-col items-center text-center gap-2"
+        >
+          <Icon
+            icon="heroicons-outline:information-circle"
+            class="w-6 h-6 text-slate-400"
+            aria-hidden="true"
+          />
+          <p class="text-sm">{{ t('types.noRolesPermissions') }}</p>
+        </Card>
         <div class="h-[calc(100vh-3rem)] p-4">
         <div class="hidden lg:grid grid-cols-3 gap-4 h-full">
           <Card class="overflow-y-auto">
@@ -495,6 +506,9 @@ const statuses = ref<string[]>([]);
 const statusFlow = ref<[string, string][]>([]);
 const permissions = ref<Record<string, Permission>>({});
 const tenantRoles = ref<{ id: number; slug: string }[]>([]);
+const canViewRoles = computed(
+  () => auth.isSuperAdmin || can('roles.view') || can('roles.manage'),
+);
 const canManage = computed(() => auth.isSuperAdmin || can('task_types.manage'));
 const canManageSLA = computed(
   () => auth.isSuperAdmin || can('task_sla_policies.manage'),
@@ -604,41 +618,46 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
     }
   }
   if (id) {
-    try {
-      const params: Record<string, any> = auth.isSuperAdmin
-        ? { scope: 'all' }
-        : { tenant_id: Number(id) };
-      const { data } = await api.get('/roles', { params });
-      let roles = data.data ?? data;
-      if (auth.isSuperAdmin) {
-        const tid = Number(id);
-        roles = roles.filter((r: any) => r.tenant_id === null || r.tenant_id === tid);
-      }
-      tenantRoles.value = roles as { id: number; slug: string }[];
-      tenantRoles.value.forEach((r) => {
-        if (!permissions.value[r.slug]) {
-          permissions.value[r.slug] = {
-            read: false,
-            edit: false,
-            delete: false,
-            export: false,
-            assign: false,
-            transition: false,
-          };
-        } else if (permissions.value[r.slug].transition === undefined) {
-          permissions.value[r.slug].transition = false;
+    if (canViewRoles.value) {
+      try {
+        const params: Record<string, any> = auth.isSuperAdmin
+          ? { scope: 'all' }
+          : { tenant_id: Number(id) };
+        const { data } = await api.get('/roles', { params });
+        let roles = data.data ?? data;
+        if (auth.isSuperAdmin) {
+          const tid = Number(id);
+          roles = roles.filter((r: any) => r.tenant_id === null || r.tenant_id === tid);
         }
-      });
-      const validSlugs = tenantRoles.value.map((r) => r.slug);
-      if (selected.value) {
-        selected.value.roles.view = selected.value.roles.view.filter((s: string) =>
-          validSlugs.includes(s)
-        );
-        selected.value.roles.edit = selected.value.roles.edit.filter((s: string) =>
-          validSlugs.includes(s)
-        );
+        tenantRoles.value = roles as { id: number; slug: string }[];
+        tenantRoles.value.forEach((r) => {
+          if (!permissions.value[r.slug]) {
+            permissions.value[r.slug] = {
+              read: false,
+              edit: false,
+              delete: false,
+              export: false,
+              assign: false,
+              transition: false,
+            };
+          } else if (permissions.value[r.slug].transition === undefined) {
+            permissions.value[r.slug].transition = false;
+          }
+        });
+        const validSlugs = tenantRoles.value.map((r) => r.slug);
+        if (selected.value) {
+          selected.value.roles.view = selected.value.roles.view.filter((s: string) =>
+            validSlugs.includes(s)
+          );
+          selected.value.roles.edit = selected.value.roles.edit.filter((s: string) =>
+            validSlugs.includes(s)
+          );
+        }
+      } catch {
+        tenantRoles.value = [];
+        permissions.value = {};
       }
-    } catch {
+    } else {
       tenantRoles.value = [];
       permissions.value = {};
     }

@@ -275,6 +275,7 @@
     "saveToConfigureSLA": "Αποθηκεύστε για να ρυθμίσετε τις Πολιτικές SLA",
     "saveToConfigureAutomations": "Αποθηκεύστε για να ρυθμίσετε Αυτοματισμούς",
     "selectTenantToSetPermissions": "Επιλέξτε μισθωτή για να ορίσετε δικαιώματα",
+    "noRolesPermissions": "Δεν έχετε δικαίωμα προβολής ρόλων",
     "noSLAPermissions": "Δεν έχετε δικαίωμα διαχείρισης Πολιτικών SLA",
     "noAutomationsPermissions": "Δεν έχετε δικαίωμα διαχείρισης Αυτοματισμών"
   },
