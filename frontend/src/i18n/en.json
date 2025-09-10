@@ -275,6 +275,7 @@
     "saveToConfigureSLA": "Save to configure SLA policies",
     "saveToConfigureAutomations": "Save to configure automations",
     "selectTenantToSetPermissions": "Select tenant to set permissions",
+    "noRolesPermissions": "You do not have permission to view roles",
     "noSLAPermissions": "You do not have permission to manage SLA policies",
     "noAutomationsPermissions": "You do not have permission to manage automations"
   },
