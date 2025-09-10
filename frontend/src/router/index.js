@@ -13,6 +13,7 @@ export const routes = [
     component: () => import('@/views/home/Dashboard.vue'),
     meta: {
       requiresAuth: true,
+      requiredAbilities: ['reports.view'],
       breadcrumb: 'routes.dashboard',
       title: 'Dashboard',
       layout: 'app',

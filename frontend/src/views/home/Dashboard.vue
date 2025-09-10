@@ -56,6 +56,7 @@ import Card from '@/components/ui/Card/index.vue';
 import Skeleton from '@/components/ui/Skeleton.vue';
 import Button from '@/components/ui/Button/index.vue';
 import { parseISO } from '@/utils/datetime';
+import { can } from '@/stores/auth';
 
 interface Kpi {
   label: string;
@@ -80,6 +81,9 @@ const loading = ref(false);
 const error = ref(false);
 
 async function fetchData() {
+  if (!can('reports.view')) {
+    return;
+  }
   loading.value = true;
   error.value = false;
   try {
