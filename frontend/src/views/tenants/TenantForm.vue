@@ -64,7 +64,7 @@ import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import vSelect from 'vue-select';
 import { useForm } from 'vee-validate';
 import { useTenantStore } from '@/stores/tenant';
-import { can } from '@/stores/auth';
+import hasAbility from '@/utils/ability';
 import { featureMap } from '@/constants/featureMap';
 
 const route = useRoute();
@@ -73,7 +73,10 @@ const isEdit = computed(() => route.name === 'tenants.edit');
 const tenantStore = useTenantStore();
 
 const canAccess = computed(
-  () => can('tenants.create') || can('tenants.update') || can('tenants.manage'),
+  () =>
+    hasAbility('tenants.create') ||
+    hasAbility('tenants.update') ||
+    hasAbility('tenants.manage'),
 );
 
 const form = ref({
@@ -93,6 +96,7 @@ const serverError = ref('');
 const { handleSubmit, setErrors, errors } = useForm();
 
 onMounted(async () => {
+  if (!canAccess.value) return;
   try {
     const { data: features } = await api.get('/lookups/features');
     featureOptions.value = features.map((f: any) => ({
@@ -126,6 +130,7 @@ onMounted(async () => {
 
 const onSubmit = handleSubmit(async () => {
   serverError.value = '';
+  if (!canAccess.value) return;
   if (!isEdit.value && form.value.features.length === 0) {
     form.value.features = ['tasks'];
   }

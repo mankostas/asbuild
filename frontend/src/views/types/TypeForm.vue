@@ -386,6 +386,7 @@ import Icon from '@/components/ui/Icon/index.vue';
 import Skeleton from '@/components/ui/Skeleton.vue';
 import { Tab, TabPanel, MenuItem } from '@headlessui/vue';
 import { can, useAuthStore } from '@/stores/auth';
+import hasAbility from '@/utils/ability';
 import api from '@/services/api';
 import { useTenantStore } from '@/stores/tenant';
 import '@/styles/types-builder.css';
@@ -546,8 +547,10 @@ const isCreate = computed(
 const canAccess = computed(
   () =>
     auth.isSuperAdmin ||
-    (can('task_types.manage') &&
-      (isEdit.value ? can('task_types.view') : can('task_types.create'))),
+    (hasAbility('task_types.manage') &&
+      (isEdit.value
+        ? hasAbility('task_types.view')
+        : hasAbility('task_types.create'))),
 );
 
 const skipTenantWatch = ref(isEdit.value);
@@ -576,6 +579,7 @@ const viewportClass = computed(() => {
 });
 
 async function refreshTenant(id: number | '', oldId?: number | '') {
+  if (!canAccess.value) return;
   const normalized = id ? String(id) : '';
   const prev = oldId ? String(oldId) : '';
 
@@ -648,6 +652,10 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
 
 onMounted(async () => {
   loading.value = true;
+  if (!canAccess.value) {
+    loading.value = false;
+    return;
+  }
   try {
     const lookupsPromise = api.get('/lookups/features');
     const typePromise = isEdit.value
@@ -968,6 +976,7 @@ function selectField(field: Field) {
 }
 
 async function onSubmit() {
+  if (!canAccess.value) return;
   transitionsEditor.value?.commitPending?.();
   const logicRules = sections.value.flatMap((s) =>
     sectionAllFields(s).flatMap((f) =>

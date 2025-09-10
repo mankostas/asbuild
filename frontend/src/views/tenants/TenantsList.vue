@@ -52,6 +52,7 @@ import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue'
 import Button from '@/components/ui/Button/index.vue';
 import api from '@/services/api';
 import { useAuthStore, can } from '@/stores/auth';
+import hasAbility from '@/utils/ability';
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -67,6 +68,9 @@ const columns = [
 ];
 
 async function fetchTenants({ page, perPage, sort, search }: any) {
+  if (!hasAbility('tenants.view') && !hasAbility('tenants.manage')) {
+    return { rows: [], total: 0 };
+  }
   if (!all.value.length) {
     // The tenants API responds with an object containing
     // `{ data: Tenant[], meta: PaginationMeta }`. We only need the
@@ -102,6 +106,7 @@ function reload() {
 }
 
 async function impersonate(t: any) {
+  if (!hasAbility('tenants.manage')) return;
   await auth.impersonate(t.id, t.name);
   window.location.reload();
 }
@@ -111,6 +116,7 @@ function view(id: number) {
 }
 
 async function remove(id: number) {
+  if (!hasAbility('tenants.delete') && !hasAbility('tenants.manage')) return;
   const result = await swal?.fire({
     title: 'Delete tenant?',
     icon: 'warning',

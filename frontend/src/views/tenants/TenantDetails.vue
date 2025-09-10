@@ -24,11 +24,13 @@ import { useRoute } from 'vue-router';
 import api from '@/services/api';
 import Button from '@/components/ui/Button/index.vue';
 import { can } from '@/stores/auth';
+import hasAbility from '@/utils/ability';
 
 const route = useRoute();
 const tenant = ref<any>(null);
 
 onMounted(async () => {
+  if (!hasAbility('tenants.view') && !hasAbility('tenants.manage')) return;
   const { data } = await api.get(`/tenants/${route.params.id}`);
   tenant.value = data;
 });
