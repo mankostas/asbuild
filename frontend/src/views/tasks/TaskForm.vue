@@ -144,7 +144,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -265,6 +265,7 @@ onMounted(async () => {
   ]);
   if (initialTenant === tenantId.value) {
     types.value = typesData;
+    await nextTick();
     Object.keys(statusBySlug).forEach((k) => delete statusBySlug[k]);
     if (Array.isArray(statusesData)) {
       statusesData.forEach((s: any) => {
