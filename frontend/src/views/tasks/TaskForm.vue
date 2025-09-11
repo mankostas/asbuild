@@ -275,7 +275,7 @@ onMounted(async () => {
 
     if (isEdit.value) {
       const res = await api.get(`/tasks/${route.params.id}`);
-      const task = res.data;
+      const task = res.data.data || res.data;
       taskTypeId.value = task.type?.id || task.task_type_id;
       if (!types.value.some((t: any) => t.id === taskTypeId.value)) {
         if (task.type) {
