@@ -122,7 +122,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import api, { extractFormErrors } from '@/services/api';
+import api from '@/services/api';
 import JsonSchemaForm from '@/components/forms/JsonSchemaForm.vue';
 import { useField, useForm } from 'vee-validate';
 import * as yup from 'yup';
@@ -390,7 +390,7 @@ watch(
 const submitForm = handleSubmit(async () => {
   serverError.value = '';
   const payload: any = {
-    task_type_id: taskTypeId.value,
+    task_type_id: Number(taskTypeId.value),
     form_data: formData.value,
   };
   if (title.value) payload.title = title.value;
@@ -399,8 +399,12 @@ const submitForm = handleSubmit(async () => {
   if (slaEndAt.value) payload.sla_end_at = toISO(slaEndAt.value);
   if (dueAt.value) payload.due_at = toISO(dueAt.value);
   if (priority.value) payload.priority = priority.value;
-  if (assignee.value) payload.assigned_user_id = assignee.value.id;
-  if (status.value && (!isEdit.value || status.value !== originalStatus.value)) {
+  if (assignee.value) payload.assigned_user_id = Number(assignee.value.id);
+  if (isEdit.value) {
+    if (status.value && status.value !== originalStatus.value) {
+      payload.status = status.value;
+    }
+  } else {
     payload.status = status.value;
   }
   try {
@@ -425,9 +429,8 @@ const submitForm = handleSubmit(async () => {
       });
     }
   } catch (e: any) {
-    const formErrors = extractFormErrors(e);
-    if (Object.keys(formErrors).length) {
-      setErrors(formErrors);
+    if (e?.status === 422 || e?.errors) {
+      setErrors(e.errors || {});
     } else {
       serverError.value = e.message || 'Failed to save';
       notify.error(serverError.value);
