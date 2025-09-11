@@ -7,13 +7,16 @@
             v-model="tenantId"
             :options="tenantOptions"
             :aria-label="t('tenant')"
+            class="w-full"
           />
         </FromGroup>
-        <Textinput
-          v-model="title"
-          :label="t('tasks.form.title')"
-          :aria-label="t('tasks.form.title')"
-        />
+        <FromGroup :label="t('tasks.form.title')">
+          <Textinput
+            v-model="title"
+            :aria-label="t('tasks.form.title')"
+            class="w-full"
+          />
+        </FromGroup>
 
         <FromGroup :label="t('tasks.form.type')" :error="taskTypeError">
           <Select
@@ -21,57 +24,66 @@
             :options="typeOptions"
             :placeholder="t('tasks.form.typePlaceholder')"
             :aria-label="t('tasks.form.type')"
+            class="w-full"
             @change="onTypeChange"
           />
         </FromGroup>
 
-        <InputGroup v-model="dueAt" :label="t('tasks.form.dueAt')" type="date" />
+        <FromGroup :label="t('tasks.form.dueAt')">
+          <InputGroup v-model="dueAt" type="date" class="w-full" />
+        </FromGroup>
 
-        <div class="flex space-x-6">
-          <InputGroup :label="t('tasks.form.slaStart')" :disabled="!can('tasks.sla.override')">
-            <template #default="{ id }">
-              <Textinput
-                :id="id"
-                v-model="slaStartAt"
-                type="datetime-local"
-                :disabled="!can('tasks.sla.override')"
-              />
-            </template>
-            <template #append>
-              <Tooltip theme="light" trigger="mouseenter focus">
-                <template #button>
-                  <Icon
-                    icon="heroicons-outline:question-mark-circle"
-                    class="w-4 h-4 text-slate-500 cursor-help"
-                    :aria-label="t('tasks.form.slaTooltip')"
-                  />
-                </template>
-                {{ t('tasks.form.slaTooltip') }}
-              </Tooltip>
-            </template>
-          </InputGroup>
-          <InputGroup :label="t('tasks.form.slaEnd')" :disabled="!can('tasks.sla.override')">
-            <template #default="{ id }">
-              <Textinput
-                :id="id"
-                v-model="slaEndAt"
-                type="datetime-local"
-                :disabled="!can('tasks.sla.override')"
-              />
-            </template>
-            <template #append>
-              <Tooltip theme="light" trigger="mouseenter focus">
-                <template #button>
-                  <Icon
-                    icon="heroicons-outline:question-mark-circle"
-                    class="w-4 h-4 text-slate-500 cursor-help"
-                    :aria-label="t('tasks.form.slaTooltip')"
-                  />
-                </template>
-                {{ t('tasks.form.slaTooltip') }}
-              </Tooltip>
-            </template>
-          </InputGroup>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <FromGroup :label="t('tasks.form.slaStart')">
+            <InputGroup :disabled="!can('tasks.sla.override')" class="w-full">
+              <template #default="{ id }">
+                <Textinput
+                  :id="id"
+                  v-model="slaStartAt"
+                  type="datetime-local"
+                  :disabled="!can('tasks.sla.override')"
+                  class="w-full"
+                />
+              </template>
+              <template #append>
+                <Tooltip theme="light" trigger="mouseenter focus">
+                  <template #button>
+                    <Icon
+                      icon="heroicons-outline:question-mark-circle"
+                      class="w-4 h-4 text-slate-500 cursor-help"
+                      :aria-label="t('tasks.form.slaTooltip')"
+                    />
+                  </template>
+                  {{ t('tasks.form.slaTooltip') }}
+                </Tooltip>
+              </template>
+            </InputGroup>
+          </FromGroup>
+          <FromGroup :label="t('tasks.form.slaEnd')">
+            <InputGroup :disabled="!can('tasks.sla.override')" class="w-full">
+              <template #default="{ id }">
+                <Textinput
+                  :id="id"
+                  v-model="slaEndAt"
+                  type="datetime-local"
+                  :disabled="!can('tasks.sla.override')"
+                  class="w-full"
+                />
+              </template>
+              <template #append>
+                <Tooltip theme="light" trigger="mouseenter focus">
+                  <template #button>
+                    <Icon
+                      icon="heroicons-outline:question-mark-circle"
+                      class="w-4 h-4 text-slate-500 cursor-help"
+                      :aria-label="t('tasks.form.slaTooltip')"
+                    />
+                  </template>
+                  {{ t('tasks.form.slaTooltip') }}
+                </Tooltip>
+              </template>
+            </InputGroup>
+          </FromGroup>
         </div>
 
         <StatusSelect
