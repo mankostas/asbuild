@@ -20,6 +20,7 @@ class BoardPositionService
         // Get ordered tasks in target column
         $siblings = Task::where('tenant_id', $tenantId)
             ->where('status_slug', $statusSlug)
+            ->where('id', '!=', $task->id)
             ->orderBy('board_position')
             ->get(['id', 'board_position']);
 
@@ -32,6 +33,7 @@ class BoardPositionService
             $this->resequence($tenantId, $statusSlug);
             $siblings = Task::where('tenant_id', $tenantId)
                 ->where('status_slug', $statusSlug)
+                ->where('id', '!=', $task->id)
                 ->orderBy('board_position')
                 ->get(['id', 'board_position']);
             $prev = $siblings[$index - 1] ?? null;
