@@ -277,6 +277,15 @@ onMounted(async () => {
       const res = await api.get(`/tasks/${route.params.id}`);
       const task = res.data;
       taskTypeId.value = task.type?.id || task.task_type_id;
+      if (!types.value.some((t: any) => t.id === taskTypeId.value)) {
+        if (task.type) {
+          types.value.push(task.type);
+        } else {
+          const { data } = await api.get(`/task-types/${taskTypeId.value}`);
+          types.value.push(data.data ?? data);
+        }
+        await nextTick();
+      }
       setFieldValue('task_type_id', taskTypeId.value, true);
       await onTypeChange();
       formData.value = task.form_data || {};
