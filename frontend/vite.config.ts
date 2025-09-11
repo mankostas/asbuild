@@ -1,14 +1,18 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
-import tailwindcss from 'tailwindcss';
-import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
+import { createRequire } from 'node:module';
 
-// Ensure all PostCSS parses include a `from` option to silence warnings
+// Patch PostCSS to always receive a `from` value. Tailwind uses `postcss.parse`
+// during module initialization, so we must patch before requiring it.
 const originalParse = postcss.parse;
 postcss.parse = (css, opts: any = {}) =>
-  originalParse(css, { from: opts.from || 'src/assets/main.css', ...opts });
+  originalParse(css, { ...opts, from: opts.from || 'src/assets/main.css' });
+
+const require = createRequire(import.meta.url);
+const tailwindcss = require('tailwindcss');
+const autoprefixer = require('autoprefixer');
 
 export default defineConfig(({ command }) => ({
   plugins: [vue()],
