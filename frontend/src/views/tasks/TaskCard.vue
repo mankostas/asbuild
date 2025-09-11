@@ -34,24 +34,41 @@
                 <span>{{ t('actions.edit') }}</span>
               </button>
             </MenuItem>
-            <MenuItem
-              v-for="s in statusOptions"
-              :key="s.slug"
-              #default="{ active }"
-            >
-              <button :class="menuClass(active)" @click="changeStatus(s.slug)" @keyup.enter="changeStatus(s.slug)" @keyup.space.prevent="changeStatus(s.slug)">
-                <Icon icon="heroicons-outline:arrow-right" />
-                <span>{{ s.name }}</span>
-              </button>
-            </MenuItem>
+            <template v-if="auth.can('tasks.status.update')">
+              <MenuItem
+                v-for="s in statusOptions"
+                :key="s.slug"
+                #default="{ active }"
+              >
+                <button
+                  :class="menuClass(active)"
+                  @click="changeStatus(s.slug)"
+                  @keyup.enter="changeStatus(s.slug)"
+                  @keyup.space.prevent="changeStatus(s.slug)"
+                >
+                  <Icon icon="heroicons-outline:arrow-right" />
+                  <span>{{ s.name }}</span>
+                </button>
+              </MenuItem>
+            </template>
             <MenuItem v-if="auth.can('tasks.update') && canMoveLeft" #default="{ active }">
-              <button :class="menuClass(active)" @click="() => move(-1)" @keyup.enter="() => move(-1)" @keyup.space.prevent="() => move(-1)">
+              <button
+                :class="menuClass(active)"
+                @click="move(-1)"
+                @keyup.enter="move(-1)"
+                @keyup.space.prevent="move(-1)"
+              >
                 <Icon icon="heroicons-outline:chevron-left" />
                 <span>{{ t('board.moveLeft') }}</span>
               </button>
             </MenuItem>
             <MenuItem v-if="auth.can('tasks.update') && canMoveRight" #default="{ active }">
-              <button :class="menuClass(active)" @click="() => move(1)" @keyup.enter="() => move(1)" @keyup.space.prevent="() => move(1)">
+              <button
+                :class="menuClass(active)"
+                @click="move(1)"
+                @keyup.enter="move(1)"
+                @keyup.space.prevent="move(1)"
+              >
                 <Icon icon="heroicons-outline:chevron-right" />
                 <span>{{ t('board.moveRight') }}</span>
               </button>
