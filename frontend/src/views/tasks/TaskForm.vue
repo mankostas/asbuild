@@ -151,6 +151,19 @@ import Modal from '@dc/components/Modal';
 import Tooltip from '@/components/ui/Tooltip/index.vue';
 import Icon from '@dc/components/Icon';
 
+const defaultKeys = new Set([
+  'assignee',
+  'priority',
+  'status',
+  'due_at',
+  'due_date',
+  'scheduled_at',
+  'sla_start_at',
+  'sla_end_at',
+  'title',
+]);
+const defaultTypes = new Set(['assignee', 'priority', 'status']);
+
 const notify = useNotify();
 const router = useRouter();
 const route = useRoute();
@@ -358,18 +371,6 @@ const assigneeField = computed(() => {
 const currentSchemaNoDefaults = computed(() => {
   if (!currentSchema.value) return null;
   const schema = JSON.parse(JSON.stringify(currentSchema.value));
-  const defaultKeys = new Set([
-    'assignee',
-    'priority',
-    'status',
-    'due_at',
-    'due_date',
-    'scheduled_at',
-    'sla_start_at',
-    'sla_end_at',
-    'title',
-  ]);
-  const defaultTypes = new Set(['assignee', 'priority', 'status']);
   if (schema.properties) {
     Object.keys(schema.properties).forEach((key) => {
       const prop = schema.properties[key];
@@ -400,9 +401,22 @@ const currentSchemaNoDefaults = computed(() => {
   return schema;
 });
 
-const assigneeRequired = computed(() => {
-  const field = assigneeField.value;
-  return field ? currentSchema.value?.required?.includes(field) : false;
+const requiredDefaultFields = computed(() => {
+  if (!currentSchema.value) return [];
+  const required = currentSchema.value.required || [];
+  const props = currentSchema.value.properties || {};
+  const set = new Set<string>();
+  required.forEach((key: string) => {
+    const prop = props[key];
+    if (defaultKeys.has(key)) {
+      set.add(key);
+    } else if (defaultTypes.has(prop?.kind)) {
+      set.add(prop.kind);
+    } else if (defaultTypes.has(prop?.type)) {
+      set.add(prop.type);
+    }
+  });
+  return Array.from(set);
 });
 
 const requiredFields = computed(() => currentSchemaNoDefaults.value?.required || []);
@@ -415,7 +429,23 @@ const canSubmit = computed(() => {
     return !(val === undefined || val === null || val === '');
   });
   if (!formValid) return false;
-  if (assigneeRequired.value && !assignee.value) return false;
+  const defaultRefMap: Record<string, any> = {
+    assignee,
+    priority,
+    status,
+    due_at: dueAt,
+    due_date: dueAt,
+    scheduled_at: scheduledAt,
+    sla_start_at: slaStartAt,
+    sla_end_at: slaEndAt,
+    title,
+  };
+  const defaultsValid = requiredDefaultFields.value.every((key) => {
+    const ref = defaultRefMap[key];
+    const val = ref?.value;
+    return !(val === undefined || val === null || val === '');
+  });
+  if (!defaultsValid) return false;
   return true;
 });
 
