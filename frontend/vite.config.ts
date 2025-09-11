@@ -50,6 +50,7 @@ export default defineConfig(({ command }) => ({
         __dirname,
         'node_modules/@videojs-player/vue',
       ),
+      'video.js': path.resolve(__dirname, 'node_modules/video.js'),
     },
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.vue'],
   },
