@@ -34,7 +34,7 @@ class TaskResource extends JsonResource
 
         $data['sla_chip'] = null;
         if ($this->sla_end_at) {
-            $data['sla_chip'] = now()->greaterThan($this->sla_end_at) ? 'overdue' : 'on_track';
+            $data['sla_chip'] = now()->greaterThan($this->sla_end_at) ? 'breached' : 'ok';
         }
 
         $data['is_watching'] = $this->relationLoaded('watchers')

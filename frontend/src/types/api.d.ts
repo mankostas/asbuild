@@ -1711,7 +1711,8 @@ export interface components {
                 watchers?: number;
                 subtasks?: number;
             };
-            sla_chip?: string | null;
+            /** @enum {string|null} */
+            sla_chip?: "ok" | "dueSoon" | "breached" | null;
             is_watching?: boolean;
         };
         TaskComment: {

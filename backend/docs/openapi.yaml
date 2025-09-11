@@ -1088,6 +1088,10 @@ components:
         sla_chip:
           type: string
           nullable: true
+          enum:
+            - ok
+            - dueSoon
+            - breached
         is_watching:
           type: boolean
     TaskComment:
