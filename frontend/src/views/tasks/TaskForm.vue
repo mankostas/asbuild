@@ -144,7 +144,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
@@ -265,6 +265,7 @@ onMounted(async () => {
   ]);
   if (initialTenant === tenantId.value) {
     types.value = typesData;
+    await nextTick();
     Object.keys(statusBySlug).forEach((k) => delete statusBySlug[k]);
     if (Array.isArray(statusesData)) {
       statusesData.forEach((s: any) => {
@@ -276,6 +277,15 @@ onMounted(async () => {
       const res = await api.get(`/tasks/${route.params.id}`);
       const task = res.data;
       taskTypeId.value = task.type?.id || task.task_type_id;
+      if (!types.value.some((t: any) => t.id === taskTypeId.value)) {
+        if (task.type) {
+          types.value.push(task.type);
+        } else {
+          const { data } = await api.get(`/task-types/${taskTypeId.value}`);
+          types.value.push(data.data ?? data);
+        }
+        await nextTick();
+      }
       setFieldValue('task_type_id', taskTypeId.value, true);
       await onTypeChange();
       formData.value = task.form_data || {};
