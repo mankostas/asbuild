@@ -30,73 +30,53 @@
           />
         </FromGroup>
 
-        <FromGroup #default="{ inputId, labelId }" :label="t('tasks.form.dueAt')">
-          <InputGroup class="w-full">
-            <template #default>
-              <Textinput
-                :id="inputId"
-                v-model="dueAt"
-                type="date"
-                :aria-labelledby="labelId"
-                class="w-full"
-              />
-            </template>
-          </InputGroup>
+        <FromGroup :label="t('tasks.form.dueAt')">
+          <DateInput v-model="dueAt" :aria-label="t('tasks.form.dueAt')" />
         </FromGroup>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <FromGroup #default="{ inputId, labelId }" :label="t('tasks.form.slaStart')">
-            <InputGroup :disabled="!can('tasks.sla.override')" class="w-full">
-              <template #default>
-                <Textinput
-                  :id="inputId"
-                  v-model="slaStartAt"
-                  type="datetime-local"
-                  :disabled="!can('tasks.sla.override')"
-                  :aria-labelledby="labelId"
-                  class="w-full"
-                />
-              </template>
-              <template #append>
-                <Tooltip theme="light" trigger="mouseenter focus">
-                  <template #button>
-                    <Icon
-                      icon="heroicons-outline:question-mark-circle"
-                      class="w-4 h-4 text-slate-500 cursor-help"
-                      :aria-label="t('tasks.form.slaTooltip')"
-                    />
-                  </template>
-                  {{ t('tasks.form.slaTooltip') }}
-                </Tooltip>
-              </template>
-            </InputGroup>
-          </FromGroup>
-          <FromGroup #default="{ inputId, labelId }" :label="t('tasks.form.slaEnd')">
-            <InputGroup :disabled="!can('tasks.sla.override')" class="w-full">
-              <template #default>
-                <Textinput
-                  :id="inputId"
-                  v-model="slaEndAt"
-                  type="datetime-local"
-                  :disabled="!can('tasks.sla.override')"
-                  :aria-labelledby="labelId"
-                  class="w-full"
-                />
-              </template>
-              <template #append>
-                <Tooltip theme="light" trigger="mouseenter focus">
-                  <template #button>
-                    <Icon
-                      icon="heroicons-outline:question-mark-circle"
-                      class="w-4 h-4 text-slate-500 cursor-help"
-                      :aria-label="t('tasks.form.slaTooltip')"
-                    />
-                  </template>
-                  {{ t('tasks.form.slaTooltip') }}
-                </Tooltip>
-              </template>
-            </InputGroup>
-          </FromGroup>
+          <InputGroup :disabled="!can('tasks.sla.override')" class="w-full">
+            <template #default>
+              <DateTimeInput
+                v-model="slaStartAt"
+                :readonly="!can('tasks.sla.override')"
+                :label="t('tasks.form.slaStart')"
+              />
+            </template>
+            <template #append>
+              <Tooltip theme="light" trigger="mouseenter focus">
+                <template #button>
+                  <Icon
+                    icon="heroicons-outline:question-mark-circle"
+                    class="w-4 h-4 text-slate-500 cursor-help"
+                    :aria-label="t('tasks.form.slaTooltip')"
+                  />
+                </template>
+                {{ t('tasks.form.slaTooltip') }}
+              </Tooltip>
+            </template>
+          </InputGroup>
+          <InputGroup :disabled="!can('tasks.sla.override')" class="w-full">
+            <template #default>
+              <DateTimeInput
+                v-model="slaEndAt"
+                :readonly="!can('tasks.sla.override')"
+                :label="t('tasks.form.slaEnd')"
+              />
+            </template>
+            <template #append>
+              <Tooltip theme="light" trigger="mouseenter focus">
+                <template #button>
+                  <Icon
+                    icon="heroicons-outline:question-mark-circle"
+                    class="w-4 h-4 text-slate-500 cursor-help"
+                    :aria-label="t('tasks.form.slaTooltip')"
+                  />
+                </template>
+                {{ t('tasks.form.slaTooltip') }}
+              </Tooltip>
+            </template>
+          </InputGroup>
         </div>
 
         <StatusSelect
@@ -116,10 +96,10 @@
         />
 
         <JsonSchemaForm
-          v-if="currentSchemaNoAssignee"
+          v-if="currentSchemaNoDefaults"
           :key="taskTypeId"
           v-model="formData"
-          :schema="currentSchemaNoAssignee"
+          :schema="currentSchemaNoDefaults"
           :task-id="0"
         />
 
@@ -155,6 +135,8 @@ import { useNotify } from '@/plugins/notify';
 import AssigneePicker from '@/components/tasks/AssigneePicker.vue';
 import PrioritySelect from '@/components/fields/PrioritySelect.vue';
 import StatusSelect from '@/components/fields/StatusSelect.vue';
+import DateInput from '@/components/fields/DateInput.vue';
+import DateTimeInput from '@/components/fields/DateTimeInput.vue';
 import { toISO } from '@/utils/datetime';
 import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
@@ -320,10 +302,16 @@ async function onTypeChange() {
     scheduledAt.value = currentType.value?.scheduled_at ? toISO(currentType.value.scheduled_at) : '';
     slaStartAt.value = currentType.value?.sla_start_at ? toISO(currentType.value.sla_start_at) : '';
     slaEndAt.value = currentType.value?.sla_end_at ? toISO(currentType.value.sla_end_at) : '';
+    dueAt.value = currentType.value?.due_at
+      ? toISO(currentType.value.due_at)
+      : currentType.value?.due_date
+      ? toISO(currentType.value.due_date)
+      : null;
   } else {
     scheduledAt.value = '';
     slaStartAt.value = '';
     slaEndAt.value = '';
+    dueAt.value = null;
   }
   await loadPriorities();
   updateStatusOptions();
@@ -367,15 +355,47 @@ const assigneeField = computed(() => {
   return Object.entries(props).find(([, prop]: any) => prop.kind === 'assignee')?.[0] || null;
 });
 
-const currentSchemaNoAssignee = computed(() => {
+const currentSchemaNoDefaults = computed(() => {
   if (!currentSchema.value) return null;
   const schema = JSON.parse(JSON.stringify(currentSchema.value));
-  const field = assigneeField.value;
-  if (field && schema.properties) {
-    delete schema.properties[field];
-    if (schema.required) {
-      schema.required = schema.required.filter((r: string) => r !== field);
-    }
+  const defaultKeys = new Set([
+    'assignee',
+    'priority',
+    'status',
+    'due_at',
+    'due_date',
+    'scheduled_at',
+    'sla_start_at',
+    'sla_end_at',
+    'title',
+  ]);
+  const defaultTypes = new Set(['assignee', 'priority', 'status']);
+  if (schema.properties) {
+    Object.keys(schema.properties).forEach((key) => {
+      const prop = schema.properties[key];
+      if (defaultKeys.has(key) || defaultTypes.has(prop?.kind) || defaultTypes.has(prop?.type)) {
+        delete schema.properties[key];
+      }
+    });
+  }
+  if (schema.required) {
+    schema.required = schema.required.filter((r: string) => !defaultKeys.has(r));
+  }
+  if (Array.isArray(schema.sections)) {
+    schema.sections.forEach((section: any) => {
+      if (Array.isArray(section.fields)) {
+        section.fields = section.fields.filter(
+          (f: any) => !defaultKeys.has(f.key) && !defaultTypes.has(f.type),
+        );
+      }
+      if (Array.isArray(section.tabs)) {
+        section.tabs.forEach((tab: any) => {
+          tab.fields = (tab.fields || []).filter(
+            (f: any) => !defaultKeys.has(f.key) && !defaultTypes.has(f.type),
+          );
+        });
+      }
+    });
   }
   return schema;
 });
@@ -385,7 +405,7 @@ const assigneeRequired = computed(() => {
   return field ? currentSchema.value?.required?.includes(field) : false;
 });
 
-const requiredFields = computed(() => currentSchemaNoAssignee.value?.required || []);
+const requiredFields = computed(() => currentSchemaNoDefaults.value?.required || []);
 
 const canSubmit = computed(() => {
   if (auth.isSuperAdmin && !isEdit.value && !tenantId.value) return false;
