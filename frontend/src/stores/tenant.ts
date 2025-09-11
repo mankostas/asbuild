@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import api from '@/services/api';
-import { TENANT_ID_KEY } from '@/config/app';
+import { TENANT_HEADER, TENANT_ID_KEY } from '@/config/app';
 import { withListParams, type ListParams } from './list';
 import { useLookupsStore } from '@/stores/lookups';
 
@@ -39,6 +39,11 @@ export const useTenantStore = defineStore('tenant', {
       } catch (error: any) {
         if (error?.status === 403) {
           this.tenants = [];
+          this.setTenant('');
+          this.allowedAbilities = {};
+          if (api.defaults?.headers?.common) {
+            delete api.defaults.headers.common[TENANT_HEADER];
+          }
           return { total: 0 } as any;
         }
         throw error;
