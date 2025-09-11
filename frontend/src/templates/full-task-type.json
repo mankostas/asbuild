@@ -7,40 +7,12 @@
         "label": "General Information",
         "fields": [
           {
-            "key": "title",
-            "label": "Title",
-            "type": "text",
-            "required": true,
-            "help": "Short title of the task",
-            "validations": { "min": 3, "max": 100 }
-          },
-          {
             "key": "description",
             "label": "Description",
             "type": "textarea",
             "required": true,
             "help": "Detailed task description",
             "validations": { "max": 1000 }
-          },
-          {
-            "key": "priority",
-            "label": "Priority",
-            "type": "select",
-            "enum": ["low", "medium", "high", "urgent"],
-            "options": [
-              { "value": "low", "label": "Low" },
-              { "value": "medium", "label": "Medium" },
-              { "value": "high", "label": "High" },
-              { "value": "urgent", "label": "Urgent" }
-            ],
-            "default": "medium",
-            "required": true
-          },
-          {
-            "key": "due_date",
-            "label": "Due Date",
-            "type": "date",
-            "required": true
           },
           {
             "key": "start_time",
@@ -61,12 +33,6 @@
             "type": "boolean",
             "required": false,
             "default": false
-          },
-          {
-            "key": "assignee",
-            "label": "Assignee",
-            "type": "assignee",
-            "required": true
           },
           {
             "key": "serial_number",
