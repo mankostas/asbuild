@@ -176,6 +176,7 @@ import Card from '@/components/ui/Card/index.vue';
 import Dropdown from '@/components/ui/Dropdown/index.vue';
 import Icon from '@/components/ui/Icon';
 import { MenuItem } from '@headlessui/vue';
+import { computeAllowedTransitions } from './allowedTransitions';
 
 interface Task {
   id: number;
@@ -218,19 +219,14 @@ const auth = useAuthStore();
 const router = useRouter();
 
 function allowedTransitions(from: string): string[] {
-  if (auth.can('tasks.manage')) {
-    return props.columns.map((c) => c.status.slug).filter((s) => s !== from);
-  }
-  const direct = props.task.type?.statuses?.[from];
-  let allowed = direct && direct.length
-    ? direct
-    : props.task.type?.status_flow_json
-        ?.filter(([f]) => f === from)
-        .map(([, to]) => to) ?? [];
-  if (props.task.previous_status_slug && props.task.previous_status_slug !== from) {
-    allowed = [...allowed, props.task.previous_status_slug];
-  }
-  return Array.from(new Set(allowed));
+  const canManage = auth.can('tasks.manage');
+  const transitions = computeAllowedTransitions(
+    props.task,
+    from,
+    canManage,
+    props.columns,
+  );
+  return canManage ? transitions.filter((s) => s !== from) : transitions;
 }
 
 const statusOptions = computed(() => {
