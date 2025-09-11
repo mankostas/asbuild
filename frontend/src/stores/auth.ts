@@ -37,8 +37,12 @@ export const useAuthStore = defineStore('auth', {
       state.user?.roles?.some(
         (r: any) => r.name === 'SuperAdmin' || r.slug === 'super_admin',
       ) || false,
-    can: (state) => (ability: string) =>
-      state.abilities.includes('*') || state.abilities.includes(ability),
+    can(state) {
+      return (ability: string) =>
+        this.isSuperAdmin ||
+        state.abilities.includes('*') ||
+        state.abilities.includes(ability);
+    },
     hasAny: (state) => (abilities: string[]) =>
       abilities.length === 0 ||
       state.abilities.includes('*') ||
