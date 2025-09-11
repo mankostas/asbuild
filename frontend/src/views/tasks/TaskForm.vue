@@ -29,19 +29,30 @@
           />
         </FromGroup>
 
-        <FromGroup :label="t('tasks.form.dueAt')">
-          <InputGroup v-model="dueAt" type="date" class="w-full" />
+        <FromGroup #default="{ inputId, labelId }" :label="t('tasks.form.dueAt')">
+          <InputGroup class="w-full">
+            <template #default>
+              <Textinput
+                :id="inputId"
+                v-model="dueAt"
+                type="date"
+                :aria-labelledby="labelId"
+                class="w-full"
+              />
+            </template>
+          </InputGroup>
         </FromGroup>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <FromGroup :label="t('tasks.form.slaStart')">
+          <FromGroup #default="{ inputId, labelId }" :label="t('tasks.form.slaStart')">
             <InputGroup :disabled="!can('tasks.sla.override')" class="w-full">
-              <template #default="{ id }">
+              <template #default>
                 <Textinput
-                  :id="id"
+                  :id="inputId"
                   v-model="slaStartAt"
                   type="datetime-local"
                   :disabled="!can('tasks.sla.override')"
+                  :aria-labelledby="labelId"
                   class="w-full"
                 />
               </template>
@@ -59,14 +70,15 @@
               </template>
             </InputGroup>
           </FromGroup>
-          <FromGroup :label="t('tasks.form.slaEnd')">
+          <FromGroup #default="{ inputId, labelId }" :label="t('tasks.form.slaEnd')">
             <InputGroup :disabled="!can('tasks.sla.override')" class="w-full">
-              <template #default="{ id }">
+              <template #default>
                 <Textinput
-                  :id="id"
+                  :id="inputId"
                   v-model="slaEndAt"
                   type="datetime-local"
                   :disabled="!can('tasks.sla.override')"
+                  :aria-labelledby="labelId"
                   class="w-full"
                 />
               </template>
