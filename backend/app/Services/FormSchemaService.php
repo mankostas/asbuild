@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class FormSchemaService
@@ -407,8 +408,18 @@ class FormSchemaService
         if (! is_string($value)) {
             return false;
         }
+
         $d = \DateTime::createFromFormat('Y-m-d', $value);
-        return $d && $d->format('Y-m-d') === $value;
+        if ($d && $d->format('Y-m-d') === $value) {
+            return true;
+        }
+
+        try {
+            Carbon::parse($value);
+            return true;
+        } catch (\Exception) {
+            return false;
+        }
     }
 
     protected function isValidTime(mixed $value): bool
