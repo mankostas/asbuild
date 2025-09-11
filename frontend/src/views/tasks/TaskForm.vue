@@ -239,7 +239,9 @@ const schema = yup.object({
   task_type_id: yup.mixed().required('Type is required'),
 });
 
-const { handleSubmit, meta, setErrors, errors } = useForm({ validationSchema: schema });
+const { handleSubmit, meta, setErrors, errors, setFieldValue } = useForm({
+  validationSchema: schema,
+});
 const { value: taskTypeId, errorMessage: taskTypeError } = useField<string | number>(
   'task_type_id',
 );
@@ -272,7 +274,7 @@ onMounted(async () => {
     if (isEdit.value) {
       const res = await api.get(`/tasks/${route.params.id}`);
       const task = res.data;
-      taskTypeId.value = task.type?.id || task.task_type_id;
+      setFieldValue('task_type_id', task.type?.id || task.task_type_id, true);
       await onTypeChange();
       formData.value = task.form_data || {};
       scheduledAt.value = task.scheduled_at ? toISO(task.scheduled_at) : '';
