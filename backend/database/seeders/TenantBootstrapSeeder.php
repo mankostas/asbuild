@@ -5,9 +5,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Models\TaskStatus;
-use App\Models\TaskType;
 use App\Support\TenantDefaults;
+use App\Services\StatusFlowService;
 
 class TenantBootstrapSeeder extends Seeder
 {
@@ -187,10 +186,11 @@ class TenantBootstrapSeeder extends Seeder
 
         $typeStatuses = array_fill_keys(array_column($defaultStatuses, 'slug'), []);
 
-        $slugs = array_column($defaultStatuses, 'slug');
         $transitions = [];
-        for ($i = 0; $i < count($slugs) - 1; $i++) {
-            $transitions[] = [$slugs[$i], $slugs[$i + 1]];
+        foreach (StatusFlowService::DEFAULT_TRANSITIONS as $from => $tos) {
+            foreach ($tos as $to) {
+                $transitions[] = [$from, $to];
+            }
         }
 
         DB::table('task_types')->updateOrInsert(

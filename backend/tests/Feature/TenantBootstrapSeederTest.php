@@ -23,5 +23,16 @@ class TenantBootstrapSeederTest extends TestCase
             'position' => 1,
         ]);
         $this->assertDatabaseHas('task_types', ['name' => 'General Task']);
+
+        $flow = \DB::table('task_types')
+            ->where('name', 'General Task')
+            ->value('status_flow_json');
+        $edges = json_decode((string) $flow, true);
+
+        $this->assertTrue(in_array(['blocked', 'assigned'], $edges, true));
+        $this->assertTrue(in_array(['review', 'completed'], $edges, true));
+        $this->assertTrue(in_array(['review', 'redo'], $edges, true));
+        $this->assertTrue(in_array(['review', 'rejected'], $edges, true));
+        $this->assertTrue(in_array(['redo', 'in_progress'], $edges, true));
     }
 }
