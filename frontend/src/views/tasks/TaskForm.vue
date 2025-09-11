@@ -201,6 +201,15 @@ const statusOptions = ref<{ label: string; value: string }[]>([]);
 const statusBySlug: Record<string, any> = {};
 const priorityOptions = ref<{ label: string; value: string }[]>([]);
 
+// Default fields handled outside of the dynamic schema form
+const defaultKeys = new Set([
+  'scheduled_at',
+  'sla_start_at',
+  'sla_end_at',
+  'due_at',
+]);
+const defaultTypes = new Set(['priority', 'status']);
+
 async function loadTypes(tid: string | number | null): Promise<any[]> {
   const headers =
     auth.isSuperAdmin && tid ? { [TENANT_HEADER]: tid } : undefined;
@@ -362,14 +371,33 @@ function updateStatusOptions(current?: string | null) {
 
 const currentSchema = computed(() => currentType.value?.schema_json || null);
 
+// Remove default fields handled by dedicated inputs
+const currentSchemaNoDefaults = computed(() => {
+  if (!currentSchema.value) return null;
+  const schema = JSON.parse(JSON.stringify(currentSchema.value));
+  const props = schema.properties || {};
+  Object.keys(props).forEach((key) => {
+    const prop = props[key];
+    if (defaultKeys.has(key) || defaultTypes.has(prop?.kind)) {
+      delete props[key];
+      if (schema.required) {
+        schema.required = schema.required.filter((r: string) => r !== key);
+      }
+    }
+  });
+  return schema;
+});
+
 const assigneeField = computed(() => {
-  const props = currentSchema.value?.properties || {};
-  return Object.entries(props).find(([, prop]: any) => prop.kind === 'assignee')?.[0] || null;
+  const props = currentSchemaNoDefaults.value?.properties || {};
+  return (
+    Object.entries(props).find(([, prop]: any) => prop.kind === 'assignee')?.[0] || null
+  );
 });
 
 const currentSchemaNoAssignee = computed(() => {
-  if (!currentSchema.value) return null;
-  const schema = JSON.parse(JSON.stringify(currentSchema.value));
+  if (!currentSchemaNoDefaults.value) return null;
+  const schema = JSON.parse(JSON.stringify(currentSchemaNoDefaults.value));
   const field = assigneeField.value;
   if (field && schema.properties) {
     delete schema.properties[field];
@@ -387,6 +415,15 @@ const assigneeRequired = computed(() => {
 
 const requiredFields = computed(() => currentSchemaNoAssignee.value?.required || []);
 
+// Required default fields (e.g., due_at, scheduled_at)
+const requiredDefaultFields = computed(() => {
+  const required = currentSchema.value?.required || [];
+  const props = currentSchema.value?.properties || {};
+  return required.filter(
+    (key: string) => defaultKeys.has(key) || defaultTypes.has(props[key]?.kind),
+  );
+});
+
 const canSubmit = computed(() => {
   if (auth.isSuperAdmin && !isEdit.value && !tenantId.value) return false;
   if (!taskTypeId.value || !title.value.trim()) return false;
@@ -396,6 +433,19 @@ const canSubmit = computed(() => {
   });
   if (!formValid) return false;
   if (assigneeRequired.value && !assignee.value) return false;
+  const defaultMap: Record<string, any> = {
+    scheduled_at: scheduledAt.value,
+    sla_start_at: slaStartAt.value,
+    sla_end_at: slaEndAt.value,
+    due_at: dueAt.value,
+    priority: priority.value,
+    status: status.value,
+  };
+  const defaultsValid = requiredDefaultFields.value.every((k: string) => {
+    const val = defaultMap[k];
+    return !(val === undefined || val === null || val === '');
+  });
+  if (!defaultsValid) return false;
   return true;
 });
 
