@@ -291,7 +291,10 @@ async function onTypeChange() {
 
 function updateStatusOptions(current?: string | null) {
   const type = currentType.value;
-  const typeStatuses = type?.statuses || [];
+  const raw = type?.statuses;
+  const typeStatuses = Array.isArray(raw)
+    ? raw
+    : Object.keys(raw || {}).map((slug) => ({ slug }));
   let opts = typeStatuses.map((s: any) => ({
     value: s.slug,
     label: statusBySlug[s.slug]?.name || s.slug,
