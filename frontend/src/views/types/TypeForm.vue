@@ -1060,18 +1060,16 @@ async function onSubmit() {
           }));
         }
 
-        if (s.photos.length) {
-          section.photos = s.photos.map((p) => ({
-            key: p.name,
-            label: p.label,
-            type: p.typeKey,
-            validations: p.validations,
-            maxCount: p.maxCount,
-            help: p.help,
-            'x-roles': p.roles,
-            'x-styles': p.styles,
-          }));
-        }
+        section.photos = s.photos.map((p) => ({
+          key: p.name,
+          label: p.label,
+          type: p.typeKey,
+          validations: p.validations,
+          maxCount: p.maxCount,
+          help: p.help,
+          'x-roles': p.roles,
+          'x-styles': p.styles,
+        }));
 
         return section;
       }),
@@ -1228,18 +1226,16 @@ const previewSchema = computed(() => ({
       }));
     }
 
-    if (s.photos.length) {
-      section.photos = s.photos.map((p) => ({
-        key: p.name,
-        label: p.label,
-        type: p.typeKey,
-        validations: p.validations,
-        maxCount: p.maxCount,
-        help: p.help,
-        'x-roles': p.roles,
-        'x-styles': p.styles,
-      }));
-    }
+    section.photos = s.photos.map((p) => ({
+      key: p.name,
+      label: p.label,
+      type: p.typeKey,
+      validations: p.validations,
+      maxCount: p.maxCount,
+      help: p.help,
+      'x-roles': p.roles,
+      'x-styles': p.styles,
+    }));
 
     return section;
   }),
