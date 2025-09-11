@@ -116,10 +116,10 @@
         />
 
         <JsonSchemaForm
-          v-if="currentSchemaNoAssignee"
+          v-if="currentSchemaNoDefaults"
           :key="taskTypeId"
           v-model="formData"
-          :schema="currentSchemaNoAssignee"
+          :schema="currentSchemaNoDefaults"
           :task-id="0"
         />
 
@@ -367,15 +367,47 @@ const assigneeField = computed(() => {
   return Object.entries(props).find(([, prop]: any) => prop.kind === 'assignee')?.[0] || null;
 });
 
-const currentSchemaNoAssignee = computed(() => {
+const currentSchemaNoDefaults = computed(() => {
   if (!currentSchema.value) return null;
   const schema = JSON.parse(JSON.stringify(currentSchema.value));
-  const field = assigneeField.value;
-  if (field && schema.properties) {
-    delete schema.properties[field];
-    if (schema.required) {
-      schema.required = schema.required.filter((r: string) => r !== field);
-    }
+  const defaultKeys = new Set([
+    'assignee',
+    'priority',
+    'status',
+    'due_at',
+    'due_date',
+    'scheduled_at',
+    'sla_start_at',
+    'sla_end_at',
+    'title',
+  ]);
+  const defaultTypes = new Set(['assignee', 'priority', 'status']);
+  if (schema.properties) {
+    Object.keys(schema.properties).forEach((key) => {
+      const prop = schema.properties[key];
+      if (defaultKeys.has(key) || defaultTypes.has(prop?.kind) || defaultTypes.has(prop?.type)) {
+        delete schema.properties[key];
+      }
+    });
+  }
+  if (schema.required) {
+    schema.required = schema.required.filter((r: string) => !defaultKeys.has(r));
+  }
+  if (Array.isArray(schema.sections)) {
+    schema.sections.forEach((section: any) => {
+      if (Array.isArray(section.fields)) {
+        section.fields = section.fields.filter(
+          (f: any) => !defaultKeys.has(f.key) && !defaultTypes.has(f.type),
+        );
+      }
+      if (Array.isArray(section.tabs)) {
+        section.tabs.forEach((tab: any) => {
+          tab.fields = (tab.fields || []).filter(
+            (f: any) => !defaultKeys.has(f.key) && !defaultTypes.has(f.type),
+          );
+        });
+      }
+    });
   }
   return schema;
 });
@@ -385,7 +417,7 @@ const assigneeRequired = computed(() => {
   return field ? currentSchema.value?.required?.includes(field) : false;
 });
 
-const requiredFields = computed(() => currentSchemaNoAssignee.value?.required || []);
+const requiredFields = computed(() => currentSchemaNoDefaults.value?.required || []);
 
 const canSubmit = computed(() => {
   if (auth.isSuperAdmin && !isEdit.value && !tenantId.value) return false;
