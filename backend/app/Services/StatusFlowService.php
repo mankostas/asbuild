@@ -65,6 +65,25 @@ class StatusFlowService
     }
 
     /**
+     * Determine terminal statuses with no outgoing transitions.
+     */
+    public function terminalStatuses(TaskType|null $type = null): array
+    {
+        $map = $this->transitions($type);
+
+        $all = array_keys($map);
+        foreach ($map as $edges) {
+            foreach ($edges as $to) {
+                if (! in_array($to, $all, true)) {
+                    $all[] = $to;
+                }
+            }
+        }
+
+        return array_values(array_filter($all, fn ($status) => empty($map[$status] ?? [])));
+    }
+
+    /**
      * Determine if transition is allowed.
      */
     public function canTransition(string $from, string $to, TaskType|null $type = null): bool
@@ -88,7 +107,7 @@ class StatusFlowService
         }
 
         $initial = data_get($statuses->first(), 'slug');
-        $final = data_get($statuses->last(), 'slug');
+        $terminals = $this->terminalStatuses($type);
 
         if ($toSlug !== $initial && empty($task->assigned_user_id)) {
             $this->abort422(
@@ -97,14 +116,14 @@ class StatusFlowService
             );
         }
 
-        if ($toSlug === $final && $this->hasIncompleteRequiredSubtasks($task)) {
+        if (in_array($toSlug, $terminals, true) && $this->hasIncompleteRequiredSubtasks($task)) {
             $this->abort422(
                 'subtasks_incomplete',
                 __('Complete required subtasks before finishing.')
             );
         }
 
-        if ($toSlug === $final && ! $this->hasAllRequiredPhotos($task, $type->schema_json)) {
+        if (in_array($toSlug, $terminals, true) && ! $this->hasAllRequiredPhotos($task, $type->schema_json)) {
             $this->abort422(
                 'photos_required',
                 __('Required photos are missing.')
