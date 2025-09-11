@@ -187,7 +187,7 @@ async function loadStatuses(tid: string | number | null): Promise<any[]> {
   const headers =
     auth.isSuperAdmin && tid ? { [TENANT_HEADER]: tid } : undefined;
   const { data } = await api.get('/task-statuses', { headers });
-  return data;
+  return data.data || data;
 }
 
 async function loadPriorities() {
@@ -239,9 +239,11 @@ onMounted(async () => {
   if (initialTenant === tenantId.value) {
     types.value = typesData;
     Object.keys(statusBySlug).forEach((k) => delete statusBySlug[k]);
-    statusesData.forEach((s: any) => {
-      statusBySlug[s.slug] = s;
-    });
+    if (Array.isArray(statusesData)) {
+      statusesData.forEach((s: any) => {
+        statusBySlug[s.slug] = s;
+      });
+    }
 
     if (isEdit.value) {
       const res = await api.get(`/tasks/${route.params.id}`);
@@ -373,9 +375,11 @@ watch(
     }
     types.value = typesData;
     Object.keys(statusBySlug).forEach((k) => delete statusBySlug[k]);
-    statusesData.forEach((s: any) => {
-      statusBySlug[s.slug] = s;
-    });
+    if (Array.isArray(statusesData)) {
+      statusesData.forEach((s: any) => {
+        statusBySlug[s.slug] = s;
+      });
+    }
     taskTypeId.value = '' as any;
     priorityOptions.value = [];
 
