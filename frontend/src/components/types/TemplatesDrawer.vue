@@ -51,7 +51,7 @@ import Button from '@/components/ui/Button/index.vue';
 import Fileinput from '@/components/ui/Fileinput/index.vue';
 import { can } from '@/stores/auth';
 import { useTaskTypesStore } from '@/stores/taskTypes';
-import fullTemplate from '../../../../task-types/templates/full-task-type.json';
+import fullTemplate from '@/templates/full-task-type.json';
 
 interface Props {
   open: boolean;
