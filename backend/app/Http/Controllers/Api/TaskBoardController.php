@@ -180,6 +180,9 @@ class TaskBoardController extends Controller
 
         $positions->move($task, $status->slug, $data['index']);
 
-        return new TaskResource($task->fresh(['type']));
+        $task = $task->fresh(['type', 'assignee', 'watchers'])
+            ->loadCount(['comments', 'attachments', 'watchers', 'subtasks']);
+
+        return new TaskResource($task);
     }
 }
