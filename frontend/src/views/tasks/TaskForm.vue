@@ -176,25 +176,18 @@ const statusOptions = ref<{ label: string; value: string }[]>([]);
 const statusBySlug: Record<string, any> = {};
 const priorityOptions = ref<{ label: string; value: string }[]>([]);
 
-async function loadTypes() {
+async function loadTypes(tid: string | number | null): Promise<any[]> {
   const headers =
-    auth.isSuperAdmin && tenantId.value
-      ? { [TENANT_HEADER]: tenantId.value }
-      : undefined;
+    auth.isSuperAdmin && tid ? { [TENANT_HEADER]: tid } : undefined;
   const { data } = await api.get('/task-types/options', { headers });
-  types.value = data;
+  return data;
 }
 
-async function loadStatuses() {
+async function loadStatuses(tid: string | number | null): Promise<any[]> {
   const headers =
-    auth.isSuperAdmin && tenantId.value
-      ? { [TENANT_HEADER]: tenantId.value }
-      : undefined;
+    auth.isSuperAdmin && tid ? { [TENANT_HEADER]: tid } : undefined;
   const { data } = await api.get('/task-statuses', { headers });
-  Object.keys(statusBySlug).forEach((k) => delete statusBySlug[k]);
-  data.forEach((s: any) => {
-    statusBySlug[s.slug] = s;
-  });
+  return data;
 }
 
 async function loadPriorities() {
@@ -238,25 +231,36 @@ onMounted(async () => {
   if (auth.isSuperAdmin && tenantStore.tenants.length === 0) {
     await tenantStore.loadTenants();
   }
-  await Promise.all([loadTypes(), loadStatuses()]);
+  const initialTenant = tenantId.value;
+  const [typesData, statusesData] = await Promise.all([
+    loadTypes(initialTenant),
+    loadStatuses(initialTenant),
+  ]);
+  if (initialTenant === tenantId.value) {
+    types.value = typesData;
+    Object.keys(statusBySlug).forEach((k) => delete statusBySlug[k]);
+    statusesData.forEach((s: any) => {
+      statusBySlug[s.slug] = s;
+    });
 
-  if (isEdit.value) {
-    const res = await api.get(`/tasks/${route.params.id}`);
-    const task = res.data;
-    taskTypeId.value = task.type?.id || task.task_type_id;
-    await onTypeChange();
-    formData.value = task.form_data || {};
-    scheduledAt.value = task.scheduled_at ? toISO(task.scheduled_at) : '';
-    slaStartAt.value = task.sla_start_at ? toISO(task.sla_start_at) : '';
-    slaEndAt.value = task.sla_end_at ? toISO(task.sla_end_at) : '';
-    dueAt.value = task.due_at ? toISO(task.due_at) : null;
-    priority.value = task.priority || '';
-    status.value = task.status || null;
-    originalStatus.value = status.value;
-    if (task.assignee) {
-      assignee.value = { id: task.assignee.id };
+    if (isEdit.value) {
+      const res = await api.get(`/tasks/${route.params.id}`);
+      const task = res.data;
+      taskTypeId.value = task.type?.id || task.task_type_id;
+      await onTypeChange();
+      formData.value = task.form_data || {};
+      scheduledAt.value = task.scheduled_at ? toISO(task.scheduled_at) : '';
+      slaStartAt.value = task.sla_start_at ? toISO(task.sla_start_at) : '';
+      slaEndAt.value = task.sla_end_at ? toISO(task.sla_end_at) : '';
+      dueAt.value = task.due_at ? toISO(task.due_at) : null;
+      priority.value = task.priority || '';
+      status.value = task.status || null;
+      originalStatus.value = status.value;
+      if (task.assignee) {
+        assignee.value = { id: task.assignee.id };
+      }
+      updateStatusOptions(task.status);
     }
-    updateStatusOptions(task.status);
   }
 });
 
@@ -355,7 +359,20 @@ const canSubmit = computed(() => {
 watch(
   () => tenantId.value,
   async () => {
-    await Promise.all([loadTypes(), loadStatuses()]);
+    const currentTenant = tenantId.value; // snapshot tenant to avoid race conditions
+    const [typesData, statusesData] = await Promise.all([
+      loadTypes(currentTenant),
+      loadStatuses(currentTenant),
+    ]);
+    if (currentTenant !== tenantId.value) {
+      // tenant changed while requests were in-flight; ignore stale results
+      return;
+    }
+    types.value = typesData;
+    Object.keys(statusBySlug).forEach((k) => delete statusBySlug[k]);
+    statusesData.forEach((s: any) => {
+      statusBySlug[s.slug] = s;
+    });
     taskTypeId.value = '' as any;
     priorityOptions.value = [];
 
