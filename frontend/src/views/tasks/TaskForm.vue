@@ -25,6 +25,7 @@
             :placeholder="t('tasks.form.typePlaceholder')"
             :aria-label="t('tasks.form.type')"
             class="w-full"
+            :disabled="isEdit"
             @change="onTypeChange"
           />
         </FromGroup>
@@ -239,7 +240,9 @@ const schema = yup.object({
   task_type_id: yup.mixed().required('Type is required'),
 });
 
-const { handleSubmit, meta, setErrors, errors } = useForm({ validationSchema: schema });
+const { handleSubmit, meta, setErrors, errors, setFieldValue } = useForm({
+  validationSchema: schema,
+});
 const { value: taskTypeId, errorMessage: taskTypeError } = useField<string | number>(
   'task_type_id',
 );
@@ -273,6 +276,7 @@ onMounted(async () => {
       const res = await api.get(`/tasks/${route.params.id}`);
       const task = res.data;
       taskTypeId.value = task.type?.id || task.task_type_id;
+      setFieldValue('task_type_id', taskTypeId.value, true);
       await onTypeChange();
       formData.value = task.form_data || {};
       scheduledAt.value = task.scheduled_at ? toISO(task.scheduled_at) : '';
