@@ -136,6 +136,7 @@ import TenantSwitcher from '@/components/admin/TenantSwitcher.vue';
 import EmptyState from '@/components/Board/EmptyState.vue';
 import boardEmpty from '@/assets/illustrations/board-empty.svg';
 import columnEmpty from '@/assets/illustrations/column-empty.svg';
+import { computeAllowedTransitions } from './allowedTransitions';
 
 const { t } = useI18n();
 const notify = useNotify();
@@ -162,7 +163,7 @@ interface Task {
   };
   type?: {
     statuses?: Record<string, string[]>;
-    status_flow_json?: [string, string][];
+    status_flow_json?: [string, string][] | Record<string, string[]>;
   };
 }
 
@@ -334,19 +335,12 @@ function onDragStart(evt: any) {
 }
 
 function allowedTransitions(task: Task, from: string): string[] {
-  if (auth.can('tasks.manage')) {
-    return columns.value.map((c) => c.status.slug);
-  }
-  const direct = task.type?.statuses?.[from];
-  let allowed = direct && direct.length
-    ? direct
-    : task.type?.status_flow_json
-        ?.filter(([f]) => f === from)
-        .map(([, to]) => to) ?? [];
-  if (task.previous_status_slug && task.previous_status_slug !== from) {
-    allowed = [...allowed, task.previous_status_slug];
-  }
-  return Array.from(new Set(allowed));
+  return computeAllowedTransitions(
+    task,
+    from,
+    auth.can('tasks.manage'),
+    columns.value,
+  );
 }
 
 function onDragMove(evt: any) {
