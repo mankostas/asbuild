@@ -415,8 +415,8 @@ class FormSchemaService
         }
 
         try {
-            Carbon::parse($value);
-            return true;
+            $d = Carbon::parse($value);
+            return $d->toDateString() === $value;
         } catch (\Exception) {
             return false;
         }
