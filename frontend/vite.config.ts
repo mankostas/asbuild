@@ -28,6 +28,28 @@ export default defineConfig(({ command }) => ({
         __dirname,
         'node_modules/@headlessui/vue',
       ),
+      'vue-cleave-component': path.resolve(
+        __dirname,
+        'node_modules/vue-cleave-component',
+      ),
+      'vue-select': path.resolve(
+        __dirname,
+        'node_modules/vue-select',
+      ),
+      'simplebar-vue': path.resolve(
+        __dirname,
+        'node_modules/simplebar-vue',
+      ),
+      '@iconify/vue': path.resolve(
+        __dirname,
+        'node_modules/@iconify/vue',
+      ),
+      gsap: path.resolve(__dirname, 'node_modules/gsap'),
+      swiper: path.resolve(__dirname, 'node_modules/swiper'),
+      '@videojs-player/vue': path.resolve(
+        __dirname,
+        'node_modules/@videojs-player/vue',
+      ),
     },
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.vue'],
   },
