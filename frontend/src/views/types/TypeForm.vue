@@ -853,10 +853,12 @@ function loadVersion(v: any) {
     }
   }
   if (Array.isArray(flow)) {
-    statusFlow.value = flow as [string, string][];
+    statusFlow.value = flow.map((e: any) =>
+      Array.isArray(e) ? [e[0], e[1]] : [e.from, e.to],
+    ) as [string, string][];
   } else if (flow && typeof flow === 'object') {
     statusFlow.value = Object.entries(flow).flatMap(([from, tos]: any) =>
-      (tos as string[]).map((to) => [from, to] as [string, string])
+      (tos as string[]).map((to) => [from, to] as [string, string]),
     );
   } else {
     statusFlow.value = [];
