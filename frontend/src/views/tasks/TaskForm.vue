@@ -154,6 +154,7 @@ import FromGroup from '@dc/components/FromGroup';
 import Modal from '@dc/components/Modal';
 import Tooltip from '@/components/ui/Tooltip/index.vue';
 import Icon from '@dc/components/Icon';
+import { computeStatusOptions } from './statusOptions';
 
 const defaultKeys = new Set([
   'assignee',
@@ -335,30 +336,12 @@ async function onTypeChange() {
 }
 
 function updateStatusOptions(current?: string | null) {
-  const type = currentType.value;
-  const raw = type?.statuses;
-  const typeStatuses = Array.isArray(raw)
-    ? raw
-    : Object.keys(raw || {}).map((slug) => ({ slug }));
-  let opts = typeStatuses.map((s: any) => ({
-    value: s.slug,
-    label: statusBySlug[s.slug]?.name || s.slug,
-  }));
-  if (isEdit.value && current) {
-    const flow = type?.status_flow_json || [];
-    let graph: Record<string, string[]> = {};
-    if (Array.isArray(flow)) {
-      flow.forEach((e: [string, string]) => {
-        const [from, to] = e;
-        if (!graph[from]) graph[from] = [];
-        graph[from].push(to);
-      });
-    } else if (flow && typeof flow === 'object') {
-      graph = flow as Record<string, string[]>;
-    }
-    const allowed = [current, ...(graph[current] || [])];
-    opts = opts.filter((o) => allowed.includes(o.value));
-  }
+  const opts = computeStatusOptions(
+    currentType.value,
+    statusBySlug,
+    isEdit.value,
+    current,
+  );
   statusOptions.value = opts;
   if (!status.value && opts.length) {
     status.value = opts[0].value;
