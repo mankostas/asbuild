@@ -30,7 +30,12 @@
               $emit('input', $event);
             }
           "
-          @change="$emit('change', $event)"
+          @change="
+            ($event) => {
+              $emit('update:modelValue', $event.target.value);
+              $emit('change', $event);
+            }
+          "
         >
         <option value="" disabled selected>{{ placeholder }}</option>
         <template v-if="!$slots.default && options">

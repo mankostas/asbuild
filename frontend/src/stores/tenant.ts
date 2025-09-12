@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import api from '@/services/api';
-import { TENANT_HEADER, TENANT_ID_KEY } from '@/config/app';
+import { TENANT_ID_KEY } from '@/config/app';
 import { withListParams, type ListParams } from './list';
 import { useLookupsStore } from '@/stores/lookups';
 
@@ -38,13 +38,10 @@ export const useTenantStore = defineStore('tenant', {
         return data.meta;
       } catch (error: any) {
         if (error?.status === 403) {
-          this.tenants = [];
-          this.setTenant('');
-          this.allowedAbilities = {};
-          if (api.defaults?.headers?.common) {
-            delete api.defaults.headers.common[TENANT_HEADER];
-          }
-          return { total: 0 } as any;
+          // Preserve the current tenant and previously loaded tenants when the
+          // impersonated user lacks permission to list tenants. Clearing the
+          // state here would drop the active tenant and break impersonation.
+          return { total: this.tenants.length } as any;
         }
         throw error;
       }
