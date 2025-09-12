@@ -3,19 +3,25 @@ import { computeStatusOptions } from '@/views/tasks/statusOptions';
 
 describe('computeStatusOptions', () => {
   const statusBySlug = {
+    redo: { name: 'Redo' },
     draft: { name: 'Draft' },
     assigned: { name: 'Assigned' },
     in_progress: { name: 'In Progress' },
+    in_review: { name: 'In Review' },
   };
   const type: any = {
     statuses: [
+      { slug: 'redo' },
       { slug: 'draft' },
       { slug: 'assigned' },
       { slug: 'in_progress' },
+      { slug: 'in_review' },
     ],
     status_flow_json: [
       ['draft', 'assigned'],
       ['assigned', 'in_progress'],
+      ['in_progress', 'in_review'],
+      ['in_review', 'redo'],
     ],
   };
 

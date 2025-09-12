@@ -46,10 +46,19 @@ export function computeStatusOptions(
     const allowed = [current, ...(graph[current] || [])];
     opts = opts.filter((o) => allowed.includes(o.value));
   } else {
-    const initial = typeStatuses[0]?.slug;
+    const incoming = new Set<string>();
+    Object.values(graph).forEach((targets) =>
+      targets.forEach((t) => incoming.add(t)),
+    );
+    const initial =
+      typeStatuses.find((s: any) => !incoming.has(s.slug))?.slug ||
+      typeStatuses[0]?.slug;
     if (initial) {
       const allowed = [initial, ...(graph[initial] || [])];
-      opts = opts.filter((o) => allowed.includes(o.value));
+      const order = new Map(allowed.map((v, i) => [v, i]));
+      opts = opts
+        .filter((o) => order.has(o.value))
+        .sort((a, b) => (order.get(a.value)! - order.get(b.value)!));
     }
   }
 
