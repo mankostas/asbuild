@@ -87,7 +87,11 @@
           :disabled="isEdit && !can('tasks.status.update')"
         />
 
-        <AssigneePicker v-if="assigneeField && can('tasks.assign')" v-model="assignee" />
+        <AssigneePicker
+          v-if="can('tasks.assign')"
+          v-model="assignee"
+          :label="t('tasks.form.assignee')"
+        />
 
         <PrioritySelect
           v-model="priority"
@@ -362,11 +366,6 @@ function updateStatusOptions(current?: string | null) {
 }
 
 const currentSchema = computed(() => currentType.value?.schema_json || null);
-
-const assigneeField = computed(() => {
-  const props = currentSchema.value?.properties || {};
-  return Object.entries(props).find(([, prop]: any) => prop.kind === 'assignee')?.[0] || null;
-});
 
 const currentSchemaNoDefaults = computed(() => {
   if (!currentSchema.value) return null;
