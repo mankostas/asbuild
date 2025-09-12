@@ -20,6 +20,16 @@ export const useTaskTypesStore = defineStore('taskTypes', {
       const { data } = await api.post(`/task-types/${id}/copy-to-tenant`, payload);
       return data;
     },
+    async copyManyToTenant(ids: number[], tenantId?: string | number) {
+      const payload: any = { ids };
+      if (tenantId) payload.tenant_id = tenantId;
+      const { data } = await api.post('/task-types/bulk-copy-to-tenant', payload);
+      return data;
+    },
+    async deleteMany(ids: number[]) {
+      const { data } = await api.post('/task-types/bulk-delete', { ids });
+      return data;
+    },
     async export(id: number) {
       const { data } = await api.post(`/task-types/${id}/export`);
       return data;
