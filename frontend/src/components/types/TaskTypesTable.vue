@@ -21,13 +21,13 @@
         btnClass="btn-danger btn-sm"
         icon="heroicons-outline:trash"
         :text="t('actions.delete')"
-        @click="emit('delete-selected', selectedIds)"
+        @click="emit('delete-selected', selectedIds.value)"
       />
       <Button
         btnClass="btn-secondary btn-sm"
         icon="heroicons-outline:document-duplicate"
         :text="t('actions.copy')"
-        @click="emit('copy-selected', selectedIds)"
+        @click="emit('copy-selected', selectedIds.value)"
       />
     </div>
 
@@ -156,8 +156,7 @@ const columns = [
   { label: 'Actions', field: 'actions' },
 ];
 
-const selectedRows = ref<any[]>([]);
-const selectedIds = computed(() => selectedRows.value.map((r: any) => r.id));
+const selectedIds = ref<number[]>([]);
 
 const filteredRows = computed(() => {
   if (!searchTerm.value) return props.rows;
@@ -167,6 +166,6 @@ const filteredRows = computed(() => {
 });
 
 function onSelectedRowsChange(params: any) {
-  selectedRows.value = [...params.selectedRows];
+  selectedIds.value = params.selectedRows.map((r: any) => r.id);
 }
 </script>
