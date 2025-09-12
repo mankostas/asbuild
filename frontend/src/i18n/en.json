@@ -124,6 +124,7 @@
       "date": "Scheduled At",
       "status": "Status",
       "priority": "Priority",
+      "assignee": "Assignee",
       "priorityPlaceholder": "Select priority",
       "dueAt": "Due",
       "type": "Type",
