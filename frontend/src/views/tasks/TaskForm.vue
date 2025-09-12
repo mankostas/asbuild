@@ -294,12 +294,12 @@ onMounted(async () => {
       slaEndAt.value = task.sla_end_at ? toISO(task.sla_end_at) : '';
       dueAt.value = task.due_at ? toISO(task.due_at) : null;
       priority.value = task.priority || '';
-      status.value = task.status || null;
+      status.value = task.status_slug || null;
       originalStatus.value = status.value;
       if (task.assignee) {
         assignee.value = { id: task.assignee.id };
       }
-      updateStatusOptions(task.status);
+      updateStatusOptions(status.value);
     }
   }
 });
@@ -342,8 +342,16 @@ function updateStatusOptions(current?: string | null) {
     isEdit.value,
     current,
   );
+
+  if (current && !opts.some((o) => o.value === current)) {
+    opts.unshift({ value: current, label: statusBySlug[current]?.name || current });
+  }
+
   statusOptions.value = opts;
-  if (!status.value && opts.length) {
+
+  if (current) {
+    status.value = current;
+  } else if (!status.value && opts.length) {
     status.value = opts[0].value;
   }
 }
