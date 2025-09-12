@@ -64,6 +64,7 @@
     ${isDisabled ? ' opacity-40 cursor-not-allowed' : ''}
     ${btnClass}
     `"
+    v-bind="$attrs"
   >
     <template v-if="!isLoading && !$slots.default">
       <span class="flex items-center">
@@ -117,6 +118,7 @@
     ${isDisabled ? ' opacity-40 cursor-not-allowed' : ''}
     ${btnClass}
     `"
+    v-bind="$attrs"
   >
     <template v-if="!isLoading && !$slots.default">
       <span class="flex items-center">
@@ -170,6 +172,7 @@ export default {
   components: {
     Icon,
   },
+  inheritAttrs: false,
   props: {
     text: {
       type: String,
