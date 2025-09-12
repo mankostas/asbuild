@@ -20,7 +20,14 @@ class TaskTypeController extends Controller
 
     protected function ensureAdmin(Request $request): void
     {
-        if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
+        if (! $request->user()->hasRole('SuperAdmin')) {
+            abort(403);
+        }
+    }
+
+    protected function ensureTenant(Request $request): void
+    {
+        if (! $request->user()->hasRole('Tenant') && ! $request->user()->hasRole('SuperAdmin')) {
             abort(403);
         }
     }
@@ -98,7 +105,7 @@ class TaskTypeController extends Controller
 
     public function update(TaskTypeRequest $request, TaskType $taskType)
     {
-        $this->ensureAdmin($request);
+        $this->ensureTenant($request);
         if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
             abort(403);
         }
@@ -165,7 +172,7 @@ class TaskTypeController extends Controller
 
     public function validateSchema(Request $request)
     {
-        $this->ensureAdmin($request);
+        $this->ensureTenant($request);
 
         $data = $request->validate([
             'schema_json' => 'required|array',
@@ -180,7 +187,7 @@ class TaskTypeController extends Controller
 
     public function previewValidate(Request $request, TaskType $taskType)
     {
-        $this->ensureAdmin($request);
+        $this->ensureTenant($request);
 
         if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
             abort(403);
