@@ -479,29 +479,6 @@ const validationErrors = ref<Record<string, string>>({});
 const validationStatus = ref<'idle' | 'success' | 'error'>('idle');
 const formRef = ref<any>(null);
 const currentVersion = ref<any | null>(null);
-const DEFAULT_STATUSES = [
-  'draft',
-  'assigned',
-  'in_progress',
-  'blocked',
-  'review',
-  'completed',
-  'rejected',
-  'redo',
-];
-const DEFAULT_FLOW: [string, string][] = [
-  ['draft', 'assigned'],
-  ['draft', 'blocked'],
-  ['assigned', 'in_progress'],
-  ['assigned', 'blocked'],
-  ['in_progress', 'review'],
-  ['in_progress', 'blocked'],
-  ['blocked', 'assigned'],
-  ['review', 'completed'],
-  ['review', 'redo'],
-  ['review', 'rejected'],
-  ['redo', 'in_progress'],
-];
 const statuses = ref<string[]>([]);
 const statusFlow = ref<[string, string][]>([]);
 const permissions = ref<Record<string, Permission>>({});
@@ -610,8 +587,16 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
       }),
     );
     if (id && !isEdit.value) {
-      statuses.value = [...DEFAULT_STATUSES];
-      statusFlow.value = DEFAULT_FLOW.map(([a, b]) => [a, b]);
+      try {
+        const { data } = await api.get('/task-statuses', {
+          params: { scope: 'tenant', tenant_id: id, per_page: 100 },
+        });
+        const list = data.data ?? data;
+        statuses.value = list.map((s: any) => s.slug);
+      } catch {
+        statuses.value = [];
+      }
+      statusFlow.value = [];
     } else {
       statuses.value = [];
       statusFlow.value = [];
