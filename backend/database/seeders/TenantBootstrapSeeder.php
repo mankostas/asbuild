@@ -54,6 +54,17 @@ class TenantBootstrapSeeder extends Seeder
             ]
         );
 
+        DB::table('roles')->updateOrInsert(
+            ['tenant_id' => $tenantId, 'slug' => 'client_admin'],
+            [
+                'name' => 'ClientAdmin',
+                'level' => 1,
+                'abilities' => json_encode($tenantAbilities),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
         DefaultFeatureRolesSeeder::syncDefaultRolesForFeatures($tenant, $tenant->selectedFeatureAbilities());
 
         $managerAbilities = array_intersect(
