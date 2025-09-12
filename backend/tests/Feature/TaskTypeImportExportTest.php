@@ -19,11 +19,11 @@ class TaskTypeImportExportTest extends TestCase
     {
         $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
         $role = Role::create([
-            'name' => 'ClientAdmin',
-            'slug' => 'client_admin',
-            'tenant_id' => $tenant->id,
+            'name' => 'SuperAdmin',
+            'slug' => 'super_admin',
+            'tenant_id' => null,
             'abilities' => ['task_types.manage'],
-            'level' => 1,
+            'level' => 0,
         ]);
         $user = User::create([
             'name' => 'U',
@@ -52,5 +52,36 @@ class TaskTypeImportExportTest extends TestCase
             ->postJson('/api/task-types/import', $payload)
             ->assertStatus(201)
             ->assertJsonFragment(['name' => 'Imported']);
+    }
+
+    public function test_cannot_export_task_type_from_other_tenant(): void
+    {
+        $tenantA = Tenant::create(['name' => 'A', 'features' => ['tasks']]);
+        $tenantB = Tenant::create(['name' => 'B', 'features' => ['tasks']]);
+
+        $role = Role::create([
+            'name' => 'ClientAdmin',
+            'slug' => 'client_admin',
+            'tenant_id' => $tenantA->id,
+            'abilities' => ['task_types.manage'],
+            'level' => 1,
+        ]);
+
+        $user = User::create([
+            'name' => 'U',
+            'email' => 'u2@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenantA->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($role->id, ['tenant_id' => $tenantA->id]);
+        Sanctum::actingAs($user);
+
+        $otherType = TaskType::create(['name' => 'Other', 'tenant_id' => $tenantB->id]);
+
+        $this->withHeader('X-Tenant-ID', $tenantA->id)
+            ->postJson("/api/task-types/{$otherType->id}/export")
+            ->assertStatus(403);
     }
 }
