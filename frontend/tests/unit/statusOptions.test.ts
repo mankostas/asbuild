@@ -34,4 +34,32 @@ describe('computeStatusOptions', () => {
     const opts = computeStatusOptions(type, statusBySlug, true, 'assigned');
     expect(opts.map((o) => o.value)).toEqual(['assigned', 'in_progress']);
   });
+
+  it('parses stringified status_flow_json', () => {
+    const type2 = {
+      ...type,
+      status_flow_json: JSON.stringify([
+        ['draft', 'assigned'],
+        ['assigned', 'in_progress'],
+        ['in_progress', 'in_review'],
+        ['in_review', 'redo'],
+      ]),
+    };
+    const opts = computeStatusOptions(type2, statusBySlug, false);
+    expect(opts.map((o) => o.value)).toEqual(['draft', 'assigned']);
+  });
+
+  it('handles object form with single transitions', () => {
+    const type3 = {
+      ...type,
+      status_flow_json: {
+        draft: 'assigned',
+        assigned: ['in_progress'],
+        in_progress: 'in_review',
+        in_review: 'redo',
+      },
+    };
+    const opts = computeStatusOptions(type3, statusBySlug, false);
+    expect(opts.map((o) => o.value)).toEqual(['draft', 'assigned']);
+  });
 });
