@@ -1,18 +1,5 @@
 <template>
   <div>
-      <div class="mb-4">
-        <select
-          id="task-types-scope"
-          v-model="scope"
-          class="border rounded px-2 py-1"
-          aria-label="Scope"
-          @change="changeScope"
-        >
-          <option v-for="opt in scopeOptions" :key="opt.value" :value="opt.value">
-            {{ opt.label }}
-          </option>
-        </select>
-      </div>
       <TaskTypesTable
         v-if="!loading"
         :rows="all"
@@ -53,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted } from 'vue';
+  import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
   import TaskTypesTable from '@/components/types/TaskTypesTable.vue';
   import Swal from 'sweetalert2';
@@ -67,31 +54,17 @@
 
 const router = useRouter();
 const all = ref<any[]>([]);
-const scope = ref<'tenant' | 'global' | 'all'>("tenant");
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
 const typesStore = useTaskTypesStore();
 const templatesOpen = ref(false);
 const loading = ref(true);
 
-if (auth.isSuperAdmin) {
-  scope.value = 'all';
-}
-
-const scopeOptions = computed(() => {
-  const opts = [
-    { value: 'tenant', label: 'Tenant' },
-    { value: 'all', label: 'All' },
-  ];
-  if (auth.isSuperAdmin) {
-    opts.splice(1, 0, { value: 'global', label: 'Global' });
-  }
-  return opts;
-});
+const scope: 'tenant' | 'all' = auth.isSuperAdmin ? 'all' : 'tenant';
 
 async function load() {
-  const tenantId = auth.isSuperAdmin && scope.value !== 'all' ? tenantStore.currentTenantId : undefined;
-  all.value = (await typesStore.fetch(scope.value, tenantId)).data;
+  const tenantId = auth.isSuperAdmin && scope !== 'all' ? tenantStore.currentTenantId : undefined;
+  all.value = (await typesStore.fetch(scope, tenantId)).data;
   loading.value = false;
 }
 
@@ -101,10 +74,6 @@ function reload() {
   loading.value = true;
   all.value = [];
   load();
-}
-
-function changeScope() {
-  reload();
 }
 
 function edit(id: number) {
