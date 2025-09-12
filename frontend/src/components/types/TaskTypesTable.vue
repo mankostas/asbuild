@@ -142,10 +142,10 @@ const perPageOptions = [
 const selectOptions = {
   enabled: true,
   selectOnCheckboxOnly: true,
-  selectioninfoClass: 'custom-class',
+  selectionInfoClass: 'custom-class',
   selectionText: 'rows selected',
   clearSelectionText: 'clear',
-  disableSelectinfo: true,
+  disableSelectInfo: true,
   selectAllByGroup: true,
 };
 
@@ -167,6 +167,6 @@ const filteredRows = computed(() => {
 });
 
 function onSelectedRowsChange(params: any) {
-  selectedRows.value = params.selectedRows;
+  selectedRows.value = [...params.selectedRows];
 }
 </script>
