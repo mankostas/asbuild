@@ -32,9 +32,11 @@ vi.mock('@/utils/ability', () => ({
 }));
 
 vi.mock('@/services/api', () => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  patch: vi.fn(),
+  default: {
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+  },
 }));
 
 // Mock other imports used solely for component rendering
@@ -69,6 +71,7 @@ vi.mock('sweetalert2', () => ({
   default: { fire: vi.fn() },
 }));
 
+import api from '@/services/api';
 import TypeForm from '@/views/types/TypeForm.vue';
 
 describe('TypeForm photo serialization', () => {
@@ -90,6 +93,26 @@ describe('TypeForm photo serialization', () => {
     ];
 
     expect(previewSchema.value.sections[0].photos).toEqual([]);
+  });
+});
+
+describe('TypeForm tenant workflow', () => {
+  it('loads tenant statuses and leaves transitions empty', async () => {
+    const result = (TypeForm as any).setup({}, { expose: () => {}, emit: () => {} });
+    const mockGet = api.get as unknown as vi.Mock;
+    mockGet.mockImplementation((url: string, opts: any) => {
+      if (url === '/task-statuses' && opts?.params?.tenant_id === 5) {
+        return Promise.resolve({ data: { data: [{ slug: 'open' }, { slug: 'closed' }] } });
+      }
+      return Promise.resolve({ data: {} });
+    });
+
+    await result.refreshTenant(5, '');
+    expect(result.statuses.value).toEqual(['open', 'closed']);
+    expect(result.statusFlow.value).toEqual([]);
+
+    result.statusFlow.value.push(['open', 'closed']);
+    expect(result.statusFlow.value.length).toBe(1);
   });
 });
 
