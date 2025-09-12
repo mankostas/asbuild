@@ -8,22 +8,22 @@
         @copy="copy"
       >
         <template #header-actions>
-          <button
+          <Button
             v-if="can('task_field_snippets.manage')"
-            class="bg-gray-200 px-4 py-2 rounded"
-            aria-label="Templates"
+            btnClass="btn-secondary light btn-sm"
+            :aria-label="t('templates.title')"
+            :text="t('templates.title')"
             @click="templatesOpen = true"
-          >
-            Templates
-          </button>
-          <RouterLink
+          />
+          <Button
             v-if="can('task_types.create') || can('task_types.manage')"
-            class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-            :to="{ name: 'taskTypes.create' }"
-          >
-            <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
-            Add Type
-          </RouterLink>
+            link="/task-types/create"
+            btnClass="btn-primary btn-sm min-w-[100px]"
+            icon="heroicons-outline:plus"
+            iconClass="w-4 h-4"
+            :text="t('types.addType')"
+            :aria-label="t('types.addType')"
+          />
         </template>
       </TaskTypesTable>
       <div v-else class="p-4">
@@ -45,12 +45,13 @@
   import TaskTypesTable from '@/components/types/TaskTypesTable.vue';
   import Swal from 'sweetalert2';
   import SkeletonTable from '@/components/ui/Skeleton/Table.vue';
-  import Icon from '@/components/ui/Icon';
+  import Button from '@/components/ui/Button';
   import api from '@/services/api';
   import { useAuthStore, can } from '@/stores/auth';
   import { useTenantStore } from '@/stores/tenant';
   import { useTaskTypesStore } from '@/stores/taskTypes';
   import TemplatesDrawer from '@/components/types/TemplatesDrawer.vue';
+  import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
 const all = ref<any[]>([]);
@@ -59,6 +60,7 @@ const tenantStore = useTenantStore();
 const typesStore = useTaskTypesStore();
 const templatesOpen = ref(false);
 const loading = ref(true);
+const { t } = useI18n();
 
 const scope: 'tenant' | 'all' = auth.isSuperAdmin ? 'all' : 'tenant';
 
