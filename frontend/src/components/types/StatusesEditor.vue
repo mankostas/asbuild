@@ -49,16 +49,16 @@
       v-if="editable"
       class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
     >
-      <Checkbox
-        v-for="status in allStatuses"
-        :key="status.slug"
-        :id="`status-${status.slug}`"
-        v-model="localStatuses"
-        :value="status.slug"
-        :label="status.name"
-        @change="emitStatuses"
-      />
-    </div>
+        <Checkbox
+          v-for="status in allStatuses"
+          :id="`status-${status.slug}`"
+          :key="status.slug"
+          v-model="localStatuses"
+          :value="status.slug"
+          :label="status.name"
+          @change="emitStatuses"
+        />
+      </div>
     <span class="sr-only" aria-live="assertive">{{ liveMessage }}</span>
   </Card>
 </template>
@@ -123,7 +123,11 @@ function removeStatus(slug: string) {
   emitStatuses();
 }
 function emitStatuses() {
-  emit('update:modelValue', localStatuses.value);
+  // Emit a fresh array so consumers relying on reference
+  // changes (e.g. watchers in TransitionsEditor) properly
+  // react when statuses are selected via checkboxes which
+  // mutate the array in place.
+  emit('update:modelValue', [...localStatuses.value]);
 }
 
 function onHandleKeydown(e: KeyboardEvent, index: number) {
