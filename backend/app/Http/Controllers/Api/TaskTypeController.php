@@ -34,19 +34,21 @@ class TaskTypeController extends Controller
 
     public function index(Request $request)
     {
-        $scope = $request->query('scope', $request->user()->hasRole('SuperAdmin') ? 'all' : 'tenant');
         // Task types are no longer versioned, so we only eager load the tenant
         $query = TaskType::query()->with(['tenant']);
 
-        if ($scope === 'tenant') {
-            $tenantId = $request->query('tenant_id', $request->user()->tenant_id);
-            $query->where('tenant_id', $tenantId);
-        } elseif ($scope === 'global') {
-            $query->whereNull('tenant_id');
-        } else {
-            if ($request->has('tenant_id')) {
+        if ($request->user()->hasRole('SuperAdmin')) {
+            $scope = $request->query('scope', 'all');
+
+            if ($scope === 'tenant') {
+                $query->where('tenant_id', $request->query('tenant_id'));
+            } elseif ($scope === 'global') {
+                $query->whereNull('tenant_id');
+            } elseif ($request->has('tenant_id')) {
                 $query->where('tenant_id', $request->query('tenant_id'));
             }
+        } else {
+            $query->where('tenant_id', $request->user()->tenant_id);
         }
 
         $result = $this->listQuery($query, $request, ['name'], ['name']);
@@ -98,8 +100,12 @@ class TaskTypeController extends Controller
         return (new TaskTypeResource($type))->response()->setStatusCode(201);
     }
 
-    public function show(TaskType $taskType)
+    public function show(Request $request, TaskType $taskType)
     {
+        if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
+            abort(403);
+        }
+
         return new TaskTypeResource($taskType);
     }
 
