@@ -259,6 +259,8 @@
       "title": "Ροή εργασίας",
       "statuses": "Καταστάσεις",
       "addStatus": "Προσθήκη κατάστασης",
+      "availableStatuses": "Διαθέσιμες καταστάσεις",
+      "selectedStatuses": "Επιλεγμένες καταστάσεις",
       "transitions": "Μεταβάσεις",
       "addTransition": "Προσθήκη μετάβασης",
       "from": "Από",
