@@ -155,6 +155,26 @@ class TaskTypeController extends Controller
         return response()->json(['message' => 'deleted']);
     }
 
+    public function bulkDestroy(Request $request)
+    {
+        $this->ensureAdmin($request);
+
+        $data = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer',
+        ]);
+
+        $query = TaskType::query()->whereIn('id', $data['ids']);
+
+        if (! $request->user()->hasRole('SuperAdmin')) {
+            $query->where('tenant_id', $request->user()->tenant_id);
+        }
+
+        $query->delete();
+
+        return response()->json(['message' => 'deleted']);
+    }
+
     public function copyToTenant(Request $request, TaskType $taskType)
     {
         $this->ensureAdmin($request);
@@ -172,6 +192,45 @@ class TaskTypeController extends Controller
         $copy->save();
 
         return (new TaskTypeResource($copy))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    public function bulkCopyToTenant(Request $request)
+    {
+        $this->ensureAdmin($request);
+
+        $data = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer',
+            'tenant_id' => 'nullable|integer',
+        ]);
+
+        $tenantId = $request->user()->hasRole('SuperAdmin')
+            ? ($data['tenant_id'] ?? null)
+            : $request->user()->tenant_id;
+
+        if (! $tenantId) {
+            abort(400, 'tenant_id required');
+        }
+
+        $types = TaskType::query()->whereIn('id', $data['ids'])->get();
+
+        $copies = collect();
+
+        foreach ($types as $type) {
+            if (! $request->user()->hasRole('SuperAdmin') && $type->tenant_id !== $request->user()->tenant_id) {
+                continue;
+            }
+
+            $copy = $type->replicate();
+            $copy->tenant_id = $tenantId;
+            $copy->save();
+
+            $copies->push($copy);
+        }
+
+        return TaskTypeResource::collection($copies)
             ->response()
             ->setStatusCode(201);
     }

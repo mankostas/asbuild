@@ -15,14 +15,31 @@
       </div>
     </div>
 
-      <vue-good-table
-        :columns="columns"
-        :rows="filteredRows"
-        styleClass="vgt-table bordered centered striped"
-        :pagination-options="{ enabled: true, perPage: perPage }"
-        :search-options="{ enabled: true, externalQuery: searchTerm }"
-        :select-options="selectOptions"
-      >
+    <div v-if="selectedIds.length" class="flex items-center gap-2 pb-4">
+      <span class="text-sm">{{ selectedIds.length }} selected</span>
+      <Button
+        btnClass="btn-danger btn-sm"
+        icon="heroicons-outline:trash"
+        :text="t('actions.delete')"
+        @click="emit('delete-selected', selectedIds)"
+      />
+      <Button
+        btnClass="btn-secondary btn-sm"
+        icon="heroicons-outline:document-duplicate"
+        :text="t('actions.copy')"
+        @click="emit('copy-selected', selectedIds)"
+      />
+    </div>
+
+    <vue-good-table
+      :columns="columns"
+      :rows="filteredRows"
+      styleClass="vgt-table bordered centered striped"
+      :pagination-options="{ enabled: true, perPage: perPage }"
+      :search-options="{ enabled: true, externalQuery: searchTerm }"
+      :select-options="selectOptions"
+      @on-selected-rows-change="onSelectedRowsChange"
+    >
         <template #table-row="rowProps">
           <span v-if="rowProps.column.field === 'tenant'">
             {{ rowProps.row.tenant?.name || '—' }}
@@ -93,6 +110,7 @@ import Dropdown from '@/components/ui/Dropdown';
 import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
 import Breadcrumbs from "@/Layout/Breadcrumbs.vue";
+import Button from '@/components/ui/Button';
 import { useI18n } from 'vue-i18n';
 
 interface TaskType {
@@ -106,6 +124,8 @@ const emit = defineEmits<{
   (e: 'edit', id: number): void;
   (e: 'delete', id: number): void;
   (e: 'copy', id: number): void;
+  (e: 'delete-selected', ids: number[]): void;
+  (e: 'copy-selected', ids: number[]): void;
 }>();
 
 const { t } = useI18n();
@@ -122,10 +142,10 @@ const perPageOptions = [
 const selectOptions = {
   enabled: true,
   selectOnCheckboxOnly: true,
-  selectioninfoClass: 'custom-class',
+  selectionInfoClass: 'custom-class',
   selectionText: 'rows selected',
   clearSelectionText: 'clear',
-  disableSelectinfo: true,
+  disableSelectInfo: true,
   selectAllByGroup: true,
 };
 
@@ -136,10 +156,17 @@ const columns = [
   { label: 'Actions', field: 'actions' },
 ];
 
+const selectedRows = ref<any[]>([]);
+const selectedIds = computed(() => selectedRows.value.map((r: any) => r.id));
+
 const filteredRows = computed(() => {
   if (!searchTerm.value) return props.rows;
   return props.rows.filter((r) =>
     String(r.name).toLowerCase().includes(searchTerm.value.toLowerCase()),
   );
 });
+
+function onSelectedRowsChange(params: any) {
+  selectedRows.value = [...params.selectedRows];
+}
 </script>

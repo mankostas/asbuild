@@ -178,6 +178,14 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->name('task-types.copy')
         ->whereNumber('task_type');
 
+    Route::post('task-types/bulk-copy-to-tenant', [TaskTypeController::class, 'bulkCopyToTenant'])
+        ->middleware('ability:task_types.manage')
+        ->name('task-types.bulk-copy');
+
+    Route::post('task-types/bulk-delete', [TaskTypeController::class, 'bulkDestroy'])
+        ->middleware('ability:task_types.delete')
+        ->name('task-types.bulk-destroy');
+
     Route::post('task-types/validate', [TaskTypeController::class, 'validateSchema'])
         ->middleware('ability:task_types.create')
         ->name('task-types.validate-schema');
