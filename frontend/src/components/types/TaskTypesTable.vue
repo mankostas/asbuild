@@ -9,6 +9,7 @@
           type="text"
           prependIcon="heroicons-outline:search"
           merged
+          classInput="text-xs !h-8"
         />
         <slot name="header-actions" />
       </div>
