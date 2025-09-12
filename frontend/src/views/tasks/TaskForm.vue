@@ -294,12 +294,12 @@ onMounted(async () => {
       slaEndAt.value = task.sla_end_at ? toISO(task.sla_end_at) : '';
       dueAt.value = task.due_at ? toISO(task.due_at) : null;
       priority.value = task.priority || '';
-      status.value = task.status || null;
+      status.value = task.status_slug || null;
       originalStatus.value = status.value;
       if (task.assignee) {
         assignee.value = { id: task.assignee.id };
       }
-      updateStatusOptions(task.status);
+      updateStatusOptions(status.value);
     }
   }
 });
