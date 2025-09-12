@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="route.meta.breadcrumb"
-    class="md:mb-6 mb-4 flex space-x-3 rtl:space-x-reverse"
+    class="flex space-x-3 rtl:space-x-reverse"
   >
     <h4
       v-if="!route.meta.groupParent"

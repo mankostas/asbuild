@@ -45,7 +45,7 @@
               : 'container-fluid'
           }`"
         >
-          <Breadcrumbs v-if="!$route.meta.hide" />
+
           <router-view #default="{ Component }">
             <Transition name="fade" mode="out-in">
               <component :is="Component" />

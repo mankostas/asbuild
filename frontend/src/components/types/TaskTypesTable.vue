@@ -1,7 +1,7 @@
 <template>
   <Card>
     <div class="md:flex justify-between pb-6 md:space-y-0 space-y-3 items-center">
-      <h5>Task Types</h5>
+      <Breadcrumbs v-if="!$route.meta.hide" />
       <div class="flex items-center gap-2">
         <InputGroup
           v-model="searchTerm"
@@ -92,6 +92,7 @@ import InputGroup from '@/components/ui/InputGroup';
 import Dropdown from '@/components/ui/Dropdown';
 import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
+import Breadcrumbs from "@/Layout/Breadcrumbs.vue";
 import { useI18n } from 'vue-i18n';
 
 interface TaskType {
