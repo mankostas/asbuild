@@ -67,6 +67,10 @@ export function computeStatusOptions(
     graph[from].push(to);
   });
 
+  if (edges.length === 0) {
+    return opts;
+  }
+
   if (isEdit && current) {
     const allowed = [current, ...(graph[current] || [])];
     opts = opts.filter((o) => allowed.includes(o.value));

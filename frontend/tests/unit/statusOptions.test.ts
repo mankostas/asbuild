@@ -62,4 +62,16 @@ describe('computeStatusOptions', () => {
     const opts = computeStatusOptions(type3, statusBySlug, false);
     expect(opts.map((o) => o.value)).toEqual(['draft', 'assigned']);
   });
+
+  it('returns all statuses when flow is missing', () => {
+    const type4 = { ...type, status_flow_json: null };
+    const opts = computeStatusOptions(type4, statusBySlug, false);
+    expect(opts.map((o) => o.value)).toEqual([
+      'redo',
+      'draft',
+      'assigned',
+      'in_progress',
+      'in_review',
+    ]);
+  });
 });
