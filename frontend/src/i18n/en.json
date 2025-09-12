@@ -259,6 +259,8 @@
       "title": "Workflow",
       "statuses": "Statuses",
       "addStatus": "Add status",
+      "availableStatuses": "Available statuses",
+      "selectedStatuses": "Selected statuses",
       "transitions": "Transitions",
       "addTransition": "Add transition",
       "from": "From",
