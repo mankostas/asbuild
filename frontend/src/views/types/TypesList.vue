@@ -6,6 +6,8 @@
         @edit="edit"
         @delete="remove"
         @copy="copy"
+        @delete-selected="removeMany"
+        @copy-selected="copyMany"
       >
         <template #header-actions>
           <Button
@@ -112,7 +114,40 @@ async function copy(id: number) {
     tenantId = res.value;
   }
     await typesStore.copyToTenant(id, tenantId);
+  reload();
+}
+
+async function removeMany(ids: number[]) {
+  const res = await Swal.fire({
+    title: 'Delete selected types?',
+    icon: 'warning',
+    showCancelButton: true,
+  });
+  if (res.isConfirmed) {
+    await typesStore.deleteMany(ids);
     reload();
+  }
+}
+
+async function copyMany(ids: number[]) {
+  let tenantId: string | number | undefined;
+  if (auth.isSuperAdmin) {
+    await tenantStore.loadTenants();
+    const inputOptions = tenantStore.tenants.reduce(
+      (acc: any, t: any) => ({ ...acc, [t.id]: t.name }),
+      {},
+    );
+    const res = await Swal.fire({
+      title: 'Copy to tenant',
+      input: 'select',
+      inputOptions,
+      showCancelButton: true,
+    });
+    if (!res.isConfirmed || !res.value) return;
+    tenantId = res.value;
+  }
+  await typesStore.copyManyToTenant(ids, tenantId);
+  reload();
 }
 function onImported() {
   templatesOpen.value = false;
