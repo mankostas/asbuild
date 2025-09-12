@@ -342,8 +342,16 @@ function updateStatusOptions(current?: string | null) {
     isEdit.value,
     current,
   );
+
+  if (current && !opts.some((o) => o.value === current)) {
+    opts.unshift({ value: current, label: statusBySlug[current]?.name || current });
+  }
+
   statusOptions.value = opts;
-  if (!status.value && opts.length) {
+
+  if (current) {
+    status.value = current;
+  } else if (!status.value && opts.length) {
     status.value = opts[0].value;
   }
 }
