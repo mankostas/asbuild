@@ -79,8 +79,12 @@ export function computeStatusOptions(
     Object.values(graph).forEach((targets) =>
       targets.forEach((t) => incoming.add(t)),
     );
+    const candidates = typeStatuses.filter(
+      (s: any) => !incoming.has(s.slug),
+    );
     const initial =
-      typeStatuses.find((s: any) => !incoming.has(s.slug))?.slug ||
+      candidates.find((s: any) => (graph[s.slug] || []).length)?.slug ||
+      candidates[0]?.slug ||
       typeStatuses[0]?.slug;
     if (initial) {
       const allowed = [initial, ...(graph[initial] || [])];

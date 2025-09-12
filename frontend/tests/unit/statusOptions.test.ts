@@ -74,4 +74,21 @@ describe('computeStatusOptions', () => {
       'in_review',
     ]);
   });
+
+  it('skips statuses without transitions when choosing initial', () => {
+    const type5 = {
+      statuses: [
+        { slug: 'redo' },
+        { slug: 'draft' },
+        { slug: 'assigned' },
+        { slug: 'in_progress' },
+      ],
+      status_flow_json: [
+        ['draft', 'assigned'],
+        ['assigned', 'in_progress'],
+      ],
+    } as any;
+    const opts = computeStatusOptions(type5, statusBySlug, false);
+    expect(opts.map((o) => o.value)).toEqual(['draft', 'assigned']);
+  });
 });
