@@ -28,19 +28,44 @@ export function computeStatusOptions(
     label: statusBySlug[s.slug]?.name || s.slug,
   }));
 
-  const flow = type?.status_flow_json || [];
-  let graph: Record<string, string[]> = {};
-  if (Array.isArray(flow)) {
-    flow.forEach((e) => {
-      if (Array.isArray(e) && e.length === 2) {
-        const [from, to] = e as [string, string];
-        if (!graph[from]) graph[from] = [];
-        graph[from].push(to);
-      }
-    });
-  } else if (flow && typeof flow === 'object') {
-    graph = flow as Record<string, string[]>;
+  let flow: any = type?.status_flow_json || [];
+  if (typeof flow === 'string') {
+    try {
+      flow = JSON.parse(flow);
+    } catch {
+      flow = [];
+    }
   }
+  const edges: [string, string][] = Array.isArray(flow)
+    ? flow.flatMap((e: any) => {
+        if (Array.isArray(e) && e.length === 2) {
+          const from = typeof e[0] === 'object' ? e[0].slug : e[0];
+          const to = typeof e[1] === 'object' ? e[1].slug : e[1];
+          return typeof from === 'string' && typeof to === 'string'
+            ? [[from, to]]
+            : [];
+        }
+        if (e && typeof e === 'object') {
+          const from = typeof e.from === 'object' ? e.from.slug : e.from;
+          const to = typeof e.to === 'object' ? e.to.slug : e.to;
+          return typeof from === 'string' && typeof to === 'string'
+            ? [[from, to]]
+            : [];
+        }
+        return [];
+      })
+    : Object.entries(flow).flatMap(([from, tos]: any) =>
+        (Array.isArray(tos) ? tos : [tos]).map((to: any) => [
+          from,
+          typeof to === 'object' ? to.slug : to,
+        ] as [string, string]),
+      );
+
+  const graph: Record<string, string[]> = {};
+  edges.forEach(([from, to]) => {
+    if (!graph[from]) graph[from] = [];
+    graph[from].push(to);
+  });
 
   if (isEdit && current) {
     const allowed = [current, ...(graph[current] || [])];
