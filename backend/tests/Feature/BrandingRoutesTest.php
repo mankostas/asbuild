@@ -71,11 +71,7 @@ class BrandingRoutesTest extends TestCase
     public function test_client_admin_cannot_update_branding(): void
     {
         $tenant = Tenant::create(['name' => 'Another Tenant']);
-        $role = Role::create([
-            'name' => 'ClientAdmin',
-            'tenant_id' => $tenant->id,
-            'abilities' => json_encode([]),
-        ]);
+        $role = $tenant->roles()->where('slug', 'client_admin')->first();
         $user = User::create([
             'name' => 'Client',
             'email' => 'client@example.com',

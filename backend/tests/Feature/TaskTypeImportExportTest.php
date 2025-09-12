@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Role;
 use App\Models\TaskType;
 use App\Models\Tenant;
 use App\Models\User;
@@ -18,13 +17,8 @@ class TaskTypeImportExportTest extends TestCase
     public function test_export_and_import_endpoints(): void
     {
         $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
-        $role = Role::create([
-            'name' => 'ClientAdmin',
-            'slug' => 'client_admin',
-            'tenant_id' => $tenant->id,
-            'abilities' => ['task_types.manage'],
-            'level' => 1,
-        ]);
+        $role = $tenant->roles()->where('slug', 'client_admin')->first();
+        $role->update(['abilities' => ['task_types.manage']]);
         $user = User::create([
             'name' => 'U',
             'email' => 'u@example.com',

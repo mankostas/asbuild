@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,13 +16,8 @@ class TaskStatusSlugTest extends TestCase
     public function test_slug_is_generated_from_name(): void
     {
         $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
-        $role = Role::create([
-            'name' => 'ClientAdmin',
-            'slug' => 'client_admin',
-            'tenant_id' => $tenant->id,
-            'abilities' => ['task_statuses.manage'],
-            'level' => 1,
-        ]);
+        $role = $tenant->roles()->where('slug', 'client_admin')->first();
+        $role->update(['abilities' => ['task_statuses.manage']]);
         $user = User::create([
             'name' => 'U',
             'email' => 'u@example.com',

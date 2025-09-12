@@ -20,14 +20,22 @@ class TaskTypeController extends Controller
 
     protected function ensureAdmin(Request $request): void
     {
-        if (! $request->user()->hasRole('SuperAdmin')) {
+        if (
+            ! $request->user()->hasRole('SuperAdmin')
+            && ! $request->user()->hasRole('Tenant')
+            && ! $request->user()->hasRole('ClientAdmin')
+        ) {
             abort(403);
         }
     }
 
     protected function ensureTenant(Request $request): void
     {
-        if (! $request->user()->hasRole('Tenant') && ! $request->user()->hasRole('SuperAdmin')) {
+        if (
+            ! $request->user()->hasRole('Tenant')
+            && ! $request->user()->hasRole('ClientAdmin')
+            && ! $request->user()->hasRole('SuperAdmin')
+        ) {
             abort(403);
         }
     }

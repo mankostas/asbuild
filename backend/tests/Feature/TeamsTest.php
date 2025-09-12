@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Role;
 use App\Models\Team;
 use App\Models\Tenant;
 use App\Models\User;
@@ -18,7 +17,7 @@ class TeamsTest extends TestCase
     public function test_team_membership_sync(): void
     {
         $tenant = Tenant::create(['name' => 'Tenant']);
-        $adminRole = Role::create(['name' => 'ClientAdmin', 'slug' => 'client_admin', 'tenant_id' => $tenant->id]);
+        $adminRole = $tenant->roles()->where('slug', 'client_admin')->first();
 
         $admin = User::create([
             'name' => 'Admin',

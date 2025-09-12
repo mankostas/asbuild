@@ -33,6 +33,12 @@ class Tenant extends Model
                 'level' => 1,
                 'abilities' => [],
             ]);
+            $tenant->roles()->create([
+                'name' => 'ClientAdmin',
+                'slug' => 'client_admin',
+                'level' => 1,
+                'abilities' => [],
+            ]);
         });
     }
 
