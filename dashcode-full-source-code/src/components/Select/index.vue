@@ -17,6 +17,7 @@
         :name="name"
         :class="`${classInput} input-control block w-full focus:outline-none min-h-[40px] `"
         :value="modelValue"
+        @change="$emit('update:modelValue', $event.target.value)"
         @input="$emit('update:modelValue', $event.target.value)"
         :error="error"
         :id="name"
