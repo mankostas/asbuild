@@ -238,6 +238,7 @@
 <script setup lang="ts">
 import draggable from 'vuedraggable';
 import { useI18n } from 'vue-i18n';
+import { watch } from 'vue';
 import { resolveI18n as resolveI18nUtil } from '@/utils/i18n';
 import Icon from '@/components/ui/Icon/index.vue';
 import Textinput from '@/components/ui/Textinput/index.vue';
@@ -259,6 +260,19 @@ defineEmits<{
 const { t, locale } = useI18n();
 
 const noop = () => {};
+
+watch(
+  () => section.cols,
+  () => {
+    const resetCols = (field: any) => {
+      field.cols = 1;
+    };
+
+    (section.fields || []).forEach(resetCols);
+    (section.photos || []).forEach(resetCols);
+    (section.tabs || []).forEach((t: any) => (t.fields || []).forEach(resetCols));
+  },
+);
 
 function addTab() {
   if (!section.tabs) section.tabs = [];
