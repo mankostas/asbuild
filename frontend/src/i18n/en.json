@@ -14,6 +14,7 @@
     "publish": "Publish",
     "unpublish": "Unpublish",
     "duplicate": "Duplicate",
+    "copy": "Copy",
     "addSection": "Add Section",
     "addField": "Add Field",
     "cancel": "Cancel",
@@ -253,6 +254,7 @@
     "delete": "Delete version"
   },
   "types": {
+    "addType": "Add Type",
     "workflow": {
       "title": "Workflow",
       "statuses": "Statuses",

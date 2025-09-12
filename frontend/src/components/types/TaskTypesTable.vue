@@ -5,7 +5,7 @@
       <div class="flex items-center gap-2">
         <InputGroup
           v-model="searchTerm"
-          placeholder="Search"
+          :placeholder="t('types.form.search')"
           type="text"
           prependIcon="heroicons-outline:search"
           merged
@@ -38,7 +38,7 @@
                     @click="$emit('edit', rowProps.row.id)"
                   >
                     <span class="text-base"><Icon icon="heroicons-outline:pencil-square" /></span>
-                    <span>Edit</span>
+                <span>{{ t('actions.edit') }}</span>
                   </button>
                 </MenuItem>
                 <MenuItem>
@@ -48,7 +48,7 @@
                     @click="$emit('delete', rowProps.row.id)"
                   >
                     <span class="text-base"><Icon icon="heroicons-outline:trash" /></span>
-                    <span>Delete</span>
+                    <span>{{ t('actions.delete') }}</span>
                   </button>
                 </MenuItem>
                 <MenuItem>
@@ -58,7 +58,7 @@
                     @click="$emit('copy', rowProps.row.id)"
                   >
                     <span class="text-base"><Icon icon="heroicons-outline:document-duplicate" /></span>
-                    <span>Copy</span>
+                    <span>{{ t('actions.copy') }}</span>
                   </button>
                 </MenuItem>
               </template>
@@ -92,6 +92,7 @@ import InputGroup from '@/components/ui/InputGroup';
 import Dropdown from '@/components/ui/Dropdown';
 import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
+import { useI18n } from 'vue-i18n';
 
 interface TaskType {
   id: number;
@@ -106,6 +107,7 @@ const emit = defineEmits<{
   (e: 'copy', id: number): void;
 }>();
 
+const { t } = useI18n();
 const searchTerm = ref('');
 const perPage = ref(10);
 const current = ref(1);
