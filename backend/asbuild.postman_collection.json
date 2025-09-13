@@ -544,7 +544,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"123-456-7890\",\n  \"address\": \"123 Main St\",\n  \"roles\": [\"ClientAdmin\"]\n}"
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"123-456-7890\",\n  \"address\": \"123 Main St\",\n  \"department\": \"Sales\",\n  \"roles\": [\"ClientAdmin\"]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/employees",
@@ -595,7 +595,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Employee\",\n  \"phone\": \"987-654-3210\",\n  \"address\": \"456 Elm St\",\n  \"roles\": [\"ClientAdmin\"]\n}"
+              "raw": "{\n  \"name\": \"Updated Employee\",\n  \"phone\": \"987-654-3210\",\n  \"address\": \"456 Elm St\",\n  \"department\": \"Sales\",\n  \"roles\": [\"ClientAdmin\"]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/employees/{employee}",

@@ -1306,6 +1306,8 @@ components:
           type: integer
         name:
           type: string
+        department:
+          type: string
     Notification:
       type: object
       required:

@@ -130,6 +130,7 @@ interface EmployeeRow {
   name: string;
   email: string;
   roles: string;
+  department?: string | null;
   phone?: string | null;
   status?: string | null;
   last_login_at?: string | null;
@@ -163,6 +164,7 @@ const selectOptions = {
 
 const columns = [
   { label: 'Name', field: 'name' },
+  { label: 'Department', field: 'department' },
   { label: 'Roles', field: 'roles' },
   { label: 'Phone', field: 'phone' },
   { label: 'Status', field: 'status' },
@@ -181,6 +183,7 @@ const filteredRows = computed(() => {
       String(r.name).toLowerCase().includes(term) ||
       String(r.email).toLowerCase().includes(term) ||
       String(r.roles).toLowerCase().includes(term) ||
+      String(r.department || '').toLowerCase().includes(term) ||
       String(r.phone || '').toLowerCase().includes(term) ||
       String(r.status || '').toLowerCase().includes(term) ||
       String(r.tenant?.name || '').toLowerCase().includes(term)

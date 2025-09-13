@@ -1878,6 +1878,7 @@ export interface components {
         Employee: {
             id?: number;
             name?: string;
+            department?: string;
         };
         Notification: {
             id: number;
