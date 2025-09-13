@@ -117,6 +117,7 @@ interface TaskType {
   id: number;
   name: string;
   tenant?: { id: number; name: string } | null;
+  statuses?: Record<string, string[]>;
 }
 
 const props = defineProps<{ rows: TaskType[] }>();
@@ -153,16 +154,22 @@ const columns = [
   { label: 'ID', field: 'id' },
   { label: 'Name', field: 'name' },
   { label: 'Tenant', field: 'tenant' },
+  { label: 'Statuses', field: 'statusCount' },
   { label: 'Actions', field: 'actions' },
 ];
 
 const selectedIds = ref<number[]>([]);
 
 const filteredRows = computed(() => {
-  if (!searchTerm.value) return props.rows;
-  return props.rows.filter((r) =>
-    String(r.name).toLowerCase().includes(searchTerm.value.toLowerCase()),
-  );
+  const rows = !searchTerm.value
+    ? props.rows
+    : props.rows.filter((r) =>
+        String(r.name).toLowerCase().includes(searchTerm.value.toLowerCase()),
+      );
+  return rows.map((row) => ({
+    ...row,
+    statusCount: Object.keys(row.statuses ?? {}).length,
+  }));
 });
 
 function onSelectedRowsChange(params: any) {
