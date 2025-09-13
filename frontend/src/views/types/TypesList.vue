@@ -62,6 +62,7 @@ interface TaskType {
   tenant?: { id: number; name: string } | null;
   statuses?: Record<string, string[]>;
   tasks_count?: number;
+  updated_at?: string;
 }
 const all = ref<TaskType[]>([]);
 const auth = useAuthStore();
@@ -80,6 +81,7 @@ async function load() {
     ...t,
     statuses: t.statuses,
     tasks_count: t.tasks_count,
+    updated_at: t.updated_at,
   }));
   loading.value = false;
 }
