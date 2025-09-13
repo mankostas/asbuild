@@ -15,13 +15,13 @@
           v-model="tenantFilter"
           :options="tenantOptions"
           class="w-40"
-          classInput="text-xs !h-8"
-          aria-label="Tenant filter"
+          classInput="text-xs !h-8 !min-h-0"
+          :aria-label="t('tenants')"
         />
         <Button
           v-if="can('task_statuses.create') || can('task_statuses.manage')"
           link="/task-statuses/create"
-          btnClass="btn-primary btn-sm min-w-[100px]"
+          btnClass="btn-primary btn-sm min-w-[100px] !h-8 !py-0"
           icon="heroicons-outline:plus"
           iconClass="w-4 h-4"
           :text="t('statuses.addStatus')"
