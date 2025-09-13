@@ -50,6 +50,7 @@ class EmployeeController extends Controller
             'email' => 'required|email',
             'phone' => 'nullable|string',
             'address' => 'nullable|string',
+            'department' => 'nullable|string',
             'roles' => 'array|nullable',
             'roles.*' => 'string',
         ]);
@@ -68,6 +69,7 @@ class EmployeeController extends Controller
             'password' => Hash::make(Str::random(config('security.password.min_length'))),
             'phone' => $data['phone'] ?? null,
             'address' => $data['address'] ?? null,
+            'department' => $data['department'] ?? null,
         ]);
 
         if (! empty($data['roles'])) {
@@ -109,6 +111,7 @@ class EmployeeController extends Controller
             'name' => 'sometimes|string',
             'phone' => 'sometimes|string',
             'address' => 'sometimes|string',
+            'department' => 'sometimes|string',
             'roles' => 'sometimes|array',
             'roles.*' => 'string',
         ]);
@@ -121,6 +124,9 @@ class EmployeeController extends Controller
         }
         if (isset($data['address'])) {
             $employee->address = $data['address'];
+        }
+        if (isset($data['department'])) {
+            $employee->department = $data['department'];
         }
         $employee->save();
 
