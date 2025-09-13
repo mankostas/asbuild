@@ -43,8 +43,23 @@ export const useRolesStore = defineStore('roles', {
       await api.delete(`/roles/${id}`);
       this.roles = this.roles.filter((r: Role) => r.id !== id);
     },
+    async deleteMany(ids: number[]) {
+      await Promise.all(ids.map((id) => api.delete(`/roles/${id}`)));
+      this.roles = this.roles.filter((r: Role) => !ids.includes(r.id as number));
+    },
     async assignUser(roleId: number, payload: AssignPayload) {
       await api.post(`/roles/${roleId}/assign`, payload);
+    },
+    async copyToTenant(id: number, tenantId?: string | number) {
+      const payload: any = {};
+      if (tenantId) payload.tenant_id = tenantId;
+      const { data } = await api.post(`/roles/${id}/copy-to-tenant`, payload);
+      return data as Role;
+    },
+    async copyManyToTenant(ids: number[], tenantId?: string | number) {
+      for (const id of ids) {
+        await this.copyToTenant(id, tenantId);
+      }
     },
   },
 });

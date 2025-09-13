@@ -15,6 +15,7 @@
     "unpublish": "Unpublish",
     "duplicate": "Duplicate",
     "copy": "Copy",
+    "assign": "Assign",
     "addSection": "Add Section",
     "addField": "Add Field",
     "cancel": "Cancel",
@@ -378,7 +379,11 @@
   "roles": {
     "label": "Roles",
     "view": "View roles",
-    "edit": "Edit roles"
+    "edit": "Edit roles",
+    "addRole": "Add role",
+    "form": {
+      "search": "Search"
+    }
   },
   "templates": {
     "title": "Templates",
