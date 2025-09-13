@@ -14,6 +14,46 @@ class RolesTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_roles_index_returns_user_counts(): void
+    {
+        $tenant = Tenant::create(['name' => 'Tenant']);
+        $viewerRole = Role::create([
+            'name' => 'Viewer',
+            'slug' => 'viewer',
+            'tenant_id' => $tenant->id,
+            'abilities' => ['roles.view'],
+        ]);
+        $role = Role::create(['name' => 'Tester', 'slug' => 'tester', 'tenant_id' => $tenant->id]);
+
+        $admin = User::create([
+            'name' => 'Admin',
+            'email' => 'admin@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user = User::create([
+            'name' => 'User',
+            'email' => 'user@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $admin->roles()->attach($viewerRole->id, ['tenant_id' => $tenant->id]);
+        $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
+        Sanctum::actingAs($admin);
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->getJson('/api/roles')
+            ->assertStatus(200)
+            ->assertJsonFragment([
+                'id' => $role->id,
+                'users_count' => 1,
+            ]);
+    }
+
     public function test_role_assignment_persists(): void
     {
         $tenant = Tenant::create(['name' => 'Tenant']);

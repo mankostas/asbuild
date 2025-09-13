@@ -143,6 +143,7 @@ interface RoleRow {
   updated_at?: string;
   tenant?: { id: number; name: string } | null;
   tenant_id?: number | null;
+  users_count: number;
 }
 
 const props = defineProps<{ rows: RoleRow[] }>();
@@ -181,6 +182,7 @@ const columns = [
   { label: 'Name', field: 'name' },
   { label: 'Description', field: 'description' },
   { label: 'Level', field: 'level', type: 'number', sortable: true },
+  { label: 'Users', field: 'users_count', type: 'number', sortable: true },
   { label: 'Tenant', field: 'tenant' },
   { label: 'Created', field: 'created_at' },
   { label: 'Updated', field: 'updated_at' },

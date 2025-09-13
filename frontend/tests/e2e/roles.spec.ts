@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 // No running server in the environment; this test documents the expected flow.
 test.skip('creates a role and assigns it to a user', async ({ page }) => {
@@ -14,6 +14,14 @@ test.skip('creates a role and assigns it to a user', async ({ page }) => {
   await page.getByPlaceholder('Search user').fill('John');
   await page.getByRole('option', { name: /John Doe/ }).click();
   await page.getByRole('button', { name: 'Assign' }).click();
+});
+
+test.skip('shows user counts for each role', async ({ page }) => {
+  await page.goto('/roles');
+  await expect(page.getByRole('columnheader', { name: 'Users' })).toBeVisible();
+  await expect(
+    page.getByRole('row', { name: /ClientAdmin/ }).getByRole('cell', { name: /\d+/ })
+  ).toBeVisible();
 });
 
 test.skip('role form shows only allowed abilities', async ({ page }) => {
