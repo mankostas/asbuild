@@ -112,6 +112,7 @@ import Pagination from '@/components/ui/Pagination';
 import Breadcrumbs from "@/Layout/Breadcrumbs.vue";
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
+import { formatDisplay } from '@/utils/datetime';
 
 interface TaskType {
   id: number;
@@ -119,6 +120,7 @@ interface TaskType {
   tenant?: { id: number; name: string } | null;
   statuses?: Record<string, string[]>;
   tasks_count?: number;
+  updated_at?: string;
 }
 
 const props = defineProps<{ rows: TaskType[] }>();
@@ -157,6 +159,7 @@ const columns = [
   { label: 'Tenant', field: 'tenant' },
   { label: 'Tasks', field: 'tasks_count' },
   { label: 'Statuses', field: 'statusCount' },
+  { label: 'Updated', field: 'updated_at' },
   { label: 'Actions', field: 'actions' },
 ];
 
@@ -171,6 +174,7 @@ const filteredRows = computed(() => {
   return rows.map((row) => ({
     ...row,
     statusCount: Object.keys(row.statuses ?? {}).length,
+    updated_at: row.updated_at ? formatDisplay(row.updated_at) : '',
   }));
 });
 
