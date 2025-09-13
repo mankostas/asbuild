@@ -274,6 +274,7 @@
     "form": {
       "name": "Name",
       "tenant": "Tenant",
+      "requireSubtasksComplete": "Require subtasks completed",
       "search": "Search",
       "searchHelp": "Filters sections and fields in the canvas."
     },

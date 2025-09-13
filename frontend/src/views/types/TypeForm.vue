@@ -68,6 +68,7 @@
       <TypeMetaBar
         v-model:name="name"
         v-model:tenant-id="tenantId"
+        v-model:require-subtasks-complete="requireSubtasksComplete"
         :show-tenant-select="auth.isSuperAdmin"
         class="border-b mb-4"
       />
@@ -456,6 +457,7 @@ interface Permission {
 
 const name = ref('');
 const tenantId = ref<number | ''>('');
+const requireSubtasksComplete = ref(false);
 const tenantFeatures = computed(() => {
   const tenant = tenantStore.tenants.find(
     (t: any) => String(t.id) === String(tenantId.value),
@@ -684,6 +686,7 @@ onMounted(async () => {
         typeData.tenant_id !== null && typeData.tenant_id !== undefined
           ? Number(typeData.tenant_id)
           : '';
+      requireSubtasksComplete.value = !!typeData.require_subtasks_complete;
       await refreshTenant(tenantId.value);
       currentVersion.value = typeData;
       loadVersion(typeData);
@@ -1002,6 +1005,7 @@ async function onSubmit() {
   const payload = {
     name: name.value,
     tenant_id: tenantId.value || undefined,
+    require_subtasks_complete: requireSubtasksComplete.value,
     schema_json: JSON.stringify({
       sections: sections.value.map((s) => {
         const section: any = {
