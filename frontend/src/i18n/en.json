@@ -61,6 +61,7 @@
   },
   "Version": "Version",
   "Section": "Section",
+  "tenants": "Tenants",
   "routes": {
     "dashboard": "Dashboard",
     "tasks": "Tasks",
