@@ -57,6 +57,7 @@ interface EmployeeRow {
   last_login_at?: string | null;
   tenant?: { id: number; name: string } | null;
   tenant_id?: number | null;
+  avatar?: string | null;
 }
 
 const router = useRouter();
@@ -112,6 +113,7 @@ async function load() {
     last_login_at: e.last_login_at,
     tenant: tenantMap[e.tenant_id] || null,
     tenant_id: e.tenant_id,
+    avatar: e.avatar,
   }));
   loading.value = false;
 }
