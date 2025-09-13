@@ -297,6 +297,12 @@
       "search": "Αναζήτηση"
     }
   },
+  "teams": {
+    "addTeam": "Προσθήκη ομάδας",
+    "form": {
+      "search": "Αναζήτηση"
+    }
+  },
   "slaPolicies": {
     "title": "Πολιτικές SLA",
     "priority": "Προτεραιότητα",

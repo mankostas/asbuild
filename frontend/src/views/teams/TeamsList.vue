@@ -1,100 +1,76 @@
 <template>
   <div>
-    <div class="mb-4">
-      <RouterLink
-        v-if="can('teams.create') || can('teams.manage')"
-        class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-        :to="{ name: 'teams.create' }"
-      >
-        <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
-        Add Team
-      </RouterLink>
-    </div>
-    <DashcodeServerTable
-      :key="tableKey"
-      :columns="columns"
-      :fetcher="fetchTeams"
+    <TeamsTable
+      v-if="!loading"
+      :rows="all"
+      @edit="edit"
+      @delete="remove"
+      @delete-selected="removeMany"
     >
-      <template
-        v-if="can('teams.update') || can('teams.delete') || can('teams.manage')"
-        #actions="{ row }"
-      >
-        <div class="flex gap-2">
-          <button
-            v-if="can('teams.update') || can('teams.manage')"
-            class="text-blue-600"
-            title="Edit"
-            @click="edit(row.id)"
-          >
-            <Icon icon="heroicons-outline:pencil-square" class="w-5 h-5" />
-          </button>
-          <button
-            v-if="can('teams.delete') || can('teams.manage')"
-            class="text-red-600"
-            title="Delete"
-            @click="remove(row.id)"
-          >
-            <Icon icon="heroicons-outline:trash" class="w-5 h-5" />
-          </button>
-        </div>
+      <template #header-actions>
+        <Button
+          v-if="can('teams.create') || can('teams.manage')"
+          link="/teams/create"
+          btnClass="btn-primary btn-sm min-w-[100px] !h-8 !py-0"
+          icon="heroicons-outline:plus"
+          iconClass="w-4 h-4"
+          :text="t('teams.addTeam')"
+          :aria-label="t('teams.addTeam')"
+        />
       </template>
-    </DashcodeServerTable>
+    </TeamsTable>
+    <div v-else class="p-4">
+      <SkeletonTable :count="10" />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
+import TeamsTable from '@/components/teams/TeamsTable.vue';
+import SkeletonTable from '@/components/ui/Skeleton/Table.vue';
+import Button from '@/components/ui/Button';
 import Swal from 'sweetalert2';
-import Icon from '@/components/ui/Icon';
-import { useNotify } from '@/plugins/notify';
 import { useTeamsStore } from '@/stores/teams';
 import { can } from '@/stores/auth';
+import { useI18n } from 'vue-i18n';
+
+interface TeamRow {
+  id: number;
+  name: string;
+  description: string | null;
+  members: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const router = useRouter();
-const notify = useNotify();
 const teamsStore = useTeamsStore();
+const { t } = useI18n();
 
-const tableKey = ref(0);
+const all = ref<TeamRow[]>([]);
+const loading = ref(true);
 
-const columns = [
-  { label: 'Name', field: 'name', sortable: true },
-  { label: 'Description', field: 'description', sortable: true },
-  { label: 'Members', field: 'members', sortable: false },
-];
-
-async function fetchTeams({ page, perPage, sort, search }: any) {
+async function load() {
   await teamsStore.fetch();
-  let rows = teamsStore.teams.slice().map((t: any) => ({
+  all.value = teamsStore.teams.map((t: any) => ({
     id: t.id,
     name: t.name,
     description: t.description,
     members: (t.employees || []).map((e: any) => e.name).join(', '),
+    created_at: t.created_at,
+    updated_at: t.updated_at,
   }));
-  if (search) {
-    const q = String(search).toLowerCase();
-    rows = rows.filter((r) =>
-      Object.values(r).some((v) => String(v ?? '').toLowerCase().includes(q)),
-    );
-  }
-  if (sort && sort.field) {
-    rows.sort((a: any, b: any) => {
-      const fa = a[sort.field] ?? '';
-      const fb = b[sort.field] ?? '';
-      if (fa < fb) return sort.type === 'asc' ? -1 : 1;
-      if (fa > fb) return sort.type === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }
-  const total = rows.length;
-  const start = (page - 1) * perPage;
-  const paged = rows.slice(start, start + perPage);
-  return { rows: paged, total };
+  loading.value = false;
 }
 
+onMounted(load);
+
 function reload() {
-  tableKey.value++;
+  loading.value = true;
+  all.value = [];
+  load();
 }
 
 function edit(id: number) {
@@ -107,13 +83,23 @@ async function remove(id: number) {
     icon: 'warning',
     showCancelButton: true,
   });
-  if (!res.isConfirmed) return;
-  try {
+  if (res.isConfirmed) {
     await teamsStore.remove(id);
     reload();
-  } catch (e: any) {
-    notify.error('Failed to delete');
+  }
+}
+
+async function removeMany(ids: number[]) {
+  const res = await Swal.fire({
+    title: 'Delete selected teams?',
+    icon: 'warning',
+    showCancelButton: true,
+  });
+  if (res.isConfirmed) {
+    for (const id of ids) {
+      await teamsStore.remove(id);
+    }
+    reload();
   }
 }
 </script>
-
