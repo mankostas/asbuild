@@ -23,6 +23,7 @@ class TaskTypeRequest extends FormRequest
             'status_flow_json' => ['sometimes', 'json'],
             'tenant_id' => ['sometimes', 'integer'],
             'abilities_json' => ['nullable', 'json'],
+            'require_subtasks_complete' => ['sometimes', 'boolean'],
         ];
     }
 
@@ -35,6 +36,7 @@ class TaskTypeRequest extends FormRequest
             'status_flow_json' => 'status flow',
             'tenant_id' => 'tenant',
             'abilities_json' => 'abilities',
+            'require_subtasks_complete' => 'require subtasks complete',
         ];
     }
 

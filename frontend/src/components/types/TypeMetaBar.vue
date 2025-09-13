@@ -25,6 +25,11 @@
           />
         </template>
       </VueSelect>
+      <Switch
+        id="requireSubtasksComplete"
+        v-model="localRequireSubtasksComplete"
+        :label="t('types.form.requireSubtasksComplete')"
+      />
     </div>
   </Card>
 </template>
@@ -36,6 +41,7 @@ import Card from '@/components/ui/Card/index.vue';
 import Textinput from '@/components/ui/Textinput/index.vue';
 import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import vSelect from 'vue-select';
+import Switch from '@/components/ui/Switch/index.vue';
 import { useTenantStore } from '@/stores/tenant';
 
 interface Option {
@@ -44,12 +50,18 @@ interface Option {
 }
 
 const props = withDefaults(
-  defineProps<{ name: string; tenantId: number | ''; showTenantSelect?: boolean }>(),
-  { showTenantSelect: true },
+  defineProps<{
+    name: string;
+    tenantId: number | '';
+    showTenantSelect?: boolean;
+    requireSubtasksComplete: boolean;
+  }>(),
+  { showTenantSelect: true, requireSubtasksComplete: false },
 );
 const emit = defineEmits<{
   (e: 'update:name', value: string): void;
   (e: 'update:tenantId', value: number | ''): void;
+  (e: 'update:requireSubtasksComplete', value: boolean): void;
 }>();
 
 const { t } = useI18n();
@@ -76,6 +88,11 @@ const localName = computed({
 const localTenantId = computed<any>({
   get: () => (props.tenantId === '' ? null : props.tenantId),
   set: (v: number | null) => emit('update:tenantId', v === null ? '' : Number(v)),
+});
+
+const localRequireSubtasksComplete = computed({
+  get: () => props.requireSubtasksComplete,
+  set: (v: boolean) => emit('update:requireSubtasksComplete', v),
 });
 
 async function onTenantSearch(search: string) {
