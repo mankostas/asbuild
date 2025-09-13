@@ -137,6 +137,23 @@ class EmployeeController extends Controller
         return new EmployeeResource($employee->load('roles'));
     }
 
+    public function toggleStatus(Request $request, User $employee)
+    {
+        $tenantId = $this->getTenantId($request);
+        if ($employee->tenant_id !== $tenantId) {
+            abort(404);
+        }
+
+        if ($employee->hasRole('SuperAdmin')) {
+            abort(403, 'Cannot modify a SuperAdmin');
+        }
+
+        $employee->status = $employee->status === 'active' ? 'inactive' : 'active';
+        $employee->save();
+
+        return new EmployeeResource($employee);
+    }
+
     public function destroy(Request $request, User $employee)
     {
         $tenantId = $this->getTenantId($request);
