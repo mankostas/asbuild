@@ -62,6 +62,7 @@
   "Version": "Version",
   "Section": "Section",
   "tenants": "Tenants",
+  "allTenants": "All tenants",
   "routes": {
     "dashboard": "Dashboard",
     "tasks": "Tasks",

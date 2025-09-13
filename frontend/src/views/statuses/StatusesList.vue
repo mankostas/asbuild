@@ -77,7 +77,7 @@ if (auth.isSuperAdmin) {
 }
 
 const tenantOptions = computed(() => [
-  { value: '', label: 'All tenants' },
+  { value: '', label: t('allTenants') },
   ...tenantStore.tenants.map((t: any) => ({ value: t.id, label: t.name })),
 ]);
 
