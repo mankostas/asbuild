@@ -10,6 +10,8 @@
     "actions": "Actions",
     "edit": "Edit",
     "delete": "Delete",
+    "impersonate": "Impersonate",
+    "resendInvite": "Resend Invite",
     "save": "Save",
     "publish": "Publish",
     "unpublish": "Unpublish",
