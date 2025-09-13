@@ -62,7 +62,7 @@ class TaskStatusFlowTest extends TestCase
             'user_id' => $user->id,
             'task_type_id' => $type->id,
             'status' => 'draft',
-            'status_slug' => 'draft',
+            'status_slug' => \App\Models\TaskStatus::prefixSlug('draft', 1),
             'assigned_user_id' => $user->id,
         ]);
     }
@@ -103,6 +103,7 @@ class TaskStatusFlowTest extends TestCase
             'user_id' => $user->id,
             'task_type_id' => $type->id,
             'status' => 'draft',
+            'status_slug' => \App\Models\TaskStatus::prefixSlug('draft', 1),
             'assigned_user_id' => $user->id,
         ]);
 

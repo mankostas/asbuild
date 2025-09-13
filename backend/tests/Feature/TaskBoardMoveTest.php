@@ -22,12 +22,10 @@ class TaskBoardMoveTest extends TestCase
         parent::setUp();
         Tenant::create(['id' => 1, 'name' => 'T', 'features' => ['tasks']]);
 
-        TaskStatus::insert([
-            ['slug' => 'draft', 'name' => 'Draft'],
-            ['slug' => 'assigned', 'name' => 'Assigned'],
-            ['slug' => 'in_progress', 'name' => 'In Progress'],
-            ['slug' => 'completed', 'name' => 'Completed'],
-        ]);
+        TaskStatus::create(['slug' => 'draft', 'name' => 'Draft', 'tenant_id' => 1]);
+        TaskStatus::create(['slug' => 'assigned', 'name' => 'Assigned', 'tenant_id' => 1]);
+        TaskStatus::create(['slug' => 'in_progress', 'name' => 'In Progress', 'tenant_id' => 1]);
+        TaskStatus::create(['slug' => 'completed', 'name' => 'Completed', 'tenant_id' => 1]);
     }
 
     protected function user(bool $manage = false): User
@@ -73,7 +71,7 @@ class TaskBoardMoveTest extends TestCase
             'tenant_id' => 1,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
-            'status_slug' => 'draft',
+            'status_slug' => \App\Models\TaskStatus::prefixSlug('draft', 1),
             'assigned_user_id' => $user->id,
         ]);
     }
@@ -133,7 +131,7 @@ class TaskBoardMoveTest extends TestCase
             'tenant_id' => 1,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
-            'status_slug' => 'draft',
+            'status_slug' => \App\Models\TaskStatus::prefixSlug('draft', 1),
             'assigned_user_id' => $user->id,
             'board_position' => 1000,
         ]);
@@ -142,7 +140,7 @@ class TaskBoardMoveTest extends TestCase
             'tenant_id' => 1,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
-            'status_slug' => 'draft',
+            'status_slug' => \App\Models\TaskStatus::prefixSlug('draft', 1),
             'assigned_user_id' => $user->id,
             'board_position' => 2000,
         ]);
@@ -151,7 +149,7 @@ class TaskBoardMoveTest extends TestCase
             'tenant_id' => 1,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
-            'status_slug' => 'draft',
+            'status_slug' => \App\Models\TaskStatus::prefixSlug('draft', 1),
             'assigned_user_id' => $user->id,
             'board_position' => 3000,
         ]);
@@ -165,7 +163,7 @@ class TaskBoardMoveTest extends TestCase
             ->assertStatus(200);
 
         $order = Task::where('tenant_id', 1)
-            ->where('status_slug', 'draft')
+            ->where('status_slug', \App\Models\TaskStatus::prefixSlug('draft', 1))
             ->orderBy('board_position')
             ->pluck('id')
             ->toArray();

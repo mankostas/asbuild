@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Task;
+use App\Models\TaskStatus;
 
 /**
  * Manage board positions for tasks using a gap strategy.
@@ -41,6 +42,7 @@ class BoardPositionService
             $position = $this->calculatePosition($prev->board_position ?? null, $next->board_position ?? null);
         }
 
+        $task->status = TaskStatus::stripPrefix($statusSlug);
         $task->status_slug = $statusSlug;
         $task->board_position = $position ?? 1000;
         $task->previous_status_slug = $previous;

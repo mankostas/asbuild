@@ -47,7 +47,7 @@ class TaskCreationTest extends TestCase
         $this->assertDatabaseHas('tasks', [
             'id' => $taskId,
             'status' => 'draft',
-            'status_slug' => 'draft',
+            'status_slug' => \App\Models\TaskStatus::prefixSlug('draft', $tenant->id),
         ]);
     }
 }

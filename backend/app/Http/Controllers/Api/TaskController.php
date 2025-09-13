@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\TaskType;
+use App\Models\TaskStatus;
 use App\Services\FormSchemaService;
 use App\Services\StatusFlowService;
 use App\Http\Resources\TaskResource;
@@ -34,7 +35,7 @@ class TaskController extends Controller
         }
 
         if ($status = $request->query('status')) {
-            $base->where('status_slug', $status);
+            $base->where('status_slug', TaskStatus::prefixSlug($status, $request->user()->tenant_id));
         }
 
         if ($assignee = $request->query('assignee')) {
@@ -90,7 +91,7 @@ class TaskController extends Controller
         }
         $statuses = $type?->statuses ?? [];
         $data['status'] = $statuses ? array_key_first($statuses) : Task::STATUS_DRAFT;
-        $data['status_slug'] = $data['status'];
+        $data['status_slug'] = TaskStatus::prefixSlug($data['status'], $tenantId);
         $this->validateAgainstSchema($type, $data['form_data'] ?? [], null);
         $this->formSchemaService->mapAssignee($type->schema_json ?? [], $data);
         $this->formSchemaService->mapReviewer($type->schema_json ?? [], $data);
@@ -165,11 +166,12 @@ class TaskController extends Controller
 
         $data = $request->validate(['status' => 'required|string']);
         $next = $data['status'];
+        $prefixed = TaskStatus::prefixSlug($next, $task->tenant_id);
         $type = $task->type;
 
         if ($task->status !== $next) {
             $canManage = $request->user()->can('tasks.manage');
-            if (! $canManage && $next !== $task->previous_status_slug && ! $this->statusFlow->canTransition($task->status, $next, $type)) {
+            if (! $canManage && $prefixed !== $task->previous_status_slug && ! $this->statusFlow->canTransition($task->status, $next, $type)) {
                 return response()->json(['message' => 'invalid_transition'], 422);
             }
             if (! $canManage) {
@@ -178,8 +180,8 @@ class TaskController extends Controller
 
             $prev = $task->status;
             $task->status = $next;
-            $task->status_slug = $next;
-            $task->previous_status_slug = $prev;
+            $task->status_slug = $prefixed;
+            $task->previous_status_slug = TaskStatus::prefixSlug($prev, $task->tenant_id);
             if ($next === Task::STATUS_IN_PROGRESS && ! $task->started_at) {
                 $task->started_at = now();
             }
