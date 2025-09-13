@@ -6,6 +6,8 @@
       @edit="edit"
       @delete="remove"
       @delete-selected="removeMany"
+      @impersonate="impersonate"
+      @resend-invite="resendInvite"
     >
       <template #header-actions>
         <Select
@@ -46,6 +48,7 @@ import { useNotify } from '@/plugins/notify';
 import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
 import { useI18n } from 'vue-i18n';
+import { setTokens } from '@/services/authStorage';
 
 interface EmployeeRow {
   id: number;
@@ -186,6 +189,32 @@ async function removeMany(ids: number[]) {
       }
     }
     reload();
+  }
+}
+
+async function impersonate(id: number) {
+  if (!can('employees.manage')) return;
+  try {
+    const { data } = await api.post(`/employees/${id}/impersonate`);
+    auth.accessToken = data.access_token;
+    auth.refreshToken = data.refresh_token;
+    setTokens(data.access_token, data.refresh_token);
+    api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
+    await auth.fetchUser();
+    reload();
+  } catch (e: any) {
+    notify.error(t('common.error'));
+  }
+}
+
+async function resendInvite(id: number) {
+  if (!can('employees.manage')) return;
+  try {
+    await api.post(`/employees/${id}/resend-invite`);
+    notify.success(t('actions.resendInvite'));
+    reload();
+  } catch (e: any) {
+    notify.error(t('common.error'));
   }
 }
 </script>

@@ -61,6 +61,26 @@
           <Dropdown classMenuItems=" w-[140px]">
             <span class="text-xl"><Icon icon="heroicons-outline:dots-vertical" /></span>
             <template #menus>
+              <MenuItem v-if="can('employees.manage')">
+                <button
+                  type="button"
+                  class="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm flex space-x-2 items-center rtl:space-x-reverse"
+                  @click="$emit('impersonate', rowProps.row.id)"
+                >
+                  <span class="text-base"><Icon icon="heroicons-outline:user" /></span>
+                  <span>{{ t('actions.impersonate') }}</span>
+                </button>
+              </MenuItem>
+              <MenuItem v-if="can('employees.manage')">
+                <button
+                  type="button"
+                  class="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm flex space-x-2 items-center rtl:space-x-reverse"
+                  @click="$emit('resend-invite', rowProps.row.id)"
+                >
+                  <span class="text-base"><Icon icon="heroicons-outline:envelope" /></span>
+                  <span>{{ t('actions.resendInvite') }}</span>
+                </button>
+              </MenuItem>
               <MenuItem v-if="can('employees.update') || can('employees.manage')">
                 <button
                   type="button"
@@ -144,7 +164,13 @@ interface EmployeeRow {
 }
 
 const props = defineProps<{ rows: EmployeeRow[] }>();
-const emit = defineEmits<{ (e: 'edit', id: number): void; (e: 'delete', id: number): void; (e: 'delete-selected', ids: number[]): void; }>();
+const emit = defineEmits<{
+  (e: 'edit', id: number): void;
+  (e: 'delete', id: number): void;
+  (e: 'delete-selected', ids: number[]): void;
+  (e: 'impersonate', id: number): void;
+  (e: 'resend-invite', id: number): void;
+}>();
 
 const { t } = useI18n();
 const notify = useNotify();
