@@ -67,18 +67,20 @@
           </span>
         </template>
         <template #selected-row-actions>
-          <Button
-            btnClass="btn-danger btn-sm"
-            icon="heroicons-outline:trash"
-            :text="t('actions.delete')"
+          <button
+            type="button"
+            class="ml-2 text-danger-500 hover:underline cursor-pointer"
             @click="emit('delete-selected', selectedIds)"
-          />
-          <Button
-            btnClass="btn-secondary btn-sm"
-            icon="heroicons-outline:document-duplicate"
-            :text="t('actions.copy')"
+          >
+            {{ t('actions.delete') }}
+          </button>
+          <button
+            type="button"
+            class="ml-2 text-primary-500 hover:underline cursor-pointer"
             @click="emit('copy-selected', selectedIds)"
-          />
+          >
+            {{ t('actions.copy') }}
+          </button>
         </template>
         <template #pagination-bottom="pagerProps">
           <div class="py-4 px-3">
@@ -108,7 +110,6 @@ import Dropdown from '@/components/ui/Dropdown';
 import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
 import Breadcrumbs from "@/Layout/Breadcrumbs.vue";
-import Button from '@/components/ui/Button';
 import { useI18n } from 'vue-i18n';
 
 interface TaskType {
