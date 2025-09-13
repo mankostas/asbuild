@@ -129,6 +129,7 @@ interface TaskStatus {
   name: string;
   slug: string;
   color: string;
+  position: number;
   tenant?: { id: number; name: string } | null;
   tenant_id?: number | null;
 }
@@ -165,6 +166,7 @@ const selectOptions = {
 
 const columns = [
   { label: 'ID', field: 'id' },
+  { label: 'Order', field: 'position', type: 'number', sortable: true },
   { label: 'Name', field: 'name' },
   { label: 'Slug', field: 'slug' },
   { label: 'Color', field: 'color' },
