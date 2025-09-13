@@ -85,14 +85,15 @@ async function load() {
   let scopeParam: 'tenant' | 'global' | 'all' = scope.value;
   let tenantId: string | number | undefined;
 
-  if (auth.isSuperAdmin) {
-    scopeParam = tenantFilter.value ? 'all' : 'all';
-    tenantId = tenantFilter.value || undefined;
-  } else if (scope.value !== 'all') {
-    tenantId = tenantStore.currentTenantId;
+  if (auth.isSuperAdmin && tenantFilter.value) {
+    scopeParam = 'all'; // tenant-only
+    tenantId = tenantFilter.value;
   }
 
-  const { data } = await statusesStore.fetch(scopeParam, tenantId);
+  const { data } = await statusesStore.fetch({
+    scope: scopeParam,
+    tenant_id: tenantId,
+  });
   await tenantStore.loadTenants({ per_page: 100 });
   const tenantMap = tenantStore.tenants.reduce(
     (acc: Record<number, any>, t: any) => ({ ...acc, [t.id]: t }),

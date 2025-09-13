@@ -5,12 +5,24 @@ import { withListParams, type ListParams } from './list';
 export const useTaskStatusesStore = defineStore('taskStatuses', {
   actions: {
     async fetch(
-      scope: 'tenant' | 'global' | 'all',
+      scopeOrParams:
+        | 'tenant'
+        | 'global'
+        | 'all'
+        | (ListParams & {
+            scope: 'tenant' | 'global' | 'all';
+            tenant_id?: string | number;
+          }),
       tenantId?: string | number,
       params: ListParams = {},
     ) {
-      const query: any = withListParams({ scope, ...params });
-      if (tenantId) query.tenant_id = tenantId;
+      let query: any;
+      if (typeof scopeOrParams === 'string') {
+        query = withListParams({ scope: scopeOrParams, ...params });
+        if (tenantId) query.tenant_id = tenantId;
+      } else {
+        query = withListParams(scopeOrParams);
+      }
       const { data } = await api.get('/task-statuses', { params: query });
       return data;
     },
