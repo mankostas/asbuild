@@ -101,7 +101,10 @@
     "roleEdit": "Edit Role",
     "tenantDetail": "Tenant Detail",
     "tenantCreate": "Create Tenant",
-    "tenantEdit": "Edit Tenant"
+    "tenantEdit": "Edit Tenant",
+    "teams": "Teams",
+    "teamCreate": "Create Team",
+    "teamEdit": "Edit Team"
   },
   "abilities": {
     "title": "Abilities",
