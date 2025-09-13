@@ -32,7 +32,21 @@
           {{ rowProps.row.description || '—' }}
         </span>
         <span v-else-if="rowProps.column.field === 'abilities'">
-          {{ summarizeAbilities(rowProps.row.abilities) }}
+          <Tooltip v-if="rowProps.row.abilities.length > 3" theme="light">
+            <template #button>
+              <span class="cursor-help">
+                {{ summarizeAbilities(rowProps.row.abilities) }}
+              </span>
+            </template>
+            <ul class="text-left list-disc pl-4">
+              <li v-for="ability in rowProps.row.abilities" :key="ability">
+                {{ ability }}
+              </li>
+            </ul>
+          </Tooltip>
+          <span v-else>
+            {{ summarizeAbilities(rowProps.row.abilities) }}
+          </span>
         </span>
         <span v-else-if="rowProps.column.field === 'created_at'">
           {{ formatDate(rowProps.row.created_at) }}
@@ -133,6 +147,7 @@ import InputGroup from '@/components/ui/InputGroup';
 import Dropdown from '@/components/ui/Dropdown';
 import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
+import Tooltip from '@/components/ui/Tooltip/index.vue';
 import Breadcrumbs from '@/Layout/Breadcrumbs.vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore, can } from '@/stores/auth';

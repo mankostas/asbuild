@@ -37,3 +37,12 @@ test.skip('role form shows only allowed abilities', async ({ page }) => {
   await expect(page.getByRole('option', { name: 'types.manage' })).not.toBeVisible();
 });
 
+test.skip('shows full abilities in a tooltip on hover', async ({ page }) => {
+  await page.goto('/roles');
+  const cell = page
+    .getByRole('row', { name: /ClientAdmin/ })
+    .getByRole('cell', { name: /\+\d+/ });
+  await cell.hover();
+  await expect(page.getByRole('tooltip')).toBeVisible();
+});
+
