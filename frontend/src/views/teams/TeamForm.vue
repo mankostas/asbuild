@@ -111,7 +111,7 @@ watch(tenantId, async (newTenant, oldTenant) => {
   selectedEmployees.value = [];
   hiddenRoles.value = {};
   featureGrants.value = {} as Record<string, string[]>;
-  if (isEdit.value) {
+  if (isEdit.value && !oldTenant) {
     await loadTeam(true);
   }
   availableFeatures.value.forEach((f) => {
@@ -132,18 +132,18 @@ async function loadTeam(preserveTenant = false) {
   form.value.description = data.description || '';
   if (!preserveTenant) {
     tenantId.value = data.tenant_id ? String(data.tenant_id) : '';
-    selectedEmployees.value = (data.employees || []).map((e: any) => e.id);
-    hiddenRoles.value = {};
-    featureGrants.value = {} as Record<string, string[]>;
-    (data.roles || []).forEach((r: any) => {
-      if (r.slug?.startsWith('__fg__')) {
-        const parts = r.slug.split('__').filter(Boolean);
-        const feature = parts[2];
-        hiddenRoles.value[feature] = r;
-        featureGrants.value[feature] = r.abilities || [];
-      }
-    });
   }
+  selectedEmployees.value = (data.employees || []).map((e: any) => e.id);
+  hiddenRoles.value = {};
+  featureGrants.value = {} as Record<string, string[]>;
+  (data.roles || []).forEach((r: any) => {
+    if (r.slug?.startsWith('__fg__')) {
+      const parts = r.slug.split('__').filter(Boolean);
+      const feature = parts[2];
+      hiddenRoles.value[feature] = r;
+      featureGrants.value[feature] = r.abilities || [];
+    }
+  });
 }
 
 const { handleSubmit, setErrors, errors } = useForm();
