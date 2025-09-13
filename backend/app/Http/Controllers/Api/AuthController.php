@@ -65,15 +65,18 @@ class AuthController extends Controller
 
         $token = PersonalAccessToken::findToken($request->refresh_token);
 
-        if (! $token || $token->name !== 'refresh-token') {
+        $validNames = ['refresh-token', 'impersonation-refresh'];
+        if (! $token || ! in_array($token->name, $validNames, true)) {
             return response()->json(['message' => 'invalid_token'], 401);
         }
 
         $user = $token->tokenable;
+        $refreshName = $token->name;
+        $accessName = $refreshName === 'impersonation-refresh' ? 'impersonation' : 'access-token';
         $token->delete();
 
-        $accessToken = $user->createToken('access-token', ['*'], now()->addMinutes(15));
-        $refreshToken = $user->createToken('refresh-token', ['refresh'], now()->addDays(30));
+        $accessToken = $user->createToken($accessName, ['*'], now()->addMinutes(15));
+        $refreshToken = $user->createToken($refreshName, ['refresh'], now()->addDays(30));
 
         return response()->json([
             'access_token' => $accessToken->plainTextToken,
