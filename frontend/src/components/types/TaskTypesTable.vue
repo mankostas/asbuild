@@ -59,7 +59,7 @@
                     @click="$emit('copy', rowProps.row.id)"
                   >
                     <span class="text-base"><Icon icon="heroicons-outline:document-duplicate" /></span>
-                    <span>{{ t('actions.copy') }}</span>
+                    <span>{{ t(auth.isSuperAdmin ? 'actions.copy' : 'actions.duplicate') }}</span>
                   </button>
                 </MenuItem>
               </template>
@@ -79,7 +79,7 @@
             class="ml-2 text-primary-500 hover:underline cursor-pointer"
             @click="emit('copy-selected', selectedIds)"
           >
-            {{ t('actions.copy') }}
+            {{ t(auth.isSuperAdmin ? 'actions.copy' : 'actions.duplicate') }}
           </button>
         </template>
         <template #pagination-bottom="pagerProps">
@@ -111,6 +111,7 @@ import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
 import Breadcrumbs from "@/Layout/Breadcrumbs.vue";
 import { useI18n } from 'vue-i18n';
+import { useAuthStore } from '@/stores/auth';
 
 interface TaskType {
   id: number;
@@ -128,6 +129,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const auth = useAuthStore();
 const searchTerm = ref('');
 const perPage = ref(10);
 const current = ref(1);
