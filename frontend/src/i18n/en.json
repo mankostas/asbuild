@@ -285,6 +285,12 @@
     "noSLAPermissions": "You do not have permission to manage SLA policies",
     "noAutomationsPermissions": "You do not have permission to manage automations"
   },
+  "statuses": {
+    "addStatus": "Add status",
+    "form": {
+      "search": "Search"
+    }
+  },
   "slaPolicies": {
     "title": "SLA Policies",
     "priority": "Priority",

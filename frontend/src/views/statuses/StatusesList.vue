@@ -1,11 +1,19 @@
 <template>
   <div>
-    <div class="flex items-center justify-between mb-4">
-      <div>
+    <TaskStatusesTable
+      v-if="!loading"
+      :rows="all"
+      @edit="edit"
+      @delete="remove"
+      @copy="copy"
+      @delete-selected="removeMany"
+      @copy-selected="copyMany"
+    >
+      <template #header-actions>
         <select
           id="task-statuses-scope"
           v-model="scope"
-          class="border rounded px-2 py-1"
+          class="border rounded px-2 py-1 text-xs"
           aria-label="Scope"
           @change="changeScope"
         >
@@ -13,82 +21,51 @@
             {{ opt.label }}
           </option>
         </select>
-      </div>
-      <RouterLink
-        v-if="can('task_statuses.create') || can('task_statuses.manage')"
-        class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-        :to="{ name: 'taskStatuses.create' }"
-      >
-        <Icon icon="heroicons-outline:plus" class="w-5 h-5" />
-        Add Status
-      </RouterLink>
-    </div>
-    <DashcodeServerTable
-      :key="tableKey"
-      :columns="columns"
-      :fetcher="fetchStatuses"
-    >
-      <template
-        v-if="
-          can('task_statuses.update') ||
-          can('task_statuses.delete') ||
-          can('task_statuses.create') ||
-          can('task_statuses.manage')
-        "
-        #actions="{ row }"
-      >
-        <div class="flex gap-2">
-          <button
-            v-if="can('task_statuses.update') || can('task_statuses.manage')"
-            class="text-blue-600"
-            title="Edit"
-            @click="edit(row.id)"
-          >
-            <Icon icon="heroicons-outline:pencil-square" class="w-5 h-5" />
-          </button>
-          <button
-            v-if="can('task_statuses.delete') || can('task_statuses.manage')"
-            class="text-red-600"
-            title="Delete"
-            @click="remove(row.id)"
-          >
-            <Icon icon="heroicons-outline:trash" class="w-5 h-5" />
-          </button>
-          <button
-            v-if="
-              (can('task_statuses.create') || can('task_statuses.manage')) &&
-              (auth.isSuperAdmin || !row.tenant_id)
-            "
-            class="text-green-600"
-            title="Copy to Tenant"
-            @click="copy(row.id)"
-          >
-            <Icon icon="heroicons-outline:document-duplicate" class="w-5 h-5" />
-          </button>
-        </div>
+        <Button
+          v-if="can('task_statuses.create') || can('task_statuses.manage')"
+          link="/task-statuses/create"
+          btnClass="btn-primary btn-sm min-w-[100px]"
+          icon="heroicons-outline:plus"
+          iconClass="w-4 h-4"
+          :text="t('statuses.addStatus')"
+          :aria-label="t('statuses.addStatus')"
+        />
       </template>
-    </DashcodeServerTable>
+    </TaskStatusesTable>
+    <div v-else class="p-4">
+      <SkeletonTable :count="10" />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
+import TaskStatusesTable from '@/components/statuses/TaskStatusesTable.vue';
+import SkeletonTable from '@/components/ui/Skeleton/Table.vue';
+import Button from '@/components/ui/Button';
 import Swal from 'sweetalert2';
-import Icon from '@/components/ui/Icon';
 import api from '@/services/api';
 import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
 import { useTaskStatusesStore } from '@/stores/taskStatuses';
+import { useI18n } from 'vue-i18n';
+
+interface TaskStatus {
+  id: number;
+  name: string;
+  tenant?: { id: number; name: string } | null;
+  tenant_id?: number | null;
+}
 
 const router = useRouter();
-const tableKey = ref(0);
-const all = ref<any[]>([]);
+const all = ref<TaskStatus[]>([]);
+const loading = ref(true);
 const scope = ref<'tenant' | 'global' | 'all'>('tenant');
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
 const statusesStore = useTaskStatusesStore();
+const { t } = useI18n();
 
 if (auth.isSuperAdmin) {
   scope.value = 'all';
@@ -105,41 +82,22 @@ const scopeOptions = computed(() => {
   return opts;
 });
 
-const columns = [
-  { label: 'ID', field: 'id', sortable: true },
-  { label: 'Name', field: 'name', sortable: true },
-];
-
-async function fetchStatuses({ page, perPage, sort, search }: any) {
-  if (!all.value.length) {
-    const tenantId =
-      auth.isSuperAdmin && scope.value !== 'all'
-        ? tenantStore.currentTenantId
-        : undefined;
-    all.value = (await statusesStore.fetch(scope.value, tenantId)).data;
-  }
-  let rows = all.value.slice();
-  if (search) {
-    const q = String(search).toLowerCase();
-    rows = rows.filter((r) => r.name.toLowerCase().includes(q));
-  }
-  if (sort && sort.field) {
-    rows.sort((a: any, b: any) => {
-      const fa = a[sort.field];
-      const fb = b[sort.field];
-      if (fa < fb) return sort.type === 'asc' ? -1 : 1;
-      if (fa > fb) return sort.type === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }
-  const total = rows.length;
-  const start = (page - 1) * perPage;
-  const paged = rows.slice(start, start + perPage);
-  return { rows: paged, total };
+async function load() {
+  const tenantId =
+    auth.isSuperAdmin && scope.value !== 'all'
+      ? tenantStore.currentTenantId
+      : undefined;
+  const { data } = await statusesStore.fetch(scope.value, tenantId);
+  all.value = data;
+  loading.value = false;
 }
 
+onMounted(load);
+
 function reload() {
-  tableKey.value++;
+  loading.value = true;
+  all.value = [];
+  load();
 }
 
 function changeScope() {
@@ -169,7 +127,6 @@ async function remove(id: number) {
   });
   if (res.isConfirmed) {
     await api.delete(`/task-statuses/${id}`);
-    all.value = [];
     reload();
   }
 }
@@ -192,7 +149,39 @@ async function copy(id: number) {
     tenantId = res.value;
   }
   await statusesStore.copyToTenant(id, tenantId);
-  all.value = [];
+  reload();
+}
+
+async function removeMany(ids: number[]) {
+  const res = await Swal.fire({
+    title: 'Delete selected statuses?',
+    icon: 'warning',
+    showCancelButton: true,
+  });
+  if (res.isConfirmed) {
+    await statusesStore.deleteMany(ids);
+    reload();
+  }
+}
+
+async function copyMany(ids: number[]) {
+  let tenantId: string | number | undefined;
+  if (auth.isSuperAdmin) {
+    await tenantStore.loadTenants();
+    const inputOptions = tenantStore.tenants.reduce(
+      (acc: any, t: any) => ({ ...acc, [t.id]: t.name }),
+      {},
+    );
+    const res = await Swal.fire({
+      title: 'Copy to tenant',
+      input: 'select',
+      inputOptions,
+      showCancelButton: true,
+    });
+    if (!res.isConfirmed || !res.value) return;
+    tenantId = res.value;
+  }
+  await statusesStore.copyManyToTenant(ids, tenantId);
   reload();
 }
 </script>
