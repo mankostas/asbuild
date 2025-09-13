@@ -113,7 +113,7 @@ watch(tenantId, async (newTenant, oldTenant) => {
   hiddenRoles.value = {};
   featureGrants.value = {} as Record<string, string[]>;
   if (isEdit.value) {
-    await loadTeam();
+    await loadTeam(true);
   }
   availableFeatures.value.forEach((f) => {
     if (!featureGrants.value[f]) featureGrants.value[f] = [];
@@ -126,12 +126,14 @@ async function loadEmployees() {
   employeeOptions.value = extractData(data);
 }
 
-async function loadTeam() {
+async function loadTeam(preserveTenant = false) {
   if (!isEdit.value) return;
   const { data } = await api.get(`/teams/${route.params.id}`);
   form.value.name = data.name || '';
   form.value.description = data.description || '';
-  tenantId.value = data.tenant_id ? String(data.tenant_id) : '';
+  if (!preserveTenant) {
+    tenantId.value = data.tenant_id ? String(data.tenant_id) : '';
+  }
   selectedEmployees.value = (data.employees || []).map((e: any) => e.id);
   hiddenRoles.value = {};
   featureGrants.value = {} as Record<string, string[]>;
