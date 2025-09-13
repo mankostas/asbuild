@@ -20,7 +20,10 @@ class TaskAutomationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_status_completed_notifies_team(): void
+    /**
+     * @dataProvider statusConditionProvider
+     */
+    public function test_status_completed_notifies_team(bool $prefixed): void
     {
         Queue::fake();
         $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
@@ -55,10 +58,14 @@ class TaskAutomationTest extends TestCase
 
         $team = Team::create(['tenant_id' => $tenant->id, 'name' => 'Team X']);
 
+        $status = $prefixed
+            ? TaskStatus::prefixSlug('completed', $tenant->id)
+            : 'completed';
+
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson("/api/task-types/{$type->id}/automations", [
                 'event' => 'status_changed',
-                'conditions_json' => ['status' => 'completed'],
+                'conditions_json' => ['status' => $status],
                 'actions_json' => [['type' => 'notify_team', 'team_id' => $team->id]],
                 'enabled' => true,
             ])->assertCreated();
@@ -81,5 +88,13 @@ class TaskAutomationTest extends TestCase
         Queue::assertPushed(AutomationNotifyTeamJob::class, function ($job) use ($task, $team) {
             return $job->taskId === $task->id && $job->teamId === $team->id;
         });
+    }
+
+    public static function statusConditionProvider(): array
+    {
+        return [
+            'unprefixed' => [false],
+            'prefixed' => [true],
+        ];
     }
 }
