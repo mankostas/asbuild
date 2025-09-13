@@ -10,6 +10,13 @@
       @copy-selected="copyMany"
     >
       <template #header-actions>
+        <Select
+          v-if="auth.isSuperAdmin"
+          v-model="tenantFilter"
+          :options="tenantOptions"
+          class="w-40"
+          classInput="text-xs !h-8"
+        />
         <Button
           v-if="can('task_statuses.create') || can('task_statuses.manage')"
           link="/task-statuses/create"
@@ -28,11 +35,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import TaskStatusesTable from '@/components/statuses/TaskStatusesTable.vue';
 import SkeletonTable from '@/components/ui/Skeleton/Table.vue';
 import Button from '@/components/ui/Button';
+import Select from '@/components/ui/Select/index.vue';
 import Swal from 'sweetalert2';
 import api from '@/services/api';
 import { useAuthStore, can } from '@/stores/auth';
@@ -51,6 +59,7 @@ const router = useRouter();
 const all = ref<TaskStatus[]>([]);
 const loading = ref(true);
 const scope = ref<'tenant' | 'global' | 'all'>('tenant');
+const tenantFilter = ref<string | number | ''>('');
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
 const statusesStore = useTaskStatusesStore();
@@ -60,12 +69,23 @@ if (auth.isSuperAdmin) {
   scope.value = 'all';
 }
 
+const tenantOptions = computed(() => [
+  { value: '', label: 'All tenants' },
+  ...tenantStore.tenants.map((t: any) => ({ value: t.id, label: t.name })),
+]);
+
 async function load() {
-  const tenantId =
-    auth.isSuperAdmin && scope.value !== 'all'
-      ? tenantStore.currentTenantId
-      : undefined;
-  const { data } = await statusesStore.fetch(scope.value, tenantId);
+  let scopeParam: 'tenant' | 'global' | 'all' = scope.value;
+  let tenantId: string | number | undefined;
+
+  if (auth.isSuperAdmin) {
+    scopeParam = tenantFilter.value ? 'all' : 'all';
+    tenantId = tenantFilter.value || undefined;
+  } else if (scope.value !== 'all') {
+    tenantId = tenantStore.currentTenantId;
+  }
+
+  const { data } = await statusesStore.fetch(scopeParam, tenantId);
   await tenantStore.loadTenants({ per_page: 100 });
   const tenantMap = tenantStore.tenants.reduce(
     (acc: Record<number, any>, t: any) => ({ ...acc, [t.id]: t }),
@@ -85,6 +105,8 @@ function reload() {
   all.value = [];
   load();
 }
+
+watch(tenantFilter, reload);
 
 watch(
   () => tenantStore.currentTenantId,

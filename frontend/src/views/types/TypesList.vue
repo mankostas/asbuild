@@ -10,6 +10,13 @@
         @copy-selected="copyMany"
       >
         <template #header-actions>
+          <Select
+            v-if="auth.isSuperAdmin"
+            v-model="tenantFilter"
+            :options="tenantOptions"
+            class="w-40"
+            classInput="text-xs !h-8"
+          />
           <Button
             v-if="can('task_field_snippets.manage')"
             btnClass="btn-secondary light btn-sm"
@@ -42,12 +49,13 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, computed, watch } from 'vue';
   import { useRouter } from 'vue-router';
   import TaskTypesTable from '@/components/types/TaskTypesTable.vue';
   import Swal from 'sweetalert2';
   import SkeletonTable from '@/components/ui/Skeleton/Table.vue';
   import Button from '@/components/ui/Button';
+  import Select from '@/components/ui/Select/index.vue';
   import api from '@/services/api';
   import { useAuthStore, can } from '@/stores/auth';
   import { useTenantStore } from '@/stores/tenant';
@@ -74,10 +82,24 @@ const loading = ref(true);
 const { t } = useI18n();
 
 const scope: 'tenant' | 'all' = auth.isSuperAdmin ? 'all' : 'tenant';
+const tenantFilter = ref<string | number | ''>('');
+
+const tenantOptions = computed(() => [
+  { value: '', label: 'All tenants' },
+  ...tenantStore.tenants.map((t: any) => ({ value: t.id, label: t.name })),
+]);
 
 async function load() {
-  const tenantId = auth.isSuperAdmin && scope !== 'all' ? tenantStore.currentTenantId : undefined;
-  const { data } = await typesStore.fetch(scope, tenantId);
+  await tenantStore.loadTenants({ per_page: 100 });
+  let tenantId: string | number | undefined;
+  let scopeParam: 'tenant' | 'all' = scope;
+  if (auth.isSuperAdmin) {
+    scopeParam = tenantFilter.value ? 'all' : 'all';
+    tenantId = tenantFilter.value || undefined;
+  } else if (scope !== 'all') {
+    tenantId = tenantStore.currentTenantId;
+  }
+  const { data } = await typesStore.fetch(scopeParam, tenantId);
   all.value = data.map((t: any) => ({
     ...t,
     statuses: t.statuses,
@@ -95,6 +117,8 @@ function reload() {
   all.value = [];
   load();
 }
+
+watch(tenantFilter, reload);
 
 function edit(id: number) {
   router.push({ name: 'taskTypes.edit', params: { id } });
