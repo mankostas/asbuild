@@ -274,6 +274,10 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':employees.manage');
     Route::patch('employees/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])
         ->middleware(Ability::class . ':employees.manage');
+    Route::post('employees/{employee}/impersonate', [EmployeeController::class, 'impersonate'])
+        ->middleware(Ability::class . ':employees.manage');
+    Route::post('employees/{employee}/resend-invite', [EmployeeController::class, 'resendInvite'])
+        ->middleware(Ability::class . ':employees.manage');
 
     Route::put('branding', [BrandingController::class, 'update'])
         ->middleware(Ability::class . ':branding.manage');

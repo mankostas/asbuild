@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Tenant;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -143,6 +144,52 @@ class EmployeeController extends Controller
         }
 
         return new EmployeeResource($employee->load('roles'));
+    }
+
+    public function impersonate(Request $request, User $employee)
+    {
+        $tenantId = $this->getTenantId($request);
+        if ($employee->tenant_id !== $tenantId || $employee->type !== 'employee') {
+            abort(404);
+        }
+
+        if ($employee->hasRole('SuperAdmin')) {
+            abort(403, 'Cannot impersonate a SuperAdmin');
+        }
+
+        $employee->tokens()->delete();
+        $accessToken = $employee->createToken('impersonation', ['*'], now()->addMinutes(15));
+        $refreshToken = $employee->createToken('impersonation-refresh', ['refresh'], now()->addDays(30));
+
+        AuditLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'impersonate',
+            'target_id' => $employee->id,
+            'meta' => ['tenant_id' => $tenantId],
+        ]);
+
+        return response()->json([
+            'access_token' => $accessToken->plainTextToken,
+            'refresh_token' => $refreshToken->plainTextToken,
+            'user' => $employee->load('roles'),
+            'impersonator_id' => $request->user()->id,
+        ]);
+    }
+
+    public function resendInvite(Request $request, User $employee)
+    {
+        $tenantId = $this->getTenantId($request);
+        if ($employee->tenant_id !== $tenantId || $employee->type !== 'employee') {
+            abort(404);
+        }
+
+        if ($employee->hasRole('SuperAdmin')) {
+            abort(403, 'Cannot modify a SuperAdmin');
+        }
+
+        Password::sendResetLink(['email' => $employee->email]);
+
+        return response()->json(['status' => 'ok']);
     }
 
     public function toggleStatus(Request $request, User $employee)
