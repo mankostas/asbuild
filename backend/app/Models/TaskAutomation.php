@@ -38,12 +38,20 @@ class TaskAutomation extends Model
 
         foreach ($rules as $rule) {
             $conditions = $rule->conditions_json ?? [];
-            if (
-                isset($conditions['status'])
-                && TaskStatus::stripPrefix($task->status_slug) !== TaskStatus::stripPrefix($conditions['status'])
-            ) {
-                continue;
+
+            if (isset($conditions['status'])) {
+                if (!is_string($conditions['status'])) {
+                    continue;
+                }
+
+                if (
+                    TaskStatus::stripPrefix($task->status_slug)
+                    !== TaskStatus::stripPrefix($conditions['status'])
+                ) {
+                    continue;
+                }
             }
+
             foreach ($rule->actions_json as $action) {
                 if (($action['type'] ?? null) === 'notify_team' && isset($action['team_id'])) {
                     AutomationNotifyTeamJob::dispatch($task->id, $action['team_id']);
