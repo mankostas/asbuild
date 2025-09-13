@@ -3,7 +3,6 @@
     <Select
       v-model="selected"
       :options="options"
-      :label="t('tenant')"
       classInput="h-8"
       :aria-label="t('tenant')"
     />
