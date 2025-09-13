@@ -79,7 +79,7 @@
           v-if="can('teams.delete') || can('teams.manage')"
           type="button"
           class="ml-2 text-danger-500 hover:underline cursor-pointer"
-          @click="emit('delete-selected', selectedIds)"
+          @click="emit('delete-selected', selectedIds.value)"
         >
           {{ t('actions.delete') }}
         </button>
