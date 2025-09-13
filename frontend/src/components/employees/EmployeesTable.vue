@@ -49,9 +49,10 @@
           {{ rowProps.row.roles || '—' }}
         </span>
         <span v-else-if="rowProps.column.field === 'status'">
-          <span :class="rowProps.row.status === 'active' ? 'text-green-600' : 'text-gray-400'">
-            {{ rowProps.row.status || '—' }}
-          </span>
+          <Switch
+            :model-value="rowProps.row.status === 'active'"
+            @update:modelValue="(val) => toggleStatus(rowProps.row, val)"
+          />
         </span>
         <span v-else-if="rowProps.column.field === 'last_login_at'">
           {{ formatDate(rowProps.row.last_login_at) }}
@@ -124,6 +125,9 @@ import Pagination from '@/components/ui/Pagination';
 import Breadcrumbs from '@/Layout/Breadcrumbs.vue';
 import { useI18n } from 'vue-i18n';
 import { can } from '@/stores/auth';
+import Switch from '@/components/ui/Switch/index.vue';
+import api from '@/services/api';
+import { useNotify } from '@/plugins/notify';
 
 interface EmployeeRow {
   id: number;
@@ -143,6 +147,7 @@ const props = defineProps<{ rows: EmployeeRow[] }>();
 const emit = defineEmits<{ (e: 'edit', id: number): void; (e: 'delete', id: number): void; (e: 'delete-selected', ids: number[]): void; }>();
 
 const { t } = useI18n();
+const notify = useNotify();
 const searchTerm = ref('');
 const perPage = ref(10);
 const current = ref(1);
@@ -193,6 +198,18 @@ const filteredRows = computed(() => {
 
 function onSelectedRowsChange(params: any) {
   selectedIds.value = params.selectedRows.map((r: any) => r.id);
+}
+
+async function toggleStatus(row: EmployeeRow, val: boolean) {
+  const previous = row.status;
+  row.status = val ? 'active' : 'inactive';
+  try {
+    const { data } = await api.patch(`/employees/${row.id}/toggle-status`);
+    row.status = data.data?.status ?? row.status;
+  } catch (e) {
+    row.status = previous;
+    notify.error(t('common.error'));
+  }
 }
 
 function formatDate(d?: string) {
