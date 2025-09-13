@@ -40,7 +40,8 @@ interface TeamRow {
   id: number;
   name: string;
   description: string | null;
-  members: string;
+  members: { name: string; avatar?: string | null }[];
+  memberCount: number;
   created_at: string;
   updated_at: string;
 }
@@ -58,7 +59,8 @@ async function load() {
     id: t.id,
     name: t.name,
     description: t.description,
-    members: (t.employees || []).map((e: any) => e.name).join(', '),
+    members: (t.employees || []).map((e: any) => ({ name: e.name, avatar: e.avatar })),
+    memberCount: (t.employees || []).length,
     created_at: t.created_at,
     updated_at: t.updated_at,
   }));
