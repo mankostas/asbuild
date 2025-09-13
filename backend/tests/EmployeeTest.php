@@ -42,4 +42,18 @@ class EmployeeTest extends TestCase
         ));
         $this->assertStringContainsString('department', $updateCode);
     }
+
+    public function test_employee_controller_has_impersonation_and_invite_methods(): void
+    {
+        $this->assertTrue(method_exists(EmployeeController::class, 'impersonate'));
+        $this->assertTrue(method_exists(EmployeeController::class, 'resendInvite'));
+    }
+
+    public function test_employee_routes_include_impersonation_and_invite_resend(): void
+    {
+        $routes = file_get_contents(dirname(__DIR__) . '/routes/api.php');
+        $this->assertStringContainsString("employees/{employee}/impersonate", $routes);
+        $this->assertStringContainsString("employees/{employee}/resend-invite", $routes);
+        $this->assertStringContainsString('employees.manage', $routes);
+    }
 }
