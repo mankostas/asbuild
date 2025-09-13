@@ -21,4 +21,25 @@ class EmployeeTest extends TestCase
         ));
         $this->assertStringContainsString('SuperAdmin', $code);
     }
+
+    public function test_employee_controller_handles_department(): void
+    {
+        $reflection = new ReflectionClass(EmployeeController::class);
+
+        $store = $reflection->getMethod('store');
+        $storeCode = implode("", array_slice(
+            file($store->getFileName()),
+            $store->getStartLine() - 1,
+            $store->getEndLine() - $store->getStartLine() + 1
+        ));
+        $this->assertStringContainsString('department', $storeCode);
+
+        $update = $reflection->getMethod('update');
+        $updateCode = implode("", array_slice(
+            file($update->getFileName()),
+            $update->getStartLine() - 1,
+            $update->getEndLine() - $update->getStartLine() + 1
+        ));
+        $this->assertStringContainsString('department', $updateCode);
+    }
 }
