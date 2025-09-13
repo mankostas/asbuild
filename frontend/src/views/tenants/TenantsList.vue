@@ -5,7 +5,7 @@
           v-if="can('tenants.create') || can('tenants.manage')"
           btnClass="btn-primary"
           text="Add Tenant"
-          :to="{ name: 'tenants.create' }"
+          :link="{ name: 'tenants.create' }"
         />
       </div>
       <DashcodeServerTable

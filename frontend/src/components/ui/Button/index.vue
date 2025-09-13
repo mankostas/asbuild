@@ -1,6 +1,6 @@
 <template>
   <button
-    v-if="!link && !div"
+    v-if="!linkValue && !div"
     :disabled="isDisabled"
     class="btn inline-flex justify-center"
     :class="`
@@ -56,8 +56,8 @@
   </button>
 
   <router-link
-    v-if="link && !div"
-    :to="link"
+    v-if="linkValue && !div"
+    :to="linkValue"
     class="btn inline-flex justify-center"
     :class="`
     ${isLoading ? ' pointer-events-none' : ''}
@@ -111,7 +111,7 @@
     </div>
   </router-link>
   <div
-    v-if="div && !link"
+    v-if="div && !linkValue"
     class="btn inline-flex justify-center"
     :class="`
     ${isLoading ? ' pointer-events-none' : ''}
@@ -207,12 +207,21 @@ export default {
       default: "",
     },
     link: {
-      type: String,
+      type: [String, Object],
+      default: "",
+    },
+    to: {
+      type: [String, Object],
       default: "",
     },
     div: {
       type: Boolean,
       default: false,
+    },
+  },
+  computed: {
+    linkValue() {
+      return this.link || this.to || "";
     },
   },
 };
