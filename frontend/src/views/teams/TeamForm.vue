@@ -1,6 +1,18 @@
 <template>
   <div v-if="canAccess">
     <form class="grid gap-4 max-w-lg" @submit.prevent="submit">
+      <VueSelect v-if="auth.isSuperAdmin" label="Tenant">
+        <template #default="{ inputId }">
+          <vSelect
+            :id="inputId"
+            v-model="tenantId"
+            :options="tenant.tenants"
+            :reduce="(t: any) => t.id"
+            label="name"
+          />
+        </template>
+        <div v-if="errors.tenant_id" class="text-red-600 text-sm">{{ errors.tenant_id }}</div>
+      </VueSelect>
       <Textinput v-model="form.name" label="Name" :error="errors.name" />
       <Textinput v-model="form.description" label="Description" :error="errors.description" />
       <VueSelect label="Employees">
@@ -81,6 +93,8 @@ const form = ref({
   description: '',
 });
 
+const tenantId = ref<string | number | ''>('');
+
 const employeeOptions = ref<any[]>([]);
 const selectedEmployees = ref<number[]>([]);
 const featureGrants = ref<Record<string, string[]>>({});
@@ -100,6 +114,7 @@ async function loadTeam() {
   const { data } = await api.get(`/teams/${route.params.id}`);
   form.value.name = data.name || '';
   form.value.description = data.description || '';
+  tenantId.value = data.tenant_id ? String(data.tenant_id) : '';
   selectedEmployees.value = (data.employees || []).map((e: any) => e.id);
   hiddenRoles.value = {};
   featureGrants.value = {} as Record<string, string[]>;
@@ -120,6 +135,9 @@ const submit = handleSubmit(async () => {
     name: form.value.name,
     description: form.value.description,
   };
+  if (auth.isSuperAdmin) {
+    payload.tenant_id = tenantId.value === '' ? undefined : Number(tenantId.value);
+  }
   let teamId: number;
   try {
     if (isEdit.value) {
@@ -139,6 +157,9 @@ const submit = handleSubmit(async () => {
 
 onMounted(async () => {
   await loadEmployees();
+  if (auth.isSuperAdmin) {
+    await tenant.loadTenants({ per_page: 100 });
+  }
   await loadTeam();
   availableFeatures.value.forEach((f) => {
     if (!featureGrants.value[f]) featureGrants.value[f] = [];

@@ -43,6 +43,9 @@
         <span v-else-if="rowProps.column.field === 'memberCount'">
           {{ rowProps.row.memberCount }}
         </span>
+        <span v-else-if="rowProps.column.field === 'tenant'">
+          {{ rowProps.row.tenant?.name || '—' }}
+        </span>
         <span v-else-if="rowProps.column.field === 'created_at'">
           {{ formatDate(rowProps.row.created_at) }}
         </span>
@@ -79,7 +82,7 @@
           v-if="can('teams.delete') || can('teams.manage')"
           type="button"
           class="ml-2 text-danger-500 hover:underline cursor-pointer"
-          @click="emit('delete-selected', selectedIds.value)"
+          @click="emit('delete-selected', selectedIds)"
         >
           {{ t('actions.delete') }}
         </button>
@@ -123,6 +126,8 @@ interface TeamRow {
   memberCount: number;
   created_at: string;
   updated_at: string;
+  tenant?: { id: number; name: string } | null;
+  tenant_id?: number | null;
 }
 
 const props = defineProps<{ rows: TeamRow[] }>();
@@ -152,6 +157,7 @@ const columns = [
   { label: 'Name', field: 'name' },
   { label: 'Description', field: 'description' },
   { label: 'Members', field: 'memberCount' },
+  { label: 'Tenant', field: 'tenant' },
   { label: 'Created', field: 'created_at' },
   { label: 'Actions', field: 'actions' },
 ];

@@ -3,15 +3,25 @@ import api from '@/services/api';
 import type { components } from '@/types/api';
 import { withListParams, type ListParams } from './list';
 
-type Team = components['schemas']['Team'];
-type TeamPayload = Omit<Team, 'id' | 'employees'>;
+type Team = components['schemas']['Team'] & {
+  tenant_id?: number | null;
+  tenant?: { id: number; name: string } | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+type TeamPayload = {
+  name: string;
+  description?: string | null;
+  tenant_id?: number | null;
+};
 
 export const useTeamsStore = defineStore('teams', {
   state: () => ({
     teams: [] as Team[],
   }),
   actions: {
-    async fetch(params: ListParams = {}) {
+    async fetch(params: ListParams & { tenant_id?: string | number } = {}) {
       const { data } = await api.get('/teams', { params: withListParams(params) });
       this.teams = data.data as Team[];
       return data.meta;
