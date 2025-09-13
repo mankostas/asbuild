@@ -63,6 +63,7 @@ interface TaskType {
   statuses?: Record<string, string[]>;
   tasks_count?: number;
   updated_at?: string;
+  require_subtasks_complete?: boolean;
 }
 const all = ref<TaskType[]>([]);
 const auth = useAuthStore();
@@ -82,6 +83,7 @@ async function load() {
     statuses: t.statuses,
     tasks_count: t.tasks_count,
     updated_at: t.updated_at,
+    require_subtasks_complete: t.require_subtasks_complete,
   }));
   loading.value = false;
 }
