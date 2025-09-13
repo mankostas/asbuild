@@ -15,11 +15,12 @@
             v-model="tenantFilter"
             :options="tenantOptions"
             class="w-40"
-            classInput="text-xs !h-8"
+            classInput="text-xs !h-8 !min-h-0"
+            :aria-label="t('tenants')"
           />
           <Button
             v-if="can('task_field_snippets.manage')"
-            btnClass="btn-secondary light btn-sm"
+            btnClass="btn-secondary light btn-sm !h-8 !py-0"
             :aria-label="t('templates.title')"
             :text="t('templates.title')"
             @click="templatesOpen = true"
@@ -27,7 +28,7 @@
           <Button
             v-if="can('task_types.create') || can('task_types.manage')"
             link="/task-types/create"
-            btnClass="btn-primary btn-sm min-w-[100px]"
+            btnClass="btn-primary btn-sm min-w-[100px] !h-8 !py-0"
             icon="heroicons-outline:plus"
             iconClass="w-4 h-4"
             :text="t('types.addType')"
