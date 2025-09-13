@@ -24,6 +24,12 @@ test.skip('shows user counts for each role', async ({ page }) => {
   ).toBeVisible();
 });
 
+test.skip('shows ability summaries for each role', async ({ page }) => {
+  await page.goto('/roles');
+  await expect(page.getByRole('columnheader', { name: 'Abilities' })).toBeVisible();
+  await expect(page.getByRole('row', { name: /ClientAdmin/ })).toContainText(/roles\.manage|1/);
+});
+
 test.skip('role form shows only allowed abilities', async ({ page }) => {
   await page.goto('/roles');
   await page.getByRole('button', { name: 'Create' }).click();

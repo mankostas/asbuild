@@ -380,6 +380,7 @@
     "label": "Roles",
     "view": "View roles",
     "edit": "Edit roles",
+    "abilities": "Abilities",
     "addRole": "Add role",
     "form": {
       "search": "Search"
