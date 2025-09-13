@@ -1,61 +1,79 @@
 <template>
-    <div>
-      <div class="mb-4">
-      <Button
-        v-if="can('employees.create') || can('employees.manage')"
-        btnClass="btn-primary"
-        text="Invite Employee"
-        link="/employees/create"
-      />
-    </div>
-    <DashcodeServerTable
-      :key="tableKey"
-      :columns="columns"
-      :fetcher="fetchEmployees"
+  <div>
+    <EmployeesTable
+      v-if="!loading"
+      :rows="all"
+      @edit="edit"
+      @delete="remove"
+      @delete-selected="removeMany"
     >
-      <template
-        v-if="can('employees.update') || can('employees.delete') || can('employees.manage')"
-        #actions="{ row }"
-      >
-        <div class="flex gap-2">
-          <Button
-            v-if="can('employees.update') || can('employees.manage')"
-            :link="`/employees/${row.id}/edit`"
-            btnClass="btn-outline-primary btn-sm"
-            text="Edit"
-          />
-          <Button
-            v-if="can('employees.delete') || can('employees.manage')"
-            btnClass="btn-outline-danger btn-sm"
-            text="Delete"
-            @click="remove(row.id)"
-          />
-        </div>
+      <template #header-actions>
+        <Select
+          v-if="auth.isSuperAdmin"
+          v-model="tenantFilter"
+          :options="tenantOptions"
+          class="w-40"
+          classInput="text-xs !h-8 !min-h-0"
+          :aria-label="t('tenants')"
+        />
+        <Button
+          v-if="can('employees.create') || can('employees.manage')"
+          link="/employees/create"
+          btnClass="btn-primary btn-sm min-w-[100px] !h-8 !py-0"
+          icon="heroicons-outline:plus"
+          iconClass="w-4 h-4"
+          :text="t('employees.addEmployee')"
+          :aria-label="t('employees.addEmployee')"
+        />
       </template>
-    </DashcodeServerTable>
+    </EmployeesTable>
+    <div v-else class="p-4">
+      <SkeletonTable :count="10" />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
-import Button from '@/components/ui/Button/index.vue';
+import { ref, onMounted, watch, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import EmployeesTable from '@/components/employees/EmployeesTable.vue';
+import SkeletonTable from '@/components/ui/Skeleton/Table.vue';
+import Button from '@/components/ui/Button';
+import Select from '@/components/ui/Select/index.vue';
+import Swal from 'sweetalert2';
 import api from '@/services/api';
 import { useNotify } from '@/plugins/notify';
-import Swal from 'sweetalert2';
-import { can } from '@/stores/auth';
+import { useAuthStore, can } from '@/stores/auth';
+import { useTenantStore } from '@/stores/tenant';
+import { useI18n } from 'vue-i18n';
 
+interface EmployeeRow {
+  id: number;
+  name: string;
+  email: string;
+  roles: string;
+  phone?: string | null;
+  address?: string | null;
+  tenant?: { id: number; name: string } | null;
+  tenant_id?: number | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+const router = useRouter();
 const notify = useNotify();
-const tableKey = ref(0);
-const all = ref<any[]>([]);
+const auth = useAuthStore();
+const tenantStore = useTenantStore();
+const { t } = useI18n();
 
-const columns = [
-  { label: 'Name', field: 'name', sortable: true },
-  { label: 'Email', field: 'email', sortable: true },
-  { label: 'Roles', field: 'roles', sortable: false },
-  { label: 'Phone', field: 'phone', sortable: true },
-  { label: 'Address', field: 'address', sortable: false },
-];
+const all = ref<EmployeeRow[]>([]);
+const loading = ref(true);
+const tenantFilter = ref<string | number | ''>('');
+
+const tenantOptions = computed(() => [
+  { value: '', label: t('allTenants') },
+  ...tenantStore.tenants.map((ten: any) => ({ value: ten.id, label: ten.name })),
+]);
 
 function formatRoles(roles: any[]) {
   return roles
@@ -64,42 +82,63 @@ function formatRoles(roles: any[]) {
     .join(', ');
 }
 
-async function fetchEmployees({ page, perPage, sort, search }: any) {
-  if (!all.value.length) {
-    const { data } = await api.get('/employees');
-    all.value = data;
+async function load() {
+  await tenantStore.loadTenants({ per_page: 100 });
+  if (auth.isSuperAdmin) {
+    if (!tenantFilter.value) {
+      tenantFilter.value = tenantStore.currentTenantId || tenantStore.tenants[0]?.id || '';
+    }
+    if (!tenantFilter.value) {
+      loading.value = false;
+      all.value = [];
+      return;
+    }
   }
-  let rows = all.value.slice();
-  if (search) {
-    const q = String(search).toLowerCase();
-    rows = rows.filter((r) =>
-      Object.values(r).some((v) => String(v ?? '').toLowerCase().includes(q)),
-    );
+  const params: any = {};
+  if (auth.isSuperAdmin && tenantFilter.value) {
+    params.tenant_id = tenantFilter.value;
   }
-  if (sort && sort.field) {
-    rows.sort((a: any, b: any) => {
-      const fa = a[sort.field] ?? '';
-      const fb = b[sort.field] ?? '';
-      if (fa < fb) return sort.type === 'asc' ? -1 : 1;
-      if (fa > fb) return sort.type === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }
-  const total = rows.length;
-  const start = (page - 1) * perPage;
-  const paged = rows.slice(start, start + perPage).map((r: any) => ({
-    id: r.id,
-    name: r.name,
-    email: r.email,
-    roles: formatRoles(r.roles),
-    phone: r.phone,
-    address: r.address,
+  const { data } = await api.get('/employees', { params });
+  const tenantMap = tenantStore.tenants.reduce(
+    (acc: Record<number, any>, t: any) => ({ ...acc, [t.id]: t }),
+    {},
+  );
+  all.value = data.data.map((e: any) => ({
+    id: e.id,
+    name: e.name,
+    email: e.email,
+    roles: formatRoles(e.roles || []),
+    phone: e.phone,
+    address: e.address,
+    tenant: tenantMap[e.tenant_id] || null,
+    tenant_id: e.tenant_id,
+    created_at: e.created_at,
+    updated_at: e.updated_at,
   }));
-  return { rows: paged, total };
+  loading.value = false;
 }
 
+onMounted(load);
+
 function reload() {
-  tableKey.value++;
+  loading.value = true;
+  all.value = [];
+  load();
+}
+
+watch(tenantFilter, () => {
+  if (auth.isSuperAdmin) reload();
+});
+
+watch(
+  () => tenantStore.currentTenantId,
+  () => {
+    if (!auth.isSuperAdmin) reload();
+  },
+);
+
+function edit(id: number) {
+  router.push({ name: 'employees.edit', params: { id } });
 }
 
 async function remove(id: number) {
@@ -107,12 +146,12 @@ async function remove(id: number) {
     title: 'Delete employee?',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Yes, delete',
   });
   if (!result.isConfirmed) return;
   try {
-    await api.delete(`/employees/${id}`);
-    all.value = [];
+    const params: any = {};
+    if (auth.isSuperAdmin && tenantFilter.value) params.tenant_id = tenantFilter.value;
+    await api.delete(`/employees/${id}`, { params });
     reload();
   } catch (e: any) {
     if (e.status === 403) {
@@ -122,5 +161,28 @@ async function remove(id: number) {
     }
   }
 }
-</script>
 
+async function removeMany(ids: number[]) {
+  const res = await Swal.fire({
+    title: 'Delete selected employees?',
+    icon: 'warning',
+    showCancelButton: true,
+  });
+  if (res.isConfirmed) {
+    for (const id of ids) {
+      try {
+        const params: any = {};
+        if (auth.isSuperAdmin && tenantFilter.value) params.tenant_id = tenantFilter.value;
+        await api.delete(`/employees/${id}`, { params });
+      } catch (e: any) {
+        if (e.status === 403) {
+          notify.error('Cannot delete user with SuperAdmin role');
+        } else {
+          notify.error('Failed to delete');
+        }
+      }
+    }
+    reload();
+  }
+}
+</script>

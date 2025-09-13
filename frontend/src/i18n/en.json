@@ -376,6 +376,12 @@
     "photo": "Photo",
     "photoGallery": "Photo Gallery"
   },
+  "employees": {
+    "addEmployee": "Invite Employee",
+    "form": {
+      "search": "Search"
+    }
+  },
   "roles": {
     "label": "Roles",
     "view": "View roles",
