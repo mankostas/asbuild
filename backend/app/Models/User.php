@@ -19,6 +19,7 @@ class User extends Authenticatable
         'tenant_id',
         'phone',
         'address',
+        'department',
         'status',
         'last_login_at',
     ];

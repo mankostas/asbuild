@@ -32,6 +32,7 @@ class UserFactory extends Factory
             'tenant_id' => 1,
             'phone' => fake()->phoneNumber(),
             'address' => fake()->address(),
+            'department' => fake()->word(),
         ];
     }
 

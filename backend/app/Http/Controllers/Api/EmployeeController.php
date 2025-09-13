@@ -36,7 +36,7 @@ class EmployeeController extends Controller
 
         $base = User::where('tenant_id', $tenantId)
             ->with('roles');
-        $result = $this->listQuery($base, $request, ['name', 'email'], ['name', 'email']);
+        $result = $this->listQuery($base, $request, ['name', 'email', 'department'], ['name', 'email', 'department']);
 
         return EmployeeResource::collection($result['data'])->additional([
             'meta' => $result['meta'],

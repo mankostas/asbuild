@@ -52,6 +52,7 @@ interface EmployeeRow {
   name: string;
   email: string;
   roles: string;
+  department?: string | null;
   phone?: string | null;
   status?: string | null;
   last_login_at?: string | null;
@@ -108,6 +109,7 @@ async function load() {
     name: e.name,
     email: e.email,
     roles: formatRoles(e.roles || []),
+    department: e.department,
     phone: e.phone,
     status: e.status,
     last_login_at: e.last_login_at,

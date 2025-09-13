@@ -14,6 +14,7 @@ class EmployeeResource extends JsonResource
         $data = parent::toArray($request);
         $data['status'] = $this->status;
         $data['last_login_at'] = $this->last_login_at;
+        $data['department'] = $this->department;
 
         return $this->formatDates($data);
     }
