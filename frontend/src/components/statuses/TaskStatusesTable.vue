@@ -136,6 +136,7 @@ interface TaskStatus {
   slug: string;
   color: string;
   position: number;
+  tasks_count: number;
   created_at: string;
   updated_at: string;
   tenant?: { id: number; name: string } | null;
@@ -178,6 +179,7 @@ const columns = [
   { label: 'Name', field: 'name' },
   { label: 'Slug', field: 'slug' },
   { label: 'Color', field: 'color' },
+  { label: 'Tasks', field: 'tasks_count', type: 'number', sortable: true },
   { label: 'Tenant', field: 'tenant' },
   { label: 'Created', field: 'created_at' },
   { label: 'Updated', field: 'updated_at' },

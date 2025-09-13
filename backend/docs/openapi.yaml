@@ -1288,6 +1288,8 @@ components:
           type: string
         position:
           type: integer
+        tasks_count:
+          type: integer
         tenant_id:
           type: integer
           nullable: true

@@ -939,7 +939,7 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        ids: number[];
+                        ids?: number[];
                         tenant_id?: string;
                     };
                 };
@@ -947,7 +947,9 @@ export interface paths {
             responses: {
                 /** @description Task types */
                 201: {
-                    headers: { [name: string]: unknown };
+                    headers: {
+                        [name: string]: unknown;
+                    };
                     content: {
                         "application/json": components["schemas"]["TaskType"][];
                     };
@@ -980,15 +982,21 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        ids: number[];
+                        ids?: number[];
                     };
                 };
             };
             responses: {
                 /** @description Deleted */
                 200: {
-                    headers: { [name: string]: unknown };
-                    content?: never;
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message?: string;
+                        };
+                    };
                 };
             };
         };
@@ -1853,8 +1861,6 @@ export interface components {
             status_flow_json?: Record<string, never> | null;
             tenant_id?: number | null;
             abilities_json?: Record<string, never> | null;
-            tasks_count?: number;
-            require_subtasks_complete?: boolean;
         };
         TaskStatus: {
             id?: number;
@@ -1862,7 +1868,12 @@ export interface components {
             name?: string;
             color?: string;
             position?: number;
+            tasks_count?: number;
             tenant_id?: number | null;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            updated_at?: string;
         };
         Employee: {
             id?: number;

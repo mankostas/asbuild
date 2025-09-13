@@ -24,7 +24,7 @@ class TaskStatusController extends Controller
         public function index(Request $request)
     {
         $scope = $request->query('scope', $request->user()->hasRole('SuperAdmin') ? 'all' : 'tenant');
-        $query = TaskStatus::query();
+        $query = TaskStatus::query()->withCount('tasks');
 
         if ($scope === 'tenant') {
             $tenantId = $request->query('tenant_id', $request->header('X-Tenant-ID', $request->user()->tenant_id));
