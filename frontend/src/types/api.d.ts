@@ -1854,6 +1854,7 @@ export interface components {
             tenant_id?: number | null;
             abilities_json?: Record<string, never> | null;
             tasks_count?: number;
+            require_subtasks_complete?: boolean;
         };
         TaskStatus: {
             id?: number;

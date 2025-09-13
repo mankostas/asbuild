@@ -28,6 +28,14 @@
           <span v-if="rowProps.column.field === 'tenant'">
             {{ rowProps.row.tenant?.name || '—' }}
           </span>
+          <span v-else-if="rowProps.column.field === 'require_subtasks_complete'">
+            <Icon
+              v-if="rowProps.row.require_subtasks_complete"
+              icon="heroicons-outline:check"
+              class="text-success-500"
+            />
+            <span v-else>—</span>
+          </span>
           <span v-else-if="rowProps.column.field === 'actions'">
             <Dropdown classMenuItems=" w-[140px]">
               <span class="text-xl"><Icon icon="heroicons-outline:dots-vertical" /></span>
@@ -121,6 +129,7 @@ interface TaskType {
   statuses?: Record<string, string[]>;
   tasks_count?: number;
   updated_at?: string;
+  require_subtasks_complete?: boolean;
 }
 
 const props = defineProps<{ rows: TaskType[] }>();
@@ -159,6 +168,7 @@ const columns = [
   { label: 'Tenant', field: 'tenant' },
   { label: 'Tasks', field: 'tasks_count' },
   { label: 'Statuses', field: 'statusCount' },
+  { label: 'Subtasks Required', field: 'require_subtasks_complete' },
   { label: 'Updated', field: 'updated_at' },
   { label: 'Actions', field: 'actions' },
 ];
