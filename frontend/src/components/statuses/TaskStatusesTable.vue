@@ -28,6 +28,9 @@
         <span v-if="rowProps.column.field === 'tenant'">
           {{ rowProps.row.tenant?.name || '—' }}
         </span>
+        <span v-else-if="rowProps.column.field === 'slug'">
+          {{ rowProps.row.slug }}
+        </span>
         <span v-else-if="rowProps.column.field === 'actions'">
           <Dropdown classMenuItems=" w-[140px]">
             <span class="text-xl"><Icon icon="heroicons-outline:dots-vertical" /></span>
@@ -118,6 +121,7 @@ import { useAuthStore, can } from '@/stores/auth';
 interface TaskStatus {
   id: number;
   name: string;
+  slug: string;
   tenant?: { id: number; name: string } | null;
   tenant_id?: number | null;
 }
@@ -155,6 +159,7 @@ const selectOptions = {
 const columns = [
   { label: 'ID', field: 'id' },
   { label: 'Name', field: 'name' },
+  { label: 'Slug', field: 'slug' },
   { label: 'Tenant', field: 'tenant' },
   { label: 'Actions', field: 'actions' },
 ];
