@@ -138,6 +138,11 @@ const submit = handleSubmit(async () => {
   if (auth.isSuperAdmin) {
     payload.tenant_id = tenantId.value === '' ? undefined : Number(tenantId.value);
   }
+  const selectedTenant = auth.isSuperAdmin
+    ? String(tenantId.value)
+    : tenant.tenantId;
+  const previousTenant = tenant.tenantId;
+  tenant.setTenant(selectedTenant);
   let teamId: number;
   try {
     if (isEdit.value) {
@@ -148,10 +153,12 @@ const submit = handleSubmit(async () => {
       teamId = created.id;
     }
     await teamsStore.syncEmployees(teamId, selectedEmployees.value);
-    await reconcileFeatureGrants(teamId);
+    await reconcileFeatureGrants(teamId, selectedTenant);
     router.push({ name: 'teams.list' });
   } catch (e: any) {
     setErrors(extractFormErrors(e));
+  } finally {
+    tenant.setTenant(previousTenant);
   }
 });
 
@@ -166,12 +173,15 @@ onMounted(async () => {
   });
 });
 
-async function reconcileFeatureGrants(teamId: number) {
+async function reconcileFeatureGrants(
+  teamId: number,
+  selectedTenant: string | number,
+) {
   for (const feature of availableFeatures.value) {
     const selected = featureGrants.value[feature] || [];
     const existing = hiddenRoles.value[feature];
     if (selected.length) {
-      const role = await ensureHiddenRole(tenant.tenantId, feature, selected);
+      const role = await ensureHiddenRole(selectedTenant, feature, selected);
       if (!existing || existing.id !== role.id) {
         await assignHiddenRoleToTeam(teamId, role.id);
         if (existing && existing.id !== role.id) {
