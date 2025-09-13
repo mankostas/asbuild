@@ -32,20 +32,26 @@
           {{ rowProps.row.description || '—' }}
         </span>
         <span v-else-if="rowProps.column.field === 'abilities'">
-          <Tooltip v-if="rowProps.row.abilities.length > 3" theme="light">
+          <Tooltip
+            v-if="(rowProps.row.abilities ?? []).length > 3"
+            theme="light"
+          >
             <template #button>
               <span class="cursor-help">
-                {{ summarizeAbilities(rowProps.row.abilities) }}
+                {{ summarizeAbilities(rowProps.row.abilities ?? []) }}
               </span>
             </template>
             <ul class="text-left list-disc pl-4">
-              <li v-for="ability in rowProps.row.abilities" :key="ability">
+              <li
+                v-for="ability in rowProps.row.abilities ?? []"
+                :key="ability"
+              >
                 {{ ability }}
               </li>
             </ul>
           </Tooltip>
           <span v-else>
-            {{ summarizeAbilities(rowProps.row.abilities) }}
+            {{ summarizeAbilities(rowProps.row.abilities ?? []) }}
           </span>
         </span>
         <span v-else-if="rowProps.column.field === 'created_at'">
@@ -157,7 +163,7 @@ interface RoleRow {
   name: string;
   description?: string | null;
   level: number;
-  abilities: string[];
+  abilities?: string[];
   created_at?: string;
   updated_at?: string;
   tenant?: { id: number; name: string } | null;
