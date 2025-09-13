@@ -69,11 +69,23 @@ export const menuItems = [
     admin: true,
   },
   {
-    title: "Employees",
+    title: "Users",
     icon: "heroicons-outline:users",
-    link: "employees.list",
-    requiredAbilities: ["employees.view", "employees.manage"],
-    requiredFeatures: ["employees"],
+    child: [
+      {
+        childtitle: "Employees",
+        childlink: "employees.list",
+        requiredAbilities: ["employees.view", "employees.manage"],
+        requiredFeatures: ["employees"],
+      },
+      {
+        childtitle: "Tenants",
+        childlink: "tenants.list",
+        admin: true,
+        requiredAbilities: ["tenants.view", "tenants.manage"],
+        requiredFeatures: ["tenants"],
+      },
+    ],
   },
   {
     title: "Reports",
@@ -81,13 +93,6 @@ export const menuItems = [
     link: "reports.kpis",
     requiredAbilities: ["reports.view"],
     requiredFeatures: ["reports"],
-    admin: true,
-  },
-  {
-    title: "Tenants",
-    icon: "heroicons-outline:building-office",
-    link: "tenants.list",
-    requiredFeatures: ["tenants"],
     admin: true,
   },
   {
@@ -189,11 +194,23 @@ export const topMenu = [
     admin: true,
   },
   {
-    title: "Employees",
+    title: "Users",
     icon: "heroicons-outline:users",
-    link: "employees.list",
-    requiredAbilities: ["employees.view", "employees.manage"],
-    requiredFeatures: ["employees"],
+    child: [
+      {
+        childtitle: "Employees",
+        childlink: "employees.list",
+        requiredAbilities: ["employees.view", "employees.manage"],
+        requiredFeatures: ["employees"],
+      },
+      {
+        childtitle: "Tenants",
+        childlink: "tenants.list",
+        admin: true,
+        requiredAbilities: ["tenants.view", "tenants.manage"],
+        requiredFeatures: ["tenants"],
+      },
+    ],
   },
   {
     title: "Reports",
@@ -233,14 +250,6 @@ export const topMenu = [
     link: "gdpr.index",
     requiredAbilities: ["gdpr.view", "gdpr.manage"],
     requiredFeatures: ["gdpr"],
-  },
-  {
-    title: "Tenants",
-    icon: "heroicons-outline:building-office",
-    link: "tenants.list",
-    admin: true,
-    requiredAbilities: ["tenants.view", "tenants.manage"],
-    requiredFeatures: ["tenants"],
   },
 ];
 

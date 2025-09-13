@@ -80,6 +80,7 @@
     "settings": "Settings",
     "gdpr": "GDPR",
     "notifications": "Notifications",
+    "users": "Users",
     "employees": "Employees",
     "employeeCreate": "Create Employee",
     "employeeEdit": "Edit Employee",
