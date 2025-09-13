@@ -8,8 +8,8 @@ use App\Http\Resources\TaskTypeResource;
 use App\Models\TaskType;
 use App\Services\FormSchemaService;
 use App\Services\StatusFlowService;
-use App\Support\TenantDefaults;
 use App\Support\ListQuery;
+use App\Support\TenantDefaults;
 use Illuminate\Http\Request;
 
 class TaskTypeController extends Controller
@@ -206,6 +206,14 @@ class TaskTypeController extends Controller
 
         if (! $tenantId) {
             abort(400, 'tenant_id required');
+        }
+
+        if (! $request->user()->hasRole('SuperAdmin') && $tenantId !== $request->user()->tenant_id) {
+            abort(403);
+        }
+
+        if (! $request->user()->hasRole('SuperAdmin') && $request->user()->rolesForTenant($tenantId)->isEmpty()) {
+            abort(403);
         }
 
         $types = TaskType::query()->whereIn('id', $data['ids'])->get();
