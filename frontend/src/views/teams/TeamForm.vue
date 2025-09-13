@@ -1,7 +1,7 @@
 <template>
   <div v-if="canAccess">
     <form class="grid gap-4 max-w-lg" @submit.prevent="submit">
-      <VueSelect v-if="auth.isSuperAdmin" label="Tenant">
+      <VueSelect v-if="auth.isSuperAdmin" label="Tenant" :error="errors.tenant_id">
         <template #default="{ inputId }">
           <vSelect
             :id="inputId"
@@ -11,7 +11,6 @@
             label="name"
           />
         </template>
-        <div v-if="errors.tenant_id" class="text-red-600 text-sm">{{ errors.tenant_id }}</div>
       </VueSelect>
       <Textinput v-model="form.name" label="Name" :error="errors.name" />
       <Textinput v-model="form.description" label="Description" :error="errors.description" />
