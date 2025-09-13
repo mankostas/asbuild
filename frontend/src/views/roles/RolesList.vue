@@ -65,6 +65,7 @@ interface RoleRow {
   updated_at?: string;
   tenant?: { id: number; name: string } | null;
   tenant_id?: number | null;
+  users_count: number;
 }
 
 const router = useRouter();
@@ -109,6 +110,7 @@ async function load() {
     tenant_id: r.tenant_id,
     created_at: r.created_at,
     updated_at: r.updated_at,
+    users_count: r.users_count,
   }));
   loading.value = false;
 }

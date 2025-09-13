@@ -19,6 +19,7 @@ class RoleResource extends JsonResource
             'abilities' => $this->abilities,
             'tenant_id' => $this->tenant_id,
             'level' => $this->level,
+            'users_count' => $this->users_count ?? 0,
         ]);
     }
 }

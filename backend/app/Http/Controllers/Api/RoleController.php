@@ -38,7 +38,8 @@ class RoleController extends Controller
         if (! $request->user()->isSuperAdmin()) {
             $tenantId = $request->user()->tenant_id;
             $userLevel = $request->user()->roleLevel($tenantId);
-            $base = Role::where('tenant_id', $tenantId)
+            $base = Role::withCount('users')
+                ->where('tenant_id', $tenantId)
                 ->where('level', '>=', $userLevel);
             $result = $this->listQuery($base, $request, ['name'], ['name']);
             return RoleResource::collection($result['data'])->additional([
@@ -48,7 +49,7 @@ class RoleController extends Controller
 
         $scope = $scope ?? ($tenantId ? 'tenant' : 'all');
 
-        $query = Role::query();
+        $query = Role::query()->withCount('users');
 
         switch ($scope) {
             case 'global':
