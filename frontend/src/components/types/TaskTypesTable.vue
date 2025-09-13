@@ -15,22 +15,6 @@
       </div>
     </div>
 
-    <div v-if="selectedIds.length" class="flex items-center gap-2 pb-4">
-      <span class="text-sm">{{ selectedIds.length }} selected</span>
-      <Button
-        btnClass="btn-danger btn-sm"
-        icon="heroicons-outline:trash"
-        :text="t('actions.delete')"
-        @click="emit('delete-selected', selectedIds.value)"
-      />
-      <Button
-        btnClass="btn-secondary btn-sm"
-        icon="heroicons-outline:document-duplicate"
-        :text="t('actions.copy')"
-        @click="emit('copy-selected', selectedIds.value)"
-      />
-    </div>
-
     <vue-good-table
       :columns="columns"
       :rows="filteredRows"
@@ -81,6 +65,20 @@
               </template>
             </Dropdown>
           </span>
+        </template>
+        <template #selected-row-actions>
+          <Button
+            btnClass="btn-danger btn-sm"
+            icon="heroicons-outline:trash"
+            :text="t('actions.delete')"
+            @click="emit('delete-selected', selectedIds)"
+          />
+          <Button
+            btnClass="btn-secondary btn-sm"
+            icon="heroicons-outline:document-duplicate"
+            :text="t('actions.copy')"
+            @click="emit('copy-selected', selectedIds)"
+          />
         </template>
         <template #pagination-bottom="pagerProps">
           <div class="py-4 px-3">
@@ -145,7 +143,6 @@ const selectOptions = {
   selectionInfoClass: 'custom-class',
   selectionText: 'rows selected',
   clearSelectionText: 'clear',
-  disableSelectInfo: true,
   selectAllByGroup: true,
 };
 
