@@ -31,6 +31,12 @@
         <span v-else-if="rowProps.column.field === 'slug'">
           {{ rowProps.row.slug }}
         </span>
+        <span v-else-if="rowProps.column.field === 'color'">
+          <span
+            class="inline-block w-4 h-4 rounded"
+            :style="{ backgroundColor: rowProps.row.color }"
+          />
+        </span>
         <span v-else-if="rowProps.column.field === 'actions'">
           <Dropdown classMenuItems=" w-[140px]">
             <span class="text-xl"><Icon icon="heroicons-outline:dots-vertical" /></span>
@@ -122,6 +128,7 @@ interface TaskStatus {
   id: number;
   name: string;
   slug: string;
+  color: string;
   tenant?: { id: number; name: string } | null;
   tenant_id?: number | null;
 }
@@ -160,6 +167,7 @@ const columns = [
   { label: 'ID', field: 'id' },
   { label: 'Name', field: 'name' },
   { label: 'Slug', field: 'slug' },
+  { label: 'Color', field: 'color' },
   { label: 'Tenant', field: 'tenant' },
   { label: 'Actions', field: 'actions' },
 ];
