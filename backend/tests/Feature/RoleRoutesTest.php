@@ -45,14 +45,15 @@ class RoleRoutesTest extends TestCase
             ->getJson('/api/roles')
             ->assertStatus(200);
 
-        $payload = ['name' => 'Tester', 'slug' => 'tester', 'level' => 1];
+        $payload = ['name' => 'Tester', 'slug' => 'tester', 'level' => 1, 'description' => 'Test role'];
         $roleId = $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->postJson('/api/roles', $payload)
             ->assertStatus(201)
             ->assertJsonStructure([
-                'data' => ['id', 'name', 'slug', 'abilities', 'tenant_id', 'level'],
+                'data' => ['id', 'name', 'description', 'slug', 'abilities', 'tenant_id', 'level'],
             ])
             ->assertJsonPath('data.level', 1)
+            ->assertJsonPath('data.description', 'Test role')
             ->assertJsonPath('data.tenant_id', $this->tenant->id)
             ->assertJsonMissingPath('data.created_at')
             ->assertJsonMissingPath('data.updated_at')
@@ -62,21 +63,23 @@ class RoleRoutesTest extends TestCase
             ->getJson("/api/roles/{$roleId}")
             ->assertStatus(200)
             ->assertJsonStructure([
-                'data' => ['id', 'name', 'slug', 'abilities', 'tenant_id', 'level'],
+                'data' => ['id', 'name', 'description', 'slug', 'abilities', 'tenant_id', 'level'],
             ])
+            ->assertJsonPath('data.description', 'Test role')
             ->assertJsonMissingPath('data.created_at')
             ->assertJsonMissingPath('data.updated_at');
 
-        $update = ['name' => 'Updated', 'slug' => 'updated', 'level' => 2];
+        $update = ['name' => 'Updated', 'slug' => 'updated', 'level' => 2, 'description' => 'Updated role'];
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->putJson("/api/roles/{$roleId}", $update)
             ->assertStatus(200)
             ->assertJsonStructure([
-                'data' => ['id', 'name', 'slug', 'abilities', 'tenant_id', 'level'],
+                'data' => ['id', 'name', 'description', 'slug', 'abilities', 'tenant_id', 'level'],
             ])
             ->assertJsonPath('data.name', 'Updated')
             ->assertJsonPath('data.slug', 'updated')
             ->assertJsonPath('data.level', 2)
+            ->assertJsonPath('data.description', 'Updated role')
             ->assertJsonMissingPath('data.created_at')
             ->assertJsonMissingPath('data.updated_at');
 

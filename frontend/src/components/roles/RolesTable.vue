@@ -28,6 +28,9 @@
         <span v-if="rowProps.column.field === 'tenant'">
           {{ rowProps.row.tenant?.name || '—' }}
         </span>
+        <span v-else-if="rowProps.column.field === 'description'">
+          {{ rowProps.row.description || '—' }}
+        </span>
         <span v-else-if="rowProps.column.field === 'created_at'">
           {{ formatDate(rowProps.row.created_at) }}
         </span>
@@ -134,6 +137,7 @@ import { useAuthStore, can } from '@/stores/auth';
 interface RoleRow {
   id: number;
   name: string;
+  description?: string | null;
   level: number;
   created_at?: string;
   updated_at?: string;
@@ -175,6 +179,7 @@ const selectOptions = {
 const columns = [
   { label: 'ID', field: 'id' },
   { label: 'Name', field: 'name' },
+  { label: 'Description', field: 'description' },
   { label: 'Level', field: 'level', type: 'number', sortable: true },
   { label: 'Tenant', field: 'tenant' },
   { label: 'Created', field: 'created_at' },

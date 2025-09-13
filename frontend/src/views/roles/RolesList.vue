@@ -59,6 +59,7 @@ import { useI18n } from 'vue-i18n';
 interface RoleRow {
   id: number;
   name: string;
+  description?: string | null;
   level: number;
   created_at?: string;
   updated_at?: string;
@@ -102,6 +103,7 @@ async function load() {
   all.value = rolesStore.roles.map((r: any) => ({
     id: r.id,
     name: r.name,
+    description: r.description,
     level: r.level,
     tenant: r.tenant || tenantMap[r.tenant_id] || null,
     tenant_id: r.tenant_id,
