@@ -61,6 +61,7 @@ interface RoleRow {
   name: string;
   description?: string | null;
   level: number;
+  abilities: string[];
   created_at?: string;
   updated_at?: string;
   tenant?: { id: number; name: string } | null;
@@ -106,6 +107,7 @@ async function load() {
     name: r.name,
     description: r.description,
     level: r.level,
+    abilities: r.abilities || [],
     tenant: r.tenant || tenantMap[r.tenant_id] || null,
     tenant_id: r.tenant_id,
     created_at: r.created_at,

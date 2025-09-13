@@ -43,7 +43,8 @@ class RoleRoutesTest extends TestCase
     {
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->getJson('/api/roles')
-            ->assertStatus(200);
+            ->assertStatus(200)
+            ->assertJsonPath('data.0.abilities.0', 'roles.manage');
 
         $payload = ['name' => 'Tester', 'slug' => 'tester', 'level' => 1, 'description' => 'Test role'];
         $roleId = $this->withHeader('X-Tenant-ID', $this->tenant->id)

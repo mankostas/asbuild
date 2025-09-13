@@ -31,6 +31,9 @@
         <span v-else-if="rowProps.column.field === 'description'">
           {{ rowProps.row.description || '—' }}
         </span>
+        <span v-else-if="rowProps.column.field === 'abilities'">
+          {{ summarizeAbilities(rowProps.row.abilities) }}
+        </span>
         <span v-else-if="rowProps.column.field === 'created_at'">
           {{ formatDate(rowProps.row.created_at) }}
         </span>
@@ -139,6 +142,7 @@ interface RoleRow {
   name: string;
   description?: string | null;
   level: number;
+  abilities: string[];
   created_at?: string;
   updated_at?: string;
   tenant?: { id: number; name: string } | null;
@@ -177,17 +181,18 @@ const selectOptions = {
   selectAllByGroup: true,
 };
 
-const columns = [
+const columns = computed(() => [
   { label: 'ID', field: 'id' },
   { label: 'Name', field: 'name' },
   { label: 'Description', field: 'description' },
+  { label: t('roles.abilities'), field: 'abilities' },
   { label: 'Level', field: 'level', type: 'number', sortable: true },
   { label: 'Users', field: 'users_count', type: 'number', sortable: true },
   { label: 'Tenant', field: 'tenant' },
   { label: 'Created', field: 'created_at' },
   { label: 'Updated', field: 'updated_at' },
   { label: 'Actions', field: 'actions' },
-];
+]);
 
 const selectedIds = ref<number[]>([]);
 
@@ -206,5 +211,11 @@ function onSelectedRowsChange(params: any) {
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString();
+}
+
+function summarizeAbilities(abilities: string[] = []): string {
+  if (!abilities.length) return '—';
+  if (abilities.length <= 3) return abilities.join(', ');
+  return abilities.slice(0, 3).join(', ') + ` +${abilities.length - 3}`;
 }
 </script>
