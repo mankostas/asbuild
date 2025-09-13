@@ -118,6 +118,7 @@ interface TaskType {
   name: string;
   tenant?: { id: number; name: string } | null;
   statuses?: Record<string, string[]>;
+  tasks_count?: number;
 }
 
 const props = defineProps<{ rows: TaskType[] }>();
@@ -154,6 +155,7 @@ const columns = [
   { label: 'ID', field: 'id' },
   { label: 'Name', field: 'name' },
   { label: 'Tenant', field: 'tenant' },
+  { label: 'Tasks', field: 'tasks_count' },
   { label: 'Statuses', field: 'statusCount' },
   { label: 'Actions', field: 'actions' },
 ];

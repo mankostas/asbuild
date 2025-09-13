@@ -1853,6 +1853,7 @@ export interface components {
             status_flow_json?: Record<string, never> | null;
             tenant_id?: number | null;
             abilities_json?: Record<string, never> | null;
+            tasks_count?: number;
         };
         TaskStatus: {
             id?: number;

@@ -35,7 +35,8 @@ class TaskTypeController extends Controller
     public function index(Request $request)
     {
         // Task types are no longer versioned, so we only eager load the tenant
-        $query = TaskType::query()->with(['tenant']);
+        // and append a count of related tasks
+        $query = TaskType::query()->with(['tenant'])->withCount('tasks');
 
         if ($request->user()->hasRole('SuperAdmin')) {
             $scope = $request->query('scope', 'all');
