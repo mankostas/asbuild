@@ -25,7 +25,22 @@
       @on-selected-rows-change="onSelectedRowsChange"
     >
       <template #table-row="rowProps">
-        <span v-if="rowProps.column.field === 'memberCount'">
+        <span v-if="rowProps.column.field === 'description'">
+          <Tooltip
+            v-if="rowProps.row.description"
+            theme="light"
+            trigger="mouseenter focus"
+          >
+            <template #button>
+              <span class="cursor-help">
+                {{ truncateDescription(rowProps.row.description) }}
+              </span>
+            </template>
+            {{ rowProps.row.description }}
+          </Tooltip>
+          <span v-else>—</span>
+        </span>
+        <span v-else-if="rowProps.column.field === 'memberCount'">
           {{ rowProps.row.memberCount }}
         </span>
         <span v-else-if="rowProps.column.field === 'created_at'">
@@ -96,6 +111,7 @@ import InputGroup from '@/components/ui/InputGroup';
 import Dropdown from '@/components/ui/Dropdown';
 import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
+import Tooltip from '@/components/ui/Tooltip/index.vue';
 import Breadcrumbs from '@/Layout/Breadcrumbs.vue';
 import { useI18n } from 'vue-i18n';
 import { can } from '@/stores/auth';
@@ -153,6 +169,11 @@ const filteredRows = computed(() => {
 
 function onSelectedRowsChange(params: any) {
   selectedIds.value = params.selectedRows.map((r: any) => r.id);
+}
+
+function truncateDescription(desc: string) {
+  const maxLength = 80;
+  return desc.length > maxLength ? `${desc.slice(0, maxLength)}…` : desc;
 }
 
 function formatDate(d: string) {
