@@ -25,7 +25,24 @@
       @on-selected-rows-change="onSelectedRowsChange"
     >
       <template #table-row="rowProps">
-        <span v-if="rowProps.column.field === 'tenant'">
+        <div v-if="rowProps.column.field === 'name'" class="flex items-center gap-2">
+          <div
+            class="w-8 h-8 rounded-full bg-slate-200 text-xs font-medium text-slate-600 flex items-center justify-center overflow-hidden"
+          >
+            <img
+              v-if="rowProps.row.avatar"
+              :src="rowProps.row.avatar"
+              alt="avatar"
+              class="w-full h-full object-cover"
+            />
+            <span v-else>{{ getInitials(rowProps.row.name) }}</span>
+          </div>
+          <div class="flex flex-col leading-tight">
+            <span class="text-sm font-medium">{{ rowProps.row.name }}</span>
+            <span class="text-xs text-gray-500">{{ rowProps.row.email }}</span>
+          </div>
+        </div>
+        <span v-else-if="rowProps.column.field === 'tenant'">
           {{ rowProps.row.tenant?.name || '—' }}
         </span>
         <span v-else-if="rowProps.column.field === 'roles'">
@@ -118,6 +135,7 @@ interface EmployeeRow {
   last_login_at?: string | null;
   tenant?: { id: number; name: string } | null;
   tenant_id?: number | null;
+  avatar?: string | null;
 }
 
 const props = defineProps<{ rows: EmployeeRow[] }>();
@@ -144,9 +162,7 @@ const selectOptions = {
 };
 
 const columns = [
-  { label: 'ID', field: 'id' },
   { label: 'Name', field: 'name' },
-  { label: 'Email', field: 'email' },
   { label: 'Roles', field: 'roles' },
   { label: 'Phone', field: 'phone' },
   { label: 'Status', field: 'status' },
@@ -178,5 +194,15 @@ function onSelectedRowsChange(params: any) {
 
 function formatDate(d?: string) {
   return d ? new Date(d).toLocaleString() : '';
+}
+
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 }
 </script>
