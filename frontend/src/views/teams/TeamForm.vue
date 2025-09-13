@@ -46,7 +46,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import api, { extractFormErrors } from '@/services/api';
+import api, { extractFormErrors, extractData } from '@/services/api';
 import Textinput from '@/components/ui/Textinput/index.vue';
 import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import Button from '@/components/ui/Button/index.vue';
@@ -92,7 +92,7 @@ const availableFeatures = computed(() =>
 
 async function loadEmployees() {
   const { data } = await api.get('/employees');
-  employeeOptions.value = data;
+  employeeOptions.value = extractData(data);
 }
 
 async function loadTeam() {

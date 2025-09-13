@@ -130,4 +130,8 @@ export function extractFormErrors(error: any): Record<string, string[]> {
   return (error && (error.errors as Record<string, string[]>)) || {};
 }
 
+export function extractData<T>(data: any): T {
+  return Array.isArray(data) ? data : data?.data;
+}
+
 export default api;
