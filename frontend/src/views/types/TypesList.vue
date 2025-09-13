@@ -61,6 +61,7 @@ interface TaskType {
   name: string;
   tenant?: { id: number; name: string } | null;
   statuses?: Record<string, string[]>;
+  tasks_count?: number;
 }
 const all = ref<TaskType[]>([]);
 const auth = useAuthStore();
@@ -75,7 +76,11 @@ const scope: 'tenant' | 'all' = auth.isSuperAdmin ? 'all' : 'tenant';
 async function load() {
   const tenantId = auth.isSuperAdmin && scope !== 'all' ? tenantStore.currentTenantId : undefined;
   const { data } = await typesStore.fetch(scope, tenantId);
-  all.value = data.map((t: any) => ({ ...t, statuses: t.statuses }));
+  all.value = data.map((t: any) => ({
+    ...t,
+    statuses: t.statuses,
+    tasks_count: t.tasks_count,
+  }));
   loading.value = false;
 }
 
