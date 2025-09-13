@@ -5,7 +5,7 @@
           v-if="can('tenants.create') || can('tenants.manage')"
           btnClass="btn-primary"
           text="Add Tenant"
-          link="/tenants/create"
+          :to="{ name: 'tenants.create' }"
         />
       </div>
       <DashcodeServerTable
@@ -23,7 +23,7 @@
           />
           <Button
             v-if="can('tenants.update') || can('tenants.manage')"
-            :link="`/tenants/${row.id}/edit`"
+            :to="{ name: 'tenants.edit', params: { id: row.id } }"
             btnClass="btn-outline-primary btn-sm"
             text="Edit"
           />
@@ -112,7 +112,7 @@ async function impersonate(t: any) {
 }
 
 function view(id: number) {
-  router.push(`/tenants/${id}`);
+  router.push({ name: 'tenants.view', params: { id } });
 }
 
 async function remove(id: number) {

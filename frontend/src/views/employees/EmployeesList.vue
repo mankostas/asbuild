@@ -20,7 +20,7 @@
         />
         <Button
           v-if="can('employees.create') || can('employees.manage')"
-          link="/employees/create"
+          :to="{ name: 'employees.create' }"
           btnClass="btn-primary btn-sm min-w-[100px] !h-8 !py-0"
           icon="heroicons-outline:plus"
           iconClass="w-4 h-4"
