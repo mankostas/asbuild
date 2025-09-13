@@ -11,6 +11,10 @@ class EmployeeResource extends JsonResource
 
     public function toArray($request): array
     {
-        return $this->formatDates(parent::toArray($request));
+        $data = parent::toArray($request);
+        $data['status'] = $this->status;
+        $data['last_login_at'] = $this->last_login_at;
+
+        return $this->formatDates($data);
     }
 }

@@ -31,11 +31,13 @@
         <span v-else-if="rowProps.column.field === 'roles'">
           {{ rowProps.row.roles || '—' }}
         </span>
-        <span v-else-if="rowProps.column.field === 'created_at'">
-          {{ formatDate(rowProps.row.created_at) }}
+        <span v-else-if="rowProps.column.field === 'status'">
+          <span :class="rowProps.row.status === 'active' ? 'text-green-600' : 'text-gray-400'">
+            {{ rowProps.row.status || '—' }}
+          </span>
         </span>
-        <span v-else-if="rowProps.column.field === 'updated_at'">
-          {{ formatDate(rowProps.row.updated_at) }}
+        <span v-else-if="rowProps.column.field === 'last_login_at'">
+          {{ formatDate(rowProps.row.last_login_at) }}
         </span>
         <span v-else-if="rowProps.column.field === 'actions'">
           <Dropdown classMenuItems=" w-[140px]">
@@ -112,11 +114,10 @@ interface EmployeeRow {
   email: string;
   roles: string;
   phone?: string | null;
-  address?: string | null;
+  status?: string | null;
+  last_login_at?: string | null;
   tenant?: { id: number; name: string } | null;
   tenant_id?: number | null;
-  created_at?: string;
-  updated_at?: string;
 }
 
 const props = defineProps<{ rows: EmployeeRow[] }>();
@@ -148,22 +149,27 @@ const columns = [
   { label: 'Email', field: 'email' },
   { label: 'Roles', field: 'roles' },
   { label: 'Phone', field: 'phone' },
-  { label: 'Address', field: 'address' },
+  { label: 'Status', field: 'status' },
+  { label: 'Last Login', field: 'last_login_at' },
   { label: 'Tenant', field: 'tenant' },
-  { label: 'Created', field: 'created_at' },
-  { label: 'Updated', field: 'updated_at' },
   { label: 'Actions', field: 'actions' },
 ];
 
 const selectedIds = ref<number[]>([]);
 
 const filteredRows = computed(() => {
-  const rows = !searchTerm.value
-    ? props.rows
-    : props.rows.filter((r) =>
-        String(r.name).toLowerCase().includes(searchTerm.value.toLowerCase()),
-      );
-  return rows;
+  const term = searchTerm.value.toLowerCase();
+  if (!term) return props.rows;
+  return props.rows.filter((r) => {
+    return (
+      String(r.name).toLowerCase().includes(term) ||
+      String(r.email).toLowerCase().includes(term) ||
+      String(r.roles).toLowerCase().includes(term) ||
+      String(r.phone || '').toLowerCase().includes(term) ||
+      String(r.status || '').toLowerCase().includes(term) ||
+      String(r.tenant?.name || '').toLowerCase().includes(term)
+    );
+  });
 });
 
 function onSelectedRowsChange(params: any) {
@@ -171,6 +177,6 @@ function onSelectedRowsChange(params: any) {
 }
 
 function formatDate(d?: string) {
-  return d ? new Date(d).toLocaleDateString() : '';
+  return d ? new Date(d).toLocaleString() : '';
 }
 </script>

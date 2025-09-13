@@ -53,11 +53,10 @@ interface EmployeeRow {
   email: string;
   roles: string;
   phone?: string | null;
-  address?: string | null;
+  status?: string | null;
+  last_login_at?: string | null;
   tenant?: { id: number; name: string } | null;
   tenant_id?: number | null;
-  created_at?: string;
-  updated_at?: string;
 }
 
 const router = useRouter();
@@ -109,11 +108,10 @@ async function load() {
     email: e.email,
     roles: formatRoles(e.roles || []),
     phone: e.phone,
-    address: e.address,
+    status: e.status,
+    last_login_at: e.last_login_at,
     tenant: tenantMap[e.tenant_id] || null,
     tenant_id: e.tenant_id,
-    created_at: e.created_at,
-    updated_at: e.updated_at,
   }));
   loading.value = false;
 }
