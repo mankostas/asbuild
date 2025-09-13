@@ -157,8 +157,6 @@ class TaskTypeController extends Controller
 
     public function bulkDestroy(Request $request)
     {
-        $this->ensureAdmin($request);
-
         $data = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'integer',
@@ -198,17 +196,13 @@ class TaskTypeController extends Controller
 
     public function bulkCopyToTenant(Request $request)
     {
-        $this->ensureAdmin($request);
-
         $data = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'integer',
             'tenant_id' => 'nullable|integer',
         ]);
 
-        $tenantId = $request->user()->hasRole('SuperAdmin')
-            ? ($data['tenant_id'] ?? null)
-            : $request->user()->tenant_id;
+        $tenantId = $data['tenant_id'] ?? $request->user()->tenant_id;
 
         if (! $tenantId) {
             abort(400, 'tenant_id required');
