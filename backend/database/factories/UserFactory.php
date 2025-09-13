@@ -33,6 +33,8 @@ class UserFactory extends Factory
             'phone' => fake()->phoneNumber(),
             'address' => fake()->address(),
             'department' => fake()->word(),
+            'status' => 'active',
+            'last_login_at' => null,
         ];
     }
 
