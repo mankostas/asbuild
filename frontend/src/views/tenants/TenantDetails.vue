@@ -11,9 +11,9 @@
         v-if="can('tenants.update') || can('tenants.manage')"
         btnClass="btn-primary btn-sm"
         text="Edit"
-        :link="`/tenants/${tenant.id}/edit`"
+        :to="{ name: 'tenants.edit', params: { id: tenant.id } }"
       />
-      <Button btnClass="btn-secondary btn-sm" text="Back" link="/tenants" />
+      <Button btnClass="btn-secondary btn-sm" text="Back" :to="{ name: 'tenants.list' }" />
     </div>
   </div>
 </template>
