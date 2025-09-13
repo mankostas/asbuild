@@ -41,7 +41,7 @@ import SkeletonTable from '@/components/ui/Skeleton/Table.vue';
 import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select/index.vue';
 import Swal from 'sweetalert2';
-import api from '@/services/api';
+import api, { extractData } from '@/services/api';
 import { useNotify } from '@/plugins/notify';
 import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
@@ -100,11 +100,12 @@ async function load() {
     params.tenant_id = tenantFilter.value;
   }
   const { data } = await api.get('/employees', { params });
+  const employees = extractData(data);
   const tenantMap = tenantStore.tenants.reduce(
     (acc: Record<number, any>, t: any) => ({ ...acc, [t.id]: t }),
     {},
   );
-  all.value = data.data.map((e: any) => ({
+  all.value = employees.map((e: any) => ({
     id: e.id,
     name: e.name,
     email: e.email,
