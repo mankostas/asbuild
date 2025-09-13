@@ -25,10 +25,9 @@
       @on-selected-rows-change="onSelectedRowsChange"
     >
       <template #table-row="rowProps">
-        <AvatarGroup
-          v-if="rowProps.column.field === 'memberCount'"
-          :members="rowProps.row.members"
-        />
+        <span v-if="rowProps.column.field === 'memberCount'">
+          {{ rowProps.row.memberCount }}
+        </span>
         <span v-else-if="rowProps.column.field === 'created_at'">
           {{ formatDate(rowProps.row.created_at) }}
         </span>
@@ -98,7 +97,6 @@ import Dropdown from '@/components/ui/Dropdown';
 import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
 import Breadcrumbs from '@/Layout/Breadcrumbs.vue';
-import AvatarGroup from '@/components/ui/AvatarGroup.vue';
 import { useI18n } from 'vue-i18n';
 import { can } from '@/stores/auth';
 
@@ -106,7 +104,6 @@ interface TeamRow {
   id: number;
   name: string;
   description: string | null;
-  members: { name: string; avatar?: string | null }[];
   memberCount: number;
   created_at: string;
   updated_at: string;
@@ -138,7 +135,7 @@ const selectOptions = {
 const columns = [
   { label: 'Name', field: 'name' },
   { label: 'Description', field: 'description' },
-  { label: 'Members', field: 'memberCount', type: 'number' },
+  { label: 'Members', field: 'memberCount' },
   { label: 'Created', field: 'created_at' },
   { label: 'Actions', field: 'actions' },
 ];
