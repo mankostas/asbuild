@@ -16,6 +16,7 @@
           :options="tenantOptions"
           class="w-40"
           classInput="text-xs !h-8"
+          aria-label="Tenant filter"
         />
         <Button
           v-if="can('task_statuses.create') || can('task_statuses.manage')"
@@ -51,6 +52,7 @@ import { useI18n } from 'vue-i18n';
 interface TaskStatus {
   id: number;
   name: string;
+  slug: string;
   tenant?: { id: number; name: string } | null;
   tenant_id?: number | null;
 }
@@ -92,8 +94,11 @@ async function load() {
     {},
   );
   all.value = data.map((s: any) => ({
-    ...s,
+    id: s.id,
+    name: s.name,
+    slug: s.slug,
     tenant: s.tenant || tenantMap[s.tenant_id] || null,
+    tenant_id: s.tenant_id,
   }));
   loading.value = false;
 }
