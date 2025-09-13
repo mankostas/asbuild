@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('selecting a tenant loads statuses and leaves transitions empty', async ({ page }) => {
-  await page.route('**/task-statuses', (route) => {
+  await page.route(/\/task-statuses\?.*/, (route) => {
     const url = new URL(route.request().url());
     const tenantId = url.searchParams.get('tenant_id');
     const data = tenantId === '2'
