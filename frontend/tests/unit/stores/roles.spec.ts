@@ -19,7 +19,7 @@ describe('roles store', () => {
   });
 
   it('fetches roles with params', async () => {
-    (api.get as any).mockResolvedValue({ data: { data: [{ id: 1 }] } });
+    (api.get as any).mockResolvedValue({ data: { data: [{ id: 1, description: 'desc' }] } });
     const store = useRolesStore();
     await store.fetch({ scope: 'tenant', tenant_id: '1' });
     expect(api.get).toHaveBeenCalledWith('/roles', {
@@ -33,7 +33,7 @@ describe('roles store', () => {
         dir: 'asc',
       },
     });
-    expect(store.roles).toEqual([{ id: 1 }]);
+    expect(store.roles).toEqual([{ id: 1, description: 'desc' }]);
   });
 
   it('omits tenant_id when scope is all', async () => {
@@ -59,6 +59,16 @@ describe('roles store', () => {
     expect(api.post).toHaveBeenCalledWith('/roles/2/assign', {
       user_id: 3,
       tenant_id: '4',
+    });
+  });
+
+  it('creates role with description', async () => {
+    (api.post as any).mockResolvedValue({ data: { id: 1 } });
+    const store = useRolesStore();
+    await store.create({ name: 'Tester', description: 'desc' } as any);
+    expect(api.post).toHaveBeenCalledWith('/roles', {
+      name: 'Tester',
+      description: 'desc',
     });
   });
 });

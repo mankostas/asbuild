@@ -12,6 +12,7 @@ class Role extends Model
     protected $fillable = [
         'tenant_id',
         'name',
+        'description',
         'slug',
         'abilities',
         'level',
@@ -19,6 +20,7 @@ class Role extends Model
 
     protected $casts = [
         'abilities' => 'array',
+        'description' => 'string',
     ];
 
     protected static function booted(): void

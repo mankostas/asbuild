@@ -11,6 +11,7 @@ type RolePayload = Role & {
   abilities?: string[];
   tenant_id?: string | null;
   level?: number;
+  description?: string | null;
 };
 
 export const useRolesStore = defineStore('roles', {
