@@ -19,6 +19,8 @@ class User extends Authenticatable
         'tenant_id',
         'phone',
         'address',
+        'status',
+        'last_login_at',
     ];
 
     protected $hidden = [
@@ -30,6 +32,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'theme_settings' => 'array',
+        'last_login_at' => 'datetime',
     ];
 
     public function roles(): BelongsToMany
