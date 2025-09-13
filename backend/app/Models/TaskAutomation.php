@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Jobs\AutomationNotifyTeamJob;
 use App\Models\Task;
+use App\Models\TaskStatus;
 
 class TaskAutomation extends Model
 {
@@ -37,7 +38,10 @@ class TaskAutomation extends Model
 
         foreach ($rules as $rule) {
             $conditions = $rule->conditions_json ?? [];
-            if (isset($conditions['status']) && $task->status_slug !== $conditions['status']) {
+            if (
+                isset($conditions['status'])
+                && TaskStatus::stripPrefix($task->status_slug) !== TaskStatus::stripPrefix($conditions['status'])
+            ) {
                 continue;
             }
             foreach ($rule->actions_json as $action) {
