@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api, { extractFormErrors, extractData } from '@/services/api';
 import Textinput from '@/components/ui/Textinput/index.vue';
@@ -103,6 +103,23 @@ const hiddenRoles = ref<Record<string, any>>({});
 const availableFeatures = computed(() =>
   auth.features.filter((f) => featureMap[f]),
 );
+
+watch(tenantId, async (newTenant, oldTenant) => {
+  if (!auth.isSuperAdmin || newTenant === oldTenant) return;
+  const previousTenant = tenant.tenantId;
+  tenant.setTenant(String(newTenant));
+  await loadEmployees();
+  selectedEmployees.value = [];
+  hiddenRoles.value = {};
+  featureGrants.value = {} as Record<string, string[]>;
+  if (isEdit.value) {
+    await loadTeam();
+  }
+  availableFeatures.value.forEach((f) => {
+    if (!featureGrants.value[f]) featureGrants.value[f] = [];
+  });
+  tenant.setTenant(previousTenant);
+});
 
 async function loadEmployees() {
   const { data } = await api.get('/employees');
