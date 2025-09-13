@@ -285,6 +285,12 @@
     "noSLAPermissions": "Δεν έχετε δικαίωμα διαχείρισης Πολιτικών SLA",
     "noAutomationsPermissions": "Δεν έχετε δικαίωμα διαχείρισης Αυτοματισμών"
   },
+  "statuses": {
+    "addStatus": "Προσθήκη κατάστασης",
+    "form": {
+      "search": "Αναζήτηση"
+    }
+  },
   "slaPolicies": {
     "title": "Πολιτικές SLA",
     "priority": "Προτεραιότητα",

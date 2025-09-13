@@ -24,5 +24,13 @@ export const useTaskStatusesStore = defineStore('taskStatuses', {
       const { data } = await api.post(`/task-statuses/${id}/copy-to-tenant`, payload);
       return data;
     },
+    async copyManyToTenant(ids: number[], tenantId?: string | number) {
+      for (const id of ids) {
+        await this.copyToTenant(id, tenantId);
+      }
+    },
+    async deleteMany(ids: number[]) {
+      await Promise.all(ids.map((id) => api.delete(`/task-statuses/${id}`)));
+    },
   },
 });
