@@ -10,17 +10,6 @@
       @copy-selected="copyMany"
     >
       <template #header-actions>
-        <select
-          id="task-statuses-scope"
-          v-model="scope"
-          class="border rounded px-2 py-1 text-xs"
-          aria-label="Scope"
-          @change="changeScope"
-        >
-          <option v-for="opt in scopeOptions" :key="opt.value" :value="opt.value">
-            {{ opt.label }}
-          </option>
-        </select>
         <Button
           v-if="can('task_statuses.create') || can('task_statuses.manage')"
           link="/task-statuses/create"
@@ -39,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import TaskStatusesTable from '@/components/statuses/TaskStatusesTable.vue';
 import SkeletonTable from '@/components/ui/Skeleton/Table.vue';
@@ -71,24 +60,21 @@ if (auth.isSuperAdmin) {
   scope.value = 'all';
 }
 
-const scopeOptions = computed(() => {
-  const opts = [
-    { value: 'tenant', label: 'Tenant' },
-    { value: 'all', label: 'All' },
-  ];
-  if (auth.isSuperAdmin) {
-    opts.splice(1, 0, { value: 'global', label: 'Global' });
-  }
-  return opts;
-});
-
 async function load() {
   const tenantId =
     auth.isSuperAdmin && scope.value !== 'all'
       ? tenantStore.currentTenantId
       : undefined;
   const { data } = await statusesStore.fetch(scope.value, tenantId);
-  all.value = data;
+  await tenantStore.loadTenants({ per_page: 100 });
+  const tenantMap = tenantStore.tenants.reduce(
+    (acc: Record<number, any>, t: any) => ({ ...acc, [t.id]: t }),
+    {},
+  );
+  all.value = data.map((s: any) => ({
+    ...s,
+    tenant: s.tenant || tenantMap[s.tenant_id] || null,
+  }));
   loading.value = false;
 }
 
@@ -98,11 +84,6 @@ function reload() {
   loading.value = true;
   all.value = [];
   load();
-}
-
-function changeScope() {
-  all.value = [];
-  reload();
 }
 
 watch(
