@@ -62,6 +62,7 @@
   "Version": "Έκδοση",
   "Section": "Ενότητα",
   "tenants": "Μισθωτές",
+  "allTenants": "Όλοι οι μισθωτές",
   "routes": {
     "dashboard": "Πίνακας ελέγχου",
     "tasks": "Εργασίες",
