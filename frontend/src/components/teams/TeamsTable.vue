@@ -31,9 +31,6 @@
         <span v-else-if="rowProps.column.field === 'created_at'">
           {{ formatDate(rowProps.row.created_at) }}
         </span>
-        <span v-else-if="rowProps.column.field === 'updated_at'">
-          {{ formatDate(rowProps.row.updated_at) }}
-        </span>
         <span v-else-if="rowProps.column.field === 'actions'">
           <Dropdown classMenuItems=" w-[140px]">
             <span class="text-xl"><Icon icon="heroicons-outline:dots-vertical" /></span>
@@ -136,12 +133,10 @@ const selectOptions = {
 };
 
 const columns = [
-  { label: 'ID', field: 'id' },
   { label: 'Name', field: 'name' },
   { label: 'Description', field: 'description' },
   { label: 'Members', field: 'members' },
   { label: 'Created', field: 'created_at' },
-  { label: 'Updated', field: 'updated_at' },
   { label: 'Actions', field: 'actions' },
 ];
 
