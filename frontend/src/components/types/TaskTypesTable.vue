@@ -15,22 +15,6 @@
       </div>
     </div>
 
-    <div v-if="selectedIds.length" class="flex items-center gap-2 pb-4">
-      <span class="text-sm">{{ selectedIds.length }} selected</span>
-      <Button
-        btnClass="btn-danger btn-sm"
-        icon="heroicons-outline:trash"
-        :text="t('actions.delete')"
-        @click="emit('delete-selected', selectedIds.value)"
-      />
-      <Button
-        btnClass="btn-secondary btn-sm"
-        icon="heroicons-outline:document-duplicate"
-        :text="t('actions.copy')"
-        @click="emit('copy-selected', selectedIds.value)"
-      />
-    </div>
-
     <vue-good-table
       :columns="columns"
       :rows="filteredRows"
@@ -82,6 +66,22 @@
             </Dropdown>
           </span>
         </template>
+        <template #selected-row-actions>
+          <button
+            type="button"
+            class="ml-2 text-danger-500 hover:underline cursor-pointer"
+            @click="emit('delete-selected', selectedIds)"
+          >
+            {{ t('actions.delete') }}
+          </button>
+          <button
+            type="button"
+            class="ml-2 text-primary-500 hover:underline cursor-pointer"
+            @click="emit('copy-selected', selectedIds)"
+          >
+            {{ t('actions.copy') }}
+          </button>
+        </template>
         <template #pagination-bottom="pagerProps">
           <div class="py-4 px-3">
             <Pagination
@@ -110,7 +110,6 @@ import Dropdown from '@/components/ui/Dropdown';
 import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
 import Breadcrumbs from "@/Layout/Breadcrumbs.vue";
-import Button from '@/components/ui/Button';
 import { useI18n } from 'vue-i18n';
 
 interface TaskType {
@@ -145,7 +144,6 @@ const selectOptions = {
   selectionInfoClass: 'custom-class',
   selectionText: 'rows selected',
   clearSelectionText: 'clear',
-  disableSelectInfo: true,
   selectAllByGroup: true,
 };
 
