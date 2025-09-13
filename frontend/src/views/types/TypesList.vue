@@ -56,7 +56,13 @@
   import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
-const all = ref<any[]>([]);
+interface TaskType {
+  id: number;
+  name: string;
+  tenant?: { id: number; name: string } | null;
+  statuses?: Record<string, string[]>;
+}
+const all = ref<TaskType[]>([]);
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
 const typesStore = useTaskTypesStore();
@@ -68,7 +74,8 @@ const scope: 'tenant' | 'all' = auth.isSuperAdmin ? 'all' : 'tenant';
 
 async function load() {
   const tenantId = auth.isSuperAdmin && scope !== 'all' ? tenantStore.currentTenantId : undefined;
-  all.value = (await typesStore.fetch(scope, tenantId)).data;
+  const { data } = await typesStore.fetch(scope, tenantId);
+  all.value = data.map((t: any) => ({ ...t, statuses: t.statuses }));
   loading.value = false;
 }
 
