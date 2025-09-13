@@ -24,7 +24,7 @@ class TeamController extends Controller
     protected function getTenantId(Request $request): int
     {
         if ($request->user()->hasRole('SuperAdmin')) {
-            $tenantId = app('tenant_id');
+            $tenantId = $request->query('tenant_id', $request->input('tenant_id', $request->header('X-Tenant-ID', app('tenant_id'))));
             if (! $tenantId) {
                 abort(400, 'Tenant ID required');
             }
@@ -36,10 +36,17 @@ class TeamController extends Controller
 
     public function index(Request $request)
     {
-        $tenantId = $this->getTenantId($request);
-        $base = Team::where('tenant_id', $tenantId)
-            ->with('employees');
-        $result = $this->listQuery($base, $request, ['name'], ['name']);
+        $query = Team::query()->with(['employees', 'tenant']);
+
+        if ($request->user()->hasRole('SuperAdmin')) {
+            if ($request->has('tenant_id')) {
+                $query->where('tenant_id', $request->query('tenant_id'));
+            }
+        } else {
+            $query->where('tenant_id', $request->user()->tenant_id);
+        }
+
+        $result = $this->listQuery($query, $request, ['name'], ['name']);
 
         return TeamResource::collection($result['data'])->additional([
             'meta' => $result['meta'],
@@ -56,7 +63,7 @@ class TeamController extends Controller
 
         $team = Team::create($data);
 
-        return (new TeamResource($team->load('employees')))
+        return (new TeamResource($team->load(['employees', 'tenant'])))
             ->response()
             ->setStatusCode(201);
     }
@@ -68,7 +75,7 @@ class TeamController extends Controller
             abort(404);
         }
 
-        return new TeamResource($team->load('employees'));
+        return new TeamResource($team->load(['employees', 'tenant']));
     }
 
     public function update(TeamUpsertRequest $request, Team $team)
@@ -84,7 +91,7 @@ class TeamController extends Controller
         $data['tenant_id'] = $team->tenant_id;
         $team->update($data);
 
-        return new TeamResource($team->load('employees'));
+        return new TeamResource($team->load(['employees', 'tenant']));
     }
 
     public function destroy(Request $request, Team $team)
@@ -122,6 +129,6 @@ class TeamController extends Controller
 
         $team->employees()->sync($employeeIds);
 
-        return new TeamResource($team->load('employees'));
+        return new TeamResource($team->load(['employees', 'tenant']));
     }
 }
