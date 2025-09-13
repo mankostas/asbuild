@@ -46,8 +46,13 @@ class TaskStatusTenantVisibilityTest extends TestCase
         $response = $this->withHeader('X-Tenant-ID', 1)->getJson('/api/task-statuses');
 
         $response->assertStatus(200);
-        $names = collect($response->json('data'))->pluck('name')->sort()->values()->all();
+        $data = $response->json('data');
+        $names = collect($data)->pluck('name')->sort()->values()->all();
         $this->assertEquals(['Global', 'Tenant One'], $names);
+        foreach ($data as $status) {
+            $this->assertArrayHasKey('created_at', $status);
+            $this->assertArrayHasKey('updated_at', $status);
+        }
     }
 
     public function test_super_admin_sees_global_and_tenant_statuses_with_header(): void
@@ -83,7 +88,12 @@ class TaskStatusTenantVisibilityTest extends TestCase
             ->getJson('/api/task-statuses?scope=tenant');
 
         $response->assertStatus(200);
-        $names = collect($response->json('data'))->pluck('name')->sort()->values()->all();
+        $data = $response->json('data');
+        $names = collect($data)->pluck('name')->sort()->values()->all();
         $this->assertEquals(['Global', 'Tenant One'], $names);
+        foreach ($data as $status) {
+            $this->assertArrayHasKey('created_at', $status);
+            $this->assertArrayHasKey('updated_at', $status);
+        }
     }
 }

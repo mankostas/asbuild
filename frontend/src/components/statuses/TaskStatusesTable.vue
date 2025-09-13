@@ -37,6 +37,12 @@
             :style="{ backgroundColor: rowProps.row.color }"
           />
         </span>
+        <span v-else-if="rowProps.column.field === 'created_at'">
+          {{ formatDate(rowProps.row.created_at) }}
+        </span>
+        <span v-else-if="rowProps.column.field === 'updated_at'">
+          {{ formatDate(rowProps.row.updated_at) }}
+        </span>
         <span v-else-if="rowProps.column.field === 'actions'">
           <Dropdown classMenuItems=" w-[140px]">
             <span class="text-xl"><Icon icon="heroicons-outline:dots-vertical" /></span>
@@ -130,6 +136,8 @@ interface TaskStatus {
   slug: string;
   color: string;
   position: number;
+  created_at: string;
+  updated_at: string;
   tenant?: { id: number; name: string } | null;
   tenant_id?: number | null;
 }
@@ -171,6 +179,8 @@ const columns = [
   { label: 'Slug', field: 'slug' },
   { label: 'Color', field: 'color' },
   { label: 'Tenant', field: 'tenant' },
+  { label: 'Created', field: 'created_at' },
+  { label: 'Updated', field: 'updated_at' },
   { label: 'Actions', field: 'actions' },
 ];
 
@@ -187,5 +197,9 @@ const filteredRows = computed(() => {
 
 function onSelectedRowsChange(params: any) {
   selectedIds.value = params.selectedRows.map((r: any) => r.id);
+}
+
+function formatDate(d: string) {
+  return new Date(d).toLocaleDateString();
 }
 </script>
