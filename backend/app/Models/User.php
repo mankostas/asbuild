@@ -19,6 +19,7 @@ class User extends Authenticatable
         'tenant_id',
         'phone',
         'address',
+        'type',
         'department',
         'status',
         'last_login_at',
@@ -33,6 +34,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'theme_settings' => 'array',
+        'type' => 'string',
         'last_login_at' => 'datetime',
     ];
 

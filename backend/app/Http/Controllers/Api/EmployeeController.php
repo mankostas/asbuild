@@ -35,6 +35,7 @@ class EmployeeController extends Controller
         $tenantId = $this->getTenantId($request);
 
         $base = User::where('tenant_id', $tenantId)
+            ->where('type', 'employee')
             ->with('roles');
         $result = $this->listQuery($base, $request, ['name', 'email', 'department'], ['name', 'email', 'department']);
 
@@ -70,6 +71,7 @@ class EmployeeController extends Controller
             'phone' => $data['phone'] ?? null,
             'address' => $data['address'] ?? null,
             'department' => $data['department'] ?? null,
+            'type' => 'employee',
         ]);
 
         if (! empty($data['roles'])) {
@@ -89,7 +91,7 @@ class EmployeeController extends Controller
     public function show(Request $request, User $employee)
     {
         $tenantId = $this->getTenantId($request);
-        if ($employee->tenant_id !== $tenantId) {
+        if ($employee->tenant_id !== $tenantId || $employee->type !== 'employee') {
             abort(404);
         }
 
@@ -99,7 +101,7 @@ class EmployeeController extends Controller
     public function update(Request $request, User $employee)
     {
         $tenantId = $this->getTenantId($request);
-        if ($employee->tenant_id !== $tenantId) {
+        if ($employee->tenant_id !== $tenantId || $employee->type !== 'employee') {
             abort(404);
         }
 
@@ -146,7 +148,7 @@ class EmployeeController extends Controller
     public function toggleStatus(Request $request, User $employee)
     {
         $tenantId = $this->getTenantId($request);
-        if ($employee->tenant_id !== $tenantId) {
+        if ($employee->tenant_id !== $tenantId || $employee->type !== 'employee') {
             abort(404);
         }
 
@@ -163,7 +165,7 @@ class EmployeeController extends Controller
     public function destroy(Request $request, User $employee)
     {
         $tenantId = $this->getTenantId($request);
-        if ($employee->tenant_id !== $tenantId) {
+        if ($employee->tenant_id !== $tenantId || $employee->type !== 'employee') {
             abort(404);
         }
 
