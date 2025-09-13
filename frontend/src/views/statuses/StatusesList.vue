@@ -53,6 +53,8 @@ interface TaskStatus {
   id: number;
   name: string;
   slug: string;
+  color: string;
+  position: number;
   tenant?: { id: number; name: string } | null;
   tenant_id?: number | null;
 }
@@ -97,6 +99,8 @@ async function load() {
     id: s.id,
     name: s.name,
     slug: s.slug,
+    color: s.color,
+    position: s.position,
     tenant: s.tenant || tenantMap[s.tenant_id] || null,
     tenant_id: s.tenant_id,
   }));
