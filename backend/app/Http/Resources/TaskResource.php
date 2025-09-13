@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Services\FormSchemaService;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Concerns\FormatsDateTimes;
+use App\Models\TaskStatus;
 
 class TaskResource extends JsonResource
 {
@@ -13,6 +14,10 @@ class TaskResource extends JsonResource
     public function toArray($request): array
     {
         $data = parent::toArray($request);
+        $data['status_slug'] = TaskStatus::stripPrefix($data['status_slug'] ?? '');
+        $data['previous_status_slug'] = isset($data['previous_status_slug'])
+            ? TaskStatus::stripPrefix($data['previous_status_slug'])
+            : null;
 
         if ($this->assignee) {
             $data['assignee'] = [

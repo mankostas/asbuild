@@ -42,10 +42,8 @@ class TaskAutomationTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
         Sanctum::actingAs($user);
 
-        TaskStatus::insert([
-            ['slug' => 'draft', 'name' => 'Draft'],
-            ['slug' => 'completed', 'name' => 'Completed'],
-        ]);
+        TaskStatus::create(['slug' => 'draft', 'name' => 'Draft', 'tenant_id' => $tenant->id]);
+        TaskStatus::create(['slug' => 'completed', 'name' => 'Completed', 'tenant_id' => $tenant->id]);
 
         $type = TaskType::create([
             'name' => 'Type',
@@ -69,7 +67,7 @@ class TaskAutomationTest extends TestCase
             'tenant_id' => $tenant->id,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
-            'status_slug' => 'draft',
+            'status_slug' => TaskStatus::prefixSlug('draft', $tenant->id),
             'board_position' => 1,
         ]);
 

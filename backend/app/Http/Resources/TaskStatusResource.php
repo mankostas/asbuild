@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Concerns\FormatsDateTimes;
+use App\Models\TaskStatus;
 
 class TaskStatusResource extends JsonResource
 {
@@ -11,6 +12,9 @@ class TaskStatusResource extends JsonResource
 
     public function toArray($request): array
     {
-        return $this->formatDates(parent::toArray($request));
+        $data = parent::toArray($request);
+        $data['slug'] = TaskStatus::stripPrefix($data['slug']);
+
+        return $this->formatDates($data);
     }
 }

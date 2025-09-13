@@ -63,7 +63,7 @@ class TaskListFiltersTest extends TestCase
             'tenant_id' => $tenant->id,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
-            'status_slug' => 'closed',
+            'status_slug' => \App\Models\TaskStatus::prefixSlug('closed', $tenant->id),
             'assigned_user_id' => $user->id,
             'priority' => 2,
             'due_at' => '2025-02-10',
@@ -71,7 +71,7 @@ class TaskListFiltersTest extends TestCase
 
         $query = http_build_query([
             'type' => $type->id,
-            'status' => $status->slug,
+            'status' => 'open',
             'assignee' => $user->id,
             'priority' => 1,
             'due_from' => '2025-01-01',

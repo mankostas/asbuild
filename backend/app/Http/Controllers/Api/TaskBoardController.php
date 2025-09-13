@@ -55,8 +55,9 @@ class TaskBoardController extends Controller
         })
             ->unique()
             ->all();
+        $prefixedSlugs = array_map(fn ($s) => TaskStatus::prefixSlug($s, $tenantId), $slugs);
 
-        $statuses = TaskStatus::whereIn('slug', $slugs)
+        $statuses = TaskStatus::whereIn('slug', $prefixedSlugs)
             ->where(function ($q) use ($tenantId) {
                 $q->whereNull('tenant_id')->orWhere('tenant_id', $tenantId);
             })
@@ -100,7 +101,7 @@ class TaskBoardController extends Controller
     public function column(Request $request, TaskQueryFilters $filters)
     {
         $data = $request->validate([
-            'status' => ['required', 'string', Rule::exists('task_statuses', 'slug')],
+            'status' => ['required', 'string'],
             'page' => ['sometimes', 'integer', 'min:1'],
             'type_ids' => ['sometimes', 'array'],
             'type_ids.*' => ['integer'],
@@ -119,12 +120,13 @@ class TaskBoardController extends Controller
         ]);
 
         $tenantId = $this->tenantId($request);
+        $prefixed = TaskStatus::prefixSlug($data['status'], $tenantId);
         $limit = 50;
         $page = max(1, $request->integer('page', 1));
         $offset = ($page - 1) * $limit;
 
         $query = Task::where('tenant_id', $tenantId)
-            ->where('status_slug', $data['status']);
+            ->where('status_slug', $prefixed);
 
         $filters->apply($query, $request);
 
@@ -153,28 +155,29 @@ class TaskBoardController extends Controller
     {
         $data = $request->validate([
             'task_id' => ['required', 'integer', Rule::exists('tasks', 'id')],
-            'status_slug' => ['required', 'string', Rule::exists('task_statuses', 'slug')],
+            'status_slug' => ['required', 'string'],
             'index' => ['required', 'integer', 'min:0'],
         ]);
 
         $tenantId = $this->tenantId($request);
+        $prefixed = TaskStatus::prefixSlug($data['status_slug'], $tenantId);
         $task = Task::where('tenant_id', $tenantId)
             ->findOrFail($data['task_id']);
-        $status = TaskStatus::where('slug', $data['status_slug'])->firstOrFail();
+        $status = TaskStatus::where('slug', $prefixed)->firstOrFail();
 
         if ($task->status_slug !== $status->slug) {
             $canManage = $request->user()->can('tasks.manage');
 
-            if (! $canManage && $status->slug !== $task->previous_status_slug && ! $flow->canTransition($task->status_slug, $status->slug, $task->type)) {
+            if (! $canManage && $status->slug !== $task->previous_status_slug && ! $flow->canTransition(TaskStatus::stripPrefix($task->status_slug), TaskStatus::stripPrefix($status->slug), $task->type)) {
                 return response()->json(['message' => 'invalid_transition'], 422);
             }
 
-            if ($status->slug === 'assigned' && empty($task->assigned_user_id)) {
+            if (TaskStatus::stripPrefix($status->slug) === 'assigned' && empty($task->assigned_user_id)) {
                 $task->assigned_user_id = $request->user()->id;
             }
 
             if (! $canManage) {
-                $flow->checkConstraints($task, $status->slug);
+                $flow->checkConstraints($task, TaskStatus::stripPrefix($status->slug));
             }
         }
 

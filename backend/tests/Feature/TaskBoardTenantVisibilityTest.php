@@ -24,7 +24,8 @@ class TaskBoardTenantVisibilityTest extends TestCase
         $tenant2 = Tenant::create(['id' => 2, 'name' => 'T2', 'features' => ['tasks']]);
 
         $status = TenantDefaults::TASK_STATUSES[0];
-        TaskStatus::create(['slug' => $status['slug'], 'name' => $status['name'], 'position' => 1]);
+        $status1 = TaskStatus::create(['slug' => $status['slug'], 'name' => $status['name'], 'tenant_id' => $tenant1->id, 'position' => 1]);
+        $status2 = TaskStatus::create(['slug' => $status['slug'], 'name' => $status['name'], 'tenant_id' => $tenant2->id, 'position' => 1]);
 
         $type1 = TaskType::create(['tenant_id' => $tenant1->id, 'name' => 'Type1', 'statuses' => [$status['slug'] => []]]);
         $type2 = TaskType::create(['tenant_id' => $tenant2->id, 'name' => 'Type2', 'statuses' => [$status['slug'] => []]]);
@@ -51,7 +52,7 @@ class TaskBoardTenantVisibilityTest extends TestCase
             'user_id' => $u1->id,
             'task_type_id' => $type1->id,
             'status' => $status['name'],
-            'status_slug' => $status['slug'],
+            'status_slug' => $status1->slug,
             'title' => 'T1 Task'
         ]);
         Task::create([
@@ -59,7 +60,7 @@ class TaskBoardTenantVisibilityTest extends TestCase
             'user_id' => $u2->id,
             'task_type_id' => $type2->id,
             'status' => $status['name'],
-            'status_slug' => $status['slug'],
+            'status_slug' => $status2->slug,
             'title' => 'T2 Task'
         ]);
 
