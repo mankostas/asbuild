@@ -21,7 +21,13 @@ class EnsureTenantScope
         if ($user->isSuperAdmin()) {
             if ($tenantId) {
                 $this->bindTenant($request, (int) $tenantId);
+            } else {
+                Tenant::setCurrent(null);
+                app()->forgetInstance('tenant_id');
+                config(['tenant' => []]);
+                config(['tenant.branding' => null]);
             }
+
             return $next($request);
         }
 
