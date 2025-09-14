@@ -92,7 +92,10 @@ const tenantOptions = computed(() => [
 ]);
 
 async function load() {
-  const isFilteringByTenant = auth.isSuperAdmin && tenantFilter.value !== '';
+  const isFilteringByTenant =
+    auth.isSuperAdmin &&
+    tenantFilter.value !== '' &&
+    tenantFilter.value !== 'super_admin';
   const scope: 'tenant' | 'global' | 'all' = auth.isSuperAdmin
     ? isFilteringByTenant
       ? 'tenant'
