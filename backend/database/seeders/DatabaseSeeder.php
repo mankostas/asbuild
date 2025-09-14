@@ -10,12 +10,14 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             TenantSeeder::class,
-            TenantBootstrapSeeder::class,
             RoleSeeder::class,
             SuperAdminSeeder::class,
             RoleUserSeeder::class,
-            TenantBootstrapSeeder::class,
             BrandingSeeder::class,
         ]);
+
+        if (env('ENABLE_DEMO_SEEDER', false)) {
+            $this->call(TenantBootstrapSeeder::class);
+        }
     }
 }
