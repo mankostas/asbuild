@@ -464,9 +464,12 @@ const tenantFeatures = computed(() => {
   );
   return tenant?.features || [];
 });
-const tenantFeatureAbilities = computed(() =>
-  tenantStore.tenantAllowedAbilities(String(tenantId.value) || ''),
-);
+const tenantFeatureAbilities = computed(() => {
+  const abilities = tenantStore.tenantAllowedAbilities(
+    String(tenantId.value) || '',
+  );
+  return Object.keys(abilities).length ? abilities : undefined;
+});
 const transitionsEditor = ref<any>(null);
 const automationsEditor = ref<any>(null);
 const slaPolicyEditor = ref<any>(null);
@@ -606,15 +609,12 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
   if (id) {
     if (canViewRoles.value) {
       try {
-        const params: Record<string, any> = auth.isSuperAdmin
-          ? { scope: 'all' }
-          : { tenant_id: Number(id) };
+        const params: Record<string, any> = {
+          tenant_id: Number(id),
+          per_page: 100,
+        };
         const { data } = await api.get('/roles', { params });
-        let roles = data.data ?? data;
-        if (auth.isSuperAdmin) {
-          const tid = Number(id);
-          roles = roles.filter((r: any) => r.tenant_id === null || r.tenant_id === tid);
-        }
+        const roles = data.data ?? data;
         tenantRoles.value = roles as { id: number; slug: string }[];
         tenantRoles.value.forEach((r) => {
           if (!permissions.value[r.slug]) {
