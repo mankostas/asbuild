@@ -88,16 +88,6 @@ function formatRoles(roles: any[]) {
 
 async function load() {
   await tenantStore.loadTenants({ per_page: 100 });
-  if (auth.isSuperAdmin) {
-    if (!tenantFilter.value) {
-      tenantFilter.value = tenantStore.currentTenantId || tenantStore.tenants[0]?.id || '';
-    }
-    if (!tenantFilter.value) {
-      loading.value = false;
-      all.value = [];
-      return;
-    }
-  }
   const params: any = {};
   if (auth.isSuperAdmin && tenantFilter.value) {
     params.tenant_id = tenantFilter.value;
