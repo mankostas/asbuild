@@ -51,7 +51,6 @@ interface TeamRow {
   name: string;
   description: string | null;
   members: { name: string; avatar?: string | null }[];
-  memberCount: number;
   created_at: string;
   updated_at: string;
   tenant?: { id: number; name: string } | null;
@@ -89,7 +88,6 @@ async function load() {
     name: t.name,
     description: t.description,
     members: (t.employees || []).map((e: any) => ({ name: e.name, avatar: e.avatar })),
-    memberCount: (t.employees || []).length,
     created_at: t.created_at,
     updated_at: t.updated_at,
     tenant: t.tenant || tenantMap[t.tenant_id] || null,
