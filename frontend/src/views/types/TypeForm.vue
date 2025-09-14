@@ -609,7 +609,6 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
         const params: Record<string, any> = {
           tenant_id: Number(id),
           per_page: 100,
-          ...(auth.isSuperAdmin ? { scope: 'all' } : {}),
         };
         const { data } = await api.get('/roles', { params });
         const roles = data.data ?? data;
