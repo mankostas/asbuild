@@ -73,7 +73,9 @@ export const useAuthStore = defineStore('auth', {
       this.abilities = data.abilities || [];
       this.features = data.features || [];
       const tenantStore = useTenantStore();
-      tenantStore.setTenant(data.user?.tenant_id || '');
+      const tenantId =
+        data.user?.tenant_id || (this.isSuperAdmin ? 'super_admin' : '');
+      tenantStore.setTenant(tenantId);
       if (this.isSuperAdmin || this.isImpersonating) {
         await tenantStore.loadTenants();
       }
