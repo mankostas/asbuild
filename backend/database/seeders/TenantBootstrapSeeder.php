@@ -56,39 +56,6 @@ class TenantBootstrapSeeder extends Seeder
 
         DefaultFeatureRolesSeeder::syncDefaultRolesForFeatures($tenant, $tenant->selectedFeatureAbilities());
 
-        $managerAbilities = array_intersect(
-            ['tasks.manage', 'teams.manage', 'task_statuses.manage', 'task_types.manage'],
-            $tenantAbilities
-        );
-        $agentAbilities = array_intersect(
-            ['tasks.view', 'tasks.update', 'tasks.status.update'],
-            $tenantAbilities
-        );
-
-        DB::table('roles')->updateOrInsert(
-            ['tenant_id' => $tenantId, 'slug' => 'manager'],
-            [
-                'name' => 'Manager',
-                'level' => 1,
-                'abilities' => json_encode($managerAbilities),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
-        $managerRoleId = DB::table('roles')->where('tenant_id', $tenantId)->where('slug', 'manager')->value('id');
-
-        DB::table('roles')->updateOrInsert(
-            ['tenant_id' => $tenantId, 'slug' => 'agent'],
-            [
-                'name' => 'Agent',
-                'level' => 2,
-                'abilities' => json_encode($agentAbilities),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
-        $agentRoleId = DB::table('roles')->where('tenant_id', $tenantId)->where('slug', 'agent')->value('id');
-
         // Team
         DB::table('teams')->updateOrInsert(
             ['tenant_id' => $tenantId, 'name' => 'Front Desk'],
@@ -109,6 +76,8 @@ class TenantBootstrapSeeder extends Seeder
                 'tenant_id' => $tenantId,
                 'phone' => '555-000-0001',
                 'address' => '1 Pet Street',
+                'type' => 'employee',
+                'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
@@ -123,21 +92,41 @@ class TenantBootstrapSeeder extends Seeder
                 'tenant_id' => $tenantId,
                 'phone' => '555-000-0002',
                 'address' => '2 Pet Street',
+                'type' => 'employee',
+                'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
         );
         $agentId = DB::table('users')->where('email', 'agent@acme.test')->value('id');
 
-        // Assign roles to employees
-        DB::table('role_user')->updateOrInsert(
-            ['role_id' => $managerRoleId, 'user_id' => $managerId, 'tenant_id' => $tenantId],
-            ['created_at' => now(), 'updated_at' => now()]
-        );
-        DB::table('role_user')->updateOrInsert(
-            ['role_id' => $agentRoleId, 'user_id' => $agentId, 'tenant_id' => $tenantId],
-            ['created_at' => now(), 'updated_at' => now()]
-        );
+        // Assign existing feature roles to employees
+        $managerRoleIds = DB::table('roles')
+            ->where('tenant_id', $tenantId)
+            ->where(function ($q) {
+                $q->where('slug', 'tenant')
+                    ->orWhere('slug', 'like', '%_manager');
+            })
+            ->pluck('id');
+
+        foreach ($managerRoleIds as $roleId) {
+            DB::table('role_user')->updateOrInsert(
+                ['role_id' => $roleId, 'user_id' => $managerId, 'tenant_id' => $tenantId],
+                ['created_at' => now(), 'updated_at' => now()]
+            );
+        }
+
+        $agentRoleIds = DB::table('roles')
+            ->where('tenant_id', $tenantId)
+            ->where('slug', 'like', '%_editor')
+            ->pluck('id');
+
+        foreach ($agentRoleIds as $roleId) {
+            DB::table('role_user')->updateOrInsert(
+                ['role_id' => $roleId, 'user_id' => $agentId, 'tenant_id' => $tenantId],
+                ['created_at' => now(), 'updated_at' => now()]
+            );
+        }
 
         // Assign employees to team
         foreach ([$managerId, $agentId] as $employeeId) {
