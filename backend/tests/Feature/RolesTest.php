@@ -51,6 +51,12 @@ class RolesTest extends TestCase
             ->assertJsonFragment([
                 'id' => $role->id,
                 'users_count' => 1,
+            ])
+            ->assertJsonStructure([
+                'data' => [[
+                    'created_at',
+                    'updated_at',
+                ]],
             ]);
     }
 

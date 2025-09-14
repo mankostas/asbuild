@@ -1224,6 +1224,12 @@ components:
           nullable: true
         level:
           type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
     RoleAssignment:
       type: object
       required:
