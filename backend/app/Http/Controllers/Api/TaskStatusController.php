@@ -21,7 +21,7 @@ class TaskStatusController extends Controller
         }
     }
 
-        public function index(Request $request)
+    public function index(Request $request)
     {
         $scope = $request->query('scope', $request->user()->hasRole('SuperAdmin') ? 'all' : 'tenant');
         $query = TaskStatus::query()->withCount('tasks');
@@ -35,7 +35,13 @@ class TaskStatusController extends Controller
             $query->whereNull('tenant_id');
         } else {
             if ($request->has('tenant_id')) {
-                $query->where('tenant_id', $request->query('tenant_id'));
+                $tenantId = $request->query('tenant_id');
+
+                if ($tenantId === 'super_admin') {
+                    $query->whereNull('tenant_id');
+                } else {
+                    $query->where('tenant_id', $tenantId);
+                }
             }
         }
 
