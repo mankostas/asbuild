@@ -1,5 +1,6 @@
 <template>
   <div v-if="canAccess">
+    <TenantSwitcher v-if="auth.isSuperAdmin" class="mb-4" />
     <form class="max-w-md grid gap-4" @submit.prevent="onSubmit">
       <div>
         <span class="block font-medium mb-1">Name<span class="text-red-600">*</span></span>
@@ -85,6 +86,7 @@ import vSelect from 'vue-select';
 import { TENANT_HEADER } from '@/config/app';
 import { useForm } from 'vee-validate';
 import { featureMap } from '@/constants/featureMap';
+import TenantSwitcher from '@/components/admin/TenantSwitcher.vue';
 
 const route = useRoute();
 const router = useRouter();

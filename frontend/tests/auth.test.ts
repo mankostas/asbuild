@@ -5,6 +5,7 @@ import { setActivePinia, createPinia } from 'pinia';
 let api: any;
 let useAuthStore: any;
 let injectStorage: any;
+let hasFeature: any;
 
 describe('auth store', () => {
   let mock: MockAdapter;
@@ -26,7 +27,7 @@ describe('auth store', () => {
     } as any;
 
     ({ default: api } = await import('../src/services/api'));
-    ({ useAuthStore } = await import('../src/stores/auth'));
+    ({ useAuthStore, hasFeature } = await import('../src/stores/auth'));
     ({ injectStorage } = await import('../src/services/authStorage'));
 
     setActivePinia(createPinia());
@@ -148,6 +149,43 @@ describe('auth store', () => {
 
     const { data } = await api.get('/protected');
     expect(data.ok).toBe(true);
+  });
+
+  it('super admin impersonates tenants and retains features', async () => {
+    mock.onPost('/auth/login').reply(200, {
+      access_token: 'root',
+      refresh_token: 'root-ref',
+    });
+    mock
+      .onGet('/me')
+      .reply(200, {
+        user: { id: 1, roles: [{ slug: 'super_admin' }] },
+        abilities: ['*'],
+        features: ['branding'],
+      });
+    mock.onGet('/tenants').reply(200, {
+      data: [{ id: 123, name: 'Acme', features: [] }],
+      meta: {},
+    });
+
+    await auth.login({ email: 'a', password: 'b' });
+    expect(auth.isSuperAdmin).toBe(true);
+    expect(hasFeature('branding')).toBe(true);
+    expect(auth.can('anything')).toBe(true);
+
+    mock
+      .onPost('/tenants/123/impersonate')
+      .reply(200, { access_token: 'imp', refresh_token: 'imp-ref' });
+    mock.onGet('/me').reply(200, {
+      user: { id: 1, roles: [{ slug: 'super_admin' }] },
+      abilities: ['*'],
+      features: ['branding'],
+    });
+
+    await auth.impersonate(123 as any, 'Acme');
+    expect(auth.isImpersonating).toBe(true);
+    expect(auth.can('other')).toBe(true);
+    expect(hasFeature('branding')).toBe(true);
   });
 });
 

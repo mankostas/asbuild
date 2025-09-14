@@ -41,17 +41,14 @@ export const useAuthStore = defineStore('auth', {
       ) || false,
     can(state) {
       return (ability: string) =>
-        this.isSuperAdmin ||
-        state.abilities.includes('*') ||
-        state.abilities.includes(ability);
+        this.isSuperAdmin || state.abilities.includes(ability);
     },
-    hasAny: (state) => (abilities: string[]) =>
-      abilities.length === 0 ||
-      state.abilities.includes('*') ||
-      state.user?.roles?.some(
-        (r: any) => r.name === 'SuperAdmin' || r.slug === 'super_admin',
-      ) ||
-      abilities.some((a) => state.abilities.includes(a)),
+    hasAny(state) {
+      return (abilities: string[]) =>
+        abilities.length === 0 ||
+        this.isSuperAdmin ||
+        abilities.some((a) => state.abilities.includes(a));
+    },
     userId: (state) => state.user?.id,
   },
   actions: {
