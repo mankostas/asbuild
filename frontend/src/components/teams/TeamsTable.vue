@@ -40,6 +40,23 @@
           </Tooltip>
           <span v-else>—</span>
         </span>
+        <span v-else-if="rowProps.column.field === 'lead'">
+          <div v-if="rowProps.row.lead" class="flex items-center gap-2">
+            <div
+              class="w-8 h-8 rounded-full bg-slate-200 text-xs font-medium text-slate-600 flex items-center justify-center overflow-hidden"
+            >
+              <img
+                v-if="rowProps.row.lead.avatar"
+                :src="rowProps.row.lead.avatar"
+                alt="avatar"
+                class="w-full h-full object-cover"
+              />
+              <span v-else>{{ getInitials(rowProps.row.lead.name) }}</span>
+            </div>
+            <span>{{ rowProps.row.lead.name }}</span>
+          </div>
+          <span v-else>—</span>
+        </span>
         <span v-else-if="rowProps.column.field === 'members'">
           <AvatarGroup :members="rowProps.row.members" :max="3" />
         </span>
@@ -125,6 +142,7 @@ interface TeamRow {
   name: string;
   description: string | null;
   members: { name: string; avatar?: string | null }[];
+  lead?: { id: number; name: string; avatar?: string | null } | null;
   created_at: string;
   updated_at: string;
   tenant?: { id: number; name: string } | null;
@@ -161,6 +179,7 @@ const columns = computed(() => {
   const cols = [
     { label: 'Name', field: 'name' },
     { label: 'Description', field: 'description' },
+    { label: 'Team Lead', field: 'lead' },
     { label: 'Members', field: 'members' },
   ];
   if (props.isSuperAdmin) {
@@ -193,5 +212,15 @@ function truncateDescription(desc: string) {
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString();
+}
+
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 }
 </script>

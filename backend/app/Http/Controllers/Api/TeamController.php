@@ -36,7 +36,7 @@ class TeamController extends Controller
 
     public function index(Request $request)
     {
-        $query = Team::query()->with(['employees', 'tenant']);
+        $query = Team::query()->with(['employees', 'tenant', 'lead']);
 
         if ($request->user()->hasRole('SuperAdmin')) {
             if ($request->has('tenant_id')) {
@@ -61,9 +61,19 @@ class TeamController extends Controller
         $tenantId = $this->getTenantId($request);
         $data['tenant_id'] = $request->user()->hasRole('SuperAdmin') ? ($data['tenant_id'] ?? $tenantId) : $tenantId;
 
+        if (isset($data['lead_id'])) {
+            $leadId = User::where('id', $data['lead_id'])
+                ->where('tenant_id', $data['tenant_id'])
+                ->value('id');
+            if (! $leadId) {
+                abort(422, 'Invalid team lead.');
+            }
+            $data['lead_id'] = $leadId;
+        }
+
         $team = Team::create($data);
 
-        return (new TeamResource($team->load(['employees', 'tenant'])))
+        return (new TeamResource($team->load(['employees', 'tenant', 'lead'])))
             ->response()
             ->setStatusCode(201);
     }
@@ -75,7 +85,7 @@ class TeamController extends Controller
             abort(404);
         }
 
-        return new TeamResource($team->load(['employees', 'tenant']));
+        return new TeamResource($team->load(['employees', 'tenant', 'lead']));
     }
 
     public function update(TeamUpsertRequest $request, Team $team)
@@ -89,9 +99,20 @@ class TeamController extends Controller
 
         $data = $request->validated();
         $data['tenant_id'] = $team->tenant_id;
+
+        if (isset($data['lead_id'])) {
+            $leadId = User::where('id', $data['lead_id'])
+                ->where('tenant_id', $data['tenant_id'])
+                ->value('id');
+            if (! $leadId) {
+                abort(422, 'Invalid team lead.');
+            }
+            $data['lead_id'] = $leadId;
+        }
+
         $team->update($data);
 
-        return new TeamResource($team->load(['employees', 'tenant']));
+        return new TeamResource($team->load(['employees', 'tenant', 'lead']));
     }
 
     public function destroy(Request $request, Team $team)
@@ -129,6 +150,6 @@ class TeamController extends Controller
 
         $team->employees()->sync($employeeIds);
 
-        return new TeamResource($team->load(['employees', 'tenant']));
+        return new TeamResource($team->load(['employees', 'tenant', 'lead']));
     }
 }

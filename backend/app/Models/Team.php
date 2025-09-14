@@ -13,6 +13,7 @@ class Team extends Model
         'tenant_id',
         'name',
         'description',
+        'lead_id',
     ];
 
     public function tenant(): BelongsTo
@@ -23,5 +24,10 @@ class Team extends Model
     public function employees(): BelongsToMany
     {
         return $this->belongsToMany(Employee::class, 'team_employee', 'team_id', 'employee_id');
+    }
+
+    public function lead(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'lead_id');
     }
 }
