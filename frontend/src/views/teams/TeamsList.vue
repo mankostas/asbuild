@@ -3,6 +3,7 @@
     <TeamsTable
       v-if="!loading"
       :rows="all"
+      :is-super-admin="auth.isSuperAdmin"
       @edit="edit"
       @delete="remove"
       @delete-selected="removeMany"
