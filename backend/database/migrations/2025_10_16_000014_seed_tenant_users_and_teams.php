@@ -14,7 +14,7 @@ return new class extends Migration
     public function down(): void
     {
         // Remove seeded team employees
-        $tenantId = DB::table('tenants')->where('name', 'Acme Vet')->value('id');
+        $tenantId = DB::table('tenants')->where('id', 2)->value('id');
         if ($tenantId) {
             $teamId = DB::table('teams')
                 ->where('tenant_id', $tenantId)
@@ -40,11 +40,21 @@ return new class extends Migration
             // Remove roles created for this tenant
             DB::table('roles')->where('tenant_id', $tenantId)->delete();
 
+            // Remove seeded task types and statuses
+            DB::table('task_types')->where('tenant_id', $tenantId)->delete();
+            DB::table('task_statuses')->where('tenant_id', $tenantId)->delete();
+
             // Remove tenant
             DB::table('tenants')->where('id', $tenantId)->delete();
         }
 
         // Remove global super admin role inserted by seeder if unused
-        DB::table('roles')->whereNull('tenant_id')->where('slug', 'super_admin')->delete();
+        $superAdminRoleId = DB::table('roles')
+            ->whereNull('tenant_id')
+            ->where('slug', 'super_admin')
+            ->value('id');
+        if ($superAdminRoleId && !DB::table('role_user')->where('role_id', $superAdminRoleId)->exists()) {
+            DB::table('roles')->where('id', $superAdminRoleId)->delete();
+        }
     }
 };
