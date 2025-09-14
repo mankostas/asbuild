@@ -29,16 +29,19 @@ export const useTenantStore = defineStore('tenant', {
         try {
           const { useAuthStore } = await import('@/stores/auth');
           const auth = useAuthStore();
+          const superAdmin = auth.isImpersonating ? auth.impersonator : auth.user;
           if (
-            auth.user &&
-            auth.isSuperAdmin &&
-            !this.tenants.some((t: any) => String(t.id) === String(auth.user?.tenant_id))
+            superAdmin &&
+            (auth.isSuperAdmin || auth.isImpersonating) &&
+            !this.tenants.some(
+              (t: any) => String(t.id) === String(superAdmin.tenant_id),
+            )
           ) {
             this.tenants.unshift({
-              id: auth.user.tenant_id,
-              name: auth.user.name,
-              phone: auth.user.phone ?? '',
-              address: auth.user.address ?? '',
+              id: superAdmin.tenant_id,
+              name: superAdmin.name,
+              phone: superAdmin.phone ?? '',
+              address: superAdmin.address ?? '',
             });
           }
         } catch (e) {
