@@ -89,7 +89,8 @@ function formatRoles(roles: any[]) {
 async function load() {
   await tenantStore.loadTenants({ per_page: 100 });
   const params: any = {};
-  if (auth.isSuperAdmin) {
+  const isFilteringByTenant = auth.isSuperAdmin && tenantFilter.value !== '';
+  if (isFilteringByTenant) {
     params.tenant_id = tenantFilter.value;
   }
   const { data } = await api.get('/employees', { params });
@@ -122,9 +123,7 @@ function reload() {
   load();
 }
 
-watch(tenantFilter, () => {
-  if (auth.isSuperAdmin) reload();
-});
+watch(tenantFilter, reload);
 
 watch(
   () => tenantStore.currentTenantId,
