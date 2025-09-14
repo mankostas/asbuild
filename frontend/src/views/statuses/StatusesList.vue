@@ -82,8 +82,11 @@ const tenantOptions = computed(() => [
 ]);
 
 async function load() {
-  const scopeParam: 'tenant' | 'global' | 'all' = scope.value;
-  const tenantId: string | number | '' | undefined = auth.isSuperAdmin
+  const isFilteringByTenant = auth.isSuperAdmin && tenantFilter.value !== '';
+  const scopeParam: 'tenant' | 'global' | 'all' = isFilteringByTenant
+    ? 'tenant'
+    : scope.value;
+  const tenantId: string | number | undefined = isFilteringByTenant
     ? tenantFilter.value
     : undefined;
 
