@@ -1,5 +1,8 @@
 <?php
 
+// Central registry of ability codes used across the application.
+// The SuperAdmin role is granted the "*" wildcard so new entries
+// automatically apply to those users without additional changes.
 return [
     // Tenants
     'tenants.view',
