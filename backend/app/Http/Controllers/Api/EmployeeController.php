@@ -18,7 +18,7 @@ class EmployeeController extends Controller
 {
     use ListQuery;
 
-    protected function getTenantId(Request $request, bool $allowNull = false): ?int
+    protected function getTenantId(Request $request, bool $allowNull = false): int|string|null
     {
         if ($request->user()->hasRole('SuperAdmin')) {
             $tenantId = app()->bound('tenant_id')
@@ -29,6 +29,10 @@ class EmployeeController extends Controller
 
             if (! $tenantId && ! $allowNull) {
                 abort(400, 'Tenant ID required');
+            }
+
+            if ($tenantId === 'super_admin') {
+                return 'super_admin';
             }
 
             return $tenantId ? (int) $tenantId : null;
@@ -42,8 +46,13 @@ class EmployeeController extends Controller
         $tenantId = $this->getTenantId($request, true);
 
         $base = User::where('type', 'employee')
-            ->when($tenantId, fn ($q) => $q->where('tenant_id', $tenantId))
             ->with('roles');
+
+        if (is_numeric($tenantId)) {
+            $base->where('tenant_id', (int) $tenantId);
+        } elseif ($tenantId === 'super_admin') {
+            $base->whereHas('roles', fn ($q) => $q->where('slug', 'super_admin'));
+        }
         $result = $this->listQuery($base, $request, ['name', 'email', 'department'], ['name', 'email', 'department']);
 
         return EmployeeResource::collection($result['data'])->additional([
