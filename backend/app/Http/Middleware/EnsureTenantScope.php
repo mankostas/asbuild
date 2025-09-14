@@ -10,6 +10,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureTenantScope
 {
+    /**
+     * Enforce tenant scoping while allowing SuperAdmins to bypass checks.
+     */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();

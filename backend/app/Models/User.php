@@ -48,6 +48,12 @@ class User extends Authenticatable
         return $this->roles()->wherePivot('tenant_id', $tenantId)->get();
     }
 
+    /**
+     * Determine if the user holds the SuperAdmin role.
+     *
+     * This helper can be reused across policies and middleware to
+     * allow privileged users to bypass tenant restrictions.
+     */
     public function isSuperAdmin(): bool
     {
         return $this->roles()

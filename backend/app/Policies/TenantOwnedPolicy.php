@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class TenantOwnedPolicy
 {
+    /**
+     * Grant all abilities to SuperAdmins prior to policy checks.
+     */
     public function before(User $user, string $ability)
     {
         if ($user->isSuperAdmin()) {
