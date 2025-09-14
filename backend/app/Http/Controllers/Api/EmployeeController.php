@@ -21,10 +21,16 @@ class EmployeeController extends Controller
     protected function getTenantId(Request $request): int
     {
         if ($request->user()->hasRole('SuperAdmin')) {
-            $tenantId = app('tenant_id');
+            $tenantId = app()->bound('tenant_id')
+                ? app('tenant_id')
+                : ($request->query('tenant_id')
+                    ?? $request->input('tenant_id')
+                    ?? $request->header('X-Tenant-ID'));
+
             if (! $tenantId) {
                 abort(400, 'Tenant ID required');
             }
+
             return (int) $tenantId;
         }
 
