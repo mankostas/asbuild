@@ -119,5 +119,35 @@ describe('auth store', () => {
 
     expect(notifySpy).not.toHaveBeenCalled();
   });
+
+  it('omits tenant header for super admin requests', async () => {
+    mock.onPost('/auth/login').reply(200, {
+      access_token: 'token',
+      refresh_token: 'ref',
+    });
+    mock
+      .onGet('/me')
+      .reply(200, { user: { id: 1, roles: [{ slug: 'super_admin' }] } });
+    mock.onGet('/tenants').reply(200, { data: [], meta: {} });
+
+    await auth.login({ email: 'a', password: 'b' });
+
+    const { useTenantStore } = await import('../src/stores/tenant');
+    const { TENANT_HEADER } = await import('../src/config/app');
+    const tenantStore = useTenantStore();
+    expect(tenantStore.currentTenantId).toBe('');
+    expect(tenantStore.tenants.some((t: any) => t.id === 'super_admin')).toBe(
+      true,
+    );
+
+    tenantStore.setTenant('super_admin');
+    mock.onGet('/protected').reply((config) => {
+      expect(config.headers[TENANT_HEADER]).toBeUndefined();
+      return [200, { ok: true }];
+    });
+
+    const { data } = await api.get('/protected');
+    expect(data.ok).toBe(true);
+  });
 });
 
