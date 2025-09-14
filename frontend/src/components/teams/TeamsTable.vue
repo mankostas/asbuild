@@ -40,8 +40,8 @@
           </Tooltip>
           <span v-else>—</span>
         </span>
-        <span v-else-if="rowProps.column.field === 'memberCount'">
-          {{ rowProps.row.memberCount }}
+        <span v-else-if="rowProps.column.field === 'members'">
+          <AvatarGroup :members="rowProps.row.members" :max="3" />
         </span>
         <span v-else-if="rowProps.column.field === 'tenant'">
           {{ rowProps.row.tenant?.name || '—' }}
@@ -114,6 +114,7 @@ import InputGroup from '@/components/ui/InputGroup';
 import Dropdown from '@/components/ui/Dropdown';
 import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
+import AvatarGroup from '@/components/ui/AvatarGroup.vue';
 import Tooltip from '@/components/ui/Tooltip/index.vue';
 import Breadcrumbs from '@/Layout/Breadcrumbs.vue';
 import { useI18n } from 'vue-i18n';
@@ -123,7 +124,7 @@ interface TeamRow {
   id: number;
   name: string;
   description: string | null;
-  memberCount: number;
+  members: { name: string; avatar?: string | null }[];
   created_at: string;
   updated_at: string;
   tenant?: { id: number; name: string } | null;
@@ -156,7 +157,7 @@ const selectOptions = {
 const columns = [
   { label: 'Name', field: 'name' },
   { label: 'Description', field: 'description' },
-  { label: 'Members', field: 'memberCount' },
+  { label: 'Members', field: 'members' },
   { label: 'Tenant', field: 'tenant' },
   { label: 'Created', field: 'created_at' },
   { label: 'Actions', field: 'actions' },
