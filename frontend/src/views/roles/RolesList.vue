@@ -86,15 +86,17 @@ const tenantOptions = computed(() => [
 ]);
 
 async function load() {
-  let scope: 'tenant' | 'global' | 'all' = 'tenant';
-  let tenantId: string | number | undefined;
-
-  if (auth.isSuperAdmin) {
-    scope = 'all';
-    tenantId = tenantFilter.value || undefined;
-  } else {
-    tenantId = tenantStore.currentTenantId || undefined;
-  }
+  const isFilteringByTenant = auth.isSuperAdmin && tenantFilter.value !== '';
+  const scope: 'tenant' | 'global' | 'all' = auth.isSuperAdmin
+    ? isFilteringByTenant
+      ? 'tenant'
+      : 'all'
+    : 'tenant';
+  const tenantId: string | number | undefined = auth.isSuperAdmin
+    ? isFilteringByTenant
+      ? tenantFilter.value
+      : undefined
+    : tenantStore.currentTenantId || undefined;
 
   await rolesStore.fetch({ scope, tenant_id: tenantId });
   await tenantStore.loadTenants({ per_page: 100 });
