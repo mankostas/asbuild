@@ -47,11 +47,23 @@ class AuthServiceProvider extends ServiceProvider
 
         $tenantId = app()->bound('tenant_id') ? (int) app('tenant_id') : $user->tenant_id;
 
-        $roles = $user->rolesForTenant($tenantId)
-            ->merge($user->roles()->wherePivotNull('tenant_id')->get());
+        $abilities = $user->rolesForTenant($tenantId)
+            ->pluck('abilities')
+            ->flatten()
+            ->filter()
+            ->unique()
+            ->all();
 
-        $abilities = $roles->pluck('abilities')->flatten()->filter()->unique()->all();
+        if (in_array('*', $abilities)) {
+            return true;
+        }
 
-        return in_array($code, $abilities);
+        if (in_array($code, $abilities)) {
+            return true;
+        }
+
+        $prefix = explode('.', $code)[0] . '.manage';
+
+        return in_array($prefix, $abilities);
     }
 }
