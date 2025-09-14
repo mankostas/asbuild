@@ -26,7 +26,7 @@ class TenantBootstrapSeeder extends Seeder
 
         // Tenant
         DB::table('tenants')->updateOrInsert(
-            ['id' => 1],
+            ['id' => 2],
             [
                 'name' => 'Acme Vet',
                 'quota_storage_mb' => 0,
@@ -37,7 +37,7 @@ class TenantBootstrapSeeder extends Seeder
                 'updated_at' => now(),
             ]
         );
-        $tenantId = DB::table('tenants')->where('id', 1)->value('id');
+        $tenantId = DB::table('tenants')->where('id', 2)->value('id');
 
         // Tenant roles
         $tenant = \App\Models\Tenant::find($tenantId);
