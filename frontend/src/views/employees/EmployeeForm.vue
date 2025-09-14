@@ -182,6 +182,7 @@ async function submit() {
 
 watch(tenantId, async (newTenant, oldTenant) => {
   if (!auth.isSuperAdmin || newTenant === oldTenant) return;
+  if (isEdit.value && !oldTenant) return;
   const prev = tenantStore.tenantId;
   tenantStore.setTenant(String(newTenant));
   await loadRoles();
