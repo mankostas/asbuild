@@ -18,6 +18,8 @@ class SuperAdminSeeder extends Seeder
                 'tenant_id' => 1,
                 'phone' => '123-456-7890',
                 'address' => '456 Admin St',
+                'type' => 'super_admin',
+                'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
