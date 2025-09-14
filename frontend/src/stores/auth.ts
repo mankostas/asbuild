@@ -27,6 +27,7 @@ export const useAuthStore = defineStore('auth', {
     accessToken: initialAccess as string | null,
     refreshToken: initialRefresh as string | null,
     impersonatedTenant: localStorage.getItem('impersonatingTenant') || '',
+    impersonator: JSON.parse(localStorage.getItem('impersonator') || 'null') as any,
     abilities: [] as string[],
     features: [] as string[],
   }),
@@ -72,7 +73,10 @@ export const useAuthStore = defineStore('auth', {
       this.abilities = data.abilities || [];
       this.features = data.features || [];
       const tenantStore = useTenantStore();
-      tenantStore.setTenant(data.user?.tenant_id || '');
+      const tenantId = this.isSuperAdmin
+        ? 'super_admin'
+        : data.user?.tenant_id || '';
+      tenantStore.setTenant(tenantId);
       if (this.isSuperAdmin || this.isImpersonating) {
         await tenantStore.loadTenants();
       }
@@ -91,6 +95,8 @@ export const useAuthStore = defineStore('auth', {
       delete api.defaults.headers.common['Authorization'];
       this.impersonatedTenant = '';
       localStorage.removeItem('impersonatingTenant');
+      this.impersonator = null;
+      localStorage.removeItem('impersonator');
       localStorage.removeItem(TENANTS_KEY);
       const tenantStore = useTenantStore();
       tenantStore.setTenant('');
@@ -114,6 +120,8 @@ export const useAuthStore = defineStore('auth', {
       await api.post('/auth/password/reset', payload);
     },
     async impersonate(tenantId: string, tenantName: string) {
+      localStorage.setItem('impersonator', JSON.stringify(this.user));
+      this.impersonator = this.user;
       const { data } = await api.post(`/tenants/${tenantId}/impersonate`);
       this.accessToken = data.access_token;
       this.refreshToken = data.refresh_token;
