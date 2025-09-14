@@ -118,10 +118,18 @@ export const useAuthStore = defineStore('auth', {
       await api.post('/auth/password/reset', payload);
     },
     async impersonate(tenantId: string, tenantName: string) {
-      localStorage.setItem('impersonator', JSON.stringify(this.user));
-      localStorage.setItem('impersonatorAccessToken', this.accessToken || '');
-      localStorage.setItem('impersonatorRefreshToken', this.refreshToken || '');
-      this.impersonator = this.user;
+      if (!this.isImpersonating) {
+        localStorage.setItem('impersonator', JSON.stringify(this.user));
+        localStorage.setItem(
+          'impersonatorAccessToken',
+          this.accessToken || '',
+        );
+        localStorage.setItem(
+          'impersonatorRefreshToken',
+          this.refreshToken || '',
+        );
+        this.impersonator = this.user;
+      }
       const { data } = await api.post(`/tenants/${tenantId}/impersonate`);
       this.accessToken = data.access_token;
       this.refreshToken = data.refresh_token;
