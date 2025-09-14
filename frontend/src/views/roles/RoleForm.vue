@@ -1,6 +1,10 @@
 <template>
   <div v-if="canAccess">
-    <TenantSwitcher v-if="auth.isSuperAdmin" class="mb-4" />
+    <TenantSwitcher
+      v-if="auth.isSuperAdmin"
+      class="mb-4"
+      :impersonate="false"
+    />
     <form class="max-w-md grid gap-4" @submit.prevent="onSubmit">
       <div>
         <span class="block font-medium mb-1">Name<span class="text-red-600">*</span></span>
