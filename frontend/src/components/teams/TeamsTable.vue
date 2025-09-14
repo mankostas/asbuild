@@ -46,8 +46,8 @@
         <span v-else-if="rowProps.column.field === 'tenant'">
           {{ rowProps.row.tenant?.name || '—' }}
         </span>
-        <span v-else-if="rowProps.column.field === 'created_at'">
-          {{ formatDate(rowProps.row.created_at) }}
+        <span v-else-if="rowProps.column.field === 'updated_at'">
+          {{ formatDate(rowProps.row.updated_at) }}
         </span>
         <span v-else-if="rowProps.column.field === 'actions'">
           <Dropdown classMenuItems=" w-[140px]">
@@ -166,7 +166,7 @@ const columns = computed(() => {
   if (props.isSuperAdmin) {
     cols.push({ label: 'Tenant', field: 'tenant' });
   }
-  cols.push({ label: 'Created', field: 'created_at' });
+  cols.push({ label: 'Updated', field: 'updated_at' });
   cols.push({ label: 'Actions', field: 'actions' });
   return cols;
 });
