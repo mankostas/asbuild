@@ -28,6 +28,7 @@ class TeamUpsertRequest extends FormRequest
             ],
             'description' => ['nullable', 'string'],
             'tenant_id' => ['nullable', 'exists:tenants,id'],
+            'lead_id' => ['nullable', 'integer', 'exists:users,id'],
         ];
     }
 
@@ -37,6 +38,7 @@ class TeamUpsertRequest extends FormRequest
             'name' => 'name',
             'description' => 'description',
             'tenant_id' => 'tenant',
+            'lead_id' => 'team lead',
         ];
     }
 
