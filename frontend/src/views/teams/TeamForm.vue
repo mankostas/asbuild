@@ -128,15 +128,16 @@ async function loadEmployees() {
 async function loadTeam(preserveTenant = false) {
   if (!isEdit.value) return;
   const { data } = await api.get(`/teams/${route.params.id}`);
-  form.value.name = data.name || '';
-  form.value.description = data.description || '';
+  const team = extractData(data);
+  form.value.name = team.name || '';
+  form.value.description = team.description || '';
   if (!preserveTenant) {
-    tenantId.value = data.tenant_id ? String(data.tenant_id) : '';
+    tenantId.value = team.tenant_id ? String(team.tenant_id) : '';
   }
-  selectedEmployees.value = (data.employees || []).map((e: any) => e.id);
+  selectedEmployees.value = (team.employees || []).map((e: any) => e.id);
   hiddenRoles.value = {};
   featureGrants.value = {} as Record<string, string[]>;
-  (data.roles || []).forEach((r: any) => {
+  (team.roles || []).forEach((r: any) => {
     if (r.slug?.startsWith('__fg__')) {
       const parts = r.slug.split('__').filter(Boolean);
       const feature = parts[2];
