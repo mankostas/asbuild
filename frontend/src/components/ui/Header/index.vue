@@ -49,7 +49,7 @@
         <div
           class="nav-tools flex items-center lg:space-x-5 space-x-3 rtl:space-x-reverse"
         >
-          <TenantSwitcher v-if="authStore.isSuperAdmin" />
+          <TenantSwitcher v-if="authStore.isSuperAdmin || authStore.isImpersonating" />
           <AddNew />
           <SwitchDark />
           <Message v-if="window.width > 768" />
