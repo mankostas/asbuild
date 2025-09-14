@@ -41,6 +41,21 @@ class EmployeeController extends Controller
         return (int) $request->user()->tenant_id;
     }
 
+    protected function ensureEmployeeTenant(User $employee, int|string $tenantId): void
+    {
+        if ($employee->type !== 'employee') {
+            abort(404);
+        }
+
+        if (is_numeric($tenantId) && $employee->tenant_id !== (int) $tenantId) {
+            abort(404);
+        }
+
+        if ($tenantId === 'super_admin' && ! $employee->hasRole('SuperAdmin')) {
+            abort(404);
+        }
+    }
+
     public function index(Request $request)
     {
         $tenantId = $this->getTenantId($request, true);
@@ -107,9 +122,7 @@ class EmployeeController extends Controller
     public function show(Request $request, User $employee)
     {
         $tenantId = $this->getTenantId($request);
-        if ($employee->tenant_id !== $tenantId || $employee->type !== 'employee') {
-            abort(404);
-        }
+        $this->ensureEmployeeTenant($employee, $tenantId);
 
         return new EmployeeResource($employee->load('roles'));
     }
@@ -117,9 +130,7 @@ class EmployeeController extends Controller
     public function update(Request $request, User $employee)
     {
         $tenantId = $this->getTenantId($request);
-        if ($employee->tenant_id !== $tenantId || $employee->type !== 'employee') {
-            abort(404);
-        }
+        $this->ensureEmployeeTenant($employee, $tenantId);
 
         if ($employee->hasRole('SuperAdmin')) {
             abort(403, 'Cannot modify a SuperAdmin');
@@ -164,9 +175,7 @@ class EmployeeController extends Controller
     public function impersonate(Request $request, User $employee)
     {
         $tenantId = $this->getTenantId($request);
-        if ($employee->tenant_id !== $tenantId || $employee->type !== 'employee') {
-            abort(404);
-        }
+        $this->ensureEmployeeTenant($employee, $tenantId);
 
         if ($employee->hasRole('SuperAdmin')) {
             abort(403, 'Cannot impersonate a SuperAdmin');
@@ -194,9 +203,7 @@ class EmployeeController extends Controller
     public function resendInvite(Request $request, User $employee)
     {
         $tenantId = $this->getTenantId($request);
-        if ($employee->tenant_id !== $tenantId || $employee->type !== 'employee') {
-            abort(404);
-        }
+        $this->ensureEmployeeTenant($employee, $tenantId);
 
         if ($employee->hasRole('SuperAdmin')) {
             abort(403, 'Cannot modify a SuperAdmin');
@@ -210,9 +217,7 @@ class EmployeeController extends Controller
     public function toggleStatus(Request $request, User $employee)
     {
         $tenantId = $this->getTenantId($request);
-        if ($employee->tenant_id !== $tenantId || $employee->type !== 'employee') {
-            abort(404);
-        }
+        $this->ensureEmployeeTenant($employee, $tenantId);
 
         if ($employee->hasRole('SuperAdmin')) {
             abort(403, 'Cannot modify a SuperAdmin');
@@ -227,9 +232,7 @@ class EmployeeController extends Controller
     public function destroy(Request $request, User $employee)
     {
         $tenantId = $this->getTenantId($request);
-        if ($employee->tenant_id !== $tenantId || $employee->type !== 'employee') {
-            abort(404);
-        }
+        $this->ensureEmployeeTenant($employee, $tenantId);
 
         if ($employee->hasRole('SuperAdmin')) {
             abort(403, 'Cannot delete a SuperAdmin');
