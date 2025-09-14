@@ -131,7 +131,10 @@ interface TeamRow {
   tenant_id?: number | null;
 }
 
-const props = defineProps<{ rows: TeamRow[] }>();
+const props = withDefaults(
+  defineProps<{ rows: TeamRow[]; isSuperAdmin?: boolean }>(),
+  { isSuperAdmin: false },
+);
 const emit = defineEmits<{ (e: 'edit', id: number): void; (e: 'delete', id: number): void; (e: 'delete-selected', ids: number[]): void; }>();
 
 const { t } = useI18n();
@@ -154,14 +157,19 @@ const selectOptions = {
   selectAllByGroup: true,
 };
 
-const columns = [
-  { label: 'Name', field: 'name' },
-  { label: 'Description', field: 'description' },
-  { label: 'Members', field: 'members' },
-  { label: 'Tenant', field: 'tenant' },
-  { label: 'Created', field: 'created_at' },
-  { label: 'Actions', field: 'actions' },
-];
+const columns = computed(() => {
+  const cols = [
+    { label: 'Name', field: 'name' },
+    { label: 'Description', field: 'description' },
+    { label: 'Members', field: 'members' },
+  ];
+  if (props.isSuperAdmin) {
+    cols.push({ label: 'Tenant', field: 'tenant' });
+  }
+  cols.push({ label: 'Created', field: 'created_at' });
+  cols.push({ label: 'Actions', field: 'actions' });
+  return cols;
+});
 
 const selectedIds = ref<number[]>([]);
 
