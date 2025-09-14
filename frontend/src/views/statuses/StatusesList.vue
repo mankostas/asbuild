@@ -82,13 +82,10 @@ const tenantOptions = computed(() => [
 ]);
 
 async function load() {
-  let scopeParam: 'tenant' | 'global' | 'all' = scope.value;
-  let tenantId: string | number | undefined;
-
-  if (auth.isSuperAdmin && tenantFilter.value) {
-    scopeParam = 'all'; // tenant-only
-    tenantId = tenantFilter.value;
-  }
+  const scopeParam: 'tenant' | 'global' | 'all' = scope.value;
+  const tenantId: string | number | '' | undefined = auth.isSuperAdmin
+    ? tenantFilter.value
+    : undefined;
 
   const { data } = await statusesStore.fetch({
     scope: scopeParam,

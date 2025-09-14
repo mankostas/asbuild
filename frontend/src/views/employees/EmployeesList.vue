@@ -89,7 +89,7 @@ function formatRoles(roles: any[]) {
 async function load() {
   await tenantStore.loadTenants({ per_page: 100 });
   const params: any = {};
-  if (auth.isSuperAdmin && tenantFilter.value) {
+  if (auth.isSuperAdmin) {
     params.tenant_id = tenantFilter.value;
   }
   const { data } = await api.get('/employees', { params });
