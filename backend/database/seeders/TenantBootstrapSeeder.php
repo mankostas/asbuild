@@ -76,6 +76,8 @@ class TenantBootstrapSeeder extends Seeder
                 'tenant_id' => $tenantId,
                 'phone' => '555-000-0001',
                 'address' => '1 Pet Street',
+                'type' => 'employee',
+                'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
@@ -90,6 +92,8 @@ class TenantBootstrapSeeder extends Seeder
                 'tenant_id' => $tenantId,
                 'phone' => '555-000-0002',
                 'address' => '2 Pet Street',
+                'type' => 'employee',
+                'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
