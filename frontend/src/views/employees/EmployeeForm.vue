@@ -1,6 +1,21 @@
 <template>
   <div v-if="canAccess">
     <form class="grid gap-4 max-w-lg" @submit.prevent="submit">
+      <VueSelect
+        v-if="auth.isSuperAdmin"
+        label="Tenant"
+      >
+        <template #default="{ inputId }">
+          <vSelect
+            :id="inputId"
+            v-model="tenantId"
+            :options="tenantStore.tenants"
+            :reduce="(t: any) => t.id"
+            label="name"
+            :disabled="isEdit"
+          />
+        </template>
+      </VueSelect>
       <Textinput v-model="form.name" label="Name" />
       <Textinput v-model="form.email" label="Email" type="email" />
       <Textinput v-model="form.phone" label="Phone" />
@@ -44,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '@/services/api';
 import Textinput from '@/components/ui/Textinput/index.vue';
@@ -64,7 +79,7 @@ import {
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
-const tenant = useTenantStore();
+const tenantStore = useTenantStore();
 
 const isEdit = computed(() => route.name === 'employees.edit');
 const canAccess = computed(() =>
@@ -82,12 +97,20 @@ const form = ref({
   roles: [] as string[],
 });
 
+const tenantId = ref<string | number | ''>('');
 const featureGrants = ref<Record<string, string[]>>({});
 const hiddenRoles = ref<Record<string, any>>({});
 
-const availableFeatures = computed(() =>
-  auth.features.filter((f) => featureMap[f]),
-);
+const availableFeatures = computed(() => {
+  if (auth.isSuperAdmin) {
+    const t = tenantStore.tenants.find(
+      (tn: any) => String(tn.id) === String(tenantId.value),
+    );
+    const features = t?.features || [];
+    return features.filter((f: string) => featureMap[f]);
+  }
+  return auth.features.filter((f) => featureMap[f]);
+});
 
 async function loadRoles() {
   const { data } = await api.get('/roles');
@@ -119,6 +142,9 @@ async function loadEmployee() {
     address: data.address || '',
     roles,
   };
+  if (auth.isSuperAdmin) {
+    tenantId.value = data.tenant_id ? String(data.tenant_id) : '';
+  }
 }
 
 async function submit() {
@@ -130,18 +156,48 @@ async function submit() {
     roles: form.value.roles.filter((r) => r !== 'SuperAdmin'),
   };
   let userId: number;
-  if (isEdit.value) {
-    await api.post(`/employees/${route.params.id}`, payload);
-    userId = Number(route.params.id);
-  } else {
-    const { data } = await api.post('/employees', payload);
-    userId = data.id;
+  const selectedTenant = auth.isSuperAdmin
+    ? String(tenantId.value)
+    : tenantStore.tenantId;
+  const previousTenant = tenantStore.tenantId;
+  if (auth.isSuperAdmin) {
+    tenantStore.setTenant(selectedTenant);
   }
-  await reconcileFeatureGrants(userId);
-  router.push({ name: 'employees.list' });
+  try {
+    if (isEdit.value) {
+      await api.post(`/employees/${route.params.id}`, payload);
+      userId = Number(route.params.id);
+    } else {
+      const { data } = await api.post('/employees', payload);
+      userId = data.id;
+    }
+    await reconcileFeatureGrants(userId, selectedTenant);
+    router.push({ name: 'employees.list' });
+  } finally {
+    if (auth.isSuperAdmin) {
+      tenantStore.setTenant(previousTenant);
+    }
+  }
 }
 
+watch(tenantId, async (newTenant, oldTenant) => {
+  if (!auth.isSuperAdmin || newTenant === oldTenant) return;
+  const prev = tenantStore.tenantId;
+  tenantStore.setTenant(String(newTenant));
+  await loadRoles();
+  form.value.roles = [];
+  hiddenRoles.value = {};
+  featureGrants.value = {} as Record<string, string[]>;
+  availableFeatures.value.forEach((f) => {
+    if (!featureGrants.value[f]) featureGrants.value[f] = [];
+  });
+  tenantStore.setTenant(prev);
+});
+
 onMounted(async () => {
+  if (auth.isSuperAdmin) {
+    await tenantStore.loadTenants({ per_page: 100 });
+  }
   await loadRoles();
   await loadEmployee();
   availableFeatures.value.forEach((f) => {
@@ -149,12 +205,15 @@ onMounted(async () => {
   });
 });
 
-async function reconcileFeatureGrants(userId: number) {
+async function reconcileFeatureGrants(
+  userId: number,
+  selectedTenant: string | number,
+) {
   for (const feature of availableFeatures.value) {
     const selected = featureGrants.value[feature] || [];
     const existing = hiddenRoles.value[feature];
     if (selected.length) {
-      const role = await ensureHiddenRole(tenant.tenantId, feature, selected);
+      const role = await ensureHiddenRole(selectedTenant, feature, selected);
       if (!existing || existing.id !== role.id) {
         await assignHiddenRoleToUser(userId, role.id);
         if (existing && existing.id !== role.id) {
