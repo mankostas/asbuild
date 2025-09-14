@@ -1839,6 +1839,8 @@ export interface components {
             name?: string;
             description?: string | null;
             level?: number;
+            created_at?: string;
+            updated_at?: string;
         };
         RoleAssignment: {
             user_id: number;
