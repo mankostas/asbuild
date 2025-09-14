@@ -138,6 +138,10 @@ function edit(id: number) {
 }
 
 async function remove(id: number) {
+  if (auth.isSuperAdmin && !tenantFilter.value) {
+    notify.error('Please select a tenant first');
+    return;
+  }
   const result = await Swal.fire({
     title: 'Delete employee?',
     icon: 'warning',
@@ -146,7 +150,7 @@ async function remove(id: number) {
   if (!result.isConfirmed) return;
   try {
     const params: any = {};
-    if (auth.isSuperAdmin && tenantFilter.value) params.tenant_id = tenantFilter.value;
+    if (auth.isSuperAdmin) params.tenant_id = tenantFilter.value;
     await api.delete(`/employees/${id}`, { params });
     reload();
   } catch (e: any) {
@@ -159,6 +163,10 @@ async function remove(id: number) {
 }
 
 async function removeMany(ids: number[]) {
+  if (auth.isSuperAdmin && !tenantFilter.value) {
+    notify.error('Please select a tenant first');
+    return;
+  }
   const res = await Swal.fire({
     title: 'Delete selected employees?',
     icon: 'warning',
@@ -168,7 +176,7 @@ async function removeMany(ids: number[]) {
     for (const id of ids) {
       try {
         const params: any = {};
-        if (auth.isSuperAdmin && tenantFilter.value) params.tenant_id = tenantFilter.value;
+        if (auth.isSuperAdmin) params.tenant_id = tenantFilter.value;
         await api.delete(`/employees/${id}`, { params });
       } catch (e: any) {
         if (e.status === 403) {
@@ -184,8 +192,14 @@ async function removeMany(ids: number[]) {
 
 async function impersonate(id: number) {
   if (!can('employees.manage')) return;
+  if (auth.isSuperAdmin && !tenantFilter.value) {
+    notify.error('Please select a tenant first');
+    return;
+  }
   try {
-    const { data } = await api.post(`/employees/${id}/impersonate`);
+    const params: any = {};
+    if (auth.isSuperAdmin) params.tenant_id = tenantFilter.value;
+    const { data } = await api.post(`/employees/${id}/impersonate`, {}, { params });
     auth.accessToken = data.access_token;
     auth.refreshToken = data.refresh_token;
     setTokens(data.access_token, data.refresh_token);
@@ -199,8 +213,14 @@ async function impersonate(id: number) {
 
 async function resendInvite(id: number) {
   if (!can('employees.manage')) return;
+  if (auth.isSuperAdmin && !tenantFilter.value) {
+    notify.error('Please select a tenant first');
+    return;
+  }
   try {
-    await api.post(`/employees/${id}/resend-invite`);
+    const params: any = {};
+    if (auth.isSuperAdmin) params.tenant_id = tenantFilter.value;
+    await api.post(`/employees/${id}/resend-invite`, {}, { params });
     notify.success(t('actions.resendInvite'));
     reload();
   } catch (e: any) {
