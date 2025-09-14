@@ -71,7 +71,11 @@ export const useAuthStore = defineStore('auth', {
       this.user = data.user;
       this.abilities = data.abilities || [];
       this.features = data.features || [];
-      useTenantStore().setTenant(data.user?.tenant_id || '');
+      const tenantStore = useTenantStore();
+      tenantStore.setTenant(data.user?.tenant_id || '');
+      if (this.isSuperAdmin || this.isImpersonating) {
+        await tenantStore.loadTenants();
+      }
     },
     async logout(skipServer = false) {
       if (!skipServer) {
