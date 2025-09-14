@@ -43,6 +43,10 @@ watch(selected, async (val) => {
   // impersonation request. Instead reset the tenant context.
   if (String(val) === 'super_admin') {
     tenantStore.setTenant('');
+    if (props.impersonate && authStore.isImpersonating) {
+      await authStore.unimpersonate();
+      window.location.reload();
+    }
     return;
   }
 

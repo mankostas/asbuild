@@ -119,6 +119,8 @@ export const useAuthStore = defineStore('auth', {
     },
     async impersonate(tenantId: string, tenantName: string) {
       localStorage.setItem('impersonator', JSON.stringify(this.user));
+      localStorage.setItem('impersonatorAccessToken', this.accessToken || '');
+      localStorage.setItem('impersonatorRefreshToken', this.refreshToken || '');
       this.impersonator = this.user;
       const { data } = await api.post(`/tenants/${tenantId}/impersonate`);
       this.accessToken = data.access_token;
@@ -129,6 +131,29 @@ export const useAuthStore = defineStore('auth', {
       this.impersonatedTenant = tenantName;
       localStorage.setItem('impersonatingTenant', tenantName);
       await this.fetchUser();
+    },
+    async unimpersonate() {
+      const access = localStorage.getItem('impersonatorAccessToken');
+      const refresh = localStorage.getItem('impersonatorRefreshToken');
+      const userJson = localStorage.getItem('impersonator');
+      if (access && refresh && userJson) {
+        this.accessToken = access;
+        this.refreshToken = refresh;
+        setTokens(access, refresh);
+        api.defaults.headers.common['Authorization'] = `Bearer ${access}`;
+        this.user = JSON.parse(userJson);
+      } else {
+        await this.logout();
+      }
+      this.impersonatedTenant = '';
+      this.impersonator = null;
+      localStorage.removeItem('impersonatingTenant');
+      localStorage.removeItem('impersonator');
+      localStorage.removeItem('impersonatorAccessToken');
+      localStorage.removeItem('impersonatorRefreshToken');
+      if (access && refresh && userJson) {
+        await this.fetchUser();
+      }
     },
   },
 });
