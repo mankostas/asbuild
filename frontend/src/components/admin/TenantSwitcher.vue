@@ -22,7 +22,12 @@ const authStore = useAuthStore();
 const props = defineProps({
   impersonate: { type: Boolean, default: true },
 });
-const selected = ref<string | number | null>(tenantStore.currentTenantId);
+// Initialize the selection with the current tenant. For super admins that
+// start without a tenant context this ensures the "Super Admin" option is
+// considered selected so choosing it again later is a no-op.
+const selected = ref<string | number | null>(
+  tenantStore.currentTenantId || 'super_admin',
+);
 const options = computed(() =>
   tenantStore.tenants.map((t) => ({ value: String(t.id), label: t.name })),
 );
@@ -34,6 +39,13 @@ onMounted(async () => {
 });
 
 watch(selected, async (val) => {
+  // Selecting the synthetic "Super Admin" tenant should not trigger an
+  // impersonation request. Instead reset the tenant context.
+  if (String(val) === 'super_admin') {
+    tenantStore.setTenant('');
+    return;
+  }
+
   const tenant = tenantStore.tenants.find((t) => String(t.id) === String(val));
   if (tenant && String(tenant.id) !== tenantStore.currentTenantId) {
     if (props.impersonate) {
