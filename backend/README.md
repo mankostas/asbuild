@@ -8,6 +8,7 @@ Teams group employees within a tenant. Users are attached to teams through the `
 
 Run the database migrations with seeding to populate a super admin account along with a sample tenant that includes roles, a team, employees, and default task types and statuses:
 
+
 ```bash
 php artisan migrate:fresh --seed
 ```
