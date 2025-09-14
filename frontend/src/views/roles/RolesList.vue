@@ -1,5 +1,6 @@
 <template>
   <div>
+    <TenantSwitcher v-if="auth.isSuperAdmin" class="mb-4" />
     <RolesTable
       v-if="!loading"
       :rows="all"
@@ -55,6 +56,7 @@ import { useAuthStore, hasAny } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
 import AssignRoleModal from './AssignRoleModal.vue';
 import { useI18n } from 'vue-i18n';
+import TenantSwitcher from '@/components/admin/TenantSwitcher.vue';
 
 interface RoleRow {
   id: number;

@@ -183,6 +183,7 @@ export const routes = [
     meta: {
       requiresAuth: true,
       requiredAbilities: ['roles.view', 'roles.manage'],
+      admin: true,
       breadcrumb: 'routes.roles',
       title: 'Roles',
       layout: 'app',
@@ -195,6 +196,7 @@ export const routes = [
     meta: {
       requiresAuth: true,
       requiredAbilities: ['roles.create', 'roles.manage'],
+      admin: true,
       breadcrumb: 'routes.roleCreate',
       title: 'Create Role',
       layout: 'app',
@@ -208,6 +210,7 @@ export const routes = [
     meta: {
       requiresAuth: true,
       requiredAbilities: ['roles.update', 'roles.manage'],
+      admin: true,
       breadcrumb: 'routes.roleEdit',
       title: 'Edit Role',
       layout: 'app',
