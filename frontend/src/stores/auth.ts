@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import api, { registerAuthStore } from '@/services/api';
 import { useThemeSettingsStore } from './themeSettings';
 import { useTenantStore } from '@/stores/tenant';
+import { TENANTS_KEY } from '@/config/app';
 import {
   getAccessToken,
   getRefreshToken,
@@ -70,7 +71,11 @@ export const useAuthStore = defineStore('auth', {
       this.user = data.user;
       this.abilities = data.abilities || [];
       this.features = data.features || [];
-      useTenantStore().setTenant(data.user?.tenant_id || '');
+      const tenantStore = useTenantStore();
+      tenantStore.setTenant(data.user?.tenant_id || '');
+      if (this.isSuperAdmin || this.isImpersonating) {
+        await tenantStore.loadTenants();
+      }
     },
     async logout(skipServer = false) {
       if (!skipServer) {
@@ -86,7 +91,10 @@ export const useAuthStore = defineStore('auth', {
       delete api.defaults.headers.common['Authorization'];
       this.impersonatedTenant = '';
       localStorage.removeItem('impersonatingTenant');
-      useTenantStore().setTenant('');
+      localStorage.removeItem(TENANTS_KEY);
+      const tenantStore = useTenantStore();
+      tenantStore.setTenant('');
+      tenantStore.tenants = [];
     },
     async refresh() {
       if (!this.refreshToken) return;

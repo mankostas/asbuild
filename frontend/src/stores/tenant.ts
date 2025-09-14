@@ -1,15 +1,16 @@
 import { defineStore } from 'pinia';
 import api from '@/services/api';
-import { TENANT_ID_KEY } from '@/config/app';
+import { TENANT_ID_KEY, TENANTS_KEY } from '@/config/app';
 import { withListParams, type ListParams } from './list';
 import { useLookupsStore } from '@/stores/lookups';
 
 const initialTenant = localStorage.getItem(TENANT_ID_KEY) || '';
+const initialTenants = JSON.parse(localStorage.getItem(TENANTS_KEY) || '[]');
 
 export const useTenantStore = defineStore('tenant', {
   state: () => ({
     currentTenantId: initialTenant as string,
-    tenants: [] as any[],
+    tenants: initialTenants as any[],
     allowedAbilities: {} as Record<string, Record<string, string[]>>,
   }),
   getters: {
@@ -24,6 +25,7 @@ export const useTenantStore = defineStore('tenant', {
           params: withListParams(params),
         });
         this.tenants = data.data;
+        localStorage.setItem(TENANTS_KEY, JSON.stringify(this.tenants));
         data.data.forEach((t: any) => {
           this.setAllowedAbilities(t.id, t.feature_abilities || {});
         });
