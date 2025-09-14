@@ -53,8 +53,10 @@ import Button from '@/components/ui/Button/index.vue';
 import api from '@/services/api';
 import { useAuthStore, can } from '@/stores/auth';
 import hasAbility from '@/utils/ability';
+import { useTenantStore } from '@/stores/tenant';
 
 const auth = useAuthStore();
+const tenantStore = useTenantStore();
 const router = useRouter();
 const swal = inject('$swal');
 const tableKey = ref(0);
@@ -72,12 +74,8 @@ async function fetchTenants({ page, perPage, sort, search }: any) {
     return { rows: [], total: 0 };
   }
   if (!all.value.length) {
-    // The tenants API responds with an object containing
-    // `{ data: Tenant[], meta: PaginationMeta }`. We only need the
-    // array of tenants for client-side pagination, so extract the
-    // `data` property explicitly before assigning to `all`.
-    const { data } = await api.get('/tenants');
-    all.value = data.data;
+    await tenantStore.loadTenants({ per_page: 100 });
+    all.value = tenantStore.tenants;
   }
   let rows = all.value.slice();
   if (search) {

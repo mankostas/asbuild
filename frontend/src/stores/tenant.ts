@@ -22,9 +22,29 @@ export const useTenantStore = defineStore('tenant', {
     async loadTenants(params: ListParams = {}) {
       try {
         const { data } = await api.get('/tenants', {
-          params: withListParams(params),
+          params: withListParams({ per_page: 100, ...params }),
         });
         this.tenants = data.data;
+
+        try {
+          const { useAuthStore } = await import('@/stores/auth');
+          const auth = useAuthStore();
+          if (
+            auth.user &&
+            (auth.isSuperAdmin || auth.isImpersonating) &&
+            !this.tenants.some((t: any) => String(t.id) === String(auth.user?.tenant_id))
+          ) {
+            this.tenants.unshift({
+              id: auth.user.tenant_id,
+              name: auth.user.name,
+              phone: auth.user.phone ?? '',
+              address: auth.user.address ?? '',
+            });
+          }
+        } catch (e) {
+          // Ignore errors when auth store is unavailable (e.g., during tests)
+        }
+
         localStorage.setItem(TENANTS_KEY, JSON.stringify(this.tenants));
         data.data.forEach((t: any) => {
           this.setAllowedAbilities(t.id, t.feature_abilities || {});
