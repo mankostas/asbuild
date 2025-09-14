@@ -31,7 +31,7 @@ export const useTenantStore = defineStore('tenant', {
           const auth = useAuthStore();
           if (
             auth.user &&
-            (auth.isSuperAdmin || auth.isImpersonating) &&
+            auth.isSuperAdmin &&
             !this.tenants.some((t: any) => String(t.id) === String(auth.user?.tenant_id))
           ) {
             this.tenants.unshift({
