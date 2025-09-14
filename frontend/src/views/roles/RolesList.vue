@@ -1,6 +1,10 @@
 <template>
   <div>
-    <TenantSwitcher v-if="auth.isSuperAdmin" class="mb-4" />
+    <TenantSwitcher
+      v-if="auth.isSuperAdmin"
+      class="mb-4"
+      :impersonate="false"
+    />
     <RolesTable
       v-if="!loading"
       :rows="all"
