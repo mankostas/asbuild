@@ -6,9 +6,11 @@
         <main class="flex-1 p-4">
           <Breadcrumbs />
           <div class="relative">
-            <Transition name="fade" mode="out-in">
-              <router-view />
-            </Transition>
+            <router-view v-slot="{ Component }">
+              <Transition name="fade" mode="out-in">
+                <component :is="Component" />
+              </Transition>
+            </router-view>
           </div>
         </main>
         <Footer />
