@@ -251,9 +251,12 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
             'update' => Ability::class . ':tasks.update',
             'destroy' => Ability::class . ':tasks.delete',
         ]);
-    Route::get('manuals/{manual}/download', [ManualController::class, 'download']);
-    Route::post('manuals/{manual}/replace', [ManualController::class, 'replace']);
-    Route::apiResource('manuals', ManualController::class);
+    Route::get('manuals/{manual}/download', [ManualController::class, 'download'])
+        ->middleware(Ability::class . ':manuals.manage');
+    Route::post('manuals/{manual}/replace', [ManualController::class, 'replace'])
+        ->middleware(Ability::class . ':manuals.manage');
+    Route::apiResource('manuals', ManualController::class)
+        ->middleware(Ability::class . ':manuals.manage');
     Route::get('notifications', [NotificationController::class, 'index'])
         ->middleware(Ability::class . ':notifications.view');
     Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead'])

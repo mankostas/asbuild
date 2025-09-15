@@ -62,6 +62,8 @@ export const menuItems = [
     title: "Manuals",
     icon: "heroicons-outline:book-open",
     link: "manuals.list",
+    requiredAbilities: ["manuals.manage"],
+    requiredFeatures: ["manuals"],
     admin: true,
   },
   {
@@ -187,6 +189,8 @@ export const topMenu = [
     title: "Manuals",
     icon: "heroicons-outline:book-open",
     link: "manuals.list",
+    requiredAbilities: ["manuals.manage"],
+    requiredFeatures: ["manuals"],
     admin: true,
   },
   {
@@ -275,6 +279,7 @@ export const addNewOptions = [
     icon: 'heroicons-outline:book-open',
     link: 'manuals.create',
     requiredAbilities: ['manuals.manage'],
+    requiredFeatures: ['manuals'],
     admin: true,
   },
   {

@@ -14,13 +14,6 @@ class ManualController extends Controller
 {
     use ListQuery;
 
-    protected function ensureAdmin(Request $request): void
-    {
-        if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
-            abort(403);
-        }
-    }
-
     public function index(Request $request)
     {
         $tenantId = $request->user()->tenant_id;
@@ -44,7 +37,6 @@ class ManualController extends Controller
     public function store(Request $request, FileStorageService $storage)
     {
         $this->authorize('create', Manual::class);
-        $this->ensureAdmin($request);
 
         $data = $request->validate([
             'file' => 'required|file|mimes:' . implode(',', config('security.allowed_upload_mimes')) . '|max:' . config('security.max_upload_size'),
@@ -82,7 +74,6 @@ class ManualController extends Controller
     public function update(Request $request, Manual $manual)
     {
         $this->authorize('update', $manual);
-        $this->ensureAdmin($request);
 
         $data = $request->validate([
             'category' => 'nullable|string',
@@ -99,7 +90,6 @@ class ManualController extends Controller
     public function destroy(Request $request, Manual $manual)
     {
         $this->authorize('delete', $manual);
-        $this->ensureAdmin($request);
         $manual->delete();
         return response()->json(['message' => 'deleted']);
     }
@@ -107,7 +97,6 @@ class ManualController extends Controller
     public function replace(Request $request, Manual $manual, FileStorageService $storage)
     {
         $this->authorize('update', $manual);
-        $this->ensureAdmin($request);
 
         $data = $request->validate([
             'file' => 'required|file|mimes:' . implode(',', config('security.allowed_upload_mimes')) . '|max:' . config('security.max_upload_size'),

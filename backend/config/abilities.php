@@ -25,6 +25,9 @@ return [
     'tasks.watch',
     'tasks.manage',
 
+    // Manuals
+    'manuals.manage',
+
     // Notifications
     'notifications.view',
     'notifications.manage',

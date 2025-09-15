@@ -18,6 +18,12 @@ return [
             'tasks.manage',
         ],
     ],
+    'manuals' => [
+        'label' => 'Manuals',
+        'abilities' => [
+            'manuals.manage',
+        ],
+    ],
     'notifications' => [
         'label' => 'Notifications',
         'abilities' => [
