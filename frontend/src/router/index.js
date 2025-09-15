@@ -598,7 +598,14 @@ router.beforeEach(async (to, from, next) => {
     return next('/auth/login');
   }
 
-  if (to.meta.requiredAbilities?.length && !auth.hasAny(to.meta.requiredAbilities)) {
+  const requiredAbilities = to.meta.requiredAbilities || [];
+  const requireAllAbilities = Boolean(to.meta.requireAllAbilities);
+  if (
+    requiredAbilities.length &&
+    (requireAllAbilities
+      ? !auth.hasAll(requiredAbilities)
+      : !auth.hasAny(requiredAbilities))
+  ) {
     return next('/not-found');
   }
 

@@ -114,9 +114,14 @@ export default {
       const auth = useAuthStore();
       return topMenu.filter((item) => {
         if (item.isHeadr) return false;
-        const req = item.requiredAbilities || [];
         const features = item.requiredFeatures || [];
-        return auth.hasAny(req) && features.every((f) => auth.features.includes(f));
+        if (!features.every((f) => auth.features.includes(f))) {
+          return false;
+        }
+        const req = item.requiredAbilities || [];
+        return (item.requireAllAbilities
+          ? auth.hasAll(req)
+          : auth.hasAny(req));
       });
     },
   },

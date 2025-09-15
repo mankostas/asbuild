@@ -138,26 +138,32 @@ export default {
 
   setup(props) {
     const auth = useAuthStore();
+    const hasFeatures = (features = []) =>
+      features.every((f) => auth.features.includes(f));
+    const meetsAbility = (abilities = [], requireAll = false) =>
+      requireAll ? auth.hasAll(abilities) : auth.hasAny(abilities);
     const visibleItems = computed(() =>
       props.items
         .map((it) => {
           const child = it.child
             ? it.child.filter((ci) => {
-                const features = ci.requiredFeatures || [];
-                if (!features.every((f) => auth.features.includes(f))) {
+                if (!hasFeatures(ci.requiredFeatures || [])) {
                   return false;
                 }
-                const req = ci.requiredAbilities || [];
-                return auth.hasAny(req);
+                return meetsAbility(
+                  ci.requiredAbilities || [],
+                  ci.requireAllAbilities || false,
+                );
               })
             : null;
           return { ...it, child };
         })
         .filter((it) => {
-          const features = it.requiredFeatures || [];
-          if (!features.every((f) => auth.features.includes(f))) return false;
-          const req = it.requiredAbilities || [];
-          const allowed = auth.hasAny(req);
+          if (!hasFeatures(it.requiredFeatures || [])) return false;
+          const allowed = meetsAbility(
+            it.requiredAbilities || [],
+            it.requireAllAbilities || false,
+          );
           if (it.child) {
             return allowed && it.child.length > 0;
           }

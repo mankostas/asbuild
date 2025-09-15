@@ -70,7 +70,10 @@
 </template>
 <script>
 import Icon from "@/components/ui/Icon";
+import { accessForRoute } from "@/constants/menu";
 import { useAuthStore } from "@/stores/auth";
+
+const inboxAccess = accessForRoute('notifications.inbox');
 export default {
   components: {
     Icon,
@@ -78,8 +81,14 @@ export default {
   computed: {
     canShow() {
       const auth = useAuthStore();
-      const req = ["notifications.view", "notifications.manage"];
-      return auth.hasAny(req) && auth.features.includes("notifications");
+      const features = inboxAccess.requiredFeatures || [];
+      if (!features.every((f) => auth.features.includes(f))) {
+        return false;
+      }
+      const req = inboxAccess.requiredAbilities || [];
+      return inboxAccess.requireAllAbilities
+        ? auth.hasAll(req)
+        : auth.hasAny(req);
     },
   },
 };
