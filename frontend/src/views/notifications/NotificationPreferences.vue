@@ -17,6 +17,7 @@
               :id="`inapp-${i}`"
               v-model="p.inapp"
               type="checkbox"
+              :disabled="!canManagePreferences"
               :aria-label="`In-app for ${p.name}`"
             />
           </td>
@@ -25,6 +26,7 @@
               :id="`email-${i}`"
               v-model="p.email"
               type="checkbox"
+              :disabled="!canManagePreferences"
               :aria-label="`Email for ${p.name}`"
             />
           </td>
@@ -33,6 +35,7 @@
               :id="`sms-${i}`"
               v-model="p.sms"
               type="checkbox"
+              :disabled="!canManagePreferences"
               :aria-label="`SMS for ${p.name}`"
             />
           </td>
@@ -41,6 +44,7 @@
     </table>
     <button
       class="mt-4 bg-blue-500 text-white px-4 py-2"
+      :disabled="!canManagePreferences"
       @click="save"
     >
       Save
@@ -49,8 +53,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import api from '@/services/api';
+import { can } from '@/stores/auth';
 
 interface Preference {
   name: string;
@@ -60,6 +65,7 @@ interface Preference {
 }
 
 const prefs = ref<Preference[]>([]);
+const canManagePreferences = computed(() => can('notifications.manage'));
 
 async function load() {
   const { data } = await api.get('/notification-preferences');
@@ -67,6 +73,7 @@ async function load() {
 }
 
 async function save() {
+  if (!canManagePreferences.value) return;
   await api.put('/notification-preferences', prefs.value);
 }
 

@@ -90,13 +90,11 @@ const routeAccessMap: Record<string, RouteAccess> = {
     requiredFeatures: ['manuals'],
   },
   'notifications.inbox': {
-    requiredAbilities: ['notifications.view', 'notifications.manage'],
-    requireAllAbilities: true,
+    requiredAbilities: ['notifications.view'],
     requiredFeatures: ['notifications'],
   },
   'notifications.prefs': {
-    requiredAbilities: ['notifications.view', 'notifications.manage'],
-    requireAllAbilities: true,
+    requiredAbilities: ['notifications.view'],
     requiredFeatures: ['notifications'],
   },
   'settings.branding': {
