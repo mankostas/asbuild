@@ -101,7 +101,7 @@
   </ul>
 </template>
 <script>
-import { topMenu } from "@/constants/menu";
+import { filterMenuItems, topMenu } from "@/constants/menu";
 import Icon from "../../Icon";
 import { useAuthStore } from "@/stores/auth";
 
@@ -112,17 +112,12 @@ export default {
   computed: {
     newMenulist() {
       const auth = useAuthStore();
-      return topMenu.filter((item) => {
-        if (item.isHeadr) return false;
-        const features = item.requiredFeatures || [];
-        if (!features.every((f) => auth.features.includes(f))) {
-          return false;
-        }
-        const req = item.requiredAbilities || [];
-        return (item.requireAllAbilities
-          ? auth.hasAll(req)
-          : auth.hasAny(req));
+      const accessible = filterMenuItems(topMenu, {
+        hasFeature: (feature) => auth.features.includes(feature),
+        hasAllAbilities: (abilities) => auth.hasAll(abilities),
+        hasAnyAbility: (abilities) => auth.hasAny(abilities),
       });
+      return accessible.filter((item) => !item.isHeadr);
     },
   },
 };

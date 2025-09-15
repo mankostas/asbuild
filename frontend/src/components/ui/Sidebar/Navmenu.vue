@@ -112,6 +112,7 @@
 <script>
 import { computed } from "vue";
 import { useRouter } from "vue-router";
+import { filterMenuItems } from "@/constants/menu";
 import { useAuthStore } from "@/stores/auth";
 import Icon from "../Icon";
 export default {
@@ -138,37 +139,12 @@ export default {
 
   setup(props) {
     const auth = useAuthStore();
-    const hasFeatures = (features = []) =>
-      features.every((f) => auth.features.includes(f));
-    const meetsAbility = (abilities = [], requireAll = false) =>
-      requireAll ? auth.hasAll(abilities) : auth.hasAny(abilities);
     const visibleItems = computed(() =>
-      props.items
-        .map((it) => {
-          const child = it.child
-            ? it.child.filter((ci) => {
-                if (!hasFeatures(ci.requiredFeatures || [])) {
-                  return false;
-                }
-                return meetsAbility(
-                  ci.requiredAbilities || [],
-                  ci.requireAllAbilities || false,
-                );
-              })
-            : null;
-          return { ...it, child };
-        })
-        .filter((it) => {
-          if (!hasFeatures(it.requiredFeatures || [])) return false;
-          const allowed = meetsAbility(
-            it.requiredAbilities || [],
-            it.requireAllAbilities || false,
-          );
-          if (it.child) {
-            return allowed && it.child.length > 0;
-          }
-          return allowed;
-        }),
+      filterMenuItems(props.items, {
+        hasFeature: (feature) => auth.features.includes(feature),
+        hasAllAbilities: (abilities) => auth.hasAll(abilities),
+        hasAnyAbility: (abilities) => auth.hasAny(abilities),
+      }),
     );
     return { visibleItems };
   },
