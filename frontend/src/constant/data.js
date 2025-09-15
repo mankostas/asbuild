@@ -33,13 +33,7 @@ export const menuItems = [
     title: "Task Types",
     icon: "heroicons-outline:tag",
     link: "taskTypes.list",
-    requiredAbilities: [
-      "task_types.view",
-      "task_types.manage",
-      "task_sla_policies.manage",
-      "task_automations.manage",
-      "task_field_snippets.manage",
-    ],
+    requiredAbilities: ["task_types.view"],
     requiredFeatures: ["task_types"],
   },
   {
@@ -164,13 +158,7 @@ export const topMenu = [
     title: "Task Types",
     icon: "heroicons-outline:tag",
     link: "taskTypes.list",
-    requiredAbilities: [
-      "task_types.view",
-      "task_types.manage",
-      "task_sla_policies.manage",
-      "task_automations.manage",
-      "task_field_snippets.manage",
-    ],
+    requiredAbilities: ["task_types.view"],
     requiredFeatures: ["task_types"],
   },
   {

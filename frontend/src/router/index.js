@@ -100,13 +100,7 @@ export const routes = [
     component: () => import('@/views/types/TypesList.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: [
-        'task_types.view',
-        'task_types.manage',
-        'task_sla_policies.manage',
-        'task_automations.manage',
-        'task_field_snippets.manage',
-      ],
+      requiredAbilities: ['task_types.view'],
       breadcrumb: 'routes.taskTypes',
       title: 'Task Types',
       layout: 'app',

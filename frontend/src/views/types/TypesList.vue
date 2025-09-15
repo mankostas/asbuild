@@ -126,6 +126,7 @@ function edit(id: number) {
 }
 
 async function remove(id: number) {
+  if (!can('task_types.manage')) return;
   const res = await Swal.fire({
     title: 'Delete type?',
     icon: 'warning',
@@ -138,6 +139,7 @@ async function remove(id: number) {
   }
 
 async function copy(id: number) {
+  if (!can('task_types.manage')) return;
   let tenantId: string | number | undefined;
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
@@ -159,6 +161,7 @@ async function copy(id: number) {
 }
 
 async function removeMany(ids: number[]) {
+  if (!can('task_types.manage')) return;
   const res = await Swal.fire({
     title: 'Delete selected types?',
     icon: 'warning',
@@ -171,6 +174,7 @@ async function removeMany(ids: number[]) {
 }
 
 async function copyMany(ids: number[]) {
+  if (!can('task_types.manage')) return;
   let tenantId: string | number | undefined;
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
