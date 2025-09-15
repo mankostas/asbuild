@@ -114,23 +114,23 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':tasks.update');
 
     Route::get('task-types', [TaskTypeController::class, 'index'])
-        ->middleware('ability:task_types.view');
+        ->middleware(Ability::class . ':task_types.view');
     Route::get('task-types/{task_type}', [TaskTypeController::class, 'show'])
-        ->middleware('ability:task_types.view')
+        ->middleware(Ability::class . ':task_types.view')
         ->whereNumber('task_type');
     Route::post('task-types', [TaskTypeController::class, 'store'])
-        ->middleware('ability:task_types.create')
+        ->middleware(Ability::class . ':task_types.create')
         ->name('task-types.store');
     Route::match(['put', 'patch'], 'task-types/{task_type}', [TaskTypeController::class, 'update'])
-        ->middleware('ability:task_types.update')
+        ->middleware(Ability::class . ':task_types.update')
         ->name('task-types.update')
         ->whereNumber('task_type');
     Route::delete('task-types/{task_type}', [TaskTypeController::class, 'destroy'])
-        ->middleware('ability:task_types.delete')
+        ->middleware(Ability::class . ':task_types.delete')
         ->name('task-types.destroy')
         ->whereNumber('task_type');
     Route::get('task-types/options', [TaskTypeController::class, 'options'])
-        ->middleware('ability:tasks.create|task_types.view');
+        ->middleware(Ability::class . ':tasks.create|task_types.view');
 
     Route::get('task-types/{task_type}/sla-policies', [TaskSlaPolicyController::class, 'index'])
         ->middleware(Ability::class . ':task_sla_policies.manage')
@@ -174,34 +174,34 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':teams.view');
 
     Route::post('task-types/{task_type}/copy-to-tenant', [TaskTypeController::class, 'copyToTenant'])
-        ->middleware('ability:task_types.manage')
+        ->middleware(Ability::class . ':task_types.manage')
         ->name('task-types.copy')
         ->whereNumber('task_type');
 
     Route::post('task-types/bulk-copy-to-tenant', [TaskTypeController::class, 'bulkCopyToTenant'])
-        ->middleware('ability:task_types.manage')
+        ->middleware(Ability::class . ':task_types.manage')
         ->name('task-types.bulk-copy');
 
     Route::post('task-types/bulk-delete', [TaskTypeController::class, 'bulkDestroy'])
-        ->middleware('ability:task_types.delete')
+        ->middleware(Ability::class . ':task_types.delete')
         ->name('task-types.bulk-destroy');
 
     Route::post('task-types/validate', [TaskTypeController::class, 'validateSchema'])
-        ->middleware('ability:task_types.create')
+        ->middleware(Ability::class . ':task_types.create')
         ->name('task-types.validate-schema');
 
     Route::post('task-types/{task_type}/validate', [TaskTypeController::class, 'previewValidate'])
-        ->middleware('ability:task_types.manage')
+        ->middleware(Ability::class . ':task_types.manage')
         ->name('task-types.validate')
         ->whereNumber('task_type');
 
     Route::post('task-types/{task_type}/export', [TaskTypeController::class, 'export'])
-        ->middleware('ability:task_types.manage')
+        ->middleware(Ability::class . ':task_types.manage')
         ->name('task-types.export')
         ->whereNumber('task_type');
 
     Route::post('task-types/import', [TaskTypeController::class, 'import'])
-        ->middleware('ability:task_types.manage')
+        ->middleware(Ability::class . ':task_types.manage')
         ->name('task-types.import');
 
     Route::post('roles', [RoleController::class, 'store'])
