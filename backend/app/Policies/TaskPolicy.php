@@ -11,7 +11,7 @@ class TaskPolicy extends TenantOwnedPolicy
 {
     public function create(User $user): bool
     {
-        return true;
+        return Gate::allows('tasks.create');
     }
 
     public function assign(User $user, Task $task): bool

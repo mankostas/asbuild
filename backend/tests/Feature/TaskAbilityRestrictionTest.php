@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\Task;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Policies\TaskPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
@@ -37,6 +38,8 @@ class TaskAbilityRestrictionTest extends TestCase
         ]);
         $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
         Sanctum::actingAs($user);
+
+        $this->assertFalse(app(TaskPolicy::class)->create($user));
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/tasks', [])
