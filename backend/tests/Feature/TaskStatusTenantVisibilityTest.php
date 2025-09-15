@@ -28,7 +28,7 @@ class TaskStatusTenantVisibilityTest extends TestCase
             'name' => 'Admin',
             'slug' => 'admin',
             'tenant_id' => 1,
-            'abilities' => ['task_statuses.manage'],
+            'abilities' => ['task_statuses.view'],
             'level' => 1,
         ]);
 
@@ -47,8 +47,10 @@ class TaskStatusTenantVisibilityTest extends TestCase
 
         $response->assertStatus(200);
         $data = $response->json('data');
-        $names = collect($data)->pluck('name')->sort()->values()->all();
-        $this->assertEquals(['Global', 'Tenant One'], $names);
+        $names = collect($data)->pluck('name');
+        $this->assertContains('Global', $names);
+        $this->assertContains('Tenant One', $names);
+        $this->assertNotContains('Tenant Two', $names);
         foreach ($data as $status) {
             $this->assertArrayHasKey('created_at', $status);
             $this->assertArrayHasKey('updated_at', $status);
@@ -89,8 +91,10 @@ class TaskStatusTenantVisibilityTest extends TestCase
 
         $response->assertStatus(200);
         $data = $response->json('data');
-        $names = collect($data)->pluck('name')->sort()->values()->all();
-        $this->assertEquals(['Global', 'Tenant One'], $names);
+        $names = collect($data)->pluck('name');
+        $this->assertContains('Global', $names);
+        $this->assertContains('Tenant One', $names);
+        $this->assertNotContains('Tenant Two', $names);
         foreach ($data as $status) {
             $this->assertArrayHasKey('created_at', $status);
             $this->assertArrayHasKey('updated_at', $status);

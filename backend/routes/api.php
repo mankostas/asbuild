@@ -166,9 +166,9 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':roles.view');
     Route::apiResource('task-statuses', TaskStatusController::class)
         ->only(['index', 'show'])
-        ->middleware(Ability::class . ':task_statuses.manage');
+        ->middleware(Ability::class . ':task_statuses.view');
     Route::get('task-statuses/{task_status}/transitions', [TaskStatusController::class, 'transitions'])
-        ->middleware(Ability::class . ':task_statuses.manage');
+        ->middleware(Ability::class . ':task_statuses.view');
     Route::apiResource('teams', TeamController::class)
         ->only(['index', 'show'])
         ->middleware(Ability::class . ':teams.view');

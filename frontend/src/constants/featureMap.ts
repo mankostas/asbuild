@@ -53,7 +53,7 @@ export const featureMap: Record<string, { label: string; abilities: string[] }> 
   },
   task_statuses: {
     label: 'Task Statuses',
-    abilities: ['task_statuses.manage'],
+    abilities: ['task_statuses.view', 'task_statuses.manage'],
   },
   employees: {
     label: 'Employees',

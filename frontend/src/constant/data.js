@@ -47,7 +47,7 @@ export const menuItems = [
     title: "Task Statuses",
     icon: "heroicons-outline:check-circle",
     link: "taskStatuses.list",
-    requiredAbilities: ["task_statuses.view", "task_statuses.manage"],
+    requiredAbilities: ["task_statuses.view"],
     requiredFeatures: ["task_statuses"],
   },
   {
@@ -172,7 +172,7 @@ export const topMenu = [
     title: "Task Statuses",
     icon: "heroicons-outline:check-circle",
     link: "taskStatuses.list",
-    requiredAbilities: ["task_statuses.view", "task_statuses.manage"],
+    requiredAbilities: ["task_statuses.view"],
     requiredFeatures: ["task_statuses"],
   },
   {
