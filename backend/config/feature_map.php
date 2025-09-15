@@ -68,6 +68,7 @@ return [
     'task_statuses' => [
         'label' => 'Task Statuses',
         'abilities' => [
+            'task_statuses.view',
             'task_statuses.manage',
         ],
     ],

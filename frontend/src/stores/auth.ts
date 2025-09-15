@@ -40,14 +40,30 @@ export const useAuthStore = defineStore('auth', {
         (r: any) => r.name === 'SuperAdmin' || r.slug === 'super_admin',
       ) || false,
     can(state) {
-      return (ability: string) =>
-        this.isSuperAdmin || state.abilities.includes(ability);
+      return (ability: string) => {
+        if (this.isSuperAdmin) {
+          return true;
+        }
+        if (state.abilities.includes(ability)) {
+          return true;
+        }
+        const prefix = ability.split('.')[0];
+        return prefix ? state.abilities.includes(`${prefix}.manage`) : false;
+      };
     },
     hasAny(state) {
-      return (abilities: string[]) =>
-        abilities.length === 0 ||
-        this.isSuperAdmin ||
-        abilities.some((a) => state.abilities.includes(a));
+      return (abilities: string[]) => {
+        if (abilities.length === 0 || this.isSuperAdmin) {
+          return true;
+        }
+        return abilities.some((ability) => {
+          if (state.abilities.includes(ability)) {
+            return true;
+          }
+          const prefix = ability.split('.')[0];
+          return prefix ? state.abilities.includes(`${prefix}.manage`) : false;
+        });
+      };
     },
     userId: (state) => state.user?.id,
   },

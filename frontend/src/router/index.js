@@ -138,7 +138,7 @@ export const routes = [
     component: () => import('@/views/statuses/StatusesList.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['task_statuses.view', 'task_statuses.manage'],
+      requiredAbilities: ['task_statuses.view'],
       breadcrumb: 'routes.taskStatuses',
       title: 'Task Statuses',
       layout: 'app',

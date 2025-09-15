@@ -54,6 +54,7 @@ return [
     'teams.manage',
 
     // Task Statuses
+    'task_statuses.view',
     'task_statuses.manage',
 
     // Employees

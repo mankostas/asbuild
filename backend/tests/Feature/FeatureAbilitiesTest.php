@@ -70,7 +70,7 @@ class FeatureAbilitiesTest extends TestCase
             'roles' => ['roles', '/api/roles', 'roles.view'],
             'task_types' => ['task_types', '/api/task-types', 'task_types.view'],
             'teams' => ['teams', '/api/teams', 'teams.view'],
-            'task_statuses' => ['task_statuses', '/api/task-statuses', 'task_statuses.manage'],
+            'task_statuses' => ['task_statuses', '/api/task-statuses', 'task_statuses.view'],
         ];
     }
 }
