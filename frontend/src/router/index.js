@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, RouterView } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import api from '@/services/api';
 import { setTokens } from '@/services/authStorage';
@@ -377,7 +377,7 @@ export const routes = [
   },
   {
     path: '/users',
-    component: RouterView,
+    component: () => import('@/views/users/UsersIndex.vue'),
     meta: {
       requiresAuth: true,
       breadcrumb: 'routes.users',
