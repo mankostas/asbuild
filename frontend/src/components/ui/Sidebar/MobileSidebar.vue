@@ -32,7 +32,7 @@
 <script>
 import { Icon } from "@iconify/vue";
 import { defineComponent } from "vue";
-import { menuItems } from "@/constant/data";
+import { menuItems } from "@/constants/menu";
 import Navmenu from "./Navmenu";
 import logoLight from "@/assets/images/logo/logo.svg";
 import logoDark from "@/assets/images/logo/logo-white.svg";

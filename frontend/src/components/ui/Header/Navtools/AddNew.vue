@@ -32,7 +32,7 @@ import { MenuItem } from '@headlessui/vue';
 import { useRouter } from 'vue-router';
 import Dropdown from '@/components/Dropdown';
 import Icon from '@/components/Icon';
-import { addNewOptions } from '@/constant/data';
+import { addNewOptions } from '@/constants/menu';
 import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
