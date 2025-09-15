@@ -56,7 +56,6 @@ export const menuItems = [
     link: "roles.list",
     requiredAbilities: ["roles.view", "roles.manage"],
     requiredFeatures: ["roles"],
-    admin: true,
   },
   {
     title: "Manuals",
@@ -64,7 +63,6 @@ export const menuItems = [
     link: "manuals.list",
     requiredAbilities: ["manuals.manage"],
     requiredFeatures: ["manuals"],
-    admin: true,
   },
   {
     title: "Users",
@@ -79,7 +77,6 @@ export const menuItems = [
       {
         childtitle: "Tenants",
         childlink: "tenants.list",
-        admin: true,
         requiredAbilities: ["tenants.view", "tenants.manage"],
         requiredFeatures: ["tenants"],
       },
@@ -91,7 +88,6 @@ export const menuItems = [
     link: "reports.kpis",
     requiredAbilities: ["reports.view"],
     requiredFeatures: ["reports"],
-    admin: true,
   },
   {
     title: "Notifications",
@@ -183,7 +179,6 @@ export const topMenu = [
     link: "roles.list",
     requiredAbilities: ["roles.view", "roles.manage"],
     requiredFeatures: ["roles"],
-    admin: true,
   },
   {
     title: "Manuals",
@@ -191,7 +186,6 @@ export const topMenu = [
     link: "manuals.list",
     requiredAbilities: ["manuals.manage"],
     requiredFeatures: ["manuals"],
-    admin: true,
   },
   {
     title: "Users",
@@ -206,7 +200,6 @@ export const topMenu = [
       {
         childtitle: "Tenants",
         childlink: "tenants.list",
-        admin: true,
         requiredAbilities: ["tenants.view", "tenants.manage"],
         requiredFeatures: ["tenants"],
       },
@@ -218,7 +211,6 @@ export const topMenu = [
     link: "reports.kpis",
     requiredAbilities: ["reports.view"],
     requiredFeatures: ["reports"],
-    admin: true,
   },
   {
     title: "Notifications",
@@ -232,7 +224,6 @@ export const topMenu = [
     title: "Branding",
     icon: "heroicons-outline:sparkles",
     link: "settings.branding",
-    admin: true,
     requiredAbilities: ["branding.manage"],
     requiredFeatures: ["branding"],
   },
@@ -240,7 +231,6 @@ export const topMenu = [
     title: "Footer",
     icon: "heroicons-outline:document-text",
     link: "settings.footer",
-    admin: true,
     requiredAbilities: ["branding.manage"],
     requiredFeatures: ["branding"],
   },
@@ -272,7 +262,6 @@ export const addNewOptions = [
       'task_automations.manage',
       'task_field_snippets.manage',
     ],
-    admin: true,
   },
   {
     label: 'Manual',
@@ -280,7 +269,6 @@ export const addNewOptions = [
     link: 'manuals.create',
     requiredAbilities: ['manuals.manage'],
     requiredFeatures: ['manuals'],
-    admin: true,
   },
   {
     label: 'Employee',
@@ -293,14 +281,12 @@ export const addNewOptions = [
     icon: 'heroicons-outline:check-circle',
     link: 'taskStatuses.create',
     requiredAbilities: ['task_statuses.manage'],
-    admin: true,
   },
   {
     label: 'Role',
     icon: 'heroicons-outline:key',
     link: 'roles.create',
     requiredAbilities: ['roles.manage'],
-    admin: true,
   },
 ];
 
