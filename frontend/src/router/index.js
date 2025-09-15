@@ -177,7 +177,6 @@ export const routes = [
     meta: {
       requiresAuth: true,
       requiredAbilities: ['roles.view', 'roles.manage'],
-      admin: true,
       breadcrumb: 'routes.roles',
       title: 'Roles',
       layout: 'app',
@@ -190,7 +189,6 @@ export const routes = [
     meta: {
       requiresAuth: true,
       requiredAbilities: ['roles.create', 'roles.manage'],
-      admin: true,
       breadcrumb: 'routes.roleCreate',
       title: 'Create Role',
       layout: 'app',
@@ -204,7 +202,6 @@ export const routes = [
     meta: {
       requiresAuth: true,
       requiredAbilities: ['roles.update', 'roles.manage'],
-      admin: true,
       breadcrumb: 'routes.roleEdit',
       title: 'Edit Role',
       layout: 'app',
@@ -217,7 +214,8 @@ export const routes = [
     component: () => import('@/views/manuals/ManualsList.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['manuals.manage'],
+      requiredFeatures: ['manuals'],
       breadcrumb: 'routes.manuals',
       title: 'Manuals',
       layout: 'app',
@@ -229,7 +227,8 @@ export const routes = [
     component: () => import('@/views/manuals/ManualForm.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['manuals.manage'],
+      requiredFeatures: ['manuals'],
       breadcrumb: 'routes.manualCreate',
       title: 'Upload Manual',
       layout: 'app',
@@ -242,7 +241,8 @@ export const routes = [
     component: () => import('@/views/manuals/ManualForm.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
+      requiredAbilities: ['manuals.manage'],
+      requiredFeatures: ['manuals'],
       breadcrumb: 'routes.manualEdit',
       title: 'Edit Manual',
       layout: 'app',
@@ -348,7 +348,6 @@ export const routes = [
     redirect: '/reports/kpis',
     meta: {
       requiresAuth: true,
-      admin: true,
       breadcrumb: 'routes.reports',
       title: 'Reports',
       layout: 'app',
@@ -361,7 +360,6 @@ export const routes = [
     component: () => import('@/views/reports/Reports.vue'),
     meta: {
       requiresAuth: true,
-      admin: true,
       breadcrumb: 'routes.reports',
       title: 'Reports - KPIs',
       layout: 'app',
@@ -424,8 +422,6 @@ export const routes = [
         component: () => import('@/views/tenants/TenantsList.vue'),
         meta: {
           requiresAuth: true,
-          admin: true,
-          super: true,
           requiredAbilities: ['tenants.view', 'tenants.manage'],
           breadcrumb: 'routes.tenants',
           title: 'Tenants',
@@ -438,8 +434,6 @@ export const routes = [
         component: () => import('@/views/tenants/TenantForm.vue'),
         meta: {
           requiresAuth: true,
-          admin: true,
-          super: true,
           requiredAbilities: ['tenants.create', 'tenants.manage'],
           breadcrumb: 'routes.tenantCreate',
           title: 'Create Tenant',
@@ -453,8 +447,6 @@ export const routes = [
         component: () => import('@/views/tenants/TenantForm.vue'),
         meta: {
           requiresAuth: true,
-          admin: true,
-          super: true,
           requiredAbilities: ['tenants.update', 'tenants.manage'],
           breadcrumb: 'routes.tenantEdit',
           title: 'Edit Tenant',
@@ -468,8 +460,6 @@ export const routes = [
         component: () => import('@/views/tenants/TenantDetails.vue'),
         meta: {
           requiresAuth: true,
-          admin: true,
-          super: true,
           requiredAbilities: ['tenants.view', 'tenants.manage'],
           breadcrumb: 'routes.tenantDetail',
           title: 'Tenant Detail',
@@ -611,10 +601,6 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return next('/auth/login');
-  }
-
-  if (to.meta.admin && !auth.isSuperAdmin) {
-    return next('/not-found');
   }
 
   if (to.meta.requiredAbilities?.length && !auth.hasAny(to.meta.requiredAbilities)) {

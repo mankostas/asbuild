@@ -156,7 +156,6 @@ export default {
         .filter((it) => {
           const features = it.requiredFeatures || [];
           if (!features.every((f) => auth.features.includes(f))) return false;
-          if (it.admin && !auth.isSuperAdmin) return false;
           const req = it.requiredAbilities || [];
           const allowed = auth.hasAny(req);
           if (it.child) {

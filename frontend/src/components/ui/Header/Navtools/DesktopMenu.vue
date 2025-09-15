@@ -114,7 +114,6 @@ export default {
       const auth = useAuthStore();
       return topMenu.filter((item) => {
         if (item.isHeadr) return false;
-        if (item.admin && !auth.isSuperAdmin) return false;
         const req = item.requiredAbilities || [];
         const features = item.requiredFeatures || [];
         return auth.hasAny(req) && features.every((f) => auth.features.includes(f));

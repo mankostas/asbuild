@@ -40,7 +40,6 @@ const auth = useAuthStore();
 
 const items = computed(() =>
   addNewOptions.filter((i) => {
-    if (i.admin && !auth.isSuperAdmin) return false;
     const req = i.requiredAbilities || [];
     const features = i.requiredFeatures || [];
     return auth.hasAny(req) && features.every((f) => auth.features.includes(f));
