@@ -14,16 +14,9 @@ class TeamController extends Controller
 {
     use ListQuery;
 
-    protected function ensureAdmin(Request $request): void
-    {
-        if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
-            abort(403);
-        }
-    }
-
     protected function getTenantId(Request $request): int
     {
-        if ($request->user()->hasRole('SuperAdmin')) {
+        if ($request->user()->isSuperAdmin()) {
             $tenantId = $request->query('tenant_id', $request->input('tenant_id', $request->header('X-Tenant-ID', app('tenant_id'))));
             if (! $tenantId) {
                 abort(400, 'Tenant ID required');
@@ -36,9 +29,11 @@ class TeamController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Team::class);
+
         $query = Team::query()->with(['employees', 'tenant', 'lead']);
 
-        if ($request->user()->hasRole('SuperAdmin')) {
+        if ($request->user()->isSuperAdmin()) {
             if ($request->has('tenant_id')) {
                 $query->where('tenant_id', $request->query('tenant_id'));
             }
@@ -55,11 +50,11 @@ class TeamController extends Controller
 
     public function store(TeamUpsertRequest $request)
     {
-        $this->ensureAdmin($request);
+        $this->authorize('create', Team::class);
 
         $data = $request->validated();
         $tenantId = $this->getTenantId($request);
-        $data['tenant_id'] = $request->user()->hasRole('SuperAdmin') ? ($data['tenant_id'] ?? $tenantId) : $tenantId;
+        $data['tenant_id'] = $request->user()->isSuperAdmin() ? ($data['tenant_id'] ?? $tenantId) : $tenantId;
 
         if (isset($data['lead_id'])) {
             $leadId = User::where('id', $data['lead_id'])
@@ -85,17 +80,19 @@ class TeamController extends Controller
             abort(404);
         }
 
+        $this->authorize('view', $team);
+
         return new TeamResource($team->load(['employees', 'tenant', 'lead']));
     }
 
     public function update(TeamUpsertRequest $request, Team $team)
     {
-        $this->ensureAdmin($request);
-
         $tenantId = $this->getTenantId($request);
         if ($team->tenant_id !== $tenantId) {
             abort(404);
         }
+
+        $this->authorize('update', $team);
 
         $data = $request->validated();
         $data['tenant_id'] = $team->tenant_id;
@@ -117,12 +114,12 @@ class TeamController extends Controller
 
     public function destroy(Request $request, Team $team)
     {
-        $this->ensureAdmin($request);
-
         $tenantId = $this->getTenantId($request);
         if ($team->tenant_id !== $tenantId) {
             abort(404);
         }
+
+        $this->authorize('delete', $team);
 
         $team->delete();
 
@@ -131,12 +128,12 @@ class TeamController extends Controller
 
     public function syncEmployees(Request $request, Team $team)
     {
-        $this->ensureAdmin($request);
-
         $tenantId = $this->getTenantId($request);
         if ($team->tenant_id !== $tenantId) {
             abort(404);
         }
+
+        $this->authorize('update', $team);
 
         $data = $request->validate([
             'employee_ids' => ['required', 'array'],
