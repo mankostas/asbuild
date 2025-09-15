@@ -51,7 +51,7 @@
                 </button>
               </MenuItem>
             </template>
-            <MenuItem v-if="auth.can('tasks.update') && canMoveLeft" #default="{ active }">
+            <MenuItem v-if="canMoveTasks && canMoveLeft" #default="{ active }">
               <button
                 :class="menuClass(active)"
                 @click="move(-1)"
@@ -62,7 +62,7 @@
                 <span>{{ t('board.moveLeft') }}</span>
               </button>
             </MenuItem>
-            <MenuItem v-if="auth.can('tasks.update') && canMoveRight" #default="{ active }">
+            <MenuItem v-if="canMoveTasks && canMoveRight" #default="{ active }">
               <button
                 :class="menuClass(active)"
                 @click="move(1)"
@@ -217,6 +217,7 @@ const { t } = useI18n();
 const notify = useNotify();
 const auth = useAuthStore();
 const router = useRouter();
+const canMoveTasks = computed(() => auth.hasAny(['tasks.update', 'tasks.manage']));
 
 function allowedTransitions(from: string): string[] {
   const canManage = auth.can('tasks.manage');
@@ -320,6 +321,7 @@ function changeStatus(slug: string) {
 }
 
 function move(dir: number) {
+  if (!canMoveTasks.value) return;
   const colIndex = props.columns.findIndex((c) =>
     c.tasks.some((t) => t.id === props.task.id),
   );

@@ -25,7 +25,7 @@ export const routes = [
     component: () => import('@/views/tasks/TasksList.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['tasks.view', 'tasks.manage'],
+      requiredAbilities: ['tasks.view'],
       breadcrumb: 'routes.tasks',
       title: 'Tasks',
       layout: 'app',
@@ -63,7 +63,7 @@ export const routes = [
     component: () => import('@/views/tasks/TaskDetails.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['tasks.view', 'tasks.manage', 'tasks.watch'],
+      requiredAbilities: ['tasks.view'],
       breadcrumb: 'routes.taskDetail',
       title: 'Task Detail',
       layout: 'app',
@@ -76,7 +76,7 @@ export const routes = [
     component: () => import('@/views/tasks/BoardView.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['tasks.view', 'tasks.update'],
+      requiredAbilities: ['tasks.view'],
       breadcrumb: 'routes.taskBoard',
       title: 'Task Board',
       layout: 'app',
