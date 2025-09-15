@@ -5,7 +5,7 @@ test('field palette filters groups by search query', async () => {
     { label: 'Inputs', items: [{ label: 'Text' }, { label: 'Number' }] },
     { label: 'Dates', items: [{ label: 'Date' }] },
   ];
-  const search = 'te';
+  const search = 'tex';
   const filtered = groups
     .map((g) => ({
       label: g.label,
