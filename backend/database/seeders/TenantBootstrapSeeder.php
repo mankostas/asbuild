@@ -25,12 +25,23 @@ class TenantBootstrapSeeder extends Seeder
         );
 
         // Tenant
+        $defaultFeatures = [
+            'tasks',
+            'notifications',
+            'task_types',
+            'task_statuses',
+            'teams',
+            'themes',
+            'billing',
+        ];
+        $defaultFeatures = array_values(array_intersect($defaultFeatures, config('features', [])));
+
         DB::table('tenants')->updateOrInsert(
             ['id' => 1],
             [
                 'name' => 'Acme Vet',
                 'quota_storage_mb' => 0,
-                'features' => json_encode(['tasks', 'notifications', 'task_types', 'task_statuses', 'teams', 'themes']),
+                'features' => json_encode($defaultFeatures),
                 'phone' => '555-123-4567',
                 'address' => '1 Pet Street',
                 'created_at' => now(),

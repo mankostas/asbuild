@@ -37,6 +37,13 @@ return [
             'reports.manage',
         ],
     ],
+    'billing' => [
+        'label' => 'Billing',
+        'abilities' => [
+            'billing.view',
+            'billing.manage',
+        ],
+    ],
     'roles' => [
         'label' => 'Roles & Permissions',
         'abilities' => [

@@ -79,6 +79,10 @@ return [
     'gdpr.export',
     'gdpr.delete',
 
+    // Billing
+    'billing.view',
+    'billing.manage',
+
     // Reports
     'reports.view',
     'reports.manage',
