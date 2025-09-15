@@ -400,6 +400,7 @@ import { can, useAuthStore } from '@/stores/auth';
 import hasAbility from '@/utils/ability';
 import api from '@/services/api';
 import { useTenantStore } from '@/stores/tenant';
+import { useFeaturesStore } from '@/stores/features';
 import '@/styles/types-builder.css';
 import { type I18nString } from '@/utils/i18n';
 import Swal from 'sweetalert2';
@@ -410,6 +411,7 @@ const route = useRoute();
 const router = useRouter();
 const tenantStore = useTenantStore();
 const auth = useAuthStore();
+const featuresStore = useFeaturesStore();
 const taskTypeId = computed(() => Number(route.params.id ?? route.query.id ?? 0));
 const loading = ref(true);
 
@@ -678,7 +680,7 @@ onMounted(async () => {
     return;
   }
   try {
-    const lookupsPromise = api.get('/lookups/features');
+    const lookupsPromise = featuresStore.load();
     const typePromise = isEdit.value
       ? api.get(`/task-types/${taskTypeId.value}`)
       : Promise.resolve(null);

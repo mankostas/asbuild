@@ -66,7 +66,8 @@ import vSelect from 'vue-select';
 import { useTeamsStore } from '@/stores/teams';
 import { can, useAuthStore } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
-import { featureMap } from '@/constants/featureMap';
+import { useFeaturesStore } from '@/stores/features';
+import { storeToRefs } from 'pinia';
 import {
   ensureHiddenRole,
   assignHiddenRoleToTeam,
@@ -79,6 +80,8 @@ const router = useRouter();
 const teamsStore = useTeamsStore();
 const auth = useAuthStore();
 const tenant = useTenantStore();
+const featuresStore = useFeaturesStore();
+const { featureMap } = storeToRefs(featuresStore);
 
 const isEdit = computed(() => route.name === 'teams.edit');
 const canAccess = computed(() =>
@@ -99,13 +102,15 @@ const selectedEmployees = ref<number[]>([]);
 const featureGrants = ref<Record<string, string[]>>({});
 const hiddenRoles = ref<Record<string, any>>({});
 
-const availableFeatures = computed(() =>
-  auth.features.filter((f) => featureMap[f]),
-);
+const availableFeatures = computed(() => {
+  const map = featureMap.value;
+  return auth.features.filter((f) => map[f]);
+});
 
 watch(tenantId, async (newTenant, oldTenant) => {
   if (!auth.isSuperAdmin || newTenant === oldTenant) return;
   const previousTenant = tenant.tenantId;
+  await featuresStore.load();
   tenant.setTenant(String(newTenant));
   await loadEmployees();
   selectedEmployees.value = [];
@@ -182,6 +187,7 @@ const submit = handleSubmit(async () => {
 });
 
 onMounted(async () => {
+  await featuresStore.load();
   await loadEmployees();
   if (auth.isSuperAdmin) {
     await tenant.loadTenants({ per_page: 100 });

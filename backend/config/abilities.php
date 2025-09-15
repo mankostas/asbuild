@@ -20,6 +20,7 @@ return [
     'tasks.status.update',
     'tasks.comment.create',
     'tasks.attach.upload',
+    'tasks.export',
     'tasks.watch',
     'tasks.manage',
 

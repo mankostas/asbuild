@@ -43,7 +43,7 @@ Base the board on Dashcode's Kanban (`@dc/views/app/kanban/column/index.vue` and
 
 Ability string | Purpose
 --- | ---
-`tasks.board.view` | View the task board (mapped under the `tasks` feature).
+`tasks.view` | View the task board and list (mapped under the `tasks` feature).
 
 Endpoint | Method | Abilities
 --- | --- | ---
