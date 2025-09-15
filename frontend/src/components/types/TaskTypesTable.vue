@@ -36,7 +36,7 @@
             />
             <span v-else>—</span>
           </span>
-          <span v-else-if="rowProps.column.field === 'actions'">
+          <span v-else-if="rowProps.column.field === 'actions' && canManageTaskTypes">
             <Dropdown classMenuItems=" w-[140px]">
               <span class="text-xl"><Icon icon="heroicons-outline:dots-vertical" /></span>
               <template #menus>
@@ -75,20 +75,22 @@
           </span>
         </template>
         <template #selected-row-actions>
-          <button
-            type="button"
-            class="ml-2 text-danger-500 hover:underline cursor-pointer"
-            @click="emit('delete-selected', selectedIds)"
-          >
-            {{ t('actions.delete') }}
-          </button>
-          <button
-            type="button"
-            class="ml-2 text-primary-500 hover:underline cursor-pointer"
-            @click="emit('copy-selected', selectedIds)"
-          >
-            {{ t(auth.isSuperAdmin ? 'actions.copy' : 'actions.duplicate') }}
-          </button>
+          <template v-if="canManageTaskTypes">
+            <button
+              type="button"
+              class="ml-2 text-danger-500 hover:underline cursor-pointer"
+              @click="emit('delete-selected', selectedIds)"
+            >
+              {{ t('actions.delete') }}
+            </button>
+            <button
+              type="button"
+              class="ml-2 text-primary-500 hover:underline cursor-pointer"
+              @click="emit('copy-selected', selectedIds)"
+            >
+              {{ t(auth.isSuperAdmin ? 'actions.copy' : 'actions.duplicate') }}
+            </button>
+          </template>
         </template>
         <template #pagination-bottom="pagerProps">
           <div class="py-4 px-3">
@@ -153,25 +155,32 @@ const perPageOptions = [
   { value: '50', label: '50' },
 ];
 
-const selectOptions = {
-  enabled: true,
+const canManageTaskTypes = computed(() => auth.can('task_types.manage'));
+
+const selectOptions = computed(() => ({
+  enabled: canManageTaskTypes.value,
   selectOnCheckboxOnly: true,
   selectionInfoClass: 'custom-class',
   selectionText: 'rows selected',
   clearSelectionText: 'clear',
   selectAllByGroup: true,
-};
+}));
 
-const columns = [
-  { label: 'ID', field: 'id' },
-  { label: 'Name', field: 'name' },
-  { label: 'Tenant', field: 'tenant' },
-  { label: 'Tasks', field: 'tasks_count' },
-  { label: 'Statuses', field: 'statusCount' },
-  { label: 'Subtasks Required', field: 'require_subtasks_complete' },
-  { label: 'Updated', field: 'updated_at' },
-  { label: 'Actions', field: 'actions' },
-];
+const columns = computed(() => {
+  const base = [
+    { label: 'ID', field: 'id' },
+    { label: 'Name', field: 'name' },
+    { label: 'Tenant', field: 'tenant' },
+    { label: 'Tasks', field: 'tasks_count' },
+    { label: 'Statuses', field: 'statusCount' },
+    { label: 'Subtasks Required', field: 'require_subtasks_complete' },
+    { label: 'Updated', field: 'updated_at' },
+  ];
+  if (canManageTaskTypes.value) {
+    base.push({ label: 'Actions', field: 'actions' });
+  }
+  return base;
+});
 
 const selectedIds = ref<number[]>([]);
 
@@ -189,6 +198,10 @@ const filteredRows = computed(() => {
 });
 
 function onSelectedRowsChange(params: any) {
+  if (!canManageTaskTypes.value) {
+    selectedIds.value = [];
+    return;
+  }
   selectedIds.value = params.selectedRows.map((r: any) => r.id);
 }
 </script>
