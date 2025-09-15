@@ -609,13 +609,29 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
   if (id) {
     if (canViewRoles.value) {
       try {
-        const params: Record<string, any> = {
+        const tenantParams: Record<string, any> = {
           tenant_id: Number(id),
           per_page: 100,
         };
-        const { data } = await api.get('/roles', { params });
-        const roles = data.data ?? data;
-        tenantRoles.value = roles as { id: number; slug: string }[];
+        const requests = [api.get('/roles', { params: tenantParams })];
+        if (auth.isSuperAdmin) {
+          requests.push(
+            api.get('/roles', { params: { scope: 'global', per_page: 100 } }),
+          );
+        }
+        const [tenantRes, globalRes] = await Promise.all(requests);
+        const tenantData = tenantRes.data.data ?? tenantRes.data;
+        tenantRoles.value = tenantData as { id: number; slug: string }[];
+        if (globalRes) {
+          const globalData = (globalRes as any).data.data ?? (globalRes as any).data;
+          const merged = [
+            ...tenantRoles.value,
+            ...(globalData as { id: number; slug: string }[]),
+          ];
+          tenantRoles.value = merged.filter(
+            (r, i, arr) => arr.findIndex((x) => x.slug === r.slug) === i,
+          );
+        }
         tenantRoles.value.forEach((r) => {
           if (!permissions.value[r.slug]) {
             permissions.value[r.slug] = {
