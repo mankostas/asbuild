@@ -167,6 +167,8 @@ export function accessForRoute(name?: string): RouteAccess {
 export interface SidebarMenuChild extends RouteAccess {
   childtitle: string;
   childlink: string;
+  childicon?: string;
+  topTitle?: string;
 }
 
 export interface SidebarMenuItem extends RouteAccess {
@@ -177,7 +179,13 @@ export interface SidebarMenuItem extends RouteAccess {
   isHeadr?: boolean;
 }
 
-export const menuItems: SidebarMenuItem[] = [
+interface MenuItemDefinition extends SidebarMenuItem {
+  topNav?: {
+    flattenChildren?: boolean;
+  };
+}
+
+const menuItemDefinitions: MenuItemDefinition[] = [
   {
     title: 'Dashboard',
     icon: 'heroicons-outline:home',
@@ -264,141 +272,126 @@ export const menuItems: SidebarMenuItem[] = [
     title: 'Settings',
     icon: 'heroicons-outline:cog',
     child: [
-      { childtitle: 'Profile', childlink: 'settings.profile', ...accessForRoute('settings.profile') },
+      {
+        childtitle: 'Profile',
+        childlink: 'settings.profile',
+        childicon: 'heroicons-outline:cog',
+        topTitle: 'Settings',
+        ...accessForRoute('settings.profile'),
+      },
       {
         childtitle: 'Branding',
         childlink: 'settings.branding',
+        childicon: 'heroicons-outline:sparkles',
         ...accessForRoute('settings.branding'),
       },
       {
         childtitle: 'Footer',
         childlink: 'settings.footer',
+        childicon: 'heroicons-outline:document-text',
         ...accessForRoute('settings.footer'),
       },
       {
         childtitle: 'GDPR',
         childlink: 'gdpr.index',
+        childicon: 'heroicons-outline:shield-check',
         ...accessForRoute('gdpr.index'),
       },
     ],
+    topNav: {
+      flattenChildren: true,
+    },
   },
 ];
+
+export const menuItems: SidebarMenuItem[] = menuItemDefinitions.map(
+  ({ topNav, ...item }) => ({ ...item }),
+);
 
 export interface TopMenuItem extends RouteAccess {
   title: string;
   icon?: string;
   link?: string;
   child?: SidebarMenuChild[];
+  isHeadr?: boolean;
 }
 
-export const topMenu: TopMenuItem[] = [
-  {
-    title: 'Dashboard',
-    icon: 'heroicons-outline:home',
-    link: 'dashboard',
-    ...accessForRoute('dashboard'),
-  },
-  {
-    title: 'Tasks',
-    icon: 'heroicons-outline:calendar',
-    link: 'tasks.list',
-    ...accessForRoute('tasks.list'),
-  },
-  {
-    title: 'Task Board',
-    icon: 'heroicons-outline:view-columns',
-    link: 'tasks.board',
-    ...accessForRoute('tasks.board'),
-  },
-  {
-    title: 'Task Reports',
-    icon: 'heroicons-outline:chart-bar',
-    link: 'tasks.reports',
-    ...accessForRoute('tasks.reports'),
-  },
-  {
-    title: 'Task Types',
-    icon: 'heroicons-outline:tag',
-    link: 'taskTypes.list',
-    ...accessForRoute('taskTypes.list'),
-  },
-  {
-    title: 'Teams',
-    icon: 'heroicons-outline:user-group',
-    link: 'teams.list',
-    ...accessForRoute('teams.list'),
-  },
-  {
-    title: 'Task Statuses',
-    icon: 'heroicons-outline:check-circle',
-    link: 'taskStatuses.list',
-    ...accessForRoute('taskStatuses.list'),
-  },
-  {
-    title: 'Roles',
-    icon: 'heroicons-outline:key',
-    link: 'roles.list',
-    ...accessForRoute('roles.list'),
-  },
-  {
-    title: 'Manuals',
-    icon: 'heroicons-outline:book-open',
-    link: 'manuals.list',
-    ...accessForRoute('manuals.list'),
-  },
-  {
-    title: 'Users',
-    icon: 'heroicons-outline:users',
-    child: [
-      {
-        childtitle: 'Employees',
-        childlink: 'employees.list',
-        ...accessForRoute('employees.list'),
-      },
-      {
-        childtitle: 'Tenants',
-        childlink: 'tenants.list',
-        ...accessForRoute('tenants.list'),
-      },
-    ],
-  },
-  {
-    title: 'Reports',
-    icon: 'heroicons-outline:chart-bar',
-    link: 'reports.kpis',
-    ...accessForRoute('reports.kpis'),
-  },
-  {
-    title: 'Notifications',
-    icon: 'heroicons-outline:bell',
-    link: 'notifications.inbox',
-    ...accessForRoute('notifications.inbox'),
-  },
-  {
-    title: 'Settings',
-    icon: 'heroicons-outline:cog',
-    link: 'settings.profile',
-    ...accessForRoute('settings.profile'),
-  },
-  {
-    title: 'Branding',
-    icon: 'heroicons-outline:sparkles',
-    link: 'settings.branding',
-    ...accessForRoute('settings.branding'),
-  },
-  {
-    title: 'Footer',
-    icon: 'heroicons-outline:document-text',
-    link: 'settings.footer',
-    ...accessForRoute('settings.footer'),
-  },
-  {
-    title: 'GDPR',
-    icon: 'heroicons-outline:shield-check',
-    link: 'gdpr.index',
-    ...accessForRoute('gdpr.index'),
-  },
-];
+const toTopMenuItems = (item: MenuItemDefinition): TopMenuItem[] => {
+  if (item.topNav?.flattenChildren && item.child) {
+    return item.child.map((child, index) => ({
+      title: child.topTitle ?? child.childtitle,
+      icon: child.childicon ?? (index === 0 ? item.icon : undefined),
+      link: child.childlink,
+      requiredAbilities: child.requiredAbilities,
+      requireAllAbilities: child.requireAllAbilities,
+      requiredFeatures: child.requiredFeatures,
+    }));
+  }
+
+  const { topNav, ...rest } = item;
+  return [{ ...rest }];
+};
+
+export const topMenu: TopMenuItem[] = menuItemDefinitions.flatMap(toTopMenuItems);
+
+export interface MenuAccessEvaluator {
+  hasFeature(feature: string): boolean;
+  hasAllAbilities(abilities: string[]): boolean;
+  hasAnyAbility(abilities: string[]): boolean;
+}
+
+const satisfiesAccess = (
+  access: RouteAccess,
+  evaluator: MenuAccessEvaluator,
+): boolean => {
+  const features = access.requiredFeatures ?? [];
+  if (!features.every((feature) => evaluator.hasFeature(feature))) {
+    return false;
+  }
+
+  const abilities = access.requiredAbilities ?? [];
+  if (abilities.length === 0) {
+    return true;
+  }
+
+  return access.requireAllAbilities
+    ? evaluator.hasAllAbilities(abilities)
+    : evaluator.hasAnyAbility(abilities);
+};
+
+const filterChildrenByAccess = (
+  children: SidebarMenuChild[] | undefined,
+  evaluator: MenuAccessEvaluator,
+): SidebarMenuChild[] | undefined => {
+  if (!children) {
+    return undefined;
+  }
+
+  const filtered = children.filter((child) => satisfiesAccess(child, evaluator));
+  return filtered.length > 0 ? filtered : undefined;
+};
+
+export function filterMenuItems<
+  T extends RouteAccess & { child?: SidebarMenuChild[] }
+>(items: readonly T[], evaluator: MenuAccessEvaluator): T[] {
+  return items
+    .map((item) => {
+      if (!satisfiesAccess(item, evaluator)) {
+        return null;
+      }
+
+      if (item.child) {
+        const child = filterChildrenByAccess(item.child, evaluator);
+        if (!child) {
+          return null;
+        }
+        return { ...item, child } as T;
+      }
+
+      return { ...item } as T;
+    })
+    .filter((item): item is T => Boolean(item));
+}
 
 export interface QuickAction extends RouteAccess {
   label: string;
