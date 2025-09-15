@@ -464,9 +464,12 @@ const tenantFeatures = computed(() => {
   );
   return tenant?.features || [];
 });
-const tenantFeatureAbilities = computed(() =>
-  tenantStore.tenantAllowedAbilities(String(tenantId.value) || ''),
-);
+const tenantFeatureAbilities = computed(() => {
+  const abilities = tenantStore.tenantAllowedAbilities(
+    String(tenantId.value) || '',
+  );
+  return Object.keys(abilities).length ? abilities : undefined;
+});
 const transitionsEditor = ref<any>(null);
 const automationsEditor = ref<any>(null);
 const slaPolicyEditor = ref<any>(null);
