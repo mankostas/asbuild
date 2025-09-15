@@ -5,6 +5,8 @@ export const menuItems = [
     title: "Dashboard",
     icon: "heroicons-outline:home",
     link: "dashboard",
+    requiredAbilities: ["reports.view"],
+    requiredFeatures: ["reports"],
   },
   {
     title: "Tasks",
@@ -130,7 +132,13 @@ export const menuItems = [
 ];
 
 export const topMenu = [
-  { title: "Dashboard", icon: "heroicons-outline:home", link: "dashboard" },
+  {
+    title: "Dashboard",
+    icon: "heroicons-outline:home",
+    link: "dashboard",
+    requiredAbilities: ["reports.view"],
+    requiredFeatures: ["reports"],
+  },
   {
     title: "Tasks",
     icon: "heroicons-outline:calendar",
