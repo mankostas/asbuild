@@ -40,9 +40,12 @@ const auth = useAuthStore();
 
 const items = computed(() =>
   addNewOptions.filter((i) => {
-    const req = i.requiredAbilities || [];
     const features = i.requiredFeatures || [];
-    return auth.hasAny(req) && features.every((f) => auth.features.includes(f));
+    if (!features.every((f) => auth.features.includes(f))) {
+      return false;
+    }
+    const req = i.requiredAbilities || [];
+    return i.requireAllAbilities ? auth.hasAll(req) : auth.hasAny(req);
   })
 );
 

@@ -1,5 +1,6 @@
 export interface RouteAccess {
   requiredAbilities?: string[];
+  requireAllAbilities?: boolean;
   requiredFeatures?: string[];
 }
 
@@ -17,7 +18,8 @@ const routeAccessMap: Record<string, RouteAccess> = {
     requiredFeatures: ['tasks'],
   },
   'tasks.edit': {
-    requiredAbilities: ['tasks.update', 'tasks.manage'],
+    requiredAbilities: ['tasks.view', 'tasks.update'],
+    requireAllAbilities: true,
     requiredFeatures: ['tasks'],
   },
   'tasks.details': {
@@ -37,11 +39,17 @@ const routeAccessMap: Record<string, RouteAccess> = {
     requiredFeatures: ['task_types'],
   },
   'taskTypes.create': {
-    requiredAbilities: ['task_types.create', 'task_types.manage'],
+    requiredAbilities: ['task_types.manage', 'task_types.create'],
+    requireAllAbilities: true,
     requiredFeatures: ['task_types'],
   },
   'taskTypes.edit': {
-    requiredAbilities: ['task_types.view', 'task_types.manage'],
+    requiredAbilities: [
+      'task_types.manage',
+      'task_types.view',
+      'task_types.update',
+    ],
+    requireAllAbilities: true,
     requiredFeatures: ['task_types'],
   },
   'taskStatuses.list': {
@@ -49,23 +57,24 @@ const routeAccessMap: Record<string, RouteAccess> = {
     requiredFeatures: ['task_statuses'],
   },
   'taskStatuses.create': {
-    requiredAbilities: ['task_statuses.create', 'task_statuses.manage'],
+    requiredAbilities: ['task_statuses.manage'],
     requiredFeatures: ['task_statuses'],
   },
   'taskStatuses.edit': {
-    requiredAbilities: ['task_statuses.update', 'task_statuses.manage'],
+    requiredAbilities: ['task_statuses.manage'],
     requiredFeatures: ['task_statuses'],
   },
   'roles.list': {
-    requiredAbilities: ['roles.view', 'roles.manage'],
+    requiredAbilities: ['roles.view'],
     requiredFeatures: ['roles'],
   },
   'roles.create': {
-    requiredAbilities: ['roles.create', 'roles.manage'],
+    requiredAbilities: ['roles.manage'],
     requiredFeatures: ['roles'],
   },
   'roles.edit': {
-    requiredAbilities: ['roles.update', 'roles.manage'],
+    requiredAbilities: ['roles.view', 'roles.manage'],
+    requireAllAbilities: true,
     requiredFeatures: ['roles'],
   },
   'manuals.list': {
@@ -82,10 +91,12 @@ const routeAccessMap: Record<string, RouteAccess> = {
   },
   'notifications.inbox': {
     requiredAbilities: ['notifications.view', 'notifications.manage'],
+    requireAllAbilities: true,
     requiredFeatures: ['notifications'],
   },
   'notifications.prefs': {
     requiredAbilities: ['notifications.view', 'notifications.manage'],
+    requireAllAbilities: true,
     requiredFeatures: ['notifications'],
   },
   'settings.branding': {
@@ -98,6 +109,7 @@ const routeAccessMap: Record<string, RouteAccess> = {
   },
   'gdpr.index': {
     requiredAbilities: ['gdpr.view', 'gdpr.manage'],
+    requireAllAbilities: true,
     requiredFeatures: ['gdpr'],
   },
   reports: {
@@ -109,43 +121,46 @@ const routeAccessMap: Record<string, RouteAccess> = {
     requiredFeatures: ['reports'],
   },
   'employees.list': {
-    requiredAbilities: ['employees.view', 'employees.manage'],
+    requiredAbilities: ['employees.view'],
     requiredFeatures: ['employees'],
   },
   'employees.create': {
-    requiredAbilities: ['employees.create', 'employees.manage'],
+    requiredAbilities: ['employees.manage'],
     requiredFeatures: ['employees'],
   },
   'employees.edit': {
-    requiredAbilities: ['employees.update', 'employees.manage'],
+    requiredAbilities: ['employees.view', 'employees.manage'],
+    requireAllAbilities: true,
     requiredFeatures: ['employees'],
   },
   'tenants.list': {
-    requiredAbilities: ['tenants.view', 'tenants.manage'],
+    requiredAbilities: ['tenants.view'],
     requiredFeatures: ['tenants'],
   },
   'tenants.create': {
-    requiredAbilities: ['tenants.create', 'tenants.manage'],
+    requiredAbilities: ['tenants.create'],
     requiredFeatures: ['tenants'],
   },
   'tenants.edit': {
-    requiredAbilities: ['tenants.update', 'tenants.manage'],
+    requiredAbilities: ['tenants.view', 'tenants.update'],
+    requireAllAbilities: true,
     requiredFeatures: ['tenants'],
   },
   'tenants.view': {
-    requiredAbilities: ['tenants.view', 'tenants.manage'],
+    requiredAbilities: ['tenants.view'],
     requiredFeatures: ['tenants'],
   },
   'teams.list': {
-    requiredAbilities: ['teams.view', 'teams.manage'],
+    requiredAbilities: ['teams.view'],
     requiredFeatures: ['teams'],
   },
   'teams.create': {
-    requiredAbilities: ['teams.create', 'teams.manage'],
+    requiredAbilities: ['teams.create'],
     requiredFeatures: ['teams'],
   },
   'teams.edit': {
-    requiredAbilities: ['teams.update', 'teams.manage'],
+    requiredAbilities: ['teams.view', 'teams.update'],
+    requireAllAbilities: true,
     requiredFeatures: ['teams'],
   },
 };

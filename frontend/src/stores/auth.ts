@@ -65,6 +65,20 @@ export const useAuthStore = defineStore('auth', {
         });
       };
     },
+    hasAll(state) {
+      return (abilities: string[]) => {
+        if (abilities.length === 0 || this.isSuperAdmin) {
+          return true;
+        }
+        return abilities.every((ability) => {
+          if (state.abilities.includes(ability)) {
+            return true;
+          }
+          const prefix = ability.split('.')[0];
+          return prefix ? state.abilities.includes(`${prefix}.manage`) : false;
+        });
+      };
+    },
     userId: (state) => state.user?.id,
   },
   actions: {
@@ -185,6 +199,10 @@ export function can(ability: string): boolean {
 
 export function hasAny(abilities: string[]): boolean {
   return useAuthStore().hasAny(abilities);
+}
+
+export function hasAll(abilities: string[]): boolean {
+  return useAuthStore().hasAll(abilities);
 }
 
 export function hasFeature(feature: string): boolean {

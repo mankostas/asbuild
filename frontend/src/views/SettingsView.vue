@@ -50,6 +50,7 @@ import Switch from '@/components/ui/Switch/index.vue';
 import { RouterLink } from 'vue-router';
 import { useNotify } from '@/plugins/notify';
 import { useAuthStore } from '@/stores/auth';
+import { accessForRoute } from '@/constants/menu';
 
 interface Pref {
   category: string;
@@ -59,19 +60,41 @@ interface Pref {
 
 const auth = useAuthStore();
 
+const notificationAccess = accessForRoute('notifications.prefs');
+const gdprAccess = accessForRoute('gdpr.index');
+
+const canAccessNotifications = computed(() => {
+  const features = notificationAccess.requiredFeatures || [];
+  if (!features.every((f) => auth.features.includes(f))) {
+    return false;
+  }
+  const req = notificationAccess.requiredAbilities || [];
+  return notificationAccess.requireAllAbilities
+    ? auth.hasAll(req)
+    : auth.hasAny(req);
+});
+
+const canAccessGdpr = computed(() => {
+  const features = gdprAccess.requiredFeatures || [];
+  if (!features.every((f) => auth.features.includes(f))) {
+    return false;
+  }
+  const req = gdprAccess.requiredAbilities || [];
+  return gdprAccess.requireAllAbilities
+    ? auth.hasAll(req)
+    : auth.hasAny(req);
+});
+
 const tabs = computed(() => {
   const t = [
     { id: 'profile', label: 'Profile' },
     { id: 'branding', label: 'Branding' },
     { id: 'footer', label: 'Footer' },
   ];
-  if (
-    auth.hasAny(['notifications.view', 'notifications.manage']) &&
-    auth.features.includes('notifications')
-  ) {
+  if (canAccessNotifications.value) {
     t.push({ id: 'notifications', label: 'Notifications' });
   }
-  if (auth.hasAny(['gdpr.view', 'gdpr.manage'])) {
+  if (canAccessGdpr.value) {
     t.push({ id: 'gdpr', label: 'GDPR' });
   }
   return t;
@@ -100,10 +123,7 @@ async function savePrefs() {
 }
 
 onMounted(() => {
-  if (
-    auth.hasAny(['notifications.view', 'notifications.manage']) &&
-    auth.features.includes('notifications')
-  ) {
+  if (canAccessNotifications.value) {
     load();
   }
 });
