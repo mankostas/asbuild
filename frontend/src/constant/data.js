@@ -12,14 +12,14 @@ export const menuItems = [
     title: "Tasks",
     icon: "heroicons-outline:calendar",
     link: "tasks.list",
-    requiredAbilities: ["tasks.view", "tasks.manage"],
+    requiredAbilities: ["tasks.view"],
     requiredFeatures: ["tasks"],
   },
   {
     title: "Task Board",
     icon: "heroicons-outline:view-columns",
     link: "tasks.board",
-    requiredAbilities: ["tasks.view", "tasks.update"],
+    requiredAbilities: ["tasks.view"],
     requiredFeatures: ["tasks"],
   },
   {
@@ -143,14 +143,14 @@ export const topMenu = [
     title: "Tasks",
     icon: "heroicons-outline:calendar",
     link: "tasks.list",
-    requiredAbilities: ["tasks.view", "tasks.manage"],
+    requiredAbilities: ["tasks.view"],
     requiredFeatures: ["tasks"],
   },
   {
     title: "Task Board",
     icon: "heroicons-outline:view-columns",
     link: "tasks.board",
-    requiredAbilities: ["tasks.view", "tasks.update"],
+    requiredAbilities: ["tasks.view"],
     requiredFeatures: ["tasks"],
   },
   {

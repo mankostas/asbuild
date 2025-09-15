@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import InputGroup from '@dc/components/InputGroup';
@@ -71,6 +71,7 @@ import Icon from '@dc/components/Icon';
 import { MenuItem } from '@headlessui/vue';
 import { useLookupsStore } from '@/stores/lookups';
 import { useTenantStore } from '@/stores/tenant';
+import { useAuthStore } from '@/stores/auth';
 
 interface Option { value: any; label: string }
 interface Filters {
@@ -89,8 +90,10 @@ const props = defineProps<{ modelValue: Filters }>();
 const emit = defineEmits<{ (e: 'update:modelValue', v: Filters): void }>();
 const { t } = useI18n();
 
+const auth = useAuthStore();
 const lookups = useLookupsStore();
 const tenantStore = useTenantStore();
+const canViewTasks = computed(() => auth.can('tasks.view'));
 const assigneeOptions = ref<Option[]>([]);
 const taskTypeOptions = ref<Option[]>([]);
 const priorityOptions: Option[] = [
@@ -116,6 +119,11 @@ const local = ref<Filters>({
 });
 
 async function loadOptions(force = false) {
+  if (!canViewTasks.value) {
+    assigneeOptions.value = [];
+    taskTypeOptions.value = [];
+    return;
+  }
   await lookups.fetchAssignees('employees', force);
   assigneeOptions.value = lookups.assignees.employees.map((a: any) => ({
     value: String(a.id),
@@ -129,6 +137,18 @@ onMounted(async () => {
   await loadOptions();
   Object.assign(local.value, props.modelValue);
 });
+
+watch(
+  canViewTasks,
+  (val) => {
+    if (val) {
+      loadOptions(true);
+    } else {
+      assigneeOptions.value = [];
+      taskTypeOptions.value = [];
+    }
+  },
+);
 
 watch(
   () => tenantStore.currentTenantId,

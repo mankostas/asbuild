@@ -49,6 +49,7 @@
             v-model="col.tasks"
             group="tasks"
             item-key="id"
+            :disabled="!canMoveTasks"
             class="px-2 pt-4 flex flex-col gap-2 min-h-[100px]"
             :data-status="col.status.slug"
             :move="onDragMove"
@@ -144,6 +145,8 @@ const auth = useAuthStore();
 const router = useRouter();
 const tenantStore = useTenantStore();
 
+const canViewBoard = computed(() => auth.can('tasks.view'));
+const canMoveTasks = computed(() => auth.hasAny(['tasks.update', 'tasks.manage']));
 const canTaskTypes = computed(() => can('task_types.view'));
 
 interface Task {
@@ -217,6 +220,17 @@ watch(
 );
 
 watch(
+  canViewBoard,
+  (val) => {
+    if (val) {
+      load();
+    } else {
+      columns.value = [];
+    }
+  },
+);
+
+watch(
   [() => prefs.filters, () => prefs.sorting],
   load,
   { deep: true }
@@ -258,6 +272,10 @@ function buildQuery() {
 }
 
 async function load() {
+  if (!canViewBoard.value) {
+    columns.value = [];
+    return;
+  }
   const { data } = await api.get('/task-board', { params: buildQuery() });
   const cols = (data.data ?? data).map((col: any) => ({
     ...col,
@@ -267,6 +285,7 @@ async function load() {
 }
 
 async function loadMore(col: Column) {
+  if (!canViewBoard.value) return;
   const page = (col.meta?.page || 1) + 1;
   const { data } = await api.get('/task-board/column', {
     params: { status: col.status.slug, page, ...buildQuery() },
@@ -280,10 +299,13 @@ async function loadMore(col: Column) {
 
 onMounted(() => {
   Object.assign(prefs, loadBoardPrefs(auth.userId || auth.user?.id || 0));
-  load();
+  if (canViewBoard.value) {
+    load();
+  }
 });
 
 async function performMove(task: Task, statusSlug: string, index: number) {
+  if (!canMoveTasks.value) return;
   const snapshot = columns.value.map((c) => ({ ...c, tasks: [...c.tasks] }));
   const fromCol = columns.value.find((c) => c.tasks.some((t) => t.id === task.id));
   if (fromCol) {
@@ -310,6 +332,12 @@ async function onDrop(evt: any) {
   const snapshots = dragSnapshots.get(task.id);
   const snapshot = snapshots?.pop();
   if (!snapshots?.length) dragSnapshots.delete(task.id);
+  if (!canMoveTasks.value) {
+    if (snapshot) {
+      columns.value = snapshot;
+    }
+    return;
+  }
   try {
     const statusSlug = evt.to?.dataset.status;
     const { data } = await api.patch('/task-board/move', {
@@ -327,6 +355,7 @@ async function onDrop(evt: any) {
 }
 
 function onDragStart(evt: any) {
+  if (!canMoveTasks.value) return;
   const task: Task = evt.item.__draggable_context.element;
   invalidMoveTasks.delete(task.id);
   const snapshots = dragSnapshots.get(task.id) ?? [];
@@ -344,6 +373,7 @@ function allowedTransitions(task: Task, from: string): string[] {
 }
 
 function onDragMove(evt: any) {
+  if (!canMoveTasks.value) return false;
   const task: Task = evt.draggedContext.element;
   const toStatus = evt.to?.dataset.status;
   if (!toStatus || toStatus === task.status_slug) return true;
