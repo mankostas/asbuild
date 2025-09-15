@@ -114,5 +114,33 @@ describe('TypeForm tenant workflow', () => {
     result.statusFlow.value.push(['open', 'closed']);
     expect(result.statusFlow.value.length).toBe(1);
   });
+
+  it('preserves global roles when fetching tenant roles', async () => {
+    const result = (TypeForm as any).setup({}, { expose: () => {}, emit: () => {} });
+    const mockGet = api.get as unknown as vi.Mock;
+    mockGet.mockReset();
+    mockGet.mockImplementation((url: string, opts: any) => {
+      if (url === '/roles' && opts?.params?.tenant_id === 5) {
+        return Promise.resolve({ data: { data: [{ id: 1, slug: 'tenant_role' }] } });
+      }
+      if (url === '/roles' && opts?.params?.scope === 'global') {
+        return Promise.resolve({ data: { data: [{ id: 2, slug: 'super_admin' }] } });
+      }
+      if (url === '/task-statuses') {
+        return Promise.resolve({ data: { data: [] } });
+      }
+      return Promise.resolve({ data: {} });
+    });
+
+    result.selected.value = {
+      roles: { view: ['super_admin', 'tenant_role'], edit: ['super_admin'] },
+    } as any;
+
+    await result.refreshTenant(5, '');
+    expect(result.tenantRoles.value.map((r: any) => r.slug)).toContain(
+      'super_admin',
+    );
+    expect(result.selected.value.roles.view).toContain('super_admin');
+  });
 });
 
