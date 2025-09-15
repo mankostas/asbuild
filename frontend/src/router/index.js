@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { accessForRoute } from '@/constants/menu';
 import api from '@/services/api';
 import { setTokens } from '@/services/authStorage';
 
@@ -13,7 +14,7 @@ export const routes = [
     component: () => import('@/views/home/Dashboard.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['reports.view'],
+      ...accessForRoute('dashboard'),
       breadcrumb: 'routes.dashboard',
       title: 'Dashboard',
       layout: 'app',
@@ -25,7 +26,7 @@ export const routes = [
     component: () => import('@/views/tasks/TasksList.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['tasks.view'],
+      ...accessForRoute('tasks.list'),
       breadcrumb: 'routes.tasks',
       title: 'Tasks',
       layout: 'app',
@@ -37,7 +38,7 @@ export const routes = [
       component: () => import('@/views/tasks/TaskForm.vue'),
       meta: {
         requiresAuth: true,
-        requiredAbilities: ['tasks.create'],
+        ...accessForRoute('tasks.create'),
         breadcrumb: 'routes.taskCreate',
         title: 'Create Task',
         layout: 'app',
@@ -50,7 +51,7 @@ export const routes = [
     component: () => import('@/views/tasks/TaskForm.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['tasks.update', 'tasks.manage'],
+      ...accessForRoute('tasks.edit'),
       breadcrumb: 'routes.taskEdit',
       title: 'Edit Task',
       layout: 'app',
@@ -63,7 +64,7 @@ export const routes = [
     component: () => import('@/views/tasks/TaskDetails.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['tasks.view'],
+      ...accessForRoute('tasks.details'),
       breadcrumb: 'routes.taskDetail',
       title: 'Task Detail',
       layout: 'app',
@@ -76,7 +77,7 @@ export const routes = [
     component: () => import('@/views/tasks/BoardView.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['tasks.view'],
+      ...accessForRoute('tasks.board'),
       breadcrumb: 'routes.taskBoard',
       title: 'Task Board',
       layout: 'app',
@@ -88,7 +89,7 @@ export const routes = [
     component: () => import('@/views/tasks/ReportsView.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['reports.view'],
+      ...accessForRoute('tasks.reports'),
       breadcrumb: 'routes.taskReports',
       title: 'Task Reports',
       layout: 'app',
@@ -100,7 +101,7 @@ export const routes = [
     component: () => import('@/views/types/TypesList.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['task_types.view'],
+      ...accessForRoute('taskTypes.list'),
       breadcrumb: 'routes.taskTypes',
       title: 'Task Types',
       layout: 'app',
@@ -112,7 +113,7 @@ export const routes = [
     component: () => import('@/views/types/TypeForm.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['task_types.create', 'task_types.manage'],
+      ...accessForRoute('taskTypes.create'),
       breadcrumb: 'routes.taskTypeCreate',
       title: 'Create Task Type',
       layout: 'app',
@@ -125,7 +126,7 @@ export const routes = [
     component: () => import('@/views/types/TypeForm.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['task_types.view', 'task_types.manage'],
+      ...accessForRoute('taskTypes.edit'),
       breadcrumb: 'routes.taskTypeEdit',
       title: 'Edit Task Type',
       layout: 'app',
@@ -138,7 +139,7 @@ export const routes = [
     component: () => import('@/views/statuses/StatusesList.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['task_statuses.view'],
+      ...accessForRoute('taskStatuses.list'),
       breadcrumb: 'routes.taskStatuses',
       title: 'Task Statuses',
       layout: 'app',
@@ -150,7 +151,7 @@ export const routes = [
     component: () => import('@/views/statuses/StatusForm.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['task_statuses.create', 'task_statuses.manage'],
+      ...accessForRoute('taskStatuses.create'),
       breadcrumb: 'routes.taskStatusCreate',
       title: 'Create Task Status',
       layout: 'app',
@@ -163,7 +164,7 @@ export const routes = [
     component: () => import('@/views/statuses/StatusForm.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['task_statuses.update', 'task_statuses.manage'],
+      ...accessForRoute('taskStatuses.edit'),
       breadcrumb: 'routes.taskStatusEdit',
       title: 'Edit Task Status',
       layout: 'app',
@@ -176,7 +177,7 @@ export const routes = [
     component: () => import('@/views/roles/RolesList.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['roles.view', 'roles.manage'],
+      ...accessForRoute('roles.list'),
       breadcrumb: 'routes.roles',
       title: 'Roles',
       layout: 'app',
@@ -188,7 +189,7 @@ export const routes = [
     component: () => import('@/views/roles/RoleForm.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['roles.create', 'roles.manage'],
+      ...accessForRoute('roles.create'),
       breadcrumb: 'routes.roleCreate',
       title: 'Create Role',
       layout: 'app',
@@ -201,7 +202,7 @@ export const routes = [
     component: () => import('@/views/roles/RoleForm.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['roles.update', 'roles.manage'],
+      ...accessForRoute('roles.edit'),
       breadcrumb: 'routes.roleEdit',
       title: 'Edit Role',
       layout: 'app',
@@ -214,8 +215,7 @@ export const routes = [
     component: () => import('@/views/manuals/ManualsList.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['manuals.manage'],
-      requiredFeatures: ['manuals'],
+      ...accessForRoute('manuals.list'),
       breadcrumb: 'routes.manuals',
       title: 'Manuals',
       layout: 'app',
@@ -227,8 +227,7 @@ export const routes = [
     component: () => import('@/views/manuals/ManualForm.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['manuals.manage'],
-      requiredFeatures: ['manuals'],
+      ...accessForRoute('manuals.create'),
       breadcrumb: 'routes.manualCreate',
       title: 'Upload Manual',
       layout: 'app',
@@ -241,8 +240,7 @@ export const routes = [
     component: () => import('@/views/manuals/ManualForm.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['manuals.manage'],
-      requiredFeatures: ['manuals'],
+      ...accessForRoute('manuals.edit'),
       breadcrumb: 'routes.manualEdit',
       title: 'Edit Manual',
       layout: 'app',
@@ -255,8 +253,7 @@ export const routes = [
     component: () => import('@/views/notifications/NotificationsInbox.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['notifications.view', 'notifications.manage'],
-      requiredFeatures: ['notifications'],
+      ...accessForRoute('notifications.inbox'),
       breadcrumb: 'routes.notifications',
       title: 'Notifications',
       layout: 'app',
@@ -269,8 +266,7 @@ export const routes = [
       import('@/views/notifications/NotificationPreferences.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['notifications.view', 'notifications.manage'],
-      requiredFeatures: ['notifications'],
+      ...accessForRoute('notifications.prefs'),
       breadcrumb: 'routes.notifications',
       title: 'Notification Preferences',
       layout: 'app',
@@ -283,6 +279,7 @@ export const routes = [
     component: () => import('@/views/settings/Profile.vue'),
     meta: {
       requiresAuth: true,
+      ...accessForRoute('settings.profile'),
       breadcrumb: 'routes.profile',
       title: 'Profile',
       layout: 'app',
@@ -295,8 +292,7 @@ export const routes = [
     component: () => import('@/views/settings/Branding.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['branding.manage'],
-      requiredFeatures: ['branding'],
+      ...accessForRoute('settings.branding'),
       breadcrumb: 'routes.branding',
       title: 'Branding',
       layout: 'app',
@@ -309,8 +305,7 @@ export const routes = [
     component: () => import('@/views/settings/Footer.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['branding.manage'],
-      requiredFeatures: ['branding'],
+      ...accessForRoute('settings.footer'),
       breadcrumb: 'routes.footer',
       title: 'Footer',
       layout: 'app',
@@ -335,11 +330,11 @@ export const routes = [
     component: () => import('@/views/gdpr/Gdpr.vue'),
     meta: {
       requiresAuth: true,
+      ...accessForRoute('gdpr.index'),
       breadcrumb: 'routes.gdpr',
       title: 'GDPR',
       layout: 'app',
       groupParent: 'settings',
-      requiredAbilities: ['gdpr.view', 'gdpr.manage'],
     },
   },
   {
@@ -348,10 +343,10 @@ export const routes = [
     redirect: '/reports/kpis',
     meta: {
       requiresAuth: true,
+      ...accessForRoute('reports'),
       breadcrumb: 'routes.reports',
       title: 'Reports',
       layout: 'app',
-      requiredAbilities: ['reports.view'],
     },
   },
   {
@@ -360,11 +355,11 @@ export const routes = [
     component: () => import('@/views/reports/Reports.vue'),
     meta: {
       requiresAuth: true,
+      ...accessForRoute('reports.kpis'),
       breadcrumb: 'routes.reports',
       title: 'Reports - KPIs',
       layout: 'app',
       groupParent: 'reports',
-      requiredAbilities: ['reports.view'],
     },
   },
   {
@@ -384,7 +379,7 @@ export const routes = [
         component: () => import('@/views/employees/EmployeesList.vue'),
         meta: {
           requiresAuth: true,
-          requiredAbilities: ['employees.view', 'employees.manage'],
+          ...accessForRoute('employees.list'),
           breadcrumb: 'routes.employees',
           title: 'Employees',
           layout: 'app',
@@ -396,7 +391,7 @@ export const routes = [
         component: () => import('@/views/employees/EmployeeForm.vue'),
         meta: {
           requiresAuth: true,
-          requiredAbilities: ['employees.create', 'employees.manage'],
+          ...accessForRoute('employees.create'),
           breadcrumb: 'routes.employeeCreate',
           title: 'Invite Employee',
           layout: 'app',
@@ -409,7 +404,7 @@ export const routes = [
         component: () => import('@/views/employees/EmployeeForm.vue'),
         meta: {
           requiresAuth: true,
-          requiredAbilities: ['employees.update', 'employees.manage'],
+          ...accessForRoute('employees.edit'),
           breadcrumb: 'routes.employeeEdit',
           title: 'Edit Employee',
           layout: 'app',
@@ -422,7 +417,7 @@ export const routes = [
         component: () => import('@/views/tenants/TenantsList.vue'),
         meta: {
           requiresAuth: true,
-          requiredAbilities: ['tenants.view', 'tenants.manage'],
+          ...accessForRoute('tenants.list'),
           breadcrumb: 'routes.tenants',
           title: 'Tenants',
           layout: 'app',
@@ -434,7 +429,7 @@ export const routes = [
         component: () => import('@/views/tenants/TenantForm.vue'),
         meta: {
           requiresAuth: true,
-          requiredAbilities: ['tenants.create', 'tenants.manage'],
+          ...accessForRoute('tenants.create'),
           breadcrumb: 'routes.tenantCreate',
           title: 'Create Tenant',
           layout: 'app',
@@ -447,7 +442,7 @@ export const routes = [
         component: () => import('@/views/tenants/TenantForm.vue'),
         meta: {
           requiresAuth: true,
-          requiredAbilities: ['tenants.update', 'tenants.manage'],
+          ...accessForRoute('tenants.edit'),
           breadcrumb: 'routes.tenantEdit',
           title: 'Edit Tenant',
           layout: 'app',
@@ -460,7 +455,7 @@ export const routes = [
         component: () => import('@/views/tenants/TenantDetails.vue'),
         meta: {
           requiresAuth: true,
-          requiredAbilities: ['tenants.view', 'tenants.manage'],
+          ...accessForRoute('tenants.view'),
           breadcrumb: 'routes.tenantDetail',
           title: 'Tenant Detail',
           layout: 'app',
@@ -475,7 +470,7 @@ export const routes = [
     component: () => import('@/views/teams/TeamsList.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['teams.view', 'teams.manage'],
+      ...accessForRoute('teams.list'),
       breadcrumb: 'routes.teams',
       title: 'Teams',
       layout: 'app',
@@ -487,7 +482,7 @@ export const routes = [
     component: () => import('@/views/teams/TeamForm.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['teams.create', 'teams.manage'],
+      ...accessForRoute('teams.create'),
       breadcrumb: 'routes.teamCreate',
       title: 'Create Team',
       layout: 'app',
@@ -500,7 +495,7 @@ export const routes = [
     component: () => import('@/views/teams/TeamForm.vue'),
     meta: {
       requiresAuth: true,
-      requiredAbilities: ['teams.update', 'teams.manage'],
+      ...accessForRoute('teams.edit'),
       breadcrumb: 'routes.teamEdit',
       title: 'Edit Team',
       layout: 'app',

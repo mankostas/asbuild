@@ -101,7 +101,7 @@
   </ul>
 </template>
 <script>
-import { topMenu } from "@/constant/data";
+import { topMenu } from "@/constants/menu";
 import Icon from "../../Icon";
 import { useAuthStore } from "@/stores/auth";
 

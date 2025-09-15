@@ -122,7 +122,7 @@
 <script>
 // import { Icon } from "@iconify/vue";
 import { defineComponent } from "vue";
-import { menuItems } from "@/constant/data";
+import { menuItems } from "@/constants/menu";
 import Navmenu from "./Navmenu";
 import { gsap } from "gsap";
 import { ref, onMounted } from "vue";
