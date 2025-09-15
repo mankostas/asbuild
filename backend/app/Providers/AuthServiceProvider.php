@@ -14,6 +14,7 @@ use App\Policies\TaskPolicy;
 use App\Policies\TaskStatusPolicy;
 use App\Policies\TaskTypePolicy;
 use App\Policies\TeamPolicy;
+use App\Services\AbilityService;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -28,42 +29,14 @@ class AuthServiceProvider extends ServiceProvider
         Team::class => TeamPolicy::class,
     ];
 
-    public function boot(): void
+    public function boot(AbilityService $abilityService): void
     {
         Gate::define('belongs-to-tenant', function ($user, $tenantId) {
             return $user->tenant_id === $tenantId;
         });
 
         foreach (config('abilities', []) as $code) {
-            Gate::define($code, fn ($user) => $this->hasAbility($user, $code));
+            Gate::define($code, fn ($user) => $abilityService->userHasAbility($user, $code));
         }
-    }
-
-    protected function hasAbility($user, string $code): bool
-    {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        $tenantId = app()->bound('tenant_id') ? (int) app('tenant_id') : $user->tenant_id;
-
-        $abilities = $user->rolesForTenant($tenantId)
-            ->pluck('abilities')
-            ->flatten()
-            ->filter()
-            ->unique()
-            ->all();
-
-        if (in_array('*', $abilities)) {
-            return true;
-        }
-
-        if (in_array($code, $abilities)) {
-            return true;
-        }
-
-        $prefix = explode('.', $code)[0] . '.manage';
-
-        return in_array($prefix, $abilities);
     }
 }
