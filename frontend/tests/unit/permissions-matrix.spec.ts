@@ -1,5 +1,13 @@
 /** @vitest-environment jsdom */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+vi.mock('@/stores/features', () => ({
+  useFeaturesStore: () => ({
+    load: vi.fn().mockResolvedValue({}),
+    abilitiesFor: (slug: string) => (slug === 'tasks' ? ['tasks.view'] : []),
+  }),
+}));
+
 import { createApp, ref, nextTick } from 'vue';
 import { createI18n } from 'vue-i18n';
 import PermissionsMatrix from '@/components/types/PermissionsMatrix.vue';

@@ -27,6 +27,13 @@ vi.mock('@/stores/tenant', () => ({
   }),
 }));
 
+vi.mock('@/stores/features', () => ({
+  useFeaturesStore: () => ({
+    load: vi.fn().mockResolvedValue({}),
+    abilitiesFor: () => [],
+  }),
+}));
+
 vi.mock('@/utils/ability', () => ({
   default: () => true,
 }));

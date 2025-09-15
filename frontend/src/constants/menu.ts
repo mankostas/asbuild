@@ -39,17 +39,11 @@ const routeAccessMap: Record<string, RouteAccess> = {
     requiredFeatures: ['task_types'],
   },
   'taskTypes.create': {
-    requiredAbilities: ['task_types.manage', 'task_types.create'],
-    requireAllAbilities: true,
+    requiredAbilities: ['task_types.create'],
     requiredFeatures: ['task_types'],
   },
   'taskTypes.edit': {
-    requiredAbilities: [
-      'task_types.manage',
-      'task_types.view',
-      'task_types.update',
-    ],
-    requireAllAbilities: true,
+    requiredAbilities: ['task_types.update'],
     requiredFeatures: ['task_types'],
   },
   'taskStatuses.list': {
