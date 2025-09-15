@@ -69,7 +69,8 @@ import Card from '@/components/ui/Card/index.vue';
 import vSelect from 'vue-select';
 import { can, useAuthStore } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
-import { featureMap } from '@/constants/featureMap';
+import { useFeaturesStore } from '@/stores/features';
+import { storeToRefs } from 'pinia';
 import {
   ensureHiddenRole,
   assignHiddenRoleToUser,
@@ -80,6 +81,8 @@ const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
+const featuresStore = useFeaturesStore();
+const { featureMap } = storeToRefs(featuresStore);
 
 const isEdit = computed(() => route.name === 'employees.edit');
 const canAccess = computed(() =>
@@ -102,14 +105,15 @@ const featureGrants = ref<Record<string, string[]>>({});
 const hiddenRoles = ref<Record<string, any>>({});
 
 const availableFeatures = computed(() => {
+  const map = featureMap.value;
   if (auth.isSuperAdmin) {
     const t = tenantStore.tenants.find(
       (tn: any) => String(tn.id) === String(tenantId.value),
     );
     const features = t?.features || [];
-    return features.filter((f: string) => featureMap[f]);
+    return features.filter((f: string) => map[f]);
   }
-  return auth.features.filter((f) => featureMap[f]);
+  return auth.features.filter((f) => map[f]);
 });
 
 async function loadRoles() {
@@ -182,6 +186,7 @@ async function submit() {
 
 watch(tenantId, async (newTenant, oldTenant) => {
   if (!auth.isSuperAdmin || newTenant === oldTenant) return;
+  await featuresStore.load();
   if (isEdit.value && !oldTenant) return;
   const prev = tenantStore.tenantId;
   tenantStore.setTenant(String(newTenant));
@@ -200,6 +205,7 @@ onMounted(async () => {
     await tenantStore.loadTenants({ per_page: 100 });
   }
   await loadRoles();
+  await featuresStore.load();
   await loadEmployee();
   availableFeatures.value.forEach((f) => {
     if (!featureGrants.value[f]) featureGrants.value[f] = [];

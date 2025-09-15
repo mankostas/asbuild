@@ -89,8 +89,8 @@ import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import vSelect from 'vue-select';
 import { TENANT_HEADER } from '@/config/app';
 import { useForm } from 'vee-validate';
-import { featureMap } from '@/constants/featureMap';
 import TenantSwitcher from '@/components/admin/TenantSwitcher.vue';
+import { useFeaturesStore } from '@/stores/features';
 
 const route = useRoute();
 const router = useRouter();
@@ -98,6 +98,7 @@ const notify = useNotify();
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
 const rolesStore = useRolesStore();
+const featuresStore = useFeaturesStore();
 
 const name = ref('');
 const slug = ref('');
@@ -173,6 +174,7 @@ onMounted(async () => {
 
 async function loadAbilityOptions() {
   try {
+    await featuresStore.load();
     const params = tenantId.value ? { forTenant: 1 } : undefined;
     const headers = tenantId.value
       ? { [TENANT_HEADER]: tenantId.value }
@@ -183,7 +185,7 @@ async function loadAbilityOptions() {
       hasAbilityMap.value
         ? Object.values(perFeature).flat()
         : tenantFeatures.value.flatMap(
-            (f: string) => featureMap[f]?.abilities || [],
+            (f: string) => featuresStore.abilitiesFor(f),
           ),
     );
     abilityOptions.value = (data || [])

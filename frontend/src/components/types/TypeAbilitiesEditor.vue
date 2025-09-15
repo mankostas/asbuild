@@ -17,7 +17,7 @@
 import { reactive, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Switch from '@/components/ui/Switch/index.vue';
-import { featureMap } from '@/constants/featureMap';
+import { useFeaturesStore } from '@/stores/features';
 
 interface Abilities {
   read: boolean;
@@ -52,9 +52,12 @@ const abilityMap: Record<keyof Abilities, string[]> = {
   transition: ['tasks.status.update'],
 };
 
+const featuresStore = useFeaturesStore();
+void featuresStore.load();
+
 const allowedAbilities = computed(() =>
   new Set(
-    props.features.flatMap((f) => featureMap[f]?.abilities || []),
+    props.features.flatMap((f) => featuresStore.abilitiesFor(f)),
   ),
 );
 

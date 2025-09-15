@@ -65,12 +65,15 @@ import vSelect from 'vue-select';
 import { useForm } from 'vee-validate';
 import { useTenantStore } from '@/stores/tenant';
 import hasAbility from '@/utils/ability';
-import { featureMap } from '@/constants/featureMap';
+import { useFeaturesStore } from '@/stores/features';
+import { storeToRefs } from 'pinia';
 
 const route = useRoute();
 const router = useRouter();
 const isEdit = computed(() => route.name === 'tenants.edit');
 const tenantStore = useTenantStore();
+const featuresStore = useFeaturesStore();
+const { featureMap } = storeToRefs(featuresStore);
 
 const canAccess = computed(
   () =>
@@ -98,10 +101,10 @@ const { handleSubmit, setErrors, errors } = useForm();
 onMounted(async () => {
   if (!canAccess.value) return;
   try {
-    const { data: features } = await api.get('/lookups/features');
-    featureOptions.value = features.map((f: any) => ({
-      label: f.label,
-      value: f.slug,
+    const map = await featuresStore.load();
+    featureOptions.value = Object.entries(map).map(([slug, data]) => ({
+      label: data.label,
+      value: slug,
     }));
   } catch (e) {
     featureOptions.value = [];
@@ -120,7 +123,7 @@ onMounted(async () => {
     featureAbilities.value = { ...(data.feature_abilities || {}) };
     form.value.features.forEach((f: string) => {
       if (!featureAbilities.value[f]) {
-        featureAbilities.value[f] = [...(featureMap[f]?.abilities || [])];
+        featureAbilities.value[f] = [...featuresStore.abilitiesFor(f)];
       }
     });
     tenantStore.setTenantFeatures(route.params.id as string, form.value.features);
@@ -165,7 +168,7 @@ const onSubmit = handleSubmit(async () => {
 });
 
 function abilityOptionsFor(feature: string) {
-  return (featureMap[feature]?.abilities || []).map((a) => ({
+  return featuresStore.abilitiesFor(feature).map((a) => ({
     label: a,
     value: a,
   }));
@@ -182,7 +185,7 @@ watch(
     });
     features.forEach((f) => {
       if (!featureAbilities.value[f]) {
-        featureAbilities.value[f] = [...(featureMap[f]?.abilities || [])];
+        featureAbilities.value[f] = [...featuresStore.abilitiesFor(f)];
       }
     });
     if (isEdit.value) {

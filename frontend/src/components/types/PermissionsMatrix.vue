@@ -102,7 +102,7 @@ import Tooltip from '@/components/ui/Tooltip/index.vue';
 import Icon from '@/components/Icon';
 import en from '@/i18n/en.json';
 import el from '@/i18n/el.json';
-import { featureMap } from '@/constants/featureMap';
+import { useFeaturesStore } from '@/stores/features';
 
 interface Role {
   id: number;
@@ -220,11 +220,14 @@ const abilityMap: Record<string, string[]> = {
   transition: ['tasks.status.update'],
 };
 
+const featuresStore = useFeaturesStore();
+void featuresStore.load();
+
 const allowedAbilities = computed(() =>
   new Set(
     props.featureAbilities !== undefined
       ? Object.values(props.featureAbilities).flat()
-      : props.features.flatMap((f) => featureMap[f]?.abilities || []),
+      : props.features.flatMap((f) => featuresStore.abilitiesFor(f)),
   ),
 );
 

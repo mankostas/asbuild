@@ -2,6 +2,7 @@
 
 return [
     'tasks',
+    'manuals',
     'notifications',
     'reports',
     'billing',

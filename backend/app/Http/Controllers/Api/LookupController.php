@@ -76,9 +76,19 @@ class LookupController extends Controller
         return collect(config('abilities'))->values()->all();
     }
 
-    public function features()
+    public function featureMap()
     {
         return collect(config('feature_map'))
+            ->map(fn ($data) => [
+                'label' => $data['label'],
+                'abilities' => array_values($data['abilities'] ?? []),
+            ])
+            ->all();
+    }
+
+    public function features()
+    {
+        return collect($this->featureMap())
             ->map(fn ($data, $slug) => [
                 'slug' => $slug,
                 'label' => $data['label'],
