@@ -12,8 +12,6 @@ return [
             'tasks.status.update',
             'tasks.comment.create',
             'tasks.attach.upload',
-            'tasks.board.view',
-            'tasks.list.view',
             'tasks.watch',
             'tasks.manage',
         ],
