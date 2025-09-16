@@ -72,6 +72,16 @@ const routeAccessConfig: Record<string, RouteAccessConfig> = {
   },
 };
 
+// Routes that should be explicitly represented in the access map even when they
+// do not require any abilities or features. Keeping them here allows future
+// adjustments to be made without touching the consuming code.
+const additionalRouteAccess: Record<string, RouteAccess> = {
+  'settings.profile': {
+    requiredAbilities: [],
+    requiredFeatures: [],
+  },
+};
+
 const routeAccessMap = reactive<Record<string, RouteAccess>>({});
 
 function resolveAbilityList(
@@ -126,6 +136,10 @@ function rebuildRouteAccess(): void {
 
   Object.entries(routeAccessConfig).forEach(([route, config]) => {
     routeAccessMap[route] = buildRouteAccess(config);
+  });
+
+  Object.entries(additionalRouteAccess).forEach(([route, access]) => {
+    routeAccessMap[route] = { ...access };
   });
 }
 
