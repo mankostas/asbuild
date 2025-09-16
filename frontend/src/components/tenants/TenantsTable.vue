@@ -47,7 +47,7 @@
           <Dropdown classMenuItems=" w-[160px]">
             <span class="text-xl"><Icon icon="heroicons-outline:dots-vertical" /></span>
             <template #menus>
-              <MenuItem v-if="can('tenants.view') || can('tenants.manage')">
+              <MenuItem v-if="can('tenants.view')">
                 <button
                   type="button"
                   class="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm flex space-x-2 items-center rtl:space-x-reverse"
@@ -57,7 +57,7 @@
                   <span>{{ t('actions.view') }}</span>
                 </button>
               </MenuItem>
-              <MenuItem v-if="can('tenants.update') || can('tenants.manage')">
+              <MenuItem v-if="can('tenants.update')">
                 <button
                   type="button"
                   class="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm flex space-x-2 items-center rtl:space-x-reverse"
@@ -77,7 +77,7 @@
                   <span>{{ t('actions.impersonate') }}</span>
                 </button>
               </MenuItem>
-              <MenuItem v-if="can('tenants.delete') || can('tenants.manage')">
+              <MenuItem v-if="can('tenants.delete')">
                 <button
                   type="button"
                   class="bg-danger-500 text-danger-500 bg-opacity-30 hover:bg-opacity-100 hover:text-white w-full px-4 py-2 text-sm flex space-x-2 items-center rtl:space-x-reverse"
@@ -93,7 +93,7 @@
       </template>
       <template #selected-row-actions>
         <button
-          v-if="can('tenants.delete') || can('tenants.manage')"
+          v-if="can('tenants.delete')"
           type="button"
           class="ml-2 text-danger-500 hover:underline cursor-pointer"
           @click="emit('delete-selected', selectedIds)"
