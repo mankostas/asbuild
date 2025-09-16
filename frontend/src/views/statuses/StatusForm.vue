@@ -98,7 +98,7 @@ const isEdit = computed(() => route.name === 'taskStatuses.edit');
 const canAccess = computed(() =>
   isEdit.value
     ? can('task_statuses.update') || can('task_statuses.manage')
-    : can('task_statuses.create') || can('task_statuses.manage'),
+    : can('task_statuses.manage'),
 );
 
 async function loadTenantsIfNeeded() {
