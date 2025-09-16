@@ -1,160 +1,133 @@
+import { reactive } from 'vue';
+import { abilityFor, onPermissionsLoaded } from '@/services/permissions';
+
 export interface RouteAccess {
   requiredAbilities?: string[];
   requireAllAbilities?: boolean;
   requiredFeatures?: string[];
 }
 
-const routeAccessMap: Record<string, RouteAccess> = {
-  dashboard: {
-    requiredAbilities: ['dashboard.view'],
-    requiredFeatures: ['dashboard'],
-  },
-  'tasks.list': {
-    requiredAbilities: ['tasks.view'],
-    requiredFeatures: ['tasks'],
-  },
-  'tasks.create': {
-    requiredAbilities: ['tasks.create'],
-    requiredFeatures: ['tasks'],
-  },
+interface RouteAccessConfig {
+  feature?: string;
+  abilities?: string[];
+  requireAllAbilities?: boolean;
+}
+
+const routeAccessConfig: Record<string, RouteAccessConfig> = {
+  dashboard: { feature: 'dashboard', abilities: ['view'] },
+  'tasks.list': { feature: 'tasks', abilities: ['view'] },
+  'tasks.create': { feature: 'tasks', abilities: ['create'] },
   'tasks.edit': {
-    requiredAbilities: ['tasks.view', 'tasks.update'],
+    feature: 'tasks',
+    abilities: ['view', 'update'],
     requireAllAbilities: true,
-    requiredFeatures: ['tasks'],
   },
-  'tasks.details': {
-    requiredAbilities: ['tasks.view'],
-    requiredFeatures: ['tasks'],
-  },
-  'tasks.board': {
-    requiredAbilities: ['tasks.view'],
-    requiredFeatures: ['tasks'],
-  },
-  'tasks.reports': {
-    requiredAbilities: ['reports.view'],
-    requiredFeatures: ['reports'],
-  },
-  'taskTypes.list': {
-    requiredAbilities: ['task_types.view'],
-    requiredFeatures: ['task_types'],
-  },
-  'taskTypes.create': {
-    requiredAbilities: ['task_types.create'],
-    requiredFeatures: ['task_types'],
-  },
-  'taskTypes.edit': {
-    requiredAbilities: ['task_types.update'],
-    requiredFeatures: ['task_types'],
-  },
-  'taskStatuses.list': {
-    requiredAbilities: ['task_statuses.view'],
-    requiredFeatures: ['task_statuses'],
-  },
-  'taskStatuses.create': {
-    requiredAbilities: ['task_statuses.manage'],
-    requiredFeatures: ['task_statuses'],
-  },
-  'taskStatuses.edit': {
-    requiredAbilities: ['task_statuses.manage'],
-    requiredFeatures: ['task_statuses'],
-  },
-  'roles.list': {
-    requiredAbilities: ['roles.view'],
-    requiredFeatures: ['roles'],
-  },
-  'roles.create': {
-    requiredAbilities: ['roles.manage'],
-    requiredFeatures: ['roles'],
-  },
+  'tasks.details': { feature: 'tasks', abilities: ['view'] },
+  'tasks.board': { feature: 'tasks', abilities: ['view'] },
+  'tasks.reports': { feature: 'reports', abilities: ['view'] },
+  'taskTypes.list': { feature: 'task_types', abilities: ['view'] },
+  'taskTypes.create': { feature: 'task_types', abilities: ['create'] },
+  'taskTypes.edit': { feature: 'task_types', abilities: ['update'] },
+  'taskStatuses.list': { feature: 'task_statuses', abilities: ['view'] },
+  'taskStatuses.create': { feature: 'task_statuses', abilities: ['manage'] },
+  'taskStatuses.edit': { feature: 'task_statuses', abilities: ['manage'] },
+  'roles.list': { feature: 'roles', abilities: ['view'] },
+  'roles.create': { feature: 'roles', abilities: ['manage'] },
   'roles.edit': {
-    requiredAbilities: ['roles.view', 'roles.manage'],
+    feature: 'roles',
+    abilities: ['view', 'manage'],
     requireAllAbilities: true,
-    requiredFeatures: ['roles'],
   },
-  'manuals.list': {
-    requiredAbilities: ['manuals.manage'],
-    requiredFeatures: ['manuals'],
-  },
-  'manuals.create': {
-    requiredAbilities: ['manuals.manage'],
-    requiredFeatures: ['manuals'],
-  },
-  'manuals.edit': {
-    requiredAbilities: ['manuals.manage'],
-    requiredFeatures: ['manuals'],
-  },
-  'notifications.inbox': {
-    requiredAbilities: ['notifications.view'],
-    requiredFeatures: ['notifications'],
-  },
-  'notifications.prefs': {
-    requiredAbilities: ['notifications.view'],
-    requiredFeatures: ['notifications'],
-  },
-  'settings.branding': {
-    requiredAbilities: ['branding.manage'],
-    requiredFeatures: ['branding'],
-  },
-  'settings.footer': {
-    requiredAbilities: ['branding.manage'],
-    requiredFeatures: ['branding'],
-  },
-  'gdpr.index': {
-    requiredAbilities: ['gdpr.view'],
-    requiredFeatures: ['gdpr'],
-  },
-  reports: {
-    requiredAbilities: ['reports.view'],
-    requiredFeatures: ['reports'],
-  },
-  'reports.kpis': {
-    requiredAbilities: ['reports.view'],
-    requiredFeatures: ['reports'],
-  },
-  'employees.list': {
-    requiredAbilities: ['employees.view'],
-    requiredFeatures: ['employees'],
-  },
-  'employees.create': {
-    requiredAbilities: ['employees.manage'],
-    requiredFeatures: ['employees'],
-  },
+  'manuals.list': { feature: 'manuals', abilities: ['manage'] },
+  'manuals.create': { feature: 'manuals', abilities: ['manage'] },
+  'manuals.edit': { feature: 'manuals', abilities: ['manage'] },
+  'notifications.inbox': { feature: 'notifications', abilities: ['view'] },
+  'notifications.prefs': { feature: 'notifications', abilities: ['view'] },
+  'settings.branding': { feature: 'branding', abilities: ['manage'] },
+  'settings.footer': { feature: 'branding', abilities: ['manage'] },
+  'gdpr.index': { feature: 'gdpr', abilities: ['view'] },
+  reports: { feature: 'reports', abilities: ['view'] },
+  'reports.kpis': { feature: 'reports', abilities: ['view'] },
+  'employees.list': { feature: 'employees', abilities: ['view'] },
+  'employees.create': { feature: 'employees', abilities: ['create'] },
   'employees.edit': {
-    requiredAbilities: ['employees.view', 'employees.manage'],
+    feature: 'employees',
+    abilities: ['view', 'manage'],
     requireAllAbilities: true,
-    requiredFeatures: ['employees'],
   },
-  'tenants.list': {
-    requiredAbilities: ['tenants.view'],
-    requiredFeatures: ['tenants'],
-  },
-  'tenants.create': {
-    requiredAbilities: ['tenants.create'],
-    requiredFeatures: ['tenants'],
-  },
+  'tenants.list': { feature: 'tenants', abilities: ['view'] },
+  'tenants.create': { feature: 'tenants', abilities: ['create'] },
   'tenants.edit': {
-    requiredAbilities: ['tenants.view', 'tenants.update'],
+    feature: 'tenants',
+    abilities: ['view', 'update'],
     requireAllAbilities: true,
-    requiredFeatures: ['tenants'],
   },
-  'tenants.view': {
-    requiredAbilities: ['tenants.view'],
-    requiredFeatures: ['tenants'],
-  },
-  'teams.list': {
-    requiredAbilities: ['teams.view'],
-    requiredFeatures: ['teams'],
-  },
-  'teams.create': {
-    requiredAbilities: ['teams.create'],
-    requiredFeatures: ['teams'],
-  },
+  'tenants.view': { feature: 'tenants', abilities: ['view'] },
+  'teams.list': { feature: 'teams', abilities: ['view'] },
+  'teams.create': { feature: 'teams', abilities: ['create'] },
   'teams.edit': {
-    requiredAbilities: ['teams.view', 'teams.update'],
+    feature: 'teams',
+    abilities: ['view', 'update'],
     requireAllAbilities: true,
-    requiredFeatures: ['teams'],
   },
 };
+
+const routeAccessMap = reactive<Record<string, RouteAccess>>({});
+
+function resolveAbilityList(
+  feature: string | undefined,
+  abilitySpecs: string[] | undefined,
+): string[] {
+  if (!abilitySpecs || abilitySpecs.length === 0) {
+    return [];
+  }
+
+  const resolved = abilitySpecs
+    .map((spec) => {
+      if (spec.includes('.')) {
+        const [abilityFeature, ...rest] = spec.split('.');
+        if (!abilityFeature || rest.length === 0) {
+          return spec;
+        }
+        const ability = rest.join('.');
+        return abilityFor(abilityFeature, ability) ?? `${abilityFeature}.${ability}`;
+      }
+
+      if (!feature) {
+        return undefined;
+      }
+
+      return abilityFor(feature, spec) ?? `${feature}.${spec}`;
+    })
+    .filter((ability): ability is string => Boolean(ability));
+
+  return Array.from(new Set(resolved));
+}
+
+function buildRouteAccess(config: RouteAccessConfig): RouteAccess {
+  const access: RouteAccess = {};
+  const requiredAbilities = resolveAbilityList(config.feature, config.abilities);
+  if (requiredAbilities.length > 0) {
+    access.requiredAbilities = requiredAbilities;
+  }
+  if (config.feature) {
+    access.requiredFeatures = [config.feature];
+  }
+  if (config.requireAllAbilities) {
+    access.requireAllAbilities = true;
+  }
+  return access;
+}
+
+function rebuildRouteAccess(): void {
+  Object.keys(routeAccessMap).forEach((key) => {
+    delete routeAccessMap[key];
+  });
+
+  Object.entries(routeAccessConfig).forEach(([route, config]) => {
+    routeAccessMap[route] = buildRouteAccess(config);
+  });
+}
 
 export function accessForRoute(name?: string): RouteAccess {
   if (!name) {
@@ -184,60 +157,69 @@ interface MenuItemDefinition extends SidebarMenuItem {
   };
 }
 
-const menuItemDefinitions: MenuItemDefinition[] = [
+interface SidebarMenuChildBlueprint {
+  childtitle: string;
+  childlink: string;
+  childicon?: string;
+  topTitle?: string;
+}
+
+interface MenuItemBlueprint {
+  title: string;
+  icon?: string;
+  link?: string;
+  child?: SidebarMenuChildBlueprint[];
+  isHeadr?: boolean;
+  topNav?: {
+    flattenChildren?: boolean;
+  };
+}
+
+const menuBlueprints: readonly MenuItemBlueprint[] = [
   {
     title: 'Dashboard',
     icon: 'heroicons-outline:home',
     link: 'dashboard',
-    ...accessForRoute('dashboard'),
   },
   {
     title: 'Tasks',
     icon: 'heroicons-outline:calendar',
     link: 'tasks.list',
-    ...accessForRoute('tasks.list'),
   },
   {
     title: 'Task Board',
     icon: 'heroicons-outline:view-columns',
     link: 'tasks.board',
-    ...accessForRoute('tasks.board'),
   },
   {
     title: 'Task Reports',
     icon: 'heroicons-outline:chart-bar',
     link: 'tasks.reports',
-    ...accessForRoute('tasks.reports'),
   },
   {
     title: 'Task Types',
     icon: 'heroicons-outline:tag',
     link: 'taskTypes.list',
-    ...accessForRoute('taskTypes.list'),
   },
   {
     title: 'Teams',
     icon: 'heroicons-outline:user-group',
     link: 'teams.list',
-    ...accessForRoute('teams.list'),
   },
   {
     title: 'Task Statuses',
     icon: 'heroicons-outline:check-circle',
     link: 'taskStatuses.list',
-    ...accessForRoute('taskStatuses.list'),
   },
   {
     title: 'Roles',
     icon: 'heroicons-outline:key',
     link: 'roles.list',
-    ...accessForRoute('roles.list'),
   },
   {
     title: 'Manuals',
     icon: 'heroicons-outline:book-open',
     link: 'manuals.list',
-    ...accessForRoute('manuals.list'),
   },
   {
     title: 'Users',
@@ -246,12 +228,10 @@ const menuItemDefinitions: MenuItemDefinition[] = [
       {
         childtitle: 'Employees',
         childlink: 'employees.list',
-        ...accessForRoute('employees.list'),
       },
       {
         childtitle: 'Tenants',
         childlink: 'tenants.list',
-        ...accessForRoute('tenants.list'),
       },
     ],
   },
@@ -259,13 +239,11 @@ const menuItemDefinitions: MenuItemDefinition[] = [
     title: 'Reports',
     icon: 'heroicons-outline:chart-bar',
     link: 'reports.kpis',
-    ...accessForRoute('reports.kpis'),
   },
   {
     title: 'Notifications',
     icon: 'heroicons-outline:bell',
     link: 'notifications.inbox',
-    ...accessForRoute('notifications.inbox'),
   },
   {
     title: 'Settings',
@@ -276,25 +254,21 @@ const menuItemDefinitions: MenuItemDefinition[] = [
         childlink: 'settings.profile',
         childicon: 'heroicons-outline:cog',
         topTitle: 'Settings',
-        ...accessForRoute('settings.profile'),
       },
       {
         childtitle: 'Branding',
         childlink: 'settings.branding',
         childicon: 'heroicons-outline:sparkles',
-        ...accessForRoute('settings.branding'),
       },
       {
         childtitle: 'Footer',
         childlink: 'settings.footer',
         childicon: 'heroicons-outline:document-text',
-        ...accessForRoute('settings.footer'),
       },
       {
         childtitle: 'GDPR',
         childlink: 'gdpr.index',
         childicon: 'heroicons-outline:shield-check',
-        ...accessForRoute('gdpr.index'),
       },
     ],
     topNav: {
@@ -303,9 +277,18 @@ const menuItemDefinitions: MenuItemDefinition[] = [
   },
 ];
 
-export const menuItems: SidebarMenuItem[] = menuItemDefinitions.map(
-  ({ topNav, ...item }) => ({ ...item }),
-);
+function buildMenuItem(blueprint: MenuItemBlueprint): MenuItemDefinition {
+  const child = blueprint.child?.map((item) => ({
+    ...item,
+    ...accessForRoute(item.childlink),
+  }));
+
+  return {
+    ...blueprint,
+    ...(child ? { child } : {}),
+    ...accessForRoute(blueprint.link),
+  };
+}
 
 export interface TopMenuItem extends RouteAccess {
   title: string;
@@ -331,7 +314,14 @@ const toTopMenuItems = (item: MenuItemDefinition): TopMenuItem[] => {
   return [{ ...rest }];
 };
 
-export const topMenu: TopMenuItem[] = menuItemDefinitions.flatMap(toTopMenuItems);
+const menuItemsState = reactive<SidebarMenuItem[]>([]);
+const topMenuState = reactive<TopMenuItem[]>([]);
+
+function rebuildMenus(): void {
+  const definitions = menuBlueprints.map(buildMenuItem);
+  menuItemsState.splice(0, menuItemsState.length, ...definitions.map(({ topNav, ...item }) => ({ ...item })));
+  topMenuState.splice(0, topMenuState.length, ...definitions.flatMap(toTopMenuItems));
+}
 
 export interface MenuAccessEvaluator {
   hasFeature(feature: string): boolean;
@@ -398,43 +388,65 @@ export interface QuickAction extends RouteAccess {
   link: string;
 }
 
-export const addNewOptions: QuickAction[] = [
+interface QuickActionBlueprint {
+  label: string;
+  icon: string;
+  link: string;
+}
+
+const quickActionBlueprints: readonly QuickActionBlueprint[] = [
   {
     label: 'Task',
     icon: 'heroicons-outline:calendar',
     link: 'tasks.create',
-    ...accessForRoute('tasks.create'),
   },
   {
     label: 'Task Type',
     icon: 'heroicons-outline:tag',
     link: 'taskTypes.create',
-    ...accessForRoute('taskTypes.create'),
   },
   {
     label: 'Manual',
     icon: 'heroicons-outline:book-open',
     link: 'manuals.create',
-    ...accessForRoute('manuals.create'),
   },
   {
     label: 'Employee',
     icon: 'heroicons-outline:users',
     link: 'employees.create',
-    ...accessForRoute('employees.create'),
   },
   {
     label: 'Task Status',
     icon: 'heroicons-outline:check-circle',
     link: 'taskStatuses.create',
-    ...accessForRoute('taskStatuses.create'),
   },
   {
     label: 'Role',
     icon: 'heroicons-outline:key',
     link: 'roles.create',
-    ...accessForRoute('roles.create'),
   },
 ];
 
+const addNewOptionsState = reactive<QuickAction[]>([]);
+
+function rebuildQuickActions(): void {
+  const actions = quickActionBlueprints.map((action) => ({
+    ...action,
+    ...accessForRoute(action.link),
+  }));
+  addNewOptionsState.splice(0, addNewOptionsState.length, ...actions);
+}
+
+function rebuildAll(): void {
+  rebuildRouteAccess();
+  rebuildMenus();
+  rebuildQuickActions();
+}
+
+rebuildAll();
+onPermissionsLoaded(rebuildAll);
+
+export const menuItems: SidebarMenuItem[] = menuItemsState;
+export const topMenu: TopMenuItem[] = topMenuState;
+export const addNewOptions: QuickAction[] = addNewOptionsState;
 export const routeAccess = routeAccessMap;

@@ -27,6 +27,7 @@ import "v-calendar/dist/style.css";
 import { VueQueryPlugin } from "@tanstack/vue-query";
 import { useThemeSettingsStore } from "./stores/themeSettings";
 import { useBrandingStore } from "./stores/branding";
+import { loadPermissions } from "./services/permissions";
 import VueDOMPurifyHTML from "vue-dompurify-html";
 
 const app = createApp(App)
@@ -51,6 +52,7 @@ app.use(VueQueryPlugin);
 
 async function bootstrap() {
   app.config.globalProperties.$store = {};
+  await loadPermissions();
   const themeSettingsStore = useThemeSettingsStore();
   await themeSettingsStore.load();
   const brandingStore = useBrandingStore();
