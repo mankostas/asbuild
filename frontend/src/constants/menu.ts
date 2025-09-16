@@ -32,10 +32,10 @@ const routeAccessConfig: Record<string, RouteAccessConfig> = {
   'taskStatuses.create': { feature: 'task_statuses', abilities: ['manage'] },
   'taskStatuses.edit': { feature: 'task_statuses', abilities: ['manage'] },
   'roles.list': { feature: 'roles', abilities: ['view'] },
-  'roles.create': { feature: 'roles', abilities: ['manage'] },
+  'roles.create': { feature: 'roles', abilities: ['create'] },
   'roles.edit': {
     feature: 'roles',
-    abilities: ['view', 'manage'],
+    abilities: ['update'],
     requireAllAbilities: true,
   },
   'manuals.list': { feature: 'manuals', abilities: ['view'] },

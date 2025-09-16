@@ -205,13 +205,13 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->name('task-types.import');
 
     Route::post('roles', [RoleController::class, 'store'])
-        ->middleware(Ability::class . ':roles.manage')
+        ->middleware(Ability::class . ':roles.create')
         ->name('roles.store');
     Route::match(['put', 'patch'], 'roles/{role}', [RoleController::class, 'update'])
-        ->middleware(Ability::class . ':roles.manage')
+        ->middleware(Ability::class . ':roles.update')
         ->name('roles.update');
     Route::delete('roles/{role}', [RoleController::class, 'destroy'])
-        ->middleware(Ability::class . ':roles.manage')
+        ->middleware(Ability::class . ':roles.delete')
         ->name('roles.destroy');
     Route::post('roles/{role}/assign', [RoleController::class, 'assign'])
         ->middleware(Ability::class . ':roles.manage')
