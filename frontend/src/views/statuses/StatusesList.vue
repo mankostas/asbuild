@@ -16,7 +16,7 @@
           :options="tenantOptions"
           class="w-40"
           classInput="text-xs !h-8 !min-h-0"
-          :aria-label="t('tenants')"
+          :aria-label="t('tenants.label')"
         />
         <Button
           v-if="can('task_statuses.manage')"

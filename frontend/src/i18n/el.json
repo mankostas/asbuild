@@ -27,7 +27,8 @@
     "close": "Κλείσιμο",
     "clear": "Καθαρισμός",
     "export": "Εξαγωγή",
-    "chooseFile": "Επιλογή αρχείου"
+    "chooseFile": "Επιλογή αρχείου",
+    "view": "Προβολή"
   },
   "messages": {
     "helloToast": "Γεια από το τοστ"
@@ -64,7 +65,12 @@
   },
   "Version": "Έκδοση",
   "Section": "Ενότητα",
-  "tenants": "Μισθωτές",
+  "tenants": {
+    "label": "Μισθωτές",
+    "form": {
+      "search": "Αναζήτηση"
+    }
+  },
   "allTenants": "Όλοι οι μισθωτές",
   "routes": {
     "dashboard": "Πίνακας ελέγχου",

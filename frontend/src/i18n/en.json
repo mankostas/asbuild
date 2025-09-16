@@ -27,7 +27,8 @@
     "close": "Close",
     "clear": "Clear",
     "export": "Export",
-    "chooseFile": "Choose File"
+    "chooseFile": "Choose File",
+    "view": "View"
   },
   "messages": {
     "helloToast": "Hello from toast"
@@ -39,13 +40,13 @@
   "none": "None",
   "a11y": {
     "skipToContent": "Skip to content",
-      "language": "Language",
-      "dragToReorder": "Drag to reorder",
-      "removeSection": "Remove section",
-      "enableAutomation": "Enable automation",
-      "movedToPosition": "Moved to position {pos}",
-      "reorderInstructions": "Press Enter to grab, use arrow keys to move, Escape to release"
-    },
+    "language": "Language",
+    "dragToReorder": "Drag to reorder",
+    "removeSection": "Remove section",
+    "enableAutomation": "Enable automation",
+    "movedToPosition": "Moved to position {pos}",
+    "reorderInstructions": "Press Enter to grab, use arrow keys to move, Escape to release"
+  },
   "commandPalette": {
     "title": "Command palette",
     "placeholder": "Type to search...",
@@ -64,7 +65,12 @@
   },
   "Version": "Version",
   "Section": "Section",
-  "tenants": "Tenants",
+  "tenants": {
+    "label": "Tenants",
+    "form": {
+      "search": "Search"
+    }
+  },
   "allTenants": "All tenants",
   "routes": {
     "dashboard": "Dashboard",
