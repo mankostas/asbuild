@@ -100,8 +100,7 @@ const routeAccessMap: Record<string, RouteAccess> = {
     requiredFeatures: ['branding'],
   },
   'gdpr.index': {
-    requiredAbilities: ['gdpr.view', 'gdpr.manage'],
-    requireAllAbilities: true,
+    requiredAbilities: ['gdpr.view'],
     requiredFeatures: ['gdpr'],
   },
   reports: {
