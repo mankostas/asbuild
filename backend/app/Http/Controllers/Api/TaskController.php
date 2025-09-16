@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\TaskType;
 use App\Models\TaskStatus;
+use App\Services\AbilityService;
 use App\Services\FormSchemaService;
 use App\Services\StatusFlowService;
 use App\Http\Resources\TaskResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Http\Requests\TaskUpsertRequest;
@@ -137,7 +139,16 @@ class TaskController extends Controller
             unset($data['sla_start_at'], $data['sla_end_at']);
         }
 
-        unset($data['status']);
+        $nextStatus = null;
+        if (array_key_exists('status', $data)) {
+            $abilityService = app(AbilityService::class);
+            $tenantId = $request->attributes->get('tenant_id');
+            if (! $abilityService->userHasAbility($request->user(), 'tasks.status.update', $tenantId)) {
+                abort(403);
+            }
+            $nextStatus = $data['status'];
+            unset($data['status']);
+        }
 
         $typeId = $data['task_type_id'] ?? $task->task_type_id;
         $type = $typeId ? TaskType::find($typeId) : $task->type;
@@ -149,8 +160,18 @@ class TaskController extends Controller
         }
         $task->fill($data);
 
+        if ($type) {
+            $task->setRelation('type', $type);
+        }
+
         if ($task->isDirty('assigned_user_id')) {
             $this->authorize('assign', $task);
+        }
+        if ($nextStatus !== null) {
+            $response = $this->applyStatusTransition($request, $task, $nextStatus, $type);
+            if ($response instanceof JsonResponse) {
+                return $response;
+            }
         }
         if (! $canOverride || ! $task->sla_end_at) {
             app(\App\Services\TaskSlaService::class)->apply($task);
@@ -193,33 +214,53 @@ class TaskController extends Controller
         $this->authorize('update', $task);
 
         $data = $request->validate(['status' => 'required|string']);
-        $next = $data['status'];
-        $prefixed = TaskStatus::prefixSlug($next, $task->tenant_id);
-        $type = $task->type;
-
-        if ($task->status !== $next) {
-            $canManage = $request->user()->can('tasks.manage');
-            if (! $canManage && $prefixed !== $task->previous_status_slug && ! $this->statusFlow->canTransition($task->status, $next, $type)) {
-                return response()->json(['message' => 'invalid_transition'], 422);
-            }
-            if (! $canManage) {
-                $this->statusFlow->checkConstraints($task, $next);
-            }
-
-            $prev = $task->status;
-            $task->status = $next;
-            $task->status_slug = $prefixed;
-            $task->previous_status_slug = TaskStatus::prefixSlug($prev, $task->tenant_id);
-            if ($next === Task::STATUS_IN_PROGRESS && ! $task->started_at) {
-                $task->started_at = now();
-            }
-            if ($next === Task::STATUS_COMPLETED && ! $task->completed_at) {
-                $task->completed_at = now();
-            }
-            $task->save();
+        $response = $this->applyStatusTransition($request, $task, $data['status'], $task->type);
+        if ($response instanceof JsonResponse) {
+            return $response;
         }
 
+        $task->save();
+
         return new TaskResource($task->load('type', 'assignee'));
+    }
+
+    protected function applyStatusTransition(Request $request, Task $task, string $next, ?TaskType $type = null): ?JsonResponse
+    {
+        if ($task->status === $next) {
+            return null;
+        }
+
+        if ($type) {
+            $task->setRelation('type', $type);
+        } else {
+            $type = $task->type;
+        }
+
+        $prefixed = TaskStatus::prefixSlug($next, $task->tenant_id);
+        $canManage = $request->user()->can('tasks.manage');
+
+        if (! $canManage && $prefixed !== $task->previous_status_slug && ! $this->statusFlow->canTransition($task->status, $next, $type)) {
+            return response()->json(['message' => 'invalid_transition'], 422);
+        }
+
+        if (! $canManage) {
+            $this->statusFlow->checkConstraints($task, $next);
+        }
+
+        $prev = $task->status;
+        $task->status = $next;
+        $task->status_slug = $prefixed;
+        $task->previous_status_slug = TaskStatus::prefixSlug($prev, $task->tenant_id);
+
+        if ($next === Task::STATUS_IN_PROGRESS && ! $task->started_at) {
+            $task->started_at = now();
+        }
+
+        if ($next === Task::STATUS_COMPLETED && ! $task->completed_at) {
+            $task->completed_at = now();
+        }
+
+        return null;
     }
 
     protected function validateAgainstSchema($type, array $data, ?Task $task = null): void

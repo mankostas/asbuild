@@ -491,8 +491,20 @@ const submitForm = handleSubmit(async () => {
   }
   try {
     if (isEdit.value) {
-      await api.patch(`/tasks/${route.params.id}`, payload);
-      notify.success('Task updated');
+      const res = await api.patch(`/tasks/${route.params.id}`, payload);
+      const data = res.data?.data ?? res.data ?? null;
+      const previousStatus = originalStatus.value;
+      const serverStatus = typeof data?.status_slug === 'string'
+        ? data.status_slug
+        : previousStatus;
+      if (typeof serverStatus === 'string') {
+        status.value = serverStatus;
+        originalStatus.value = serverStatus;
+      }
+      const statusChanged = serverStatus !== previousStatus;
+      notify.success(
+        statusChanged ? t('tasks.status.updated') : t('tasks.messages.updated'),
+      );
       router.push({
         name: 'tasks.details',
         params: { id: route.params.id },
@@ -503,7 +515,7 @@ const submitForm = handleSubmit(async () => {
           ? { [TENANT_HEADER]: tenantId.value }
           : undefined;
       const res = await api.post('/tasks', payload, { headers });
-      notify.success('Task created');
+      notify.success(t('tasks.messages.created'));
       const taskId = res.data?.data?.id ?? res.data?.id;
       router.push({
         name: 'tasks.details',
@@ -511,8 +523,13 @@ const submitForm = handleSubmit(async () => {
       });
     }
   } catch (e: any) {
-    if (e?.status === 422 || e?.errors) {
+    if (e?.errors) {
       setErrors(e.errors || {});
+    } else if (e?.message === 'invalid_transition') {
+      const message = t('tasks.status.errors.invalid_transition');
+      serverError.value = message;
+      notify.error(message);
+      showError.value = true;
     } else {
       serverError.value = e.message || 'Failed to save';
       notify.error(serverError.value);
