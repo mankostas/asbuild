@@ -202,7 +202,10 @@ watch(
   { deep: true },
 );
 
-const baseAbilityList = [
+type AbilityKey = keyof Permission;
+type AbilityListItem = { key: AbilityKey; label: string };
+
+const baseAbilityList: AbilityListItem[] = [
   { key: 'read', label: t('abilities.read') },
   { key: 'edit', label: t('abilities.edit') },
   { key: 'delete', label: t('abilities.delete') },
@@ -211,7 +214,7 @@ const baseAbilityList = [
   { key: 'transition', label: t('abilities.transition') },
 ];
 
-const abilityMap: Record<string, string[]> = {
+const abilityMap: Record<AbilityKey, string[]> = {
   read: ['tasks.view'],
   edit: ['tasks.update'],
   delete: ['tasks.delete'],
@@ -221,7 +224,13 @@ const abilityMap: Record<string, string[]> = {
 };
 
 const featuresStore = useFeaturesStore();
-void featuresStore.load();
+if (props.featureAbilities === undefined) {
+  void featuresStore.load();
+}
+
+const featuresReady = computed(
+  () => props.featureAbilities !== undefined || featuresStore.hasFeatureData,
+);
 
 const allowedAbilities = computed(() =>
   new Set(
@@ -231,7 +240,7 @@ const allowedAbilities = computed(() =>
   ),
 );
 
-const abilityList = computed(() =>
+const abilityList = computed<AbilityListItem[]>(() =>
   baseAbilityList.filter((ability) => {
     const req = abilityMap[ability.key];
     return req ? req.some((a) => allowedAbilities.value.has(a)) : true;
@@ -243,34 +252,55 @@ const canTransition = computed(() =>
   abilityMap.transition.some((a) => allowedAbilities.value.has(a)),
 );
 
-watch(
-  canTransition,
-  (val) => {
-    if (!val) {
-      Object.values(localPermissions).forEach((p) => {
-        p.transition = false;
-      });
-    }
-  },
-  { immediate: true },
-);
+const syncPermissionsForAbilityList = (list: AbilityListItem[]) => {
+  const keys = list.map((a) => a.key);
+
+  Object.values(localPermissions).forEach((perm) => {
+    Object.keys(perm).forEach((k) => {
+      if (!keys.includes(k as AbilityKey)) {
+        delete (perm as any)[k];
+      }
+    });
+
+    keys.forEach((k) => {
+      if (!(k in perm)) {
+        (perm as any)[k] = false;
+      }
+    });
+  });
+};
+
+let featureWatchersInitialized = false;
+const initializeFeatureWatchers = () => {
+  if (featureWatchersInitialized) return;
+  featureWatchersInitialized = true;
+
+  syncPermissionsForAbilityList(abilityList.value);
+
+  watch(abilityList, (list) => {
+    if (!list.length && !featuresReady.value) return;
+    syncPermissionsForAbilityList(list);
+  });
+
+  watch(
+    canTransition,
+    (val) => {
+      if (!val) {
+        Object.values(localPermissions).forEach((p) => {
+          p.transition = false;
+        });
+      }
+    },
+    { immediate: true },
+  );
+};
 
 watch(
-  abilityList,
-  (list) => {
-    const keys = list.map((a) => a.key) as (keyof Permission)[];
-    Object.values(localPermissions).forEach((perm) => {
-      Object.keys(perm).forEach((k) => {
-        if (!keys.includes(k as keyof Permission)) {
-          delete (perm as any)[k];
-        }
-      });
-      keys.forEach((k) => {
-        if (!(k in perm)) {
-          (perm as any)[k] = false;
-        }
-      });
-    });
+  featuresReady,
+  (ready) => {
+    if (ready) {
+      initializeFeatureWatchers();
+    }
   },
   { immediate: true },
 );
