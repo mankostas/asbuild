@@ -16,6 +16,8 @@ class TaskStatusController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', TaskStatus::class);
+
         $scope = $request->query('scope', $request->user()->hasRole('SuperAdmin') ? 'all' : 'tenant');
         $query = TaskStatus::query()->withCount('tasks');
 
@@ -47,6 +49,8 @@ class TaskStatusController extends Controller
 
     public function store(TaskStatusUpsertRequest $request)
     {
+        $this->authorize('create', TaskStatus::class);
+
         $data = $request->validated();
 
         if ($request->user()->hasRole('SuperAdmin')) {
@@ -61,14 +65,15 @@ class TaskStatusController extends Controller
 
     public function show(TaskStatus $taskStatus)
     {
+        $this->authorize('view', $taskStatus);
+
         return new TaskStatusResource($taskStatus);
     }
 
     public function update(TaskStatusUpsertRequest $request, TaskStatus $taskStatus)
     {
-        if (! $request->user()->hasRole('SuperAdmin') && $taskStatus->tenant_id !== $request->user()->tenant_id) {
-            abort(403);
-        }
+        $this->authorize('update', $taskStatus);
+
         $data = $request->validated();
 
         if ($request->user()->hasRole('SuperAdmin')) {
@@ -85,15 +90,16 @@ class TaskStatusController extends Controller
 
     public function destroy(Request $request, TaskStatus $taskStatus)
     {
-        if (! $request->user()->hasRole('SuperAdmin') && $taskStatus->tenant_id !== $request->user()->tenant_id) {
-            abort(403);
-        }
+        $this->authorize('delete', $taskStatus);
+
         $taskStatus->delete();
         return response()->json(['message' => 'deleted']);
     }
 
     public function copyToTenant(Request $request, TaskStatus $taskStatus)
     {
+        $this->authorize('view', $taskStatus);
+
         $tenantId = $request->user()->hasRole('SuperAdmin')
             ? $request->input('tenant_id')
             : $request->user()->tenant_id;
@@ -113,6 +119,8 @@ class TaskStatusController extends Controller
 
     public function transitions(TaskStatus $taskStatus, StatusFlowService $flow)
     {
+        $this->authorize('view', $taskStatus);
+
         $names = $flow->allowedTransitions($taskStatus->name);
         $query = TaskStatus::query()->whereIn('name', $names);
 

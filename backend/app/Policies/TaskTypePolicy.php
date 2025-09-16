@@ -9,6 +9,20 @@ use Illuminate\Support\Facades\Gate;
 
 class TaskTypePolicy extends TenantOwnedPolicy
 {
+    public function viewAny(User $user): bool
+    {
+        return Gate::allows('task_types.view') || Gate::allows('task_types.manage');
+    }
+
+    public function view(User $user, Model $type): bool
+    {
+        if (! $type instanceof TaskType) {
+            return false;
+        }
+
+        return $this->viewAny($user) && parent::view($user, $type);
+    }
+
     public function create(User $user): bool
     {
         return Gate::allows('task_types.create') || Gate::allows('task_types.manage');

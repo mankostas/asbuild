@@ -20,6 +20,8 @@ class TaskTypeController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', TaskType::class);
+
         // Task types are no longer versioned, so we only eager load the tenant
         // and append a count of related tasks
         $query = TaskType::query()->with(['tenant'])->withCount('tasks');
@@ -47,6 +49,8 @@ class TaskTypeController extends Controller
 
     public function options(Request $request)
     {
+        $this->authorize('viewAny', TaskType::class);
+
         $tenantId = $request->attributes->get('tenant_id') ?? auth()->user()?->tenant_id;
 
         $types = TaskType::query()
@@ -59,6 +63,8 @@ class TaskTypeController extends Controller
 
     public function store(TaskTypeRequest $request)
     {
+        $this->authorize('create', TaskType::class);
+
         $data = $request->validated();
         if (isset($data['schema_json'])) {
             $this->formSchemaService->validate($data['schema_json']);
@@ -88,18 +94,15 @@ class TaskTypeController extends Controller
 
     public function show(Request $request, TaskType $taskType)
     {
-        if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
-            abort(403);
-        }
+        $this->authorize('view', $taskType);
 
         return new TaskTypeResource($taskType);
     }
 
     public function update(TaskTypeRequest $request, TaskType $taskType)
     {
-        if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
-            abort(403);
-        }
+        $this->authorize('update', $taskType);
+
         $data = $request->validated();
         if (isset($data['schema_json'])) {
             $this->formSchemaService->validate($data['schema_json']);
@@ -131,9 +134,8 @@ class TaskTypeController extends Controller
 
     public function destroy(Request $request, TaskType $taskType)
     {
-        if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
-            abort(403);
-        }
+        $this->authorize('delete', $taskType);
+
         $taskType->delete();
 
         return response()->json(['message' => 'deleted']);
@@ -146,19 +148,19 @@ class TaskTypeController extends Controller
             'ids.*' => 'integer',
         ]);
 
-        $query = TaskType::query()->whereIn('id', $data['ids']);
+        $types = TaskType::query()->whereIn('id', $data['ids'])->get();
 
-        if (! $request->user()->hasRole('SuperAdmin')) {
-            $query->where('tenant_id', $request->user()->tenant_id);
-        }
+        $types->each(fn (TaskType $type) => $this->authorize('delete', $type));
 
-        $query->delete();
+        TaskType::query()->whereKey($types->modelKeys())->delete();
 
         return response()->json(['message' => 'deleted']);
     }
 
     public function copyToTenant(Request $request, TaskType $taskType)
     {
+        $this->authorize('view', $taskType);
+
         $tenantId = $request->user()->hasRole('SuperAdmin')
             ? $request->input('tenant_id')
             : $request->user()->tenant_id;
@@ -203,7 +205,7 @@ class TaskTypeController extends Controller
         $copies = collect();
 
         foreach ($types as $type) {
-            if (! $request->user()->hasRole('SuperAdmin') && $type->tenant_id !== $request->user()->tenant_id) {
+            if ($request->user()->cannot('view', $type)) {
                 continue;
             }
 
@@ -221,6 +223,8 @@ class TaskTypeController extends Controller
 
     public function validateSchema(Request $request)
     {
+        $this->authorize('validate', TaskType::class);
+
         $data = $request->validate([
             'schema_json' => 'required|array',
             'form_data' => 'array',
@@ -234,9 +238,7 @@ class TaskTypeController extends Controller
 
     public function previewValidate(Request $request, TaskType $taskType)
     {
-        if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
-            abort(403);
-        }
+        $this->authorize('update', $taskType);
 
         $data = $request->validate([
             'schema_json' => 'required|array',
@@ -251,15 +253,15 @@ class TaskTypeController extends Controller
 
     public function export(Request $request, TaskType $taskType)
     {
-        if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
-            abort(403);
-        }
+        $this->authorize('view', $taskType);
 
         return response()->json($taskType->toArray());
     }
 
     public function import(Request $request)
     {
+        $this->authorize('create', TaskType::class);
+
         $data = $request->validate([
             'name' => 'required|string',
             'schema_json' => 'array',
