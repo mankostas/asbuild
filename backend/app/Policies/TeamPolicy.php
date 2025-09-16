@@ -32,4 +32,9 @@ class TeamPolicy extends TenantOwnedPolicy
     {
         return Gate::allows('teams.delete') && parent::delete($user, $team);
     }
+
+    public function manageMembers(User $user, Model $team): bool
+    {
+        return Gate::allows('teams.manage') && parent::update($user, $team);
+    }
 }

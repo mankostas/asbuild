@@ -18,7 +18,6 @@ return [
             'tasks.status.update',
             'tasks.comment.create',
             'tasks.attach.upload',
-            'tasks.export',
             'tasks.watch',
             'tasks.manage',
         ],
@@ -43,13 +42,6 @@ return [
             'reports.manage',
         ],
     ],
-    'billing' => [
-        'label' => 'Billing',
-        'abilities' => [
-            'billing.view',
-            'billing.manage',
-        ],
-    ],
     'roles' => [
         'label' => 'Roles & Permissions',
         'abilities' => [
@@ -70,7 +62,6 @@ return [
             'task_types.manage',
             'task_sla_policies.manage',
             'task_automations.manage',
-            'task_field_snippets.manage',
         ],
     ],
     'teams' => [

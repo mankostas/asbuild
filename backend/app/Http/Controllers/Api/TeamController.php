@@ -133,7 +133,7 @@ class TeamController extends Controller
             abort(404);
         }
 
-        $this->authorize('update', $team);
+        $this->authorize('manageMembers', $team);
 
         $data = $request->validate([
             'employee_ids' => ['required', 'array'],
