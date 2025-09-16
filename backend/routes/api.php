@@ -286,8 +286,24 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':employees.manage');
     Route::post('employees/{employee}/impersonate', [EmployeeController::class, 'impersonate'])
         ->middleware(Ability::class . ':employees.manage');
+    Route::post('employees/{employee}/password-reset', [EmployeeController::class, 'sendPasswordReset'])
+        ->middleware(Ability::class . ':employees.manage');
+    Route::post('employees/{employee}/invite-resend', [EmployeeController::class, 'resendInvite'])
+        ->middleware(Ability::class . ':employees.manage');
+    Route::post('employees/{employee}/email-reset', [EmployeeController::class, 'resetEmail'])
+        ->middleware(Ability::class . ':employees.manage');
     Route::post('employees/{employee}/resend-invite', [EmployeeController::class, 'resendInvite'])
         ->middleware(Ability::class . ':employees.manage');
+    Route::prefix('tenants/{tenant}/owner')->group(function () {
+        Route::get('/', [TenantController::class, 'owner'])
+            ->middleware(Ability::class . ':tenants.view|tenants.manage');
+        Route::post('password-reset', [TenantController::class, 'ownerPasswordReset'])
+            ->middleware(Ability::class . ':tenants.manage');
+        Route::post('invite-resend', [TenantController::class, 'ownerResendInvite'])
+            ->middleware(Ability::class . ':tenants.manage');
+        Route::post('email-reset', [TenantController::class, 'ownerResetEmail'])
+            ->middleware(Ability::class . ':tenants.manage');
+    });
 
     Route::put('branding', [BrandingController::class, 'update'])
         ->middleware(Ability::class . ':branding.manage');

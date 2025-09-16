@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\Concerns\ManagesTenantUsers;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use App\Http\Resources\EmployeeResource;
 use App\Support\ListQuery;
@@ -17,6 +17,16 @@ use App\Support\ListQuery;
 class EmployeeController extends Controller
 {
     use ListQuery;
+    use ManagesTenantUsers;
+
+    protected function guardManageableEmployee(Request $request, User $employee): int|string
+    {
+        $tenantId = $this->getTenantId($request);
+        $this->ensureEmployeeTenant($employee, $tenantId);
+        $this->ensureUserIsNotSuperAdmin($employee);
+
+        return $tenantId;
+    }
 
     protected function getTenantId(Request $request, bool $allowNull = false): int|string|null
     {
@@ -112,7 +122,7 @@ class EmployeeController extends Controller
             $user->roles()->sync($roleData);
         }
 
-        Password::sendResetLink(['email' => $user->email]);
+        $this->dispatchInvite($user);
 
         return (new EmployeeResource($user->load('roles')))
             ->response()
@@ -129,12 +139,7 @@ class EmployeeController extends Controller
 
     public function update(Request $request, User $employee)
     {
-        $tenantId = $this->getTenantId($request);
-        $this->ensureEmployeeTenant($employee, $tenantId);
-
-        if ($employee->hasRole('SuperAdmin')) {
-            abort(403, 'Cannot modify a SuperAdmin');
-        }
+        $tenantId = $this->guardManageableEmployee($request, $employee);
 
         $data = $request->validate([
             'name' => 'sometimes|string',
@@ -202,26 +207,38 @@ class EmployeeController extends Controller
 
     public function resendInvite(Request $request, User $employee)
     {
-        $tenantId = $this->getTenantId($request);
-        $this->ensureEmployeeTenant($employee, $tenantId);
+        $this->guardManageableEmployee($request, $employee);
 
-        if ($employee->hasRole('SuperAdmin')) {
-            abort(403, 'Cannot modify a SuperAdmin');
-        }
-
-        Password::sendResetLink(['email' => $employee->email]);
+        $this->dispatchInvite($employee);
 
         return response()->json(['status' => 'ok']);
     }
 
+    public function sendPasswordReset(Request $request, User $employee)
+    {
+        $this->guardManageableEmployee($request, $employee);
+
+        $this->dispatchPasswordReset($employee);
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    public function resetEmail(Request $request, User $employee)
+    {
+        $this->guardManageableEmployee($request, $employee);
+
+        $data = $request->validate([
+            'email' => 'required|email|unique:users,email,' . $employee->id,
+        ]);
+
+        $this->resetUserEmail($employee, $data['email']);
+
+        return new EmployeeResource($employee->fresh());
+    }
+
     public function toggleStatus(Request $request, User $employee)
     {
-        $tenantId = $this->getTenantId($request);
-        $this->ensureEmployeeTenant($employee, $tenantId);
-
-        if ($employee->hasRole('SuperAdmin')) {
-            abort(403, 'Cannot modify a SuperAdmin');
-        }
+        $this->guardManageableEmployee($request, $employee);
 
         $employee->status = $employee->status === 'active' ? 'inactive' : 'active';
         $employee->save();
@@ -231,12 +248,7 @@ class EmployeeController extends Controller
 
     public function destroy(Request $request, User $employee)
     {
-        $tenantId = $this->getTenantId($request);
-        $this->ensureEmployeeTenant($employee, $tenantId);
-
-        if ($employee->hasRole('SuperAdmin')) {
-            abort(403, 'Cannot delete a SuperAdmin');
-        }
+        $this->guardManageableEmployee($request, $employee);
 
         $employee->delete();
         return response()->noContent();
