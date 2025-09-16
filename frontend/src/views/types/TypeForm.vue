@@ -541,14 +541,21 @@ const isEdit = computed(
 const isCreate = computed(
   () => route.name === 'taskTypes.create' && auth.isSuperAdmin,
 );
-const canAccess = computed(
-  () =>
-    auth.isSuperAdmin ||
-    (hasAbility('task_types.manage') &&
-      (isEdit.value
-        ? hasAbility('task_types.view')
-        : hasAbility('task_types.create'))),
-);
+const canAccess = computed(() => {
+  if (auth.isSuperAdmin) {
+    return true;
+  }
+
+  if (hasAbility('task_types.manage')) {
+    return true;
+  }
+
+  if (isEdit.value) {
+    return hasAbility('task_types.update');
+  }
+
+  return hasAbility('task_types.create');
+});
 
 const skipTenantWatch = ref(isEdit.value);
 
