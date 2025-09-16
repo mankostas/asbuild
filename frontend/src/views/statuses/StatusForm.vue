@@ -95,10 +95,8 @@ const serverError = ref('');
 const tenantId = ref('');
 
 const isEdit = computed(() => route.name === 'taskStatuses.edit');
-const canAccess = computed(() =>
-  isEdit.value
-    ? can('task_statuses.update') || can('task_statuses.manage')
-    : can('task_statuses.manage'),
+const canAccess = computed(
+  () => auth.isSuperAdmin || can('task_statuses.manage'),
 );
 
 async function loadTenantsIfNeeded() {
