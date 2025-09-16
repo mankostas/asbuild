@@ -14,13 +14,6 @@ class TaskStatusController extends Controller
 {
     use ListQuery;
 
-    protected function ensureAdmin(Request $request): void
-    {
-        if (! $request->user()->hasRole('ClientAdmin') && ! $request->user()->hasRole('SuperAdmin')) {
-            abort(403);
-        }
-    }
-
     public function index(Request $request)
     {
         $scope = $request->query('scope', $request->user()->hasRole('SuperAdmin') ? 'all' : 'tenant');
@@ -54,7 +47,6 @@ class TaskStatusController extends Controller
 
     public function store(TaskStatusUpsertRequest $request)
     {
-        $this->ensureAdmin($request);
         $data = $request->validated();
 
         if ($request->user()->hasRole('SuperAdmin')) {
@@ -74,7 +66,6 @@ class TaskStatusController extends Controller
 
     public function update(TaskStatusUpsertRequest $request, TaskStatus $taskStatus)
     {
-        $this->ensureAdmin($request);
         if (! $request->user()->hasRole('SuperAdmin') && $taskStatus->tenant_id !== $request->user()->tenant_id) {
             abort(403);
         }
@@ -94,7 +85,6 @@ class TaskStatusController extends Controller
 
     public function destroy(Request $request, TaskStatus $taskStatus)
     {
-        $this->ensureAdmin($request);
         if (! $request->user()->hasRole('SuperAdmin') && $taskStatus->tenant_id !== $request->user()->tenant_id) {
             abort(403);
         }
@@ -104,8 +94,6 @@ class TaskStatusController extends Controller
 
     public function copyToTenant(Request $request, TaskStatus $taskStatus)
     {
-        $this->ensureAdmin($request);
-
         $tenantId = $request->user()->hasRole('SuperAdmin')
             ? $request->input('tenant_id')
             : $request->user()->tenant_id;
