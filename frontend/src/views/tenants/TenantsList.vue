@@ -1,130 +1,209 @@
 <template>
-    <div>
-      <div class="mb-4">
+  <div>
+    <TenantsTable
+      v-if="!loading"
+      :rows="all"
+      @view="view"
+      @edit="edit"
+      @delete="remove"
+      @delete-selected="removeMany"
+      @impersonate="impersonate"
+    >
+      <template #header-actions>
+        <Select
+          v-model="tenantFilter"
+          :options="tenantOptions"
+          class="w-40"
+          classInput="text-xs !h-8 !min-h-0"
+          :aria-label="t('tenants.label')"
+        />
         <Button
           v-if="can('tenants.create') || can('tenants.manage')"
-          btnClass="btn-primary"
-          text="Add Tenant"
           :link="{ name: 'tenants.create' }"
+          btnClass="btn-primary btn-sm min-w-[100px] !h-8 !py-0"
+          icon="heroicons-outline:plus"
+          iconClass="w-4 h-4"
+          text="Add Tenant"
+          aria-label="Add Tenant"
         />
-      </div>
-      <DashcodeServerTable
-        :key="tableKey"
-      :columns="columns"
-      :fetcher="fetchTenants"
-    >
-      <template #actions="{ row }">
-        <div class="flex gap-2">
-          <Button
-            v-if="can('tenants.view') || can('tenants.manage')"
-            btnClass="btn-outline-primary btn-sm"
-            text="View"
-            @click="view(row.id)"
-          />
-          <Button
-            v-if="can('tenants.update') || can('tenants.manage')"
-            :to="{ name: 'tenants.edit', params: { id: row.id } }"
-            btnClass="btn-outline-primary btn-sm"
-            text="Edit"
-          />
-          <Button
-            v-if="can('tenants.manage')"
-            btnClass="btn-outline-secondary btn-sm"
-            text="Impersonate"
-            @click="impersonate(row)"
-          />
-          <Button
-            v-if="can('tenants.delete') || can('tenants.manage')"
-            btnClass="btn-outline-danger btn-sm"
-            text="Delete"
-            @click="remove(row.id)"
-          />
-        </div>
       </template>
-    </DashcodeServerTable>
+    </TenantsTable>
+    <div v-else class="p-4">
+      <SkeletonTable :count="10" />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, inject } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
+import Swal from 'sweetalert2';
+import TenantsTable from '@/components/tenants/TenantsTable.vue';
+import SkeletonTable from '@/components/ui/Skeleton/Table.vue';
 import Button from '@/components/ui/Button/index.vue';
-import api from '@/services/api';
+import Select from '@/components/ui/Select/index.vue';
+import api, { extractData } from '@/services/api';
+import { useNotify } from '@/plugins/notify';
 import { useAuthStore, can } from '@/stores/auth';
 import hasAbility from '@/utils/ability';
 import { useTenantStore } from '@/stores/tenant';
+import { useI18n } from 'vue-i18n';
 
+interface TenantRow {
+  id: number | string;
+  name: string;
+  slug?: string | null;
+  domain?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  features?: string[] | null;
+  feature_count?: number | null;
+  features_count?: number | null;
+}
+
+const router = useRouter();
+const notify = useNotify();
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
-const router = useRouter();
-const swal = inject('$swal');
-const tableKey = ref(0);
-const all = ref<any[]>([]);
+const { t } = useI18n();
 
-const columns = [
-  { label: 'ID', field: 'id', sortable: true },
-  { label: 'Name', field: 'name', sortable: true },
-  { label: 'Phone', field: 'phone', sortable: true },
-  { label: 'Address', field: 'address', sortable: false },
-];
+const all = ref<TenantRow[]>([]);
+const loading = ref(true);
+const tenantFilter = ref<string | number | ''>(tenantStore.currentTenantId || '');
 
-async function fetchTenants({ page, perPage, sort, search }: any) {
-  if (!hasAbility('tenants.view') && !hasAbility('tenants.manage')) {
-    return { rows: [], total: 0 };
-  }
-  if (!all.value.length) {
+const tenantOptions = computed(() => [
+  { value: '', label: t('allTenants') },
+  ...tenantStore.tenants.map((ten: any) => ({ value: ten.id, label: ten.name })),
+]);
+
+async function refreshTenantOptions() {
+  try {
     await tenantStore.loadTenants({ per_page: 100 });
-    all.value = tenantStore.tenants;
+  } catch (error) {
+    // Ignore tenant loading errors, which are handled globally
   }
-  let rows = all.value.slice();
-  if (search) {
-    const q = String(search).toLowerCase();
-    rows = rows.filter((r) =>
-      Object.values(r).some((v) => String(v ?? '').toLowerCase().includes(q)),
-    );
+}
+
+async function loadTenants() {
+  if (!hasAbility('tenants.view') && !hasAbility('tenants.manage')) {
+    all.value = [];
+    loading.value = false;
+    return;
   }
-  if (sort && sort.field) {
-    rows.sort((a: any, b: any) => {
-      const fa = a[sort.field] ?? '';
-      const fb = b[sort.field] ?? '';
-      if (fa < fb) return sort.type === 'asc' ? -1 : 1;
-      if (fa > fb) return sort.type === 'asc' ? 1 : -1;
-      return 0;
+
+  loading.value = true;
+  try {
+    const { data } = await api.get('/tenants', {
+      params: { tenant_id: tenantFilter.value },
     });
+    const tenants = extractData<any[]>(data) || [];
+    all.value = tenants.map((tenant: any) => ({
+      id: tenant.id,
+      name: tenant.name,
+      slug: tenant.slug,
+      domain: tenant.domain,
+      phone: tenant.phone,
+      address: tenant.address,
+      features: tenant.features ?? null,
+      feature_count:
+        typeof tenant.feature_count === 'number'
+          ? tenant.feature_count
+          : typeof tenant.features_count === 'number'
+          ? tenant.features_count
+          : Array.isArray(tenant.features)
+          ? tenant.features.length
+          : null,
+      features_count:
+        typeof tenant.features_count === 'number'
+          ? tenant.features_count
+          : undefined,
+    }));
+  } catch (error) {
+    all.value = [];
+    notify.error(t('common.error'));
+  } finally {
+    loading.value = false;
   }
-  const total = rows.length;
-  const start = (page - 1) * perPage;
-  const paged = rows.slice(start, start + perPage);
-  return { rows: paged, total };
 }
 
-function reload() {
-  tableKey.value++;
+async function reload() {
+  await Promise.all([refreshTenantOptions(), loadTenants()]);
 }
 
-async function impersonate(t: any) {
-  if (!hasAbility('tenants.manage')) return;
-  await auth.impersonate(t.id, t.name);
-  window.location.reload();
-}
+onMounted(async () => {
+  await refreshTenantOptions();
+  await loadTenants();
+});
 
-function view(id: number) {
+watch(tenantFilter, () => {
+  loadTenants();
+});
+
+function view(id: number | string) {
+  if (!can('tenants.view') && !can('tenants.manage')) return;
   router.push({ name: 'tenants.view', params: { id } });
 }
 
-async function remove(id: number) {
+function edit(id: number | string) {
+  if (!can('tenants.update') && !can('tenants.manage')) return;
+  router.push({ name: 'tenants.edit', params: { id } });
+}
+
+async function impersonate(id: number | string) {
+  if (!hasAbility('tenants.manage')) return;
+  const tenantId = String(id);
+  const tenant =
+    all.value.find((t) => String(t.id) === tenantId) ||
+    tenantStore.tenants.find((t: any) => String(t.id) === tenantId);
+  try {
+    await auth.impersonate(tenantId, tenant?.name || tenantId);
+    window.location.reload();
+  } catch (error) {
+    notify.error(t('common.error'));
+  }
+}
+
+async function remove(id: number | string) {
   if (!hasAbility('tenants.delete') && !hasAbility('tenants.manage')) return;
-  const result = await swal?.fire({
+  const result = await Swal.fire({
     title: 'Delete tenant?',
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Yes, delete',
   });
-  if (!result?.isConfirmed) return;
-  await api.delete(`/tenants/${id}`);
-  all.value = [];
-  reload();
+  if (!result.isConfirmed) return;
+  try {
+    await api.delete(`/tenants/${id}`);
+    await reload();
+  } catch (error) {
+    notify.error(t('common.error'));
+  }
+}
+
+async function removeMany(ids: Array<number | string>) {
+  if (!ids.length) return;
+  if (!hasAbility('tenants.delete') && !hasAbility('tenants.manage')) return;
+  const res = await Swal.fire({
+    title: 'Delete selected tenants?',
+    icon: 'warning',
+    showCancelButton: true,
+  });
+  if (!res.isConfirmed) return;
+
+  let hasError = false;
+  for (const id of ids) {
+    try {
+      await api.delete(`/tenants/${id}`);
+    } catch (error) {
+      hasError = true;
+    }
+  }
+
+  if (hasError) {
+    notify.error(t('common.error'));
+  }
+
+  await reload();
 }
 </script>
 
