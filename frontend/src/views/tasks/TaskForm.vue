@@ -477,7 +477,11 @@ const submitForm = handleSubmit(async () => {
   if (slaEndAt.value) payload.sla_end_at = toISO(slaEndAt.value);
   if (dueAt.value) payload.due_at = toISO(dueAt.value);
   if (priority.value) payload.priority = priority.value;
-  if (assignee.value) payload.assigned_user_id = Number(assignee.value.id);
+  if (can('tasks.assign')) {
+    payload.assigned_user_id = assignee.value
+      ? Number(assignee.value.id)
+      : null;
+  }
   if (isEdit.value) {
     if (status.value && status.value !== originalStatus.value) {
       payload.status = status.value;
