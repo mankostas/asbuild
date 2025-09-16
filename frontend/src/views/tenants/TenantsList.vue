@@ -23,8 +23,8 @@
           btnClass="btn-primary btn-sm min-w-[100px] !h-8 !py-0"
           icon="heroicons-outline:plus"
           iconClass="w-4 h-4"
-          text="Add Tenant"
-          aria-label="Add Tenant"
+          :text="t('tenants.list.addTenant')"
+          :aria-label="t('tenants.list.addTenant')"
         />
       </template>
     </TenantsTable>
@@ -165,10 +165,11 @@ async function impersonate(id: number | string) {
 async function remove(id: number | string) {
   if (!can('tenants.delete')) return;
   const result = await Swal.fire({
-    title: 'Delete tenant?',
+    title: t('tenants.list.deleteTenantTitle'),
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Yes, delete',
+    confirmButtonText: t('tenants.list.confirmDelete'),
+    cancelButtonText: t('actions.cancel'),
   });
   if (!result.isConfirmed) return;
   try {
@@ -183,9 +184,11 @@ async function removeMany(ids: Array<number | string>) {
   if (!ids.length) return;
   if (!can('tenants.delete')) return;
   const res = await Swal.fire({
-    title: 'Delete selected tenants?',
+    title: t('tenants.list.deleteSelectedTenantsTitle'),
     icon: 'warning',
     showCancelButton: true,
+    confirmButtonText: t('tenants.list.confirmDelete'),
+    cancelButtonText: t('actions.cancel'),
   });
   if (!res.isConfirmed) return;
 

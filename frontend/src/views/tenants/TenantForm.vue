@@ -1,25 +1,25 @@
 <template>
   <div v-if="canAccess">
     <form class="max-w-md grid gap-4" @submit.prevent="onSubmit">
-      <Textinput v-model="form.name" label="Name" />
+      <Textinput v-model="form.name" :label="t('tenants.form.name')" />
       <div v-if="errors.name" class="text-red-600 text-sm">{{ errors.name }}</div>
       <Textinput
         v-model.number="form.quota_storage_mb"
-        label="Storage Quota (MB)"
+        :label="t('tenants.form.storageQuota')"
         type="number"
       />
-      <Textinput v-model="form.phone" label="Phone" />
-      <Textinput v-model="form.address" label="Address" />
-      <Textinput v-if="!isEdit" v-model="form.user_name" label="Admin Name" />
+      <Textinput v-model="form.phone" :label="t('tenants.form.phone')" />
+      <Textinput v-model="form.address" :label="t('tenants.form.address')" />
+      <Textinput v-if="!isEdit" v-model="form.user_name" :label="t('tenants.form.adminName')" />
       <div v-if="!isEdit && errors.user_name" class="text-red-600 text-sm">{{ errors.user_name }}</div>
       <Textinput
         v-if="!isEdit"
         v-model="form.user_email"
-        label="Admin Email"
+        :label="t('tenants.form.adminEmail')"
         type="email"
       />
       <div v-if="!isEdit && errors.user_email" class="text-red-600 text-sm">{{ errors.user_email }}</div>
-      <VueSelect label="Features" :error="errors.features">
+      <VueSelect :label="t('tenants.form.features')" :error="errors.features">
         <template #default="{ inputId }">
           <vSelect
             :id="inputId"
@@ -31,7 +31,7 @@
         </template>
       </VueSelect>
       <div v-if="form.features.length" class="grid gap-4">
-        <h3 class="font-medium">Abilities per feature</h3>
+        <h3 class="font-medium">{{ t('tenants.form.abilitiesPerFeature') }}</h3>
         <VueSelect
           v-for="f in form.features"
           :key="f"
@@ -49,7 +49,7 @@
         </VueSelect>
       </div>
       <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
-      <Button type="submit" text="Save" btnClass="btn-dark" />
+      <Button type="submit" :text="t('actions.save')" btnClass="btn-dark" />
     </form>
   </div>
 </template>
@@ -67,6 +67,7 @@ import { useTenantStore } from '@/stores/tenant';
 import hasAbility from '@/utils/ability';
 import { useFeaturesStore } from '@/stores/features';
 import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
 
 const route = useRoute();
 const router = useRouter();
@@ -74,6 +75,7 @@ const isEdit = computed(() => route.name === 'tenants.edit');
 const tenantStore = useTenantStore();
 const featuresStore = useFeaturesStore();
 const { featureMap } = storeToRefs(featuresStore);
+const { t } = useI18n();
 
 const canAccess = computed(
   () =>
@@ -162,7 +164,7 @@ const onSubmit = handleSubmit(async () => {
     if (Object.keys(errs).length) {
       setErrors(errs);
     } else {
-      serverError.value = e.message || 'Failed to save';
+      serverError.value = e.message || t('tenants.form.saveError');
     }
   }
 });

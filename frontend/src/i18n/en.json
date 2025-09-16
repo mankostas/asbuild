@@ -26,6 +26,7 @@
     "select": "Select",
     "close": "Close",
     "clear": "Clear",
+    "back": "Back",
     "export": "Export",
     "chooseFile": "Choose File",
     "view": "View"
@@ -68,7 +69,37 @@
   "tenants": {
     "label": "Tenants",
     "form": {
-      "search": "Search"
+      "search": "Search",
+      "name": "Name",
+      "storageQuota": "Storage Quota (MB)",
+      "phone": "Phone",
+      "address": "Address",
+      "adminName": "Admin Name",
+      "adminEmail": "Admin Email",
+      "features": "Features",
+      "abilitiesPerFeature": "Abilities per feature",
+      "saveError": "Failed to save tenant"
+    },
+    "list": {
+      "addTenant": "Add Tenant",
+      "deleteTenantTitle": "Delete tenant?",
+      "deleteSelectedTenantsTitle": "Delete selected tenants?",
+      "confirmDelete": "Yes, delete"
+    },
+    "table": {
+      "rowsSelected": "rows selected",
+      "columns": {
+        "name": "Name",
+        "phone": "Phone",
+        "address": "Address",
+        "features": "Features"
+      }
+    },
+    "details": {
+      "id": "ID",
+      "name": "Name",
+      "phone": "Phone",
+      "address": "Address"
     }
   },
   "allTenants": "All tenants",
