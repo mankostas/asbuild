@@ -15,45 +15,84 @@ class TeamsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_team_membership_sync(): void
+    public function test_team_membership_sync_requires_manage_ability(): void
+    {
+        [$tenant, $admin] = $this->createTenantUser(['teams.update']);
+        $team = Team::create(['tenant_id' => $tenant->id, 'name' => 'Alpha', 'description' => '']);
+        $member = $this->createEmployee($tenant, 'Member', 'member@example.com');
+
+        Sanctum::actingAs($admin);
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson("/api/teams/{$team->id}/employees", [
+                'employee_ids' => [$member->id],
+            ])
+            ->assertStatus(403);
+
+        $this->assertSame(0, $team->employees()->count());
+    }
+
+    public function test_team_membership_sync_allows_manage_ability(): void
+    {
+        [$tenant, $admin] = $this->createTenantUser(['teams.manage']);
+        $team = Team::create(['tenant_id' => $tenant->id, 'name' => 'Beta', 'description' => '']);
+        $memberOne = $this->createEmployee($tenant, 'Member One', 'member1@example.com');
+        $memberTwo = $this->createEmployee($tenant, 'Member Two', 'member2@example.com');
+
+        Sanctum::actingAs($admin);
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson("/api/teams/{$team->id}/employees", [
+                'employee_ids' => [$memberOne->id, $memberTwo->id],
+            ])
+            ->assertStatus(200);
+
+        $this->assertEqualsCanonicalizing(
+            [$memberOne->id, $memberTwo->id],
+            $team->fresh()->employees->pluck('id')->all()
+        );
+    }
+
+    /**
+     * @return array{0: Tenant, 1: User}
+     */
+    protected function createTenantUser(array $abilities): array
     {
         $tenant = Tenant::create(['name' => 'Tenant']);
-        $adminRole = Role::create(['name' => 'ClientAdmin', 'slug' => 'client_admin', 'tenant_id' => $tenant->id]);
+        $role = Role::create([
+            'name' => 'ClientAdmin',
+            'slug' => 'client_admin',
+            'tenant_id' => $tenant->id,
+            'abilities' => $abilities,
+        ]);
 
         $admin = User::create([
             'name' => 'Admin',
-            'email' => 'admin@example.com',
+            'email' => 'admin' . uniqid() . '@example.com',
             'password' => Hash::make('secret'),
             'tenant_id' => $tenant->id,
             'phone' => '123456',
             'address' => 'Street 1',
-        ]);
-        $user1 = User::create([
-            'name' => 'User1',
-            'email' => 'user1@example.com',
-            'password' => Hash::make('secret'),
-            'tenant_id' => $tenant->id,
-            'phone' => '123456',
-            'address' => 'Street 1',
-        ]);
-        $user2 = User::create([
-            'name' => 'User2',
-            'email' => 'user2@example.com',
-            'password' => Hash::make('secret'),
-            'tenant_id' => $tenant->id,
-            'phone' => '123456',
-            'address' => 'Street 1',
-        ]);
-        $admin->roles()->attach($adminRole->id, ['tenant_id' => $tenant->id]);
-        $team = Team::create(['tenant_id' => $tenant->id, 'name' => 'Alpha', 'description' => '']);
-        Sanctum::actingAs($admin);
-
-        \DB::table('team_employee')->insert([
-            ['team_id' => $team->id, 'employee_id' => $user1->id],
-            ['team_id' => $team->id, 'employee_id' => $user2->id],
+            'type' => 'employee',
+            'status' => 'active',
         ]);
 
-        $members = $team->belongsToMany(User::class, 'team_employee', 'team_id', 'employee_id')->get();
-        $this->assertCount(2, $members);
+        $admin->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
+
+        return [$tenant, $admin];
+    }
+
+    protected function createEmployee(Tenant $tenant, string $name, string $email): User
+    {
+        return User::create([
+            'name' => $name,
+            'email' => $email,
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+            'type' => 'employee',
+            'status' => 'active',
+        ]);
     }
 }

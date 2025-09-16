@@ -23,7 +23,6 @@ return [
     'tasks.status.update',
     'tasks.comment.create',
     'tasks.attach.upload',
-    'tasks.export',
     'tasks.watch',
     'tasks.manage',
 
@@ -49,7 +48,6 @@ return [
     'task_types.manage',
     'task_sla_policies.manage',
     'task_automations.manage',
-    'task_field_snippets.manage',
 
     // Teams
     'teams.view',
@@ -81,10 +79,6 @@ return [
     'gdpr.manage',
     'gdpr.export',
     'gdpr.delete',
-
-    // Billing
-    'billing.view',
-    'billing.manage',
 
     // Reports
     'reports.view',

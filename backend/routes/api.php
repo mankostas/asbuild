@@ -227,7 +227,7 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         ->middleware(Ability::class . ':teams.delete')
         ->name('teams.destroy');
     Route::post('teams/{team}/employees', [TeamController::class, 'syncEmployees'])
-        ->middleware(Ability::class . ':teams.update');
+        ->middleware(Ability::class . ':teams.manage');
 
     Route::post('task-statuses', [TaskStatusController::class, 'store'])
         ->middleware(Ability::class . ':task_statuses.manage')
