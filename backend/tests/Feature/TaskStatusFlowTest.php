@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\Ability;
 use App\Models\Role;
 use App\Models\Task;
 use App\Models\TaskType;
@@ -40,6 +41,30 @@ class TaskStatusFlowTest extends TestCase
             'address' => 'Street 1',
         ]);
         $user->roles()->attach($role->id, ['tenant_id' => 1]);
+        $user->refresh();
+        Sanctum::actingAs($user);
+        return $user;
+    }
+
+    protected function authManager(): User
+    {
+        $role = Role::create([
+            'name' => 'Manager',
+            'slug' => 'manager',
+            'tenant_id' => 1,
+            'abilities' => ['tasks.status.update', 'tasks.update', 'tasks.manage'],
+            'level' => 1,
+        ]);
+        $user = User::create([
+            'name' => 'M',
+            'email' => 'm@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => 1,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($role->id, ['tenant_id' => 1]);
+        $user->refresh();
         Sanctum::actingAs($user);
         return $user;
     }
@@ -145,5 +170,82 @@ class TaskStatusFlowTest extends TestCase
             ->postJson("/api/tasks/{$task->id}/status", ['status' => 'assigned'])
             ->assertStatus(200)
             ->assertJsonPath('data.status', 'assigned');
+    }
+
+    public function test_update_route_allows_status_change(): void
+    {
+        $this->withoutMiddleware(Ability::class);
+        $user = $this->authUser();
+        $task = $this->makeTask($user);
+
+        $this->assertTrue(app(\App\Services\AbilityService::class)->userHasAbility($user, 'tasks.update', 1));
+
+        $response = $this->withHeader('X-Tenant-ID', 1)
+            ->patchJson("/api/tasks/{$task->id}", [
+                'title' => 'Updated Title',
+                'status' => 'assigned',
+            ]);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonPath('data.status', 'assigned');
+
+        $this->assertSame('assigned', $task->fresh()->status);
+    }
+
+    public function test_update_route_rejects_invalid_status_transition(): void
+    {
+        $this->withoutMiddleware(Ability::class);
+        $user = $this->authUser();
+        $task = $this->makeTask($user);
+        $task->update(['title' => 'Original Title']);
+
+        $this->withHeader('X-Tenant-ID', 1)
+            ->patchJson("/api/tasks/{$task->id}", [
+                'title' => 'Changed Title',
+                'status' => 'completed',
+            ])
+            ->assertStatus(422)
+            ->assertJson(['message' => 'invalid_transition']);
+
+        $fresh = $task->fresh();
+        $this->assertSame('draft', $fresh->status);
+        $this->assertSame('Original Title', $fresh->title);
+    }
+
+    public function test_update_route_requires_status_ability_when_status_provided(): void
+    {
+        $this->withoutMiddleware(Ability::class);
+        $role = Role::create([
+            'name' => 'Limited',
+            'slug' => 'limited',
+            'tenant_id' => 1,
+            'abilities' => ['tasks.update'],
+            'level' => 1,
+        ]);
+
+        $user = User::create([
+            'name' => 'Limited User',
+            'email' => 'limited@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => 1,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($role->id, ['tenant_id' => 1]);
+        $user->refresh();
+        Sanctum::actingAs($user);
+
+        $task = $this->makeTask($user);
+
+        $this->withHeader('X-Tenant-ID', 1)
+            ->patchJson("/api/tasks/{$task->id}", ['status' => 'assigned'])
+            ->assertStatus(403);
+
+        $this->assertSame('draft', $task->fresh()->status);
+
+        $this->withHeader('X-Tenant-ID', 1)
+            ->patchJson("/api/tasks/{$task->id}", ['title' => 'Only Title'])
+            ->assertStatus(200);
     }
 }
