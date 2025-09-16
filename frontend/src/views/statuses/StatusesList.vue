@@ -19,7 +19,7 @@
           :aria-label="t('tenants')"
         />
         <Button
-          v-if="can('task_statuses.create') || can('task_statuses.manage')"
+          v-if="can('task_statuses.manage')"
           link="/task-statuses/create"
           btnClass="btn-primary btn-sm min-w-[100px] !h-8 !py-0"
           icon="heroicons-outline:plus"
@@ -48,6 +48,7 @@ import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
 import { useTaskStatusesStore } from '@/stores/taskStatuses';
 import { useI18n } from 'vue-i18n';
+import { useNotify } from '@/plugins/notify';
 
 interface TaskStatus {
   id: number;
@@ -71,6 +72,7 @@ const auth = useAuthStore();
 const tenantStore = useTenantStore();
 const statusesStore = useTaskStatusesStore();
 const { t } = useI18n();
+const notify = useNotify();
 
 if (auth.isSuperAdmin) {
   scope.value = 'all';
@@ -138,7 +140,16 @@ function edit(id: number) {
   router.push({ name: 'taskStatuses.edit', params: { id } });
 }
 
+function ensureCanManage(): boolean {
+  if (can('task_statuses.manage')) {
+    return true;
+  }
+  notify.forbidden();
+  return false;
+}
+
 async function remove(id: number) {
+  if (!ensureCanManage()) return;
   const res = await Swal.fire({
     title: 'Delete status?',
     icon: 'warning',
@@ -151,6 +162,7 @@ async function remove(id: number) {
 }
 
 async function copy(id: number) {
+  if (!ensureCanManage()) return;
   let tenantId: string | number | undefined;
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
@@ -172,6 +184,7 @@ async function copy(id: number) {
 }
 
 async function removeMany(ids: number[]) {
+  if (!ensureCanManage()) return;
   const res = await Swal.fire({
     title: 'Delete selected statuses?',
     icon: 'warning',
@@ -184,6 +197,7 @@ async function removeMany(ids: number[]) {
 }
 
 async function copyMany(ids: number[]) {
+  if (!ensureCanManage()) return;
   let tenantId: string | number | undefined;
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();

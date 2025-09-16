@@ -67,7 +67,7 @@
                   <span>{{ t('actions.delete') }}</span>
                 </button>
               </MenuItem>
-              <MenuItem v-if="(can('task_statuses.create') || can('task_statuses.manage')) && (auth.isSuperAdmin || !rowProps.row.tenant_id)">
+              <MenuItem v-if="can('task_statuses.manage') && (auth.isSuperAdmin || !rowProps.row.tenant_id)">
                 <button
                   type="button"
                   class="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full px-4 py-2 text-sm flex space-x-2 items-center rtl:space-x-reverse"
@@ -91,7 +91,7 @@
           {{ t('actions.delete') }}
         </button>
         <button
-          v-if="can('task_statuses.create') || can('task_statuses.manage')"
+          v-if="can('task_statuses.manage')"
           type="button"
           class="ml-2 text-primary-500 hover:underline cursor-pointer"
           @click="emit('copy-selected', selectedIds)"
