@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Support\AbilityNormalizer;
 
 class AbilityService
 {
@@ -27,6 +28,8 @@ class AbilityService
         }
 
         $abilities = $this->resolveAbilities($user, $tenantId);
+
+        $codes = AbilityNormalizer::expandRequestedAbilities($codes);
 
         if (in_array('*', $abilities, true)) {
             return true;
@@ -58,6 +61,7 @@ class AbilityService
         }
 
         $abilities = $roles->pluck('abilities')->flatten()->filter()->unique()->values()->all();
+        $abilities = AbilityNormalizer::normalizeList($abilities);
 
         return $this->cache[$cacheKey] = $abilities;
     }
