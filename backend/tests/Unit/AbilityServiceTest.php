@@ -124,4 +124,50 @@ class AbilityServiceTest extends TestCase
         $this->assertTrue($this->service->userHasAbility($user, 'reports.view'));
         $this->assertContains('dashboard.view', $this->service->resolveAbilities($user));
     }
+
+    public function test_tenants_manage_grants_sensitive_actions(): void
+    {
+        $tenant = Tenant::create(['name' => 'Delta Group', 'features' => []]);
+
+        $manager = User::create([
+            'name' => 'Manager',
+            'email' => 'manager@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $manageRole = Role::create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Tenant Manager',
+            'slug' => 'tenant_manager',
+            'level' => 1,
+            'abilities' => ['tenants.manage'],
+        ]);
+
+        $manageRole->users()->attach($manager->id, ['tenant_id' => $tenant->id]);
+
+        $this->assertTrue($this->service->userHasAbility($manager, 'tenants.delete', $tenant->id));
+        $this->assertTrue($this->service->userHasAbility($manager, 'tenants.update', $tenant->id));
+        $this->assertTrue($this->service->userHasAbility($manager, 'tenants.impersonate', $tenant->id));
+
+        $viewer = User::create([
+            'name' => 'Viewer',
+            'email' => 'viewer@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $viewRole = Role::create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Tenant Viewer',
+            'slug' => 'tenant_viewer',
+            'level' => 2,
+            'abilities' => ['tenants.view'],
+        ]);
+
+        $viewRole->users()->attach($viewer->id, ['tenant_id' => $tenant->id]);
+
+        $this->assertFalse($this->service->userHasAbility($viewer, 'tenants.impersonate', $tenant->id));
+        $this->assertFalse($this->service->userHasAnyAbility($viewer, ['tenants.manage', 'tenants.impersonate'], $tenant->id));
+    }
 }

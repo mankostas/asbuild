@@ -33,3 +33,12 @@ Foundation for a Laravel 11 backend and Vue 3 single-page application.
      * * * * * cd /path/to/backend && php artisan queue:work --once >> /dev/null 2>&1
      ```
 6. Health check: visit `/api/health` to confirm the app is running.
+
+## Tenant management
+
+Super administrators manage tenants through the `/api/tenants` endpoint and its SPA counterpart. Access to the listing requires the `tenants.view` ability in addition to holding the SuperAdmin role. The index supports two key filters:
+
+* `tenant_id` — restricts the response to a single tenant record.
+* `search` — performs a case-insensitive match on tenant names for quick lookups.
+
+Bulk destructive actions are gated by abilities. The UI keeps the **Delete Selected** control disabled until the current operator holds the `tenants.delete` ability and has selected at least one tenant. Sensitive options such as impersonation or editing stay hidden until the `tenants.manage` ability is granted; that ability fans out to other `tenants.*` permissions, mirroring the backend enforcement tested in `AbilityServiceTest`.
