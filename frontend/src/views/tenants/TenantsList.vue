@@ -92,11 +92,29 @@ async function loadTenants() {
 
   loading.value = true;
   try {
-    const { data } = await api.get('/tenants', {
-      params: { tenant_id: tenantFilter.value },
-    });
-    const tenants = extractData<any[]>(data) || [];
-    all.value = tenants.map((tenant: any) => ({
+    const aggregated: any[] = [];
+    const tenantIdParam = tenantFilter.value === '' ? undefined : tenantFilter.value;
+    let page = 1;
+    let lastPage = 1;
+
+    do {
+      const response = await api.get('/tenants', {
+        params: {
+          tenant_id: tenantIdParam,
+          per_page: 100,
+          page,
+        },
+      });
+
+      const tenants = extractData<any[]>(response.data) || [];
+      aggregated.push(...tenants);
+
+      const meta = response.data?.meta;
+      lastPage = typeof meta?.last_page === 'number' ? meta.last_page : page;
+      page += 1;
+    } while (page <= lastPage);
+
+    all.value = aggregated.map((tenant: any) => ({
       id: tenant.id,
       name: tenant.name,
       slug: tenant.slug,
