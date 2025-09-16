@@ -83,6 +83,10 @@ watch(
 watch(
   abilityLabels,
   (labels) => {
+    if (!featuresStore.hasFeatureData) {
+      return;
+    }
+
     const keys = Object.keys(labels) as (keyof Abilities)[];
     Object.keys(localAbilities).forEach((k) => {
       if (!keys.includes(k as keyof Abilities)) {
@@ -90,9 +94,7 @@ watch(
       }
     });
     keys.forEach((k) => {
-      if (!(k in localAbilities)) {
-        (localAbilities as any)[k] = false;
-      }
+      (localAbilities as any)[k] = props.modelValue[k];
     });
   },
   { immediate: true },
