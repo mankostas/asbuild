@@ -11,7 +11,7 @@ class RolePolicy extends TenantOwnedPolicy
 {
     public function create(User $user): bool
     {
-        return Gate::allows('roles.manage');
+        return Gate::allows('roles.create');
     }
 
     public function view(User $user, Model $role): bool
@@ -24,14 +24,14 @@ class RolePolicy extends TenantOwnedPolicy
     public function update(User $user, Model $role): bool
     {
         return $role instanceof Role
-            && Gate::allows('roles.manage')
+            && Gate::allows('roles.update')
             && parent::update($user, $role);
     }
 
     public function delete(User $user, Model $role): bool
     {
         return $role instanceof Role
-            && Gate::allows('roles.manage')
+            && Gate::allows('roles.delete')
             && parent::delete($user, $role);
     }
 }
