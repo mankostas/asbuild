@@ -18,11 +18,10 @@ Roles carry a numeric `level` used to scope what other roles they can manage. Lo
 
 ## Features & Abilities
 
-Features are enumerated in `config/features.php` and mapped to ability strings via `config/feature_map.php`. Each feature lists the abilities that gate access to parts of the system. When introducing a new feature:
+Features are enumerated in `config/features.php` and mapped to ability strings via `config/feature_map.php`. Each feature lists the abilities that gate access to parts of the system. The feature map is the single source of truth for ability codes; `config/abilities.php` is generated from it when configuration is loaded or cached. When introducing a new feature:
 
-1. Define any new ability strings in `config/abilities.php`.
-2. Map the feature to its abilities in `config/feature_map.php`.
-3. Optionally register the feature slug in `config/features.php` if it should be toggled.
+1. Add the ability strings to the appropriate feature entry in `config/feature_map.php`.
+2. Optionally register the feature slug in `config/features.php` if it should be toggled.
 
 Example for a `reports` feature:
 
@@ -40,14 +39,7 @@ return [
 ];
 ```
 
-```php
-// config/abilities.php
-return [
-    // ...
-    'reports.view',
-    'reports.manage',
-];
-```
+Once the feature map is updated, `config('abilities')` will automatically include the new codes (after the config cache is rebuilt, if applicable).
 
 Remember to safeguard new resources. When adding a manage-able resource:
 
