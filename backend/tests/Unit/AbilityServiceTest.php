@@ -99,7 +99,7 @@ class AbilityServiceTest extends TestCase
         $this->assertFalse($this->service->userHasAbility($user, 'tasks.view', $tenantTwo->id));
     }
 
-    public function test_dashboard_view_alias_grants_reports_view(): void
+    public function test_reports_view_alias_grants_dashboard_view(): void
     {
         $tenant = Tenant::create(['name' => 'Gamma Corp', 'features' => ['dashboard']]);
 
@@ -115,13 +115,13 @@ class AbilityServiceTest extends TestCase
             'name' => 'Viewer',
             'slug' => 'viewer',
             'level' => 3,
-            'abilities' => ['dashboard.view'],
+            'abilities' => ['reports.view'],
         ]);
 
         $role->users()->attach($user->id, ['tenant_id' => $tenant->id]);
 
-        $this->assertTrue($this->service->userHasAbility($user, 'reports.view'));
         $this->assertTrue($this->service->userHasAbility($user, 'dashboard.view'));
-        $this->assertContains('reports.view', $this->service->resolveAbilities($user));
+        $this->assertTrue($this->service->userHasAbility($user, 'reports.view'));
+        $this->assertContains('dashboard.view', $this->service->resolveAbilities($user));
     }
 }

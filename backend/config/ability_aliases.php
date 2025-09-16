@@ -2,5 +2,5 @@
 
 return [
     // Legacy ability => canonical replacement mapping.
-    'dashboard.view' => 'reports.view',
+    'reports.view' => 'dashboard.view',
 ];
