@@ -49,7 +49,7 @@ const routeAccessConfig: Record<string, RouteAccessConfig> = {
   reports: { feature: 'reports', abilities: ['view'] },
   'reports.kpis': { feature: 'reports', abilities: ['view'] },
   'employees.list': { feature: 'employees', abilities: ['view'] },
-  'employees.create': { feature: 'employees', abilities: ['create'] },
+  'employees.create': { feature: 'employees', abilities: ['employees.create'] },
   'employees.edit': {
     feature: 'employees',
     abilities: ['view', 'manage'],
