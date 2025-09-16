@@ -16,6 +16,8 @@ class ManualController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Manual::class);
+
         $tenantId = $request->user()->tenant_id;
         $search = $request->query('search', '');
         $perPage = $request->query('per_page', 15);

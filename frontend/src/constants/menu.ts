@@ -38,7 +38,7 @@ const routeAccessConfig: Record<string, RouteAccessConfig> = {
     abilities: ['view', 'manage'],
     requireAllAbilities: true,
   },
-  'manuals.list': { feature: 'manuals', abilities: ['manage'] },
+  'manuals.list': { feature: 'manuals', abilities: ['view'] },
   'manuals.create': { feature: 'manuals', abilities: ['manage'] },
   'manuals.edit': { feature: 'manuals', abilities: ['manage'] },
   'notifications.inbox': { feature: 'notifications', abilities: ['view'] },

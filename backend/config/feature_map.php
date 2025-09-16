@@ -25,6 +25,7 @@ return [
     'manuals' => [
         'label' => 'Manuals',
         'abilities' => [
+            'manuals.view',
             'manuals.manage',
         ],
     ],
