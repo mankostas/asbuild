@@ -266,13 +266,12 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::put('notification-preferences', [NotificationController::class, 'updatePreferences'])
         ->middleware(Ability::class . ':notifications.manage');
 
-    Route::apiResource('employees', EmployeeController::class)->middleware([
-        'index' => Ability::class . ':employees.view',
-        'show' => Ability::class . ':employees.view',
-        'store' => Ability::class . ':employees.manage',
-        'update' => Ability::class . ':employees.manage',
-        'destroy' => Ability::class . ':employees.manage',
-    ]);
+    Route::apiResource('employees', EmployeeController::class)
+        ->middlewareFor('index', Ability::class . ':employees.view')
+        ->middlewareFor('show', Ability::class . ':employees.view')
+        ->middlewareFor('store', Ability::class . ':employees.create')
+        ->middlewareFor('update', Ability::class . ':employees.manage')
+        ->middlewareFor('destroy', Ability::class . ':employees.manage');
     Route::post('employees/{employee}', [EmployeeController::class, 'update'])
         ->middleware(Ability::class . ':employees.manage');
     Route::patch('employees/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])
