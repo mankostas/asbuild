@@ -51,6 +51,7 @@ import Dropdown from '@/components/Dropdown';
 import Icon from '@/components/Icon';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
+import { accessForRoute } from '@/constants/menu';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -71,6 +72,7 @@ const ProfileMenu = [
   {
     label: 'Profile',
     icon: 'heroicons-outline:user',
+    ...accessForRoute('settings.profile'),
     link: () => {
       router.push({ name: 'settings.profile' });
     },

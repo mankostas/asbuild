@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import Navmenu from '@/components/ui/Sidebar/Navmenu.vue';
 import { useAuthStore } from '@/stores/auth';
+import { accessForRoute } from '@/constants/menu';
 
 function runVisible(items: any[]) {
   const { visibleItems } = (Navmenu as any).setup(
@@ -58,5 +59,29 @@ describe('Navmenu feature gating', () => {
     const visible = runVisible(items);
     expect(visible).toHaveLength(1);
     expect(visible[0].child).toHaveLength(1);
+  });
+
+  it('shows the profile menu item without feature or ability requirements', () => {
+    const auth = useAuthStore();
+    auth.abilities = [];
+    auth.features = [];
+
+    const items = [
+      {
+        title: 'Settings',
+        child: [
+          {
+            childtitle: 'Profile',
+            childlink: 'settings.profile',
+            ...accessForRoute('settings.profile'),
+          },
+        ],
+      },
+    ];
+
+    const visible = runVisible(items);
+    expect(visible).toHaveLength(1);
+    expect(visible[0].child).toHaveLength(1);
+    expect(visible[0].child?.[0].childlink).toBe('settings.profile');
   });
 });
