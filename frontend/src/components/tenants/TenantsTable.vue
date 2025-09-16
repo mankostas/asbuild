@@ -164,22 +164,22 @@ const perPageOptions = [
   { value: '50', label: '50' },
 ];
 
-const selectOptions = {
+const selectOptions = computed(() => ({
   enabled: true,
   selectOnCheckboxOnly: true,
   selectionInfoClass: 'custom-class',
-  selectionText: 'rows selected',
-  clearSelectionText: 'clear',
+  selectionText: t('tenants.table.rowsSelected'),
+  clearSelectionText: t('actions.clear'),
   selectAllByGroup: true,
-};
+}));
 
-const columns = [
-  { label: 'Name', field: 'name' },
-  { label: 'Phone', field: 'phone' },
-  { label: 'Address', field: 'address' },
-  { label: 'Features', field: 'feature_count' },
-  { label: 'Actions', field: 'actions' },
-];
+const columns = computed(() => [
+  { label: t('tenants.table.columns.name'), field: 'name' },
+  { label: t('tenants.table.columns.phone'), field: 'phone' },
+  { label: t('tenants.table.columns.address'), field: 'address' },
+  { label: t('tenants.table.columns.features'), field: 'feature_count' },
+  { label: t('actions.actions'), field: 'actions' },
+]);
 
 const selectedIds = ref<Array<number | string>>([]);
 

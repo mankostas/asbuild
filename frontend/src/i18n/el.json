@@ -26,6 +26,7 @@
     "select": "Επιλογή",
     "close": "Κλείσιμο",
     "clear": "Καθαρισμός",
+    "back": "Πίσω",
     "export": "Εξαγωγή",
     "chooseFile": "Επιλογή αρχείου",
     "view": "Προβολή"
@@ -68,7 +69,37 @@
   "tenants": {
     "label": "Μισθωτές",
     "form": {
-      "search": "Αναζήτηση"
+      "search": "Αναζήτηση",
+      "name": "Όνομα",
+      "storageQuota": "Όριο αποθήκευσης (MB)",
+      "phone": "Τηλέφωνο",
+      "address": "Διεύθυνση",
+      "adminName": "Όνομα διαχειριστή",
+      "adminEmail": "Email διαχειριστή",
+      "features": "Δυνατότητες",
+      "abilitiesPerFeature": "Δικαιώματα ανά δυνατότητα",
+      "saveError": "Αποτυχία αποθήκευσης μισθωτή"
+    },
+    "list": {
+      "addTenant": "Προσθήκη μισθωτή",
+      "deleteTenantTitle": "Διαγραφή μισθωτή;",
+      "deleteSelectedTenantsTitle": "Διαγραφή επιλεγμένων μισθωτών;",
+      "confirmDelete": "Ναι, διαγραφή"
+    },
+    "table": {
+      "rowsSelected": "γραμμές επιλεγμένες",
+      "columns": {
+        "name": "Όνομα",
+        "phone": "Τηλέφωνο",
+        "address": "Διεύθυνση",
+        "features": "Δυνατότητες"
+      }
+    },
+    "details": {
+      "id": "ID",
+      "name": "Όνομα",
+      "phone": "Τηλέφωνο",
+      "address": "Διεύθυνση"
     }
   },
   "allTenants": "Όλοι οι μισθωτές",
