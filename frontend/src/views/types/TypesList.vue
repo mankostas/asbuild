@@ -19,7 +19,7 @@
             :aria-label="t('tenants')"
           />
           <Button
-            v-if="can('task_field_snippets.manage')"
+            v-if="can('task_types.manage')"
             btnClass="btn-secondary light btn-sm !h-8 !py-0"
             :aria-label="t('templates.title')"
             :text="t('templates.title')"
@@ -40,7 +40,7 @@
         <SkeletonTable :count="10" />
       </div>
       <TemplatesDrawer
-        v-if="can('task_field_snippets.manage')"
+        v-if="can('task_types.manage')"
         :open="templatesOpen"
         :types="all"
         @close="templatesOpen = false"
