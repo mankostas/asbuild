@@ -138,7 +138,9 @@
           >
             <Icon icon="heroicons-outline:trash" class="w-5 h-5" />
           </button>
-          <template v-if="hasAny(['tasks.update', 'tasks.manage'])">
+          <template
+            v-if="hasAny(['tasks.update', 'tasks.manage', 'tasks.status.update'])"
+          >
             <button
               v-for="s in getChangeActions(row)"
               :key="s"
@@ -322,7 +324,8 @@ async function applyBulkStatus() {
   for (const id of selected.value) {
     const row = all.value.find((r) => r.id === id);
     if (!row) continue;
-    if (!hasAny(['tasks.update', 'tasks.manage'])) continue;
+    if (!hasAny(['tasks.update', 'tasks.manage', 'tasks.status.update']))
+      continue;
     if (!getChangeActions(row).includes(bulkStatus.value)) continue;
     await api.post(`/tasks/${id}/status`, { status: bulkStatus.value });
     row.status = bulkStatus.value;
