@@ -85,21 +85,27 @@ export function loadPermissions(force = false): Promise<void> {
       api.get<string[]>('/lookups/abilities'),
     ])
       .then(([featureResult, abilityResult]) => {
-        if (featureResult.status === 'fulfilled') {
+        const featureLoaded = featureResult.status === 'fulfilled';
+        const abilityLoaded = abilityResult.status === 'fulfilled';
+
+        if (featureLoaded) {
           state.featureMap = featureResult.value.data ?? {};
         } else if (force) {
           state.featureMap = {};
         }
 
-        if (abilityResult.status === 'fulfilled') {
+        if (abilityLoaded) {
           state.abilityList = abilityResult.value.data ?? [];
         } else if (force) {
           state.abilityList = [];
         }
 
         buildAbilityLookup();
-        state.loaded = true;
-        notifyListeners();
+
+        state.loaded = featureLoaded && abilityLoaded;
+        if (state.loaded) {
+          notifyListeners();
+        }
       })
       .finally(() => {
         loadPromise = null;
