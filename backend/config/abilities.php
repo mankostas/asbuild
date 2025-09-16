@@ -3,82 +3,27 @@
 // Central registry of ability codes used across the application.
 // The SuperAdmin role is granted the "*" wildcard so new entries
 // automatically apply to those users without additional changes.
-return [
-    // Tenants
-    'tenants.view',
-    'tenants.create',
-    'tenants.update',
-    'tenants.delete',
-    'tenants.manage',
+//
+// This file derives its values from config/feature_map.php so the
+// feature map remains the single source of truth. When config is
+// cached, the generated list is stored alongside the rest of the
+// configuration for fast lookups.
+$featureMap = require __DIR__.'/feature_map.php';
 
-    // Tasks
-    'tasks.view',
-    'tasks.create',
-    'tasks.update',
-    'tasks.delete',
-    'tasks.assign',
-    'tasks.status.update',
-    'tasks.comment.create',
-    'tasks.attach.upload',
-    'tasks.watch',
-    'tasks.manage',
+$abilities = [];
 
-    // Manuals
-    'manuals.view',
-    'manuals.manage',
+foreach ($featureMap as $definition) {
+    if (! is_array($definition)) {
+        continue;
+    }
 
-    // Notifications
-    'notifications.view',
-    'notifications.manage',
+    $featureAbilities = $definition['abilities'] ?? [];
 
-    // Roles & Permissions
-    'roles.view',
-    'roles.create',
-    'roles.update',
-    'roles.delete',
-    'roles.manage',
+    if (! is_array($featureAbilities)) {
+        continue;
+    }
 
-    // Task Types
-    'task_types.view',
-    'task_types.create',
-    'task_types.update',
-    'task_types.delete',
-    'task_types.manage',
-    'task_sla_policies.manage',
-    'task_automations.manage',
+    $abilities = array_merge($abilities, $featureAbilities);
+}
 
-    // Teams
-    'teams.view',
-    'teams.create',
-    'teams.update',
-    'teams.delete',
-    'teams.manage',
-
-    // Task Statuses
-    'task_statuses.view',
-    'task_statuses.manage',
-
-    // Employees
-    'employees.view',
-    'employees.create',
-    'employees.update',
-    'employees.delete',
-    'employees.manage',
-
-    // Theme Customizer
-    'themes.view',
-    'themes.manage',
-
-    // Branding
-    'branding.manage',
-
-    // GDPR
-    'gdpr.view',
-    'gdpr.manage',
-    'gdpr.export',
-    'gdpr.delete',
-
-    // Reports
-    'reports.view',
-    'reports.manage',
-];
+return array_values(array_unique($abilities));
