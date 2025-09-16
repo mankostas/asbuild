@@ -6,7 +6,6 @@ return [
     'manuals',
     'notifications',
     'reports',
-    'billing',
     'roles',
     'task_types',
     'task_statuses',

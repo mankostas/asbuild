@@ -18,7 +18,6 @@ class TenantRolesBackfillSeeder extends Seeder
             'task_statuses',
             'teams',
             'themes',
-            'billing',
         ];
         $defaultFeatures = array_values(array_intersect($defaultFeatures, config('features', [])));
 
