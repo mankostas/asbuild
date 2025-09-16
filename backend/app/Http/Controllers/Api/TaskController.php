@@ -99,7 +99,13 @@ class TaskController extends Controller
             $this->formSchemaService->sanitizeRichText($type->schema_json ?? [], $data['form_data']);
         }
 
-        $task = new Task($data);
+        $task = new Task();
+        $task->fill($data);
+
+        if ($task->assigned_user_id !== null) {
+            $this->authorize('assign', $task);
+        }
+
         if (! $canOverride || ! $task->sla_end_at) {
             app(\App\Services\TaskSlaService::class)->apply($task);
         }
@@ -142,6 +148,10 @@ class TaskController extends Controller
             $this->formSchemaService->sanitizeRichText($type->schema_json ?? [], $data['form_data']);
         }
         $task->fill($data);
+
+        if ($task->isDirty('assigned_user_id')) {
+            $this->authorize('assign', $task);
+        }
         if (! $canOverride || ! $task->sla_end_at) {
             app(\App\Services\TaskSlaService::class)->apply($task);
         }
@@ -151,6 +161,24 @@ class TaskController extends Controller
         }
 
         return new TaskResource($task->load('comments', 'type', 'assignee', 'watchers'));
+    }
+
+    public function assign(Request $request, Task $task)
+    {
+        $this->authorize('assign', $task);
+
+        $data = $request->validate([
+            'assigned_user_id' => ['nullable', 'integer'],
+        ]);
+
+        $task->assigned_user_id = $data['assigned_user_id'] ?? null;
+        $task->save();
+
+        if ($task->assigned_user_id) {
+            $task->watchers()->firstOrCreate(['user_id' => $task->assigned_user_id]);
+        }
+
+        return new TaskResource($task->load('assignee', 'watchers'));
     }
 
     public function destroy(Task $task)

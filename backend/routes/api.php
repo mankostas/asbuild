@@ -87,6 +87,8 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         'update' => Ability::class . ':tasks.update',
         'destroy' => Ability::class . ':tasks.delete',
     ]);
+    Route::patch('tasks/{task}/assign', [TaskController::class, 'assign'])
+        ->middleware(Ability::class . ':tasks.assign');
     Route::post('tasks/{task}/status', [TaskController::class, 'updateStatus'])
         ->middleware(Ability::class . ':tasks.status.update');
     Route::post('tasks/{task}/files', [FileController::class, 'attachToTask'])

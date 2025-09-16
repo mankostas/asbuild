@@ -302,7 +302,7 @@ function formatDate(d: string) {
 
 async function assignMe() {
   try {
-    await api.patch(`/tasks/${props.task.id}`, {
+    await api.patch(`/tasks/${props.task.id}/assign`, {
       assigned_user_id: auth.user.id,
     });
     emit('assigned', {
