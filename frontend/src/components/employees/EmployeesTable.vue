@@ -58,7 +58,7 @@
           {{ formatDate(rowProps.row.last_login_at) }}
         </span>
         <span v-else-if="rowProps.column.field === 'actions'">
-          <Dropdown classMenuItems=" w-[140px]">
+          <Dropdown classMenuItems=" w-[180px]">
             <span class="text-xl"><Icon icon="heroicons-outline:dots-vertical" /></span>
             <template #menus>
               <MenuItem v-if="can('employees.manage')">
@@ -79,6 +79,26 @@
                 >
                   <span class="text-base"><Icon icon="heroicons-outline:envelope" /></span>
                   <span>{{ t('actions.resendInvite') }}</span>
+                </button>
+              </MenuItem>
+              <MenuItem v-if="can('employees.manage')">
+                <button
+                  type="button"
+                  class="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm flex space-x-2 items-center rtl:space-x-reverse"
+                  @click="$emit('reset-email', rowProps.row.id)"
+                >
+                  <span class="text-base"><Icon icon="heroicons-outline:at-symbol" /></span>
+                  <span>{{ t('actions.resetEmail') }}</span>
+                </button>
+              </MenuItem>
+              <MenuItem v-if="can('employees.manage')">
+                <button
+                  type="button"
+                  class="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm flex space-x-2 items-center rtl:space-x-reverse"
+                  @click="$emit('send-password-reset', rowProps.row.id)"
+                >
+                  <span class="text-base"><Icon icon="heroicons-outline:key" /></span>
+                  <span>{{ t('actions.sendPasswordReset') }}</span>
                 </button>
               </MenuItem>
               <MenuItem v-if="can('employees.update') || can('employees.manage')">
@@ -170,6 +190,8 @@ const emit = defineEmits<{
   (e: 'delete-selected', ids: number[]): void;
   (e: 'impersonate', id: number): void;
   (e: 'resend-invite', id: number): void;
+  (e: 'reset-email', id: number): void;
+  (e: 'send-password-reset', id: number): void;
 }>();
 
 const { t } = useI18n();

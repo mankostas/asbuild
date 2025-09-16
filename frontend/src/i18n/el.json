@@ -12,6 +12,8 @@
     "delete": "Διαγραφή",
     "impersonate": "Υποδύσου",
     "resendInvite": "Επαναποστολή πρόσκλησης",
+    "resetEmail": "Επαναφορά email",
+    "sendPasswordReset": "Αποστολή επαναφοράς κωδικού",
     "save": "Αποθήκευση",
     "publish": "Δημοσίευση",
     "unpublish": "Αποδημοσίευση",
@@ -85,6 +87,20 @@
       "deleteTenantTitle": "Διαγραφή μισθωτή;",
       "deleteSelectedTenantsTitle": "Διαγραφή επιλεγμένων μισθωτών;",
       "confirmDelete": "Ναι, διαγραφή"
+    },
+    "owner": {
+      "resetEmail": {
+        "title": "Επαναφορά email ιδιοκτήτη",
+        "label": "Νέο email",
+        "placeholder": "name@example.com",
+        "confirm": "Επαναφορά email",
+        "required": "Απαιτείται email",
+        "success": "Το email του ιδιοκτήτη ενημερώθηκε"
+      },
+      "passwordReset": {
+        "success": "Στάλθηκε email επαναφοράς κωδικού στον ιδιοκτήτη"
+      },
+      "inviteResent": "Η πρόσκληση του ιδιοκτήτη στάλθηκε ξανά"
     },
     "table": {
       "rowsSelected": "γραμμές επιλεγμένες",
@@ -429,6 +445,17 @@
     "addEmployee": "Πρόσκληση υπαλλήλου",
     "form": {
       "search": "Αναζήτηση"
+    },
+    "resetEmail": {
+      "title": "Επαναφορά email υπαλλήλου",
+      "label": "Νέο email",
+      "placeholder": "name@example.com",
+      "confirm": "Επαναφορά email",
+      "required": "Απαιτείται email",
+      "success": "Το email του υπαλλήλου ενημερώθηκε"
+    },
+    "passwordReset": {
+      "success": "Στάλθηκε email επαναφοράς κωδικού"
     }
   },
   "roles": {

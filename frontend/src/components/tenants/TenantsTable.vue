@@ -44,7 +44,7 @@
           {{ formatFeatureCount(rowProps.row) }}
         </span>
         <span v-else-if="rowProps.column.field === 'actions'">
-          <Dropdown classMenuItems=" w-[160px]">
+          <Dropdown classMenuItems=" w-[200px]">
             <span class="text-xl"><Icon icon="heroicons-outline:dots-vertical" /></span>
             <template #menus>
               <MenuItem v-if="can('tenants.view')">
@@ -75,6 +75,36 @@
                 >
                   <span class="text-base"><Icon icon="heroicons-outline:user" /></span>
                   <span>{{ t('actions.impersonate') }}</span>
+                </button>
+              </MenuItem>
+              <MenuItem v-if="can('tenants.manage') && rowProps.row.owner">
+                <button
+                  type="button"
+                  class="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm flex space-x-2 items-center rtl:space-x-reverse"
+                  @click="$emit('owner-resend-invite', rowProps.row.id)"
+                >
+                  <span class="text-base"><Icon icon="heroicons-outline:envelope" /></span>
+                  <span>{{ t('actions.resendInvite') }}</span>
+                </button>
+              </MenuItem>
+              <MenuItem v-if="can('tenants.manage') && rowProps.row.owner">
+                <button
+                  type="button"
+                  class="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm flex space-x-2 items-center rtl:space-x-reverse"
+                  @click="$emit('owner-reset-email', rowProps.row.id)"
+                >
+                  <span class="text-base"><Icon icon="heroicons-outline:at-symbol" /></span>
+                  <span>{{ t('actions.resetEmail') }}</span>
+                </button>
+              </MenuItem>
+              <MenuItem v-if="can('tenants.manage') && rowProps.row.owner">
+                <button
+                  type="button"
+                  class="hover:bg-slate-900 hover:text-white dark:hover:bg-slate-600 dark:hover:bg-opacity-50 w-full border-b border-b-gray-500 border-opacity-10 px-4 py-2 text-sm flex space-x-2 items-center rtl:space-x-reverse"
+                  @click="$emit('owner-password-reset', rowProps.row.id)"
+                >
+                  <span class="text-base"><Icon icon="heroicons-outline:key" /></span>
+                  <span>{{ t('actions.sendPasswordReset') }}</span>
                 </button>
               </MenuItem>
               <MenuItem v-if="can('tenants.delete')">
@@ -132,6 +162,12 @@ import Breadcrumbs from '@/Layout/Breadcrumbs.vue';
 import { useI18n } from 'vue-i18n';
 import { can } from '@/stores/auth';
 
+interface TenantOwner {
+  id: number | string;
+  name?: string | null;
+  email?: string | null;
+}
+
 interface TenantRow {
   id: number | string;
   name: string;
@@ -142,6 +178,7 @@ interface TenantRow {
   features?: string[] | null;
   feature_count?: number | null;
   features_count?: number | null;
+  owner?: TenantOwner | null;
 }
 
 const props = defineProps<{ rows: TenantRow[] }>();
@@ -151,6 +188,9 @@ const emit = defineEmits<{
   (e: 'delete', id: number | string): void;
   (e: 'delete-selected', ids: Array<number | string>): void;
   (e: 'impersonate', id: number | string): void;
+  (e: 'owner-resend-invite', id: number | string): void;
+  (e: 'owner-reset-email', id: number | string): void;
+  (e: 'owner-password-reset', id: number | string): void;
 }>();
 
 const { t } = useI18n();
@@ -192,6 +232,8 @@ const filteredRows = computed(() => {
     const address = String(r.address || '').toLowerCase();
     const slug = String(r.slug || '').toLowerCase();
     const domain = String(r.domain || '').toLowerCase();
+    const ownerName = String(r.owner?.name || '').toLowerCase();
+    const ownerEmail = String(r.owner?.email || '').toLowerCase();
     const featureCount = featureCountValue(r);
     const featureText = Array.isArray(r.features)
       ? r.features.join(' ').toLowerCase()
@@ -203,6 +245,8 @@ const filteredRows = computed(() => {
       address.includes(term) ||
       slug.includes(term) ||
       domain.includes(term) ||
+      ownerName.includes(term) ||
+      ownerEmail.includes(term) ||
       featureText.includes(term)
     );
   });

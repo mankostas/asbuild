@@ -8,6 +8,8 @@
       @delete-selected="removeMany"
       @impersonate="impersonate"
       @resend-invite="resendInvite"
+      @reset-email="resetEmail"
+      @send-password-reset="sendPasswordReset"
     >
       <template #header-actions>
         <Select
@@ -221,6 +223,66 @@ async function resendInvite(id: number) {
     if (auth.isSuperAdmin) params.tenant_id = tenantFilter.value;
     await api.post(`/employees/${id}/resend-invite`, {}, { params });
     notify.success(t('actions.resendInvite'));
+    reload();
+  } catch (e: any) {
+    notify.error(t('common.error'));
+  }
+}
+
+async function resetEmail(id: number) {
+  if (!can('employees.manage')) return;
+  if (auth.isSuperAdmin && !tenantFilter.value) {
+    notify.error('Please select a tenant first');
+    return;
+  }
+
+  const employee = all.value.find((item) => item.id === id);
+  const result = await Swal.fire({
+    title: t('employees.resetEmail.title'),
+    input: 'email',
+    inputLabel: t('employees.resetEmail.label'),
+    inputValue: employee?.email || '',
+    inputPlaceholder: t('employees.resetEmail.placeholder'),
+    showCancelButton: true,
+    confirmButtonText: t('employees.resetEmail.confirm'),
+    cancelButtonText: t('actions.cancel'),
+    preConfirm: (value) => {
+      if (!value) {
+        Swal.showValidationMessage(t('employees.resetEmail.required'));
+      }
+      return value;
+    },
+  });
+
+  const email = typeof result.value === 'string' ? result.value.trim() : '';
+
+  if (!result.isConfirmed || !email) {
+    return;
+  }
+
+  try {
+    const params: any = {};
+    if (auth.isSuperAdmin) params.tenant_id = tenantFilter.value;
+    await api.post(`/employees/${id}/email-reset`, { email }, { params });
+    notify.success(t('employees.resetEmail.success'));
+    reload();
+  } catch (e: any) {
+    notify.error(t('common.error'));
+  }
+}
+
+async function sendPasswordReset(id: number) {
+  if (!can('employees.manage')) return;
+  if (auth.isSuperAdmin && !tenantFilter.value) {
+    notify.error('Please select a tenant first');
+    return;
+  }
+
+  try {
+    const params: any = {};
+    if (auth.isSuperAdmin) params.tenant_id = tenantFilter.value;
+    await api.post(`/employees/${id}/password-reset`, {}, { params });
+    notify.success(t('employees.passwordReset.success'));
     reload();
   } catch (e: any) {
     notify.error(t('common.error'));
