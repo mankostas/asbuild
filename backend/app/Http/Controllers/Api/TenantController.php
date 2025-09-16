@@ -29,7 +29,14 @@ class TenantController extends Controller
     public function index(Request $request)
     {
         $this->ensureSuperAdmin($request);
-        $result = $this->listQuery(Tenant::query(), $request, ['name'], ['name']);
+        $query = Tenant::query();
+
+        if ($request->filled('tenant_id')) {
+            $tenantId = $request->query('tenant_id');
+            $query->where('id', $tenantId);
+        }
+
+        $result = $this->listQuery($query, $request, ['name'], ['name']);
 
         $result['data'] = array_map(function ($tenant) {
             return $tenant->makeVisible('feature_abilities');
