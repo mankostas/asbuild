@@ -12,6 +12,8 @@
     "delete": "Delete",
     "impersonate": "Impersonate",
     "resendInvite": "Resend Invite",
+    "resetEmail": "Reset Email",
+    "sendPasswordReset": "Send Password Reset",
     "save": "Save",
     "publish": "Publish",
     "unpublish": "Unpublish",
@@ -85,6 +87,20 @@
       "deleteTenantTitle": "Delete tenant?",
       "deleteSelectedTenantsTitle": "Delete selected tenants?",
       "confirmDelete": "Yes, delete"
+    },
+    "owner": {
+      "resetEmail": {
+        "title": "Reset tenant owner email",
+        "label": "New email address",
+        "placeholder": "name@example.com",
+        "confirm": "Reset email",
+        "required": "Email is required",
+        "success": "Tenant owner email updated"
+      },
+      "passwordReset": {
+        "success": "Tenant owner password reset email sent"
+      },
+      "inviteResent": "Tenant owner invitation resent"
     },
     "table": {
       "rowsSelected": "rows selected",
@@ -429,6 +445,17 @@
     "addEmployee": "Invite Employee",
     "form": {
       "search": "Search"
+    },
+    "resetEmail": {
+      "title": "Reset employee email",
+      "label": "New email address",
+      "placeholder": "name@example.com",
+      "confirm": "Reset email",
+      "required": "Email is required",
+      "success": "Employee email updated"
+    },
+    "passwordReset": {
+      "success": "Password reset email sent"
     }
   },
   "roles": {

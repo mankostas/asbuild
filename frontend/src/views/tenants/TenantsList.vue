@@ -8,6 +8,9 @@
       @delete="remove"
       @delete-selected="removeMany"
       @impersonate="impersonate"
+      @owner-resend-invite="resendOwnerInvite"
+      @owner-reset-email="resetOwnerEmail"
+      @owner-password-reset="sendOwnerPasswordReset"
     >
       <template #header-actions>
         <Select
@@ -48,6 +51,15 @@ import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
 import { useI18n } from 'vue-i18n';
 
+interface TenantOwner {
+  id: number | string;
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  last_login_at?: string | null;
+}
+
 interface TenantRow {
   id: number | string;
   name: string;
@@ -58,6 +70,7 @@ interface TenantRow {
   features?: string[] | null;
   feature_count?: number | null;
   features_count?: number | null;
+  owner?: TenantOwner | null;
 }
 
 const router = useRouter();
@@ -81,6 +94,36 @@ async function refreshTenantOptions() {
   } catch (error) {
     // Ignore tenant loading errors, which are handled globally
   }
+}
+
+async function fetchTenantOwners(tenants: any[]): Promise<Record<string, TenantOwner | null>> {
+  if (!tenants.length || !can('tenants.manage')) {
+    return {};
+  }
+
+  const entries = await Promise.all(
+    tenants.map(async (tenant: any) => {
+      const tenantId = tenant?.id;
+      if (tenantId === undefined || tenantId === null) {
+        return [null, null] as const;
+      }
+
+      try {
+        const response = await api.get(`/tenants/${tenantId}/owner`);
+        const owner = extractData<TenantOwner | null>(response.data) || null;
+        return [String(tenantId), owner] as const;
+      } catch (error) {
+        return [String(tenantId), null] as const;
+      }
+    }),
+  );
+
+  return entries.reduce<Record<string, TenantOwner | null>>((acc, [id, owner]) => {
+    if (id) {
+      acc[id] = owner;
+    }
+    return acc;
+  }, {});
 }
 
 async function loadTenants() {
@@ -114,6 +157,8 @@ async function loadTenants() {
       page += 1;
     } while (page <= lastPage);
 
+    const owners = await fetchTenantOwners(aggregated);
+
     all.value = aggregated.map((tenant: any) => ({
       id: tenant.id,
       name: tenant.name,
@@ -134,6 +179,18 @@ async function loadTenants() {
         typeof tenant.features_count === 'number'
           ? tenant.features_count
           : undefined,
+      owner:
+        owners[String(tenant.id)] ??
+        (tenant.owner
+          ? {
+              id: tenant.owner.id,
+              name: tenant.owner.name ?? null,
+              email: tenant.owner.email ?? null,
+              phone: tenant.owner.phone ?? null,
+              address: tenant.owner.address ?? null,
+              last_login_at: tenant.owner.last_login_at ?? null,
+            }
+          : null),
     }));
   } catch (error) {
     all.value = [];
@@ -224,6 +281,70 @@ async function removeMany(ids: Array<number | string>) {
   }
 
   await reload();
+}
+
+async function resendOwnerInvite(id: number | string) {
+  if (!can('tenants.manage')) return;
+
+  try {
+    await api.post(`/tenants/${id}/owner/invite-resend`);
+    notify.success(t('tenants.owner.inviteResent'));
+    await reload();
+  } catch (error) {
+    notify.error(t('common.error'));
+  }
+}
+
+async function sendOwnerPasswordReset(id: number | string) {
+  if (!can('tenants.manage')) return;
+
+  try {
+    await api.post(`/tenants/${id}/owner/password-reset`);
+    notify.success(t('tenants.owner.passwordReset.success'));
+    await reload();
+  } catch (error) {
+    notify.error(t('common.error'));
+  }
+}
+
+async function resetOwnerEmail(id: number | string) {
+  if (!can('tenants.manage')) return;
+
+  const tenantId = String(id);
+  const tenant =
+    all.value.find((t) => String(t.id) === tenantId) ||
+    tenantStore.tenants.find((t: any) => String(t.id) === tenantId);
+
+  const result = await Swal.fire({
+    title: t('tenants.owner.resetEmail.title'),
+    input: 'email',
+    inputLabel: t('tenants.owner.resetEmail.label'),
+    inputValue: tenant?.owner?.email || tenant?.email || '',
+    inputPlaceholder: t('tenants.owner.resetEmail.placeholder'),
+    showCancelButton: true,
+    confirmButtonText: t('tenants.owner.resetEmail.confirm'),
+    cancelButtonText: t('actions.cancel'),
+    preConfirm: (value) => {
+      if (!value) {
+        Swal.showValidationMessage(t('tenants.owner.resetEmail.required'));
+      }
+      return value;
+    },
+  });
+
+  const email = typeof result.value === 'string' ? result.value.trim() : '';
+
+  if (!result.isConfirmed || !email) {
+    return;
+  }
+
+  try {
+    await api.post(`/tenants/${tenantId}/owner/email-reset`, { email });
+    notify.success(t('tenants.owner.resetEmail.success'));
+    await reload();
+  } catch (error) {
+    notify.error(t('common.error'));
+  }
 }
 </script>
 
