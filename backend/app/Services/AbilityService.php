@@ -6,6 +6,15 @@ use App\Models\User;
 
 class AbilityService
 {
+    private array $cache = [];
+
+    public function __construct()
+    {
+        if (function_exists('app')) {
+            app()->terminating(fn () => $this->clearCache());
+        }
+    }
+
     public function userHasAbility(User $user, string $code, ?int $tenantId = null): bool
     {
         return $this->userHasAnyAbility($user, [$code], $tenantId);
@@ -36,13 +45,21 @@ class AbilityService
     {
         $tenantId = $this->resolveTenantId($user, $tenantId);
 
+        $cacheKey = $this->resolveCacheKey($user, $tenantId);
+
+        if (array_key_exists($cacheKey, $this->cache)) {
+            return $this->cache[$cacheKey];
+        }
+
         $roles = $user->roles()->wherePivotNull('tenant_id')->get();
 
         if ($tenantId !== null) {
             $roles = $user->rolesForTenant($tenantId)->merge($roles);
         }
 
-        return $roles->pluck('abilities')->flatten()->filter()->unique()->values()->all();
+        $abilities = $roles->pluck('abilities')->flatten()->filter()->unique()->values()->all();
+
+        return $this->cache[$cacheKey] = $abilities;
     }
 
     protected function resolveTenantId(User $user, ?int $tenantId = null): ?int
@@ -69,5 +86,23 @@ class AbilityService
         $prefix = explode('.', $code)[0] . '.manage';
 
         return in_array($prefix, $abilities, true);
+    }
+
+    private function clearCache(): void
+    {
+        $this->cache = [];
+    }
+
+    private function resolveCacheKey(User $user, ?int $tenantId): string
+    {
+        $userKey = $user->getKey();
+
+        if ($userKey === null) {
+            $userKey = spl_object_hash($user);
+        }
+
+        $tenantKey = $tenantId !== null ? (string) $tenantId : 'null';
+
+        return $userKey . '|' . $tenantKey;
     }
 }
