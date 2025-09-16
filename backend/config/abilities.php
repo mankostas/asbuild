@@ -27,6 +27,7 @@ return [
     'tasks.manage',
 
     // Manuals
+    'manuals.view',
     'manuals.manage',
 
     // Notifications

@@ -8,6 +8,16 @@ use Illuminate\Support\Facades\Gate;
 
 class ManualPolicy extends TenantOwnedPolicy
 {
+    public function viewAny(User $user): bool
+    {
+        return Gate::allows('manuals.view');
+    }
+
+    public function view(User $user, Manual $manual): bool
+    {
+        return Gate::allows('manuals.view') && parent::view($user, $manual);
+    }
+
     public function create(User $user): bool
     {
         return Gate::allows('manuals.manage');
