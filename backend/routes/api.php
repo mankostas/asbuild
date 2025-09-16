@@ -301,10 +301,12 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
             ->middleware(Ability::class . ':gdpr.delete');
     });
 
+    Route::get('reports/overview', [ReportController::class, 'overview'])
+        ->middleware(Ability::class . ':dashboard.view');
+
     Route::prefix('reports')
         ->middleware(Ability::class . ':reports.view')
         ->group(function () {
-            Route::get('overview', [ReportController::class, 'overview']);
             Route::get('kpis', [ReportController::class, 'kpis']);
             Route::get('materials', [ReportController::class, 'materials']);
             Route::get('tasks/overview', [ReportController::class, 'tasksOverview']);

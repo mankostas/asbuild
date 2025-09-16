@@ -10,6 +10,7 @@ class TenantRolesBackfillSeeder extends Seeder
     public function run(): void
     {
         $defaultFeatures = [
+            'dashboard',
             'tasks',
             'notifications',
             'roles',

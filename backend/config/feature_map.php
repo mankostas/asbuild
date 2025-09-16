@@ -1,6 +1,12 @@
 <?php
 
 return [
+    'dashboard' => [
+        'label' => 'Dashboard',
+        'abilities' => [
+            'dashboard.view',
+        ],
+    ],
     'tasks' => [
         'label' => 'Tasks',
         'abilities' => [

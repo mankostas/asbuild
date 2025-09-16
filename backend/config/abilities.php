@@ -4,6 +4,9 @@
 // The SuperAdmin role is granted the "*" wildcard so new entries
 // automatically apply to those users without additional changes.
 return [
+    // Dashboard
+    'dashboard.view',
+
     // Tenants
     'tenants.view',
     'tenants.create',

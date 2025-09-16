@@ -26,6 +26,7 @@ class TenantBootstrapSeeder extends Seeder
 
         // Tenant
         $defaultFeatures = [
+            'dashboard',
             'tasks',
             'notifications',
             'task_types',
