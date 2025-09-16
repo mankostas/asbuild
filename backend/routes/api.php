@@ -313,9 +313,13 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         });
 
     // Lookup endpoints
-    Route::get('lookups/assignees', [LookupController::class, 'assignees']);
-    Route::get('lookups/abilities', [LookupController::class, 'abilities']); // ?forTenant=1
-    Route::get('lookups/feature-map', [LookupController::class, 'featureMap']);
-    Route::get('lookups/features', [LookupController::class, 'features']);
+    Route::get('lookups/assignees', [LookupController::class, 'assignees'])
+        ->middleware(Ability::class . ':tasks.view|employees.view|teams.view');
+    Route::get('lookups/abilities', [LookupController::class, 'abilities']) // ?forTenant=1
+        ->middleware(Ability::class . ':roles.view');
+    Route::get('lookups/feature-map', [LookupController::class, 'featureMap'])
+        ->middleware(Ability::class . ':roles.view|employees.view|teams.view|task_types.view|tenants.view');
+    Route::get('lookups/features', [LookupController::class, 'features'])
+        ->middleware(Ability::class . ':roles.view|tenants.view');
     Route::get('calendar/events', [CalendarController::class, 'events']);
 });
