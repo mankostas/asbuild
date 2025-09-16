@@ -49,8 +49,6 @@ class TaskTypeController extends Controller
 
     public function options(Request $request)
     {
-        $this->authorize('viewAny', TaskType::class);
-
         $tenantId = $request->attributes->get('tenant_id') ?? auth()->user()?->tenant_id;
 
         $types = TaskType::query()
