@@ -39,7 +39,7 @@
         <button
           v-else
           type="button"
-          class="menu-link"
+          class="menu-link w-full"
           :class="
             activeSubmenu === i ? 'parent_active not-collapsed' : 'collapsed'
           "
