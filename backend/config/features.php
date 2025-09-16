@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'dashboard',
     'tasks',
     'manuals',
     'notifications',

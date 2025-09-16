@@ -6,8 +6,8 @@ export interface RouteAccess {
 
 const routeAccessMap: Record<string, RouteAccess> = {
   dashboard: {
-    requiredAbilities: ['reports.view'],
-    requiredFeatures: ['reports'],
+    requiredAbilities: ['dashboard.view'],
+    requiredFeatures: ['dashboard'],
   },
   'tasks.list': {
     requiredAbilities: ['tasks.view'],

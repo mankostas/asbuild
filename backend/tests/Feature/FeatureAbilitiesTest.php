@@ -65,6 +65,7 @@ class FeatureAbilitiesTest extends TestCase
     public static function featureAbilityProvider(): array
     {
         return [
+            'dashboard' => ['dashboard', '/api/reports/overview', 'dashboard.view'],
             'gdpr' => ['gdpr', '/api/gdpr/consents', 'gdpr.view'],
             'notifications' => ['notifications', '/api/notifications', 'notifications.view'],
             'roles' => ['roles', '/api/roles', 'roles.view'],

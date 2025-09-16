@@ -41,7 +41,7 @@ class ReportController extends Controller
 
     public function overview(Request $request)
     {
-        Gate::authorize('reports.view');
+        Gate::authorize('dashboard.view');
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
 
@@ -56,9 +56,10 @@ class ReportController extends Controller
             ->count();
         $onTimePercentage = $completed > 0 ? ($onTime / $completed) * 100 : 0;
 
+        $durationExpression = $this->secondsDiffExpression('started_at', 'completed_at');
         $avgDurationSeconds = (clone $base)
             ->whereNotNull('started_at')
-            ->select(DB::raw('AVG(TIMESTAMPDIFF(SECOND, started_at, completed_at)) as avg'))
+            ->select(DB::raw("AVG({$durationExpression}) as avg"))
             ->value('avg') ?? 0;
         $avgDurationMinutes = $avgDurationSeconds / 60;
 
@@ -112,9 +113,10 @@ class ReportController extends Controller
             ->count();
         $onTimePercentage = $completed > 0 ? ($onTime / $completed) * 100 : 0;
 
+        $durationExpression = $this->secondsDiffExpression('started_at', 'completed_at');
         $avgDurationSeconds = (clone $base)
             ->whereNotNull('started_at')
-            ->select(DB::raw('AVG(TIMESTAMPDIFF(SECOND, started_at, completed_at)) as avg'))
+            ->select(DB::raw("AVG({$durationExpression}) as avg"))
             ->value('avg') ?? 0;
         $avgDurationMinutes = $avgDurationSeconds / 60;
 
@@ -162,11 +164,12 @@ class ReportController extends Controller
             ->get()
             ->map(fn ($row) => ['x' => $row->date, 'y' => $row->count]);
 
+        $durationExpression = $this->secondsDiffExpression('started_at', 'completed_at');
         $cycle = (clone $base)
             ->whereNotNull('started_at')
             ->select(
                 DB::raw('DATE(completed_at) as date'),
-                DB::raw('AVG(TIMESTAMPDIFF(SECOND, started_at, completed_at))/60 as avg')
+                DB::raw("AVG({$durationExpression})/60 as avg")
             )
             ->groupBy('date')
             ->orderBy('date')
@@ -230,5 +233,14 @@ class ReportController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    protected function secondsDiffExpression(string $startColumn, string $endColumn): string
+    {
+        return match (DB::connection()->getDriverName()) {
+            'sqlite' => "strftime('%s', {$endColumn}) - strftime('%s', {$startColumn})",
+            'pgsql' => "EXTRACT(EPOCH FROM {$endColumn} - {$startColumn})",
+            default => "TIMESTAMPDIFF(SECOND, {$startColumn}, {$endColumn})",
+        };
     }
 }
