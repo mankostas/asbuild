@@ -1,5 +1,5 @@
 <template>
-  <Drawer v-if="can('task_field_snippets.manage')" :open="open" @close="close">
+  <Drawer v-if="can('task_types.manage')" :open="open" @close="close">
     <div class="w-full max-w-md p-4 space-y-6">
       <h2 class="text-lg font-bold">{{ t('templates.title') }}</h2>
       <div>
