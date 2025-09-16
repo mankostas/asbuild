@@ -98,4 +98,30 @@ class AbilityServiceTest extends TestCase
         $this->assertTrue($this->service->userHasAbility($user, 'tasks.view', $tenantOne->id));
         $this->assertFalse($this->service->userHasAbility($user, 'tasks.view', $tenantTwo->id));
     }
+
+    public function test_dashboard_view_alias_grants_reports_view(): void
+    {
+        $tenant = Tenant::create(['name' => 'Gamma Corp', 'features' => ['dashboard']]);
+
+        $user = User::create([
+            'name' => 'Analyst',
+            'email' => 'analyst@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $role = Role::create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Viewer',
+            'slug' => 'viewer',
+            'level' => 3,
+            'abilities' => ['dashboard.view'],
+        ]);
+
+        $role->users()->attach($user->id, ['tenant_id' => $tenant->id]);
+
+        $this->assertTrue($this->service->userHasAbility($user, 'reports.view'));
+        $this->assertTrue($this->service->userHasAbility($user, 'dashboard.view'));
+        $this->assertContains('reports.view', $this->service->resolveAbilities($user));
+    }
 }

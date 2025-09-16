@@ -81,7 +81,7 @@ const loading = ref(false);
 const error = ref(false);
 
 async function fetchData() {
-  if (!can('dashboard.view')) {
+  if (!can('reports.view')) {
     return;
   }
   loading.value = true;

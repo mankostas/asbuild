@@ -41,7 +41,7 @@ class ReportController extends Controller
 
     public function overview(Request $request)
     {
-        Gate::authorize('dashboard.view');
+        Gate::authorize('reports.view');
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
 

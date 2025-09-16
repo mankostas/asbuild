@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\App;
 use App\Models\Task;
+use App\Support\AbilityNormalizer;
 
 class Tenant extends Model
 {
@@ -48,7 +49,7 @@ class Tenant extends Model
             }
         }
 
-        return $selected;
+        return AbilityNormalizer::normalizeFeatureAbilityMap($selected);
     }
 
     public function allowedAbilities(): array

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Support\AbilityNormalizer;
 
 class TenantUpsertRequest extends FormRequest
 {
@@ -59,7 +60,8 @@ class TenantUpsertRequest extends FormRequest
 
                 $allowed = $featureMap[$feature]['abilities'] ?? [];
                 foreach ((array) $abilities as $ability) {
-                    if (! in_array($ability, $allowed, true)) {
+                    $normalized = AbilityNormalizer::normalize((string) $ability);
+                    if (! in_array($normalized, $allowed, true)) {
                         $validator->errors()->add("feature_abilities.$feature", "The ability $ability is not allowed.");
                     }
                 }
@@ -80,7 +82,8 @@ class TenantUpsertRequest extends FormRequest
                 continue;
             }
             $allowed = $featureMap[$feature]['abilities'] ?? [];
-            $sanitized = array_values(array_intersect((array) $abilities, $allowed));
+            $normalizedAbilities = AbilityNormalizer::normalizeList((array) $abilities);
+            $sanitized = array_values(array_intersect($normalizedAbilities, $allowed));
             if ($sanitized) {
                 $sanitizedAbilities[$feature] = $sanitized;
             }

@@ -307,7 +307,7 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     });
 
     Route::get('reports/overview', [ReportController::class, 'overview'])
-        ->middleware(Ability::class . ':dashboard.view');
+        ->middleware(Ability::class . ':reports.view');
 
     Route::prefix('reports')
         ->middleware(Ability::class . ':reports.view')

@@ -4,7 +4,7 @@ return [
     'dashboard' => [
         'label' => 'Dashboard',
         'abilities' => [
-            'dashboard.view',
+            'reports.view',
         ],
     ],
     'tasks' => [
