@@ -36,23 +36,28 @@ class AbilityService
     {
         $tenantId = $this->resolveTenantId($user, $tenantId);
 
-        $roles = $user->rolesForTenant($tenantId)
-            ->merge($user->roles()->wherePivotNull('tenant_id')->get());
+        $roles = $user->roles()->wherePivotNull('tenant_id')->get();
+
+        if ($tenantId !== null) {
+            $roles = $user->rolesForTenant($tenantId)->merge($roles);
+        }
 
         return $roles->pluck('abilities')->flatten()->filter()->unique()->values()->all();
     }
 
-    protected function resolveTenantId(User $user, ?int $tenantId = null): int
+    protected function resolveTenantId(User $user, ?int $tenantId = null): ?int
     {
         if ($tenantId !== null) {
             return $tenantId;
         }
 
         if (app()->bound('tenant_id')) {
-            return (int) app('tenant_id');
+            $boundTenantId = app('tenant_id');
+
+            return $boundTenantId !== null ? (int) $boundTenantId : null;
         }
 
-        return (int) $user->tenant_id;
+        return $user->tenant_id !== null ? (int) $user->tenant_id : null;
     }
 
     protected function abilityMatches(string $code, array $abilities): bool

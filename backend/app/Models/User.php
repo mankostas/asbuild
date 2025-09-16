@@ -43,8 +43,12 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class)->withPivot('tenant_id')->withTimestamps();
     }
 
-    public function rolesForTenant(int $tenantId)
+    public function rolesForTenant(?int $tenantId)
     {
+        if ($tenantId === null) {
+            return collect();
+        }
+
         if ($this->relationLoaded('roles')) {
             return $this->roles
                 ->filter(function ($role) use ($tenantId) {
