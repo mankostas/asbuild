@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\AbilityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -14,6 +15,10 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
+    public function __construct(private AbilityService $abilityService)
+    {
+    }
+
     public function login(Request $request)
     {
         $request->validate([
@@ -138,22 +143,8 @@ class AuthController extends Controller
 
         return response()->json([
             'user' => $user,
-            'abilities' => $this->abilitiesFor($user),
+            'abilities' => $this->abilityService->resolveAbilities($user),
             'features' => $features,
         ]);
-    }
-
-    protected function abilitiesFor(User $user): array
-    {
-        if ($user->isSuperAdmin()) {
-            return ['*'];
-        }
-
-        $tenantId = app()->bound('tenant_id') ? (int) app('tenant_id') : $user->tenant_id;
-
-        $roles = $user->rolesForTenant($tenantId)
-            ->merge($user->roles()->wherePivotNull('tenant_id')->get());
-
-        return $roles->pluck('abilities')->flatten()->filter()->unique()->values()->all();
     }
 }
