@@ -45,6 +45,16 @@ class User extends Authenticatable
 
     public function rolesForTenant(int $tenantId)
     {
+        if ($this->relationLoaded('roles')) {
+            return $this->roles
+                ->filter(function ($role) use ($tenantId) {
+                    $pivotTenantId = $role->pivot->tenant_id ?? null;
+
+                    return $pivotTenantId !== null && (int) $pivotTenantId === $tenantId;
+                })
+                ->values();
+        }
+
         return $this->roles()->wherePivot('tenant_id', $tenantId)->get();
     }
 
@@ -56,6 +66,12 @@ class User extends Authenticatable
      */
     public function isSuperAdmin(): bool
     {
+        if ($this->relationLoaded('roles')) {
+            return $this->roles->contains(function ($role) {
+                return $role->slug === 'super_admin' || $role->name === 'SuperAdmin';
+            });
+        }
+
         return $this->roles()
             ->where(function ($q) {
                 $q->where('slug', 'super_admin')
@@ -67,6 +83,12 @@ class User extends Authenticatable
     public function hasRole(string $role): bool
     {
         $slug = Str::snake($role);
+
+        if ($this->relationLoaded('roles')) {
+            return $this->roles->contains(function ($roleModel) use ($role, $slug) {
+                return $roleModel->name === $role || $roleModel->slug === $slug;
+            });
+        }
 
         return $this->roles()
             ->where(function ($q) use ($role, $slug) {
