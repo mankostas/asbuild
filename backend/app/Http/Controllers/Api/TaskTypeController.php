@@ -18,20 +18,6 @@ class TaskTypeController extends Controller
 
     public function __construct(private FormSchemaService $formSchemaService) {}
 
-    protected function ensureAdmin(Request $request): void
-    {
-        if (! $request->user()->hasRole('SuperAdmin')) {
-            abort(403);
-        }
-    }
-
-    protected function ensureTenant(Request $request): void
-    {
-        if (! $request->user()->hasRole('Tenant') && ! $request->user()->hasRole('SuperAdmin')) {
-            abort(403);
-        }
-    }
-
     public function index(Request $request)
     {
         // Task types are no longer versioned, so we only eager load the tenant
@@ -73,7 +59,6 @@ class TaskTypeController extends Controller
 
     public function store(TaskTypeRequest $request)
     {
-        $this->ensureAdmin($request);
         $data = $request->validated();
         if (isset($data['schema_json'])) {
             $this->formSchemaService->validate($data['schema_json']);
@@ -112,7 +97,6 @@ class TaskTypeController extends Controller
 
     public function update(TaskTypeRequest $request, TaskType $taskType)
     {
-        $this->ensureTenant($request);
         if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
             abort(403);
         }
@@ -147,7 +131,6 @@ class TaskTypeController extends Controller
 
     public function destroy(Request $request, TaskType $taskType)
     {
-        $this->ensureAdmin($request);
         if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
             abort(403);
         }
@@ -176,8 +159,6 @@ class TaskTypeController extends Controller
 
     public function copyToTenant(Request $request, TaskType $taskType)
     {
-        $this->ensureAdmin($request);
-
         $tenantId = $request->user()->hasRole('SuperAdmin')
             ? $request->input('tenant_id')
             : $request->user()->tenant_id;
@@ -240,8 +221,6 @@ class TaskTypeController extends Controller
 
     public function validateSchema(Request $request)
     {
-        $this->ensureTenant($request);
-
         $data = $request->validate([
             'schema_json' => 'required|array',
             'form_data' => 'array',
@@ -255,8 +234,6 @@ class TaskTypeController extends Controller
 
     public function previewValidate(Request $request, TaskType $taskType)
     {
-        $this->ensureTenant($request);
-
         if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
             abort(403);
         }
@@ -274,8 +251,6 @@ class TaskTypeController extends Controller
 
     public function export(Request $request, TaskType $taskType)
     {
-        $this->ensureAdmin($request);
-
         if (! $request->user()->hasRole('SuperAdmin') && $taskType->tenant_id !== $request->user()->tenant_id) {
             abort(403);
         }
@@ -285,8 +260,6 @@ class TaskTypeController extends Controller
 
     public function import(Request $request)
     {
-        $this->ensureAdmin($request);
-
         $data = $request->validate([
             'name' => 'required|string',
             'schema_json' => 'array',
