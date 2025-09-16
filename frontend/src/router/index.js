@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { accessForRoute } from '@/constants/menu';
+import { onPermissionsLoaded } from '@/services/permissions';
 import api from '@/services/api';
 import { setTokens } from '@/services/authStorage';
 
@@ -533,6 +534,23 @@ export const routes = [
     meta: { title: 'Not Found', layout: 'default', hide: true },
   },
 ];
+
+function refreshRouteAccess(routeList) {
+  routeList.forEach((route) => {
+    if (route.name) {
+      route.meta = route.meta || {};
+      Object.assign(route.meta, accessForRoute(route.name));
+    }
+    if (route.children) {
+      refreshRouteAccess(route.children);
+    }
+  });
+}
+
+refreshRouteAccess(routes);
+onPermissionsLoaded(() => {
+  refreshRouteAccess(routes);
+});
 
 const router = createRouter({
   history: createWebHistory(),
