@@ -100,14 +100,14 @@ function resolveAbilityList(
           return spec;
         }
         const ability = rest.join('.');
-        return abilityFor(abilityFeature, ability) ?? `${abilityFeature}.${ability}`;
+        return abilityFor(abilityFeature, ability);
       }
 
       if (!feature) {
         return undefined;
       }
 
-      return abilityFor(feature, spec) ?? `${feature}.${spec}`;
+      return abilityFor(feature, spec);
     })
     .filter((ability): ability is string => Boolean(ability));
 

@@ -132,7 +132,7 @@ export function abilityFor(feature: string, ability: string): string | undefined
     return fallback;
   }
 
-  return fallback;
+  return undefined;
 }
 
 export function featureLabel(feature: string, fallback?: string): string {
