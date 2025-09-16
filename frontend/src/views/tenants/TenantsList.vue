@@ -18,7 +18,7 @@
           :aria-label="t('tenants.label')"
         />
         <Button
-          v-if="can('tenants.create') || can('tenants.manage')"
+          v-if="can('tenants.create')"
           :link="{ name: 'tenants.create' }"
           btnClass="btn-primary btn-sm min-w-[100px] !h-8 !py-0"
           icon="heroicons-outline:plus"
@@ -45,7 +45,6 @@ import Select from '@/components/ui/Select/index.vue';
 import api, { extractData } from '@/services/api';
 import { useNotify } from '@/plugins/notify';
 import { useAuthStore, can } from '@/stores/auth';
-import hasAbility from '@/utils/ability';
 import { useTenantStore } from '@/stores/tenant';
 import { useI18n } from 'vue-i18n';
 
@@ -85,7 +84,7 @@ async function refreshTenantOptions() {
 }
 
 async function loadTenants() {
-  if (!hasAbility('tenants.view') && !hasAbility('tenants.manage')) {
+  if (!can('tenants.view')) {
     all.value = [];
     loading.value = false;
     return;
@@ -140,17 +139,17 @@ watch(tenantFilter, () => {
 });
 
 function view(id: number | string) {
-  if (!can('tenants.view') && !can('tenants.manage')) return;
+  if (!can('tenants.view')) return;
   router.push({ name: 'tenants.view', params: { id } });
 }
 
 function edit(id: number | string) {
-  if (!can('tenants.update') && !can('tenants.manage')) return;
+  if (!can('tenants.update')) return;
   router.push({ name: 'tenants.edit', params: { id } });
 }
 
 async function impersonate(id: number | string) {
-  if (!hasAbility('tenants.manage')) return;
+  if (!can('tenants.manage')) return;
   const tenantId = String(id);
   const tenant =
     all.value.find((t) => String(t.id) === tenantId) ||
@@ -164,7 +163,7 @@ async function impersonate(id: number | string) {
 }
 
 async function remove(id: number | string) {
-  if (!hasAbility('tenants.delete') && !hasAbility('tenants.manage')) return;
+  if (!can('tenants.delete')) return;
   const result = await Swal.fire({
     title: 'Delete tenant?',
     icon: 'warning',
@@ -182,7 +181,7 @@ async function remove(id: number | string) {
 
 async function removeMany(ids: Array<number | string>) {
   if (!ids.length) return;
-  if (!hasAbility('tenants.delete') && !hasAbility('tenants.manage')) return;
+  if (!can('tenants.delete')) return;
   const res = await Swal.fire({
     title: 'Delete selected tenants?',
     icon: 'warning',
