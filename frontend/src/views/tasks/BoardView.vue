@@ -4,9 +4,59 @@
       <h1 class="text-xl font-semibold">{{ t('routes.taskBoard') }}</h1>
       <TenantSwitcher v-if="auth.isSuperAdmin" :impersonate="false" />
     </div>
-    <BoardFilters v-model="prefs.filters" />
-    <QuickFilterChips v-model="prefs.filters" class="mt-4" />
-    <div class="flex items-center justify-between mt-4 mb-4">
+    <Card
+      class="relative overflow-hidden border border-slate-200/70 bg-gradient-to-br from-white/90 via-white/80 to-slate-50/70 shadow-lg shadow-slate-500/10 backdrop-blur-xl dark:border-white/5 dark:from-slate-900/80 dark:via-slate-900/70 dark:to-slate-900/50 dark:shadow-slate-900/30"
+      bodyClass="p-6 sm:p-8 space-y-8"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="max-w-xl space-y-2">
+          <p class="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500 dark:text-slate-400">
+            {{ t('board.filterTitle') }}
+          </p>
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            {{ t('board.filterSubtitle') }}
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <Badge
+            v-if="activeFilterCount"
+            :label="t('board.activeFilters', { count: activeFilterCount })"
+            badgeClass="pill inline-flex items-center gap-2 bg-primary-500/10 px-3 py-1.5 text-primary-600 shadow-[0_4px_14px_rgba(79,70,229,0.15)] backdrop-blur dark:bg-primary-500/20 dark:text-primary-200"
+            icon="heroicons-outline:sparkles"
+          />
+          <span
+            v-else
+            class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400 dark:text-slate-500"
+          >
+            {{ t('board.noActiveFilters') }}
+          </span>
+          <Button
+            v-if="activeFilterCount"
+            btnClass="btn-light btn-sm rounded-full border border-transparent bg-slate-900/5 px-4 py-2 text-slate-600 shadow-[0_2px_10px_rgba(15,23,42,0.12)] transition hover:-translate-y-0.5 hover:bg-slate-900/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 dark:bg-white/5 dark:text-slate-200"
+            :aria-label="t('board.resetFilters')"
+            @click="clearFilters"
+            @keyup.enter="clearFilters"
+            @keyup.space.prevent="clearFilters"
+          >
+            <span class="flex items-center gap-2 text-sm font-medium">
+              <Icon icon="heroicons-outline:arrow-path" class="h-4 w-4" />
+              {{ t('board.resetFilters') }}
+            </span>
+          </Button>
+        </div>
+      </div>
+      <BoardFilters v-model="prefs.filters" />
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <QuickFilterChips
+          v-model="prefs.filters"
+          class="flex-1 flex-wrap gap-3"
+        />
+        <span class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400 dark:text-slate-500">
+          {{ t('board.quickFiltersHint') }}
+        </span>
+      </div>
+    </Card>
+    <div class="flex items-center justify-between mt-6 mb-4">
       <Select
         v-model="prefs.sorting.key"
         :options="sortOptions"
@@ -127,6 +177,8 @@ import Card from '@dc/components/Card';
 import Select from '@dc/components/Select';
 import Dropdown from '@dc/components/Dropdown';
 import Button from '@dc/components/Button';
+import Badge from '@dc/components/Badge';
+import Icon from '@dc/components/Icon';
 import { MenuItem } from '@headlessui/vue';
 import { loadBoardPrefs, saveBoardPrefs, BoardPrefs } from '@/services/boardPrefs';
 import { useAuthStore, can } from '@/stores/auth';
@@ -198,6 +250,21 @@ const prefs = reactive<BoardPrefs>({
   filters: { ...defaultFilters },
   sorting: { key: 'created_at', dir: 'asc' },
   cardDensity: 'comfortable',
+});
+
+const activeFilterCount = computed(() => {
+  const filters = prefs.filters;
+  let count = 0;
+  if (filters.q) count++;
+  if (filters.assigneeId) count++;
+  if (filters.priority) count++;
+  if (filters.sla) count++;
+  if (filters.typeIds?.length) count++;
+  if (filters.hasPhotos) count++;
+  if (filters.mine) count++;
+  if (filters.dueToday) count++;
+  if (filters.breachedOnly) count++;
+  return count;
 });
 
 const sortOptions = [
