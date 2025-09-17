@@ -1,153 +1,102 @@
 <template>
   <div class="space-y-6">
-    <div class="grid gap-4 xl:grid-cols-12">
-      <div class="xl:col-span-5">
-        <div class="filter-field">
-          <span class="filter-label">{{ t('board.search') }}</span>
-          <div
-            class="filter-control filter-control--input"
-            :class="{ 'filter-control--active': local.q }"
-          >
-            <InputGroup
-              v-model="local.q"
-              :placeholder="t('board.search')"
-              class="w-full"
-              classInput="!h-11 !bg-transparent !border-none !shadow-none !ring-0 !px-0 text-sm sm:text-base text-slate-700 placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-400"
-              :aria-label="t('board.search')"
-            >
-              <template #prepend>
-                <Icon
-                  icon="heroicons-outline:search"
-                  class="text-lg text-slate-400 dark:text-slate-400"
-                />
-              </template>
-            </InputGroup>
-          </div>
-        </div>
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-12">
+      <FromGroup class="md:col-span-2 xl:col-span-4" :label="t('board.search')">
+        <template #default="{ inputId, labelId }">
+          <InputGroup
+            :id="inputId"
+            v-model="local.q"
+            :placeholder="t('board.search')"
+            prependIcon="heroicons-outline:search"
+            class="w-full"
+            :aria-labelledby="labelId"
+          />
+        </template>
+      </FromGroup>
+
+      <FromGroup class="xl:col-span-3" :label="t('board.assignee')">
+        <template #default="{ inputId, labelId }">
+          <Select
+            :id="inputId"
+            v-model="local.assigneeId"
+            :options="assigneeOptions"
+            :placeholder="t('board.assignee')"
+            :aria-labelledby="labelId"
+          />
+        </template>
+      </FromGroup>
+
+      <FromGroup class="xl:col-span-2" :label="t('board.priority')">
+        <template #default="{ inputId, labelId }">
+          <Select
+            :id="inputId"
+            v-model="local.priority"
+            :options="priorityOptions"
+            :placeholder="t('board.priority')"
+            :aria-labelledby="labelId"
+          />
+        </template>
+      </FromGroup>
+
+      <FromGroup class="xl:col-span-2" :label="t('board.sla')">
+        <template #default="{ inputId, labelId }">
+          <Select
+            :id="inputId"
+            v-model="local.sla"
+            :options="slaOptions"
+            :placeholder="t('board.sla')"
+            :aria-labelledby="labelId"
+          />
+        </template>
+      </FromGroup>
+
+      <div class="xl:col-span-3 space-y-2">
+        <span class="input-label">{{ t('board.taskTypes') }}</span>
+        <Dropdown
+          parentClass="block"
+          :classMenuItems="dropdownMenuClass"
+          classItem="px-3 py-2"
+        >
+          <span :class="dropdownButtonClass">
+            <span class="truncate">{{ typeFilterLabel }}</span>
+            <Icon icon="heroicons-outline:chevron-down" class="h-4 w-4" />
+          </span>
+          <template #menus>
+            <div class="space-y-1">
+              <MenuItem
+                v-for="opt in taskTypeOptions"
+                :key="opt.value"
+                #default="{ active }"
+              >
+                <div
+                  class="rounded-md px-2 py-1.5 transition"
+                  :class="[
+                    active
+                      ? 'bg-slate-100 text-slate-900 dark:bg-slate-700/60 dark:text-slate-100'
+                      : 'text-slate-600 dark:text-slate-200',
+                  ]"
+                >
+                  <Checkbox
+                    v-model="local.typeIds"
+                    :value="opt.value"
+                    :label="opt.label"
+                    class="w-full"
+                  />
+                </div>
+              </MenuItem>
+            </div>
+          </template>
+        </Dropdown>
       </div>
 
       <div class="xl:col-span-3">
-        <div class="filter-field">
-          <span class="filter-label">{{ t('board.assignee') }}</span>
-          <div
-            class="filter-control"
-            :class="{ 'filter-control--active': local.assigneeId }"
-          >
-            <Select
-              v-model="local.assigneeId"
-              :options="assigneeOptions"
-              :placeholder="t('board.assignee')"
-              classInput="!h-11 !rounded-[1.5rem] !border-none !bg-transparent !px-0 !shadow-none text-sm sm:text-base font-medium text-slate-600 dark:text-slate-200 placeholder:text-slate-400"
-              :aria-label="t('board.assignee')"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div class="xl:col-span-2">
-        <div class="filter-field">
-          <span class="filter-label">{{ t('board.priority') }}</span>
-          <div
-            class="filter-control"
-            :class="{ 'filter-control--active': local.priority }"
-          >
-            <Select
-              v-model="local.priority"
-              :options="priorityOptions"
-              :placeholder="t('board.priority')"
-              classInput="!h-11 !rounded-[1.5rem] !border-none !bg-transparent !px-0 !shadow-none text-sm sm:text-base font-medium text-slate-600 dark:text-slate-200 placeholder:text-slate-400"
-              :aria-label="t('board.priority')"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div class="xl:col-span-2">
-        <div class="filter-field">
-          <span class="filter-label">{{ t('board.sla') }}</span>
-          <div class="filter-control" :class="{ 'filter-control--active': local.sla }">
-            <Select
-              v-model="local.sla"
-              :options="slaOptions"
-              :placeholder="t('board.sla')"
-              classInput="!h-11 !rounded-[1.5rem] !border-none !bg-transparent !px-0 !shadow-none text-sm sm:text-base font-medium text-slate-600 dark:text-slate-200 placeholder:text-slate-400"
-              :aria-label="t('board.sla')"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div class="xl:col-span-4">
-        <div class="filter-field">
-          <span class="filter-label">{{ t('board.taskTypes') }}</span>
-          <div
-            class="filter-control filter-control--button"
-            :class="{ 'filter-control--active': hasTypeSelection }"
-          >
-            <Dropdown
-              :label="typeFilterLabel"
-              :labelClass="dropdownButtonClass"
-              :classMenuItems="dropdownMenuClass"
-              classItem="px-2 py-1.5"
-            >
-              <template #menus>
-                <div class="space-y-1">
-                  <MenuItem
-                    v-for="opt in taskTypeOptions"
-                    :key="opt.value"
-                    #default="{ active }"
-                  >
-                    <button
-                      type="button"
-                      class="flex w-full items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition"
-                      :class="[
-                        isTypeSelected(opt.value)
-                          ? 'bg-primary-500/10 text-primary-600 dark:text-primary-200'
-                          : active
-                            ? 'bg-slate-100/80 text-slate-700 dark:bg-slate-700/40 dark:text-slate-200'
-                            : 'text-slate-600 dark:text-slate-200',
-                      ]"
-                      @click.prevent="toggleType(opt.value)"
-                      @keyup.enter.prevent="toggleType(opt.value)"
-                      @keyup.space.prevent="toggleType(opt.value)"
-                    >
-                      <span class="truncate">{{ opt.label }}</span>
-                      <Icon
-                        v-if="isTypeSelected(opt.value)"
-                        icon="heroicons-mini:check"
-                        class="h-4 w-4"
-                      />
-                    </button>
-                  </MenuItem>
-                </div>
-              </template>
-            </Dropdown>
-          </div>
-        </div>
-      </div>
-
-      <div class="xl:col-span-8">
-        <div class="filter-field">
-          <span class="filter-label">{{ t('board.hasPhotos') }}</span>
-          <div
-            class="filter-control filter-control--switch"
-            :class="{ 'filter-control--active': hasPhotosToggle }"
-          >
-            <div class="flex flex-col gap-1">
-              <span class="text-sm font-semibold text-slate-700 dark:text-slate-100">
-                {{ t('board.hasPhotos') }}
-              </span>
-              <span class="text-xs text-slate-400 dark:text-slate-400">
-                {{ t('board.hasPhotosHint') }}
-              </span>
-            </div>
-            <Switch
-              v-model="hasPhotosToggle"
-              :active="hasPhotosToggle"
-              :aria-label="t('board.hasPhotos')"
-            />
-          </div>
-        </div>
+        <Switch
+          id="board-has-photos"
+          v-model="hasPhotosToggle"
+          :label="t('board.hasPhotos')"
+          :description="t('board.hasPhotosHint')"
+          :aria-label="t('board.hasPhotos')"
+        />
       </div>
     </div>
   </div>
@@ -160,6 +109,9 @@ import api from '@/services/api';
 import InputGroup from '@dc/components/InputGroup';
 import Select from '@dc/components/Select';
 import Dropdown from '@dc/components/Dropdown';
+import Checkbox from '@dc/components/Checkbox';
+import FromGroup from '@dc/components/FromGroup';
+
 import Icon from '@dc/components/Icon';
 import Switch from '@/components/ui/Switch/index.vue';
 import { MenuItem } from '@headlessui/vue';
@@ -200,8 +152,7 @@ const slaOptions: Option[] = [
   { value: 'end', label: t('board.sla') + ' End' },
 ];
 
-const dropdownMenuClass =
-  'mt-3 w-64 rounded-2xl border border-slate-200/70 bg-white/95 p-3 shadow-xl shadow-primary-500/10 backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/95';
+const dropdownMenuClass = 'mt-2 w-64 p-2';
 
 const local = ref<Filters>({
   assigneeId: null,
@@ -233,24 +184,13 @@ const typeFilterLabel = computed(() => {
 });
 
 const dropdownButtonClass = computed(() =>
-  hasTypeSelection.value
-    ? 'filter-dropdown-button text-primary-600 dark:text-primary-200'
-    : 'filter-dropdown-button text-slate-600 dark:text-slate-200',
+[
+    'btn btn-sm w-full flex items-center justify-between gap-2',
+    hasTypeSelection.value
+      ? 'btn-outline-primary active'
+      : 'btn-outline-light',
+  ].join(' '),
 );
-
-function isTypeSelected(id: string) {
-  return local.value.typeIds?.includes(id) ?? false;
-}
-
-function toggleType(id: string) {
-  const current = new Set<string>(local.value.typeIds ?? []);
-  if (current.has(id)) {
-    current.delete(id);
-  } else {
-    current.add(id);
-  }
-  local.value.typeIds = Array.from(current);
-}
 
 async function loadOptions(force = false) {
   if (!canViewTasks.value) {

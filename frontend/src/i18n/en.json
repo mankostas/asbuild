@@ -307,6 +307,8 @@
     "clear": "Clear",
     "filterTitle": "Smart filters",
     "filterSubtitle": "Personalize the board to spotlight the work that needs you most right now.",
+    "showFilters": "Show filters",
+    "hideFilters": "Hide filters",
     "activeFilters": "{count, plural, one {# active filter} other {# active filters}}",
     "noActiveFilters": "All tasks visible",
     "quickFiltersHint": "Instant focus toggles",

@@ -5,53 +5,73 @@
       <TenantSwitcher v-if="auth.isSuperAdmin" :impersonate="false" />
     </div>
     <Card
-      class="relative overflow-hidden border border-slate-200/70 bg-gradient-to-br from-white/90 via-white/80 to-slate-50/70 shadow-lg shadow-slate-500/10 backdrop-blur-xl dark:border-white/5 dark:from-slate-900/80 dark:via-slate-900/70 dark:to-slate-900/50 dark:shadow-slate-900/30"
-      bodyClass="p-6 sm:p-8 space-y-8"
+      class="mb-6"
+      :title="t('board.filterTitle')"
+      :subtitle="t('board.filterSubtitle')"
+      bodyClass="p-6 space-y-6"
     >
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <div class="max-w-xl space-y-2">
-          <p class="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500 dark:text-slate-400">
-            {{ t('board.filterTitle') }}
-          </p>
-          <p class="text-sm text-slate-500 dark:text-slate-400">
-            {{ t('board.filterSubtitle') }}
-          </p>
-        </div>
-        <div class="flex flex-wrap items-center gap-3">
+      <template #header>
+        <div class="flex flex-wrap items-center justify-end gap-2">
           <Badge
             v-if="activeFilterCount"
             :label="t('board.activeFilters', { count: activeFilterCount })"
-            badgeClass="pill inline-flex items-center gap-2 bg-primary-500/10 px-3 py-1.5 text-primary-600 shadow-[0_4px_14px_rgba(79,70,229,0.15)] backdrop-blur dark:bg-primary-500/20 dark:text-primary-200"
+            badgeClass="pill bg-primary-500 text-white"
             icon="heroicons-outline:sparkles"
           />
           <span
             v-else
-            class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400 dark:text-slate-500"
+            class="text-xs font-medium text-slate-500 dark:text-slate-400"
           >
             {{ t('board.noActiveFilters') }}
           </span>
           <Button
             v-if="activeFilterCount"
-            btnClass="btn-light btn-sm rounded-full border border-transparent bg-slate-900/5 px-4 py-2 text-slate-600 shadow-[0_2px_10px_rgba(15,23,42,0.12)] transition hover:-translate-y-0.5 hover:bg-slate-900/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 dark:bg-white/5 dark:text-slate-200"
+            btnClass="btn-outline btn-sm"
+            type="button"
             :aria-label="t('board.resetFilters')"
             @click="clearFilters"
             @keyup.enter="clearFilters"
             @keyup.space.prevent="clearFilters"
           >
-            <span class="flex items-center gap-2 text-sm font-medium">
-              <Icon icon="heroicons-outline:arrow-path" class="h-4 w-4" />
-              {{ t('board.resetFilters') }}
+            {{ t('board.resetFilters') }}
+          </Button>
+          <Button
+            btnClass="btn-outline btn-sm"
+            type="button"
+            :aria-expanded="showFilters"
+            aria-controls="board-filters-panel"
+            @click="toggleFilters"
+            @keyup.enter.prevent="toggleFilters"
+            @keyup.space.prevent="toggleFilters"
+          >
+            <span class="flex items-center gap-1">
+              <Icon
+                :icon="showFilters ? 'heroicons-outline:chevron-up' : 'heroicons-outline:chevron-down'"
+                class="h-4 w-4"
+              />
+              {{ showFilters ? t('board.hideFilters') : t('board.showFilters') }}
             </span>
           </Button>
         </div>
-      </div>
-      <BoardFilters v-model="prefs.filters" />
-      <div class="flex flex-wrap items-center justify-between gap-4">
+      </template>
+      <Transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0 -translate-y-2"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-2"
+      >
+        <div v-if="showFilters" id="board-filters-panel" class="space-y-6">
+          <BoardFilters v-model="prefs.filters" />
+        </div>
+      </Transition>
+      <div class="flex flex-wrap items-center justify-between gap-3">
         <QuickFilterChips
           v-model="prefs.filters"
-          class="flex-1 flex-wrap gap-3"
+          class="flex-1 flex-wrap gap-2"
         />
-        <span class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400 dark:text-slate-500">
+        <span class="text-xs font-medium text-slate-500 dark:text-slate-400">
           {{ t('board.quickFiltersHint') }}
         </span>
       </div>
@@ -250,6 +270,29 @@ const prefs = reactive<BoardPrefs>({
   filters: { ...defaultFilters },
   sorting: { key: 'created_at', dir: 'asc' },
   cardDensity: 'comfortable',
+  showFilters: true,
+});
+
+const showFilters = computed({
+  get: () => (typeof prefs.showFilters === 'boolean' ? prefs.showFilters : true),
+  set: (value: boolean) => {
+    prefs.showFilters = value;
+  },
+});
+
+const activeFilterCount = computed(() => {
+  const filters = prefs.filters;
+  let count = 0;
+  if (filters.q) count++;
+  if (filters.assigneeId) count++;
+  if (filters.priority) count++;
+  if (filters.sla) count++;
+  if (filters.typeIds?.length) count++;
+  if (filters.hasPhotos) count++;
+  if (filters.mine) count++;
+  if (filters.dueToday) count++;
+  if (filters.breachedOnly) count++;
+  return count;
 });
 
 const activeFilterCount = computed(() => {
@@ -316,6 +359,10 @@ function clearFilters() {
   Object.assign(prefs.filters, defaultFilters);
 }
 
+function toggleFilters() {
+  showFilters.value = !showFilters.value;
+}
+
 function updateTask(updated: Task) {
   const col = columns.value.find((c) => c.tasks.some((t) => t.id === updated.id));
   if (!col) return;
@@ -366,6 +413,9 @@ async function loadMore(col: Column) {
 
 onMounted(() => {
   Object.assign(prefs, loadBoardPrefs(auth.userId || auth.user?.id || 0));
+  if (typeof prefs.showFilters !== 'boolean') {
+    prefs.showFilters = true;
+  }
   if (canViewBoard.value) {
     load();
   }
