@@ -6,15 +6,13 @@
     </div>
     <Card
       class="mb-6"
-      :title="t('board.filterTitle')"
-      :subtitle="t('board.filterSubtitle')"
       bodyClass="p-6 space-y-6"
     >
       <template #header>
         <div class="flex flex-wrap items-center justify-end gap-2">
           <Badge
             v-if="activeFilterCount"
-            :label="t('board.activeFilters', { count: activeFilterCount })"
+            :label="t('board.activeFilters', activeFilterCount)"
             badgeClass="pill bg-primary-500 text-white"
             icon="heroicons-outline:sparkles"
           />
