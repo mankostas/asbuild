@@ -15,6 +15,7 @@ export type BoardPrefs = {
   };
   sorting: { key: 'created_at' | 'due_at' | 'priority' | 'board_position'; dir: 'asc' | 'desc' };
   cardDensity: 'comfortable' | 'compact';
+  showFilters: boolean;
 };
 const KEY = (userId: string | number) => `asbuild:board:v1:${userId}`;
 export function loadBoardPrefs(userId: string | number): BoardPrefs {

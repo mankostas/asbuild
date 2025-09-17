@@ -1,60 +1,103 @@
 <template>
-  <div class="flex flex-wrap items-end gap-4">
-    <InputGroup
-      v-model="local.q"
-      :placeholder="t('board.search')"
-      classInput="h-10"
-      :aria-label="t('board.search')"
-    >
-      <template #prepend>
-        <Icon icon="heroicons-outline:search" />
-      </template>
-    </InputGroup>
-    <Select
-      v-model="local.assigneeId"
-      :options="assigneeOptions"
-      classInput="h-10"
-      :placeholder="t('board.assignee')"
-      :aria-label="t('board.assignee')"
-    />
-    <Select
-      v-model="local.priority"
-      :options="priorityOptions"
-      classInput="h-10"
-      :placeholder="t('board.priority')"
-      :aria-label="t('board.priority')"
-    />
-    <Select
-      v-model="local.sla"
-      :options="slaOptions"
-      classInput="h-10"
-      :placeholder="t('board.sla')"
-      :aria-label="t('board.sla')"
-    />
-    <Dropdown :label="t('board.taskTypes')" labelClass="btn btn-light h-10">
-      <template #menus>
-        <MenuItem
-          v-for="opt in taskTypeOptions"
-          :key="opt.value"
-          #default="{ active }"
+  <div class="space-y-6">
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-12">
+      <FromGroup class="md:col-span-2 xl:col-span-4" :label="t('board.search')">
+        <template #default="{ inputId, labelId }">
+          <InputGroup
+            :id="inputId"
+            v-model="local.q"
+            :placeholder="t('board.search')"
+            prependIcon="heroicons-outline:search"
+            class="w-full"
+            :aria-labelledby="labelId"
+          />
+        </template>
+      </FromGroup>
+
+      <FromGroup class="xl:col-span-3" :label="t('board.assignee')">
+        <template #default="{ inputId, labelId }">
+          <Select
+            :id="inputId"
+            v-model="local.assigneeId"
+            :options="assigneeOptions"
+            :placeholder="t('board.assignee')"
+            :aria-labelledby="labelId"
+          />
+        </template>
+      </FromGroup>
+
+      <FromGroup class="xl:col-span-2" :label="t('board.priority')">
+        <template #default="{ inputId, labelId }">
+          <Select
+            :id="inputId"
+            v-model="local.priority"
+            :options="priorityOptions"
+            :placeholder="t('board.priority')"
+            :aria-labelledby="labelId"
+          />
+        </template>
+      </FromGroup>
+
+      <FromGroup class="xl:col-span-2" :label="t('board.sla')">
+        <template #default="{ inputId, labelId }">
+          <Select
+            :id="inputId"
+            v-model="local.sla"
+            :options="slaOptions"
+            :placeholder="t('board.sla')"
+            :aria-labelledby="labelId"
+          />
+        </template>
+      </FromGroup>
+
+      <div class="xl:col-span-3 space-y-2">
+        <span class="input-label">{{ t('board.taskTypes') }}</span>
+        <Dropdown
+          parentClass="block"
+          :classMenuItems="dropdownMenuClass"
+          classItem="px-3 py-2"
         >
-          <div
-            class="flex items-center space-x-2 px-4 py-2"
-            :class="active ? 'bg-slate-100' : ''"
-          >
-            <Checkbox v-model="local.typeIds" :value="opt.value" />
-            <span>{{ opt.label }}</span>
-          </div>
-        </MenuItem>
-      </template>
-    </Dropdown>
-    <div class="inline-flex items-center gap-2">
-      <Checkbox
-        id="has-photos"
-        v-model="local.hasPhotos"
-        :aria-label="t('board.hasPhotos')"
-      />
-      <span>{{ t('board.hasPhotos') }}</span>
+          <span :class="dropdownButtonClass">
+            <span class="truncate">{{ typeFilterLabel }}</span>
+            <Icon icon="heroicons-outline:chevron-down" class="h-4 w-4" />
+          </span>
+          <template #menus>
+            <div class="space-y-1">
+              <MenuItem
+                v-for="opt in taskTypeOptions"
+                :key="opt.value"
+                #default="{ active }"
+              >
+                <div
+                  class="rounded-md px-2 py-1.5 transition"
+                  :class="[
+                    active
+                      ? 'bg-slate-100 text-slate-900 dark:bg-slate-700/60 dark:text-slate-100'
+                      : 'text-slate-600 dark:text-slate-200',
+                  ]"
+                >
+                  <Checkbox
+                    v-model="local.typeIds"
+                    :value="opt.value"
+                    :label="opt.label"
+                    class="w-full"
+                  />
+                </div>
+              </MenuItem>
+            </div>
+          </template>
+        </Dropdown>
+      </div>
+
+      <div class="xl:col-span-3">
+        <Switch
+          id="board-has-photos"
+          v-model="hasPhotosToggle"
+          :label="t('board.hasPhotos')"
+          :description="t('board.hasPhotosHint')"
+          :aria-label="t('board.hasPhotos')"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -67,7 +110,9 @@ import InputGroup from '@dc/components/InputGroup';
 import Select from '@dc/components/Select';
 import Dropdown from '@dc/components/Dropdown';
 import Checkbox from '@dc/components/Checkbox';
+import FromGroup from '@dc/components/FromGroup';
 import Icon from '@dc/components/Icon';
+import Switch from '@/components/ui/Switch/index.vue';
 import { MenuItem } from '@headlessui/vue';
 import { useLookupsStore } from '@/stores/lookups';
 import { useTenantStore } from '@/stores/tenant';
@@ -106,6 +151,8 @@ const slaOptions: Option[] = [
   { value: 'end', label: t('board.sla') + ' End' },
 ];
 
+const dropdownMenuClass = 'mt-2 w-64 p-2';
+
 const local = ref<Filters>({
   assigneeId: null,
   priority: null,
@@ -117,6 +164,32 @@ const local = ref<Filters>({
   dueToday: false,
   breachedOnly: false,
 });
+
+const hasPhotosToggle = computed({
+  get: () => !!local.value.hasPhotos,
+  set: (value: boolean) => {
+    local.value.hasPhotos = value ? true : null;
+  },
+});
+
+const hasTypeSelection = computed(
+  () => (local.value.typeIds?.length ?? 0) > 0,
+);
+
+const typeFilterLabel = computed(() => {
+  const count = local.value.typeIds?.length ?? 0;
+  if (!count) return t('board.taskTypes');
+  return t('board.taskTypesSelected', { count });
+});
+
+const dropdownButtonClass = computed(() =>
+  [
+    'btn btn-sm w-full flex items-center justify-between gap-2',
+    hasTypeSelection.value
+      ? 'btn-outline-primary active'
+      : 'btn-outline-light',
+  ].join(' '),
+);
 
 async function loadOptions(force = false) {
   if (!canViewTasks.value) {
@@ -135,7 +208,11 @@ async function loadOptions(force = false) {
 
 onMounted(async () => {
   await loadOptions();
-  Object.assign(local.value, props.modelValue);
+  Object.assign(local.value, props.modelValue, {
+    typeIds: Array.isArray(props.modelValue.typeIds)
+      ? [...props.modelValue.typeIds]
+      : [],
+  });
 });
 
 watch(
@@ -159,7 +236,10 @@ watch(
 
 watch(
   () => props.modelValue,
-  (val) => Object.assign(local.value, val),
+  (val) =>
+    Object.assign(local.value, val, {
+      typeIds: Array.isArray(val.typeIds) ? [...val.typeIds] : [],
+    }),
   { deep: true },
 );
 
