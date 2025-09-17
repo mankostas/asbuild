@@ -1,6 +1,19 @@
 <template>
   <div class="space-y-6">
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-12">
+      <div
+        v-if="auth.isSuperAdmin"
+        class="md:col-span-2 xl:col-span-3 space-y-2"
+      >
+        <span class="input-label">{{ t('tenant') }}</span>
+        <div class="filter-control">
+          <TenantSwitcher
+            class="w-full"
+            :impersonate="false"
+          />
+        </div>
+      </div>
+
       <FromGroup class="md:col-span-2 xl:col-span-4" :label="t('board.search')">
         <template #default="{ inputId, labelId }">
           <InputGroup
@@ -118,6 +131,7 @@ import { MenuItem } from '@headlessui/vue';
 import { useLookupsStore } from '@/stores/lookups';
 import { useTenantStore } from '@/stores/tenant';
 import { useAuthStore } from '@/stores/auth';
+import TenantSwitcher from '@/components/admin/TenantSwitcher.vue';
 
 interface Option { value: any; label: string }
 interface Filters {
