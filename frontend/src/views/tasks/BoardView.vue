@@ -11,7 +11,7 @@
         <div class="flex flex-wrap items-center justify-end gap-2">
           <Badge
             v-if="activeFilterCount"
-            :label="t('board.activeFilters', { count: activeFilterCount })"
+            :label="t('board.activeFilters', activeFilterCount)"
             badgeClass="pill bg-primary-500 text-white"
             icon="heroicons-outline:sparkles"
           />
