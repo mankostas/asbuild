@@ -283,6 +283,7 @@ const showFilters = computed({
 const activeFilterCount = computed(() => {
   const filters = prefs.filters;
   let count = 0;
+  if (filters.statusIds?.length) count++;
   if (filters.q) count++;
   if (filters.assigneeId) count++;
   if (filters.priority) count++;
@@ -292,21 +293,7 @@ const activeFilterCount = computed(() => {
   if (filters.mine) count++;
   if (filters.dueToday) count++;
   if (filters.breachedOnly) count++;
-  return count;
-});
-
-const activeFilterCount = computed(() => {
-  const filters = prefs.filters;
-  let count = 0;
-  if (filters.q) count++;
-  if (filters.assigneeId) count++;
-  if (filters.priority) count++;
-  if (filters.sla) count++;
-  if (filters.typeIds?.length) count++;
-  if (filters.hasPhotos) count++;
-  if (filters.mine) count++;
-  if (filters.dueToday) count++;
-  if (filters.breachedOnly) count++;
+  if (filters.dates && Object.values(filters.dates).some(Boolean)) count++;
   return count;
 });
 
