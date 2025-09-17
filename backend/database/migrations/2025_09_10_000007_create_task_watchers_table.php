@@ -10,9 +10,10 @@ return new class extends Migration
     {
         Schema::create('task_watchers', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('task_id');
-            $table->unsignedBigInteger('user_id');
+            $table->foreignId('task_id')->constrained('tasks')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
+            $table->unique(['task_id', 'user_id']);
         });
     }
 
