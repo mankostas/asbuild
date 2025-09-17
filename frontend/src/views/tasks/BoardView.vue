@@ -2,13 +2,10 @@
   <div class="p-4">
     <div class="flex items-center justify-between mb-4">
       <h1 class="text-xl font-semibold">{{ t('routes.taskBoard') }}</h1>
-      <TenantSwitcher v-if="auth.isSuperAdmin" :impersonate="false" />
     </div>
     <Card
       class="mb-6"
-      :title="t('board.filterTitle')"
-      :subtitle="t('board.filterSubtitle')"
-      bodyClass="p-6 space-y-6"
+      :bodyClass="cardBodyClass"
     >
       <template #header>
         <div class="flex flex-wrap items-center justify-end gap-2">
@@ -78,7 +75,7 @@
     </Card>
     <div class="flex items-center justify-between mt-6 mb-4">
       <Select
-        v-model="prefs.sorting.key"
+        v-model="sortSelection"
         :options="sortOptions"
         classInput="h-8"
         :aria-label="t('board.sort')"
@@ -205,7 +202,6 @@ import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
 import BoardFilters from '@/components/Board/BoardFilters.vue';
 import QuickFilterChips from '@/components/Board/QuickFilterChips.vue';
-import TenantSwitcher from '@/components/admin/TenantSwitcher.vue';
 import EmptyState from '@/components/Board/EmptyState.vue';
 import boardEmpty from '@/assets/illustrations/board-empty.svg';
 import columnEmpty from '@/assets/illustrations/column-empty.svg';
@@ -228,6 +224,8 @@ interface Task {
   previous_status_slug?: string | null;
   priority?: number | null;
   due_at?: string | null;
+  created_at?: string | null;
+  board_position?: number | null;
   sla_chip?: string | null;
   assignee?: { id: number; name: string };
   counts?: {
@@ -252,22 +250,24 @@ const columns = ref<Column[]>([]);
 const dragSnapshots = new Map<number, Column[][]>();
 const invalidMoveTasks = new Set<number>();
 
-const defaultFilters: BoardPrefs['filters'] = {
-  statusIds: [],
-  typeIds: [],
-  assigneeId: null,
-  priority: null,
-  sla: null,
-  q: null,
-  hasPhotos: null,
-  mine: false,
-  dueToday: false,
-  breachedOnly: false,
-  dates: {},
-};
+function makeDefaultFilters(): BoardPrefs['filters'] {
+  return {
+    statusIds: [],
+    typeIds: [],
+    assigneeId: null,
+    priority: null,
+    sla: null,
+    q: null,
+    hasPhotos: null,
+    mine: false,
+    dueToday: false,
+    breachedOnly: false,
+    dates: {},
+  };
+}
 
 const prefs = reactive<BoardPrefs>({
-  filters: { ...defaultFilters },
+  filters: makeDefaultFilters(),
   sorting: { key: 'created_at', dir: 'asc' },
   cardDensity: 'comfortable',
   showFilters: true,
@@ -279,6 +279,10 @@ const showFilters = computed({
     prefs.showFilters = value;
   },
 });
+
+const cardBodyClass = computed(() =>
+  showFilters.value ? 'p-6 space-y-6' : 'p-4 space-y-4',
+);
 
 const activeFilterCount = computed(() => {
   const filters = prefs.filters;
@@ -297,12 +301,28 @@ const activeFilterCount = computed(() => {
   return count;
 });
 
-const sortOptions = [
-  { value: 'created_at', label: 'Created' },
-  { value: 'due_at', label: 'Due' },
-  { value: 'priority', label: 'Priority' },
-  { value: 'board_position', label: 'Board Position' },
-];
+const sortOptions = computed(() => [
+  { value: 'created_at:asc', label: t('board.sortCreatedFirst') },
+  { value: 'created_at:desc', label: t('board.sortCreatedLast') },
+  { value: 'due_at:asc', label: t('board.sortDueSoonest') },
+  { value: 'due_at:desc', label: t('board.sortDueLatest') },
+  { value: 'priority:desc', label: t('board.sortPriorityHigh') },
+  { value: 'priority:asc', label: t('board.sortPriorityLow') },
+  { value: 'board_position:asc', label: t('board.sortBoardStart') },
+  { value: 'board_position:desc', label: t('board.sortBoardEnd') },
+]);
+
+const sortSelection = computed({
+  get: () => `${prefs.sorting.key}:${prefs.sorting.dir}`,
+  set: (value: string) => {
+    const [key, dir] = value.split(':');
+    if (key === 'created_at' || key === 'due_at' || key === 'priority' || key === 'board_position') {
+      prefs.sorting.key = key;
+    }
+    prefs.sorting.dir = dir === 'desc' ? 'desc' : 'asc';
+    sortColumns();
+  },
+});
 
 const densityOptions: BoardPrefs['cardDensity'][] = ['comfortable', 'compact'];
 const densityLabel = computed(() => prefs.cardDensity);
@@ -337,13 +357,13 @@ watch(
   () => tenantStore.currentTenantId,
   () => {
     columns.value = [];
-    Object.assign(prefs.filters, defaultFilters);
+    Object.assign(prefs.filters, makeDefaultFilters());
     load();
   },
 );
 
 function clearFilters() {
-  Object.assign(prefs.filters, defaultFilters);
+  Object.assign(prefs.filters, makeDefaultFilters());
 }
 
 function toggleFilters() {
@@ -355,6 +375,7 @@ function updateTask(updated: Task) {
   if (!col) return;
   const idx = col.tasks.findIndex((t) => t.id === updated.id);
   col.tasks[idx] = updated;
+  sortColumn(col);
 }
 
 function buildQuery() {
@@ -365,10 +386,15 @@ function buildQuery() {
   if (f.sla) params.sla = f.sla;
   if (f.q) params.q = f.q;
   if (f.typeIds?.length) params.type_ids = f.typeIds;
+  if (f.statusIds?.length) params.status_ids = f.statusIds;
   if (f.hasPhotos) params.has_photos = 1;
   if (f.mine) params.mine = 1;
   if (f.dueToday) params.due_today = 1;
   if (f.breachedOnly) params.breached_only = 1;
+  if (f.dates?.from) params.created_from = f.dates.from;
+  if (f.dates?.to) params.created_to = f.dates.to;
+  params.sort = prefs.sorting.key;
+  params.sort_dir = prefs.sorting.dir;
   return params;
 }
 
@@ -383,6 +409,7 @@ async function load() {
     tasks: col.tasks?.data ?? col.tasks ?? [],
   }));
   columns.value = cols;
+  sortColumns();
 }
 
 async function loadMore(col: Column) {
@@ -396,12 +423,24 @@ async function loadMore(col: Column) {
   col.meta.page = page;
   col.meta.total = data.meta.total;
   col.meta.has_more = data.meta.has_more;
+  sortColumn(col);
 }
 
 onMounted(() => {
   Object.assign(prefs, loadBoardPrefs(auth.userId || auth.user?.id || 0));
   if (typeof prefs.showFilters !== 'boolean') {
     prefs.showFilters = true;
+  }
+  if (
+    !prefs.sorting ||
+    !['created_at', 'due_at', 'priority', 'board_position'].includes(
+      prefs.sorting.key,
+    )
+  ) {
+    prefs.sorting = { key: 'created_at', dir: 'asc' };
+  }
+  if (!['asc', 'desc'].includes(prefs.sorting.dir)) {
+    prefs.sorting.dir = 'asc';
   }
   if (canViewBoard.value) {
     load();
@@ -425,6 +464,7 @@ async function performMove(task: Task, statusSlug: string, index: number) {
       index,
     });
     Object.assign(task, data.data);
+    sortColumns();
   } catch {
     columns.value = snapshot;
     notify.error(t('board.errorMove'));
@@ -450,6 +490,7 @@ async function onDrop(evt: any) {
       index: evt.newIndex,
     });
     Object.assign(task, data.data);
+    sortColumns();
   } catch {
     if (snapshot) {
       columns.value = snapshot;
@@ -490,5 +531,46 @@ function onDragMove(evt: any) {
     return false;
   }
   return true;
+}
+
+function sortColumn(col: Column) {
+  const key = prefs.sorting.key;
+  const dir = prefs.sorting.dir === 'desc' ? -1 : 1;
+  col.tasks.sort((a, b) => {
+    const dateKeys: Array<'created_at' | 'due_at'> = ['created_at', 'due_at'];
+    if (dateKeys.includes(key as any)) {
+      const aDate = a[key as 'created_at' | 'due_at']
+        ? new Date(a[key as 'created_at' | 'due_at'] as string).getTime()
+        : null;
+      const bDate = b[key as 'created_at' | 'due_at']
+        ? new Date(b[key as 'created_at' | 'due_at'] as string).getTime()
+        : null;
+      if (aDate === bDate) {
+        return (a.board_position ?? 0) - (b.board_position ?? 0);
+      }
+      if (aDate === null) return 1;
+      if (bDate === null) return -1;
+      return (aDate - bDate) * dir;
+    }
+
+    if (key === 'priority') {
+      const fallback = dir === -1 ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
+      const aPriority = a.priority ?? fallback;
+      const bPriority = b.priority ?? fallback;
+      if (aPriority === bPriority) {
+        return (a.board_position ?? 0) - (b.board_position ?? 0);
+      }
+      return (aPriority - bPriority) * dir;
+    }
+
+    // board_position or fallback
+    const aPos = a.board_position ?? 0;
+    const bPos = b.board_position ?? 0;
+    return (aPos - bPos) * dir;
+  });
+}
+
+function sortColumns() {
+  columns.value.forEach((col) => sortColumn(col));
 }
 </script>

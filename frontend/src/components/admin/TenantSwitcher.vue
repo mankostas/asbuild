@@ -4,6 +4,7 @@
       v-model="selected"
       :options="options"
       classInput="h-8"
+      :placeholder="t('tenant')"
       :aria-label="t('tenant')"
     />
   </div>
@@ -37,6 +38,13 @@ onMounted(async () => {
     await tenantStore.loadTenants();
   }
 });
+
+watch(
+  () => tenantStore.currentTenantId,
+  (id) => {
+    selected.value = id || 'super_admin';
+  },
+);
 
 watch(selected, async (val) => {
   // Selecting the synthetic "Super Admin" tenant should not trigger an
