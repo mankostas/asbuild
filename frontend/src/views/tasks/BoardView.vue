@@ -295,6 +295,21 @@ const activeFilterCount = computed(() => {
   return count;
 });
 
+const activeFilterCount = computed(() => {
+  const filters = prefs.filters;
+  let count = 0;
+  if (filters.q) count++;
+  if (filters.assigneeId) count++;
+  if (filters.priority) count++;
+  if (filters.sla) count++;
+  if (filters.typeIds?.length) count++;
+  if (filters.hasPhotos) count++;
+  if (filters.mine) count++;
+  if (filters.dueToday) count++;
+  if (filters.breachedOnly) count++;
+  return count;
+});
+
 const sortOptions = [
   { value: 'created_at', label: 'Created' },
   { value: 'due_at', label: 'Due' },

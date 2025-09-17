@@ -111,6 +111,7 @@ import Select from '@dc/components/Select';
 import Dropdown from '@dc/components/Dropdown';
 import Checkbox from '@dc/components/Checkbox';
 import FromGroup from '@dc/components/FromGroup';
+
 import Icon from '@dc/components/Icon';
 import Switch from '@/components/ui/Switch/index.vue';
 import { MenuItem } from '@headlessui/vue';
@@ -183,7 +184,7 @@ const typeFilterLabel = computed(() => {
 });
 
 const dropdownButtonClass = computed(() =>
-  [
+[
     'btn btn-sm w-full flex items-center justify-between gap-2',
     hasTypeSelection.value
       ? 'btn-outline-primary active'
@@ -253,3 +254,66 @@ watch(
   { deep: true },
 );
 </script>
+
+<style scoped>
+.filter-field {
+  @apply flex flex-col gap-2;
+}
+
+.filter-label {
+  @apply text-xs font-semibold uppercase tracking-[0.32em] text-slate-500 dark:text-slate-400;
+}
+
+.filter-control {
+  @apply relative flex w-full items-center rounded-2xl border border-slate-200/70 bg-white/80 px-3 py-2 shadow-[0_1px_0_rgba(15,23,42,0.06)] transition-all duration-200 backdrop-blur-xl dark:border-slate-700/60 dark:bg-slate-900/60;
+}
+
+.filter-control--input {
+  @apply py-1.5;
+}
+
+.filter-control--button,
+.filter-control--switch {
+  @apply px-0;
+}
+
+.filter-control--switch {
+  @apply justify-between px-5 py-4;
+}
+
+.filter-control--active {
+  @apply border-primary-500/60 shadow-[0_10px_30px_rgba(79,70,229,0.18)];
+}
+
+:deep(.filter-control .inputGroup) {
+  @apply w-full;
+}
+
+:deep(.filter-control .input-group-control) {
+  @apply !h-10 !w-full !rounded-[1.5rem] !border-none !bg-transparent !px-0 !text-sm !shadow-none !ring-0 text-slate-700 placeholder:text-slate-400 focus:!outline-none focus:!ring-0 dark:text-slate-100 dark:placeholder:text-slate-400;
+}
+
+:deep(.filter-control .input-group-text) {
+  @apply bg-transparent text-slate-400 dark:text-slate-400;
+}
+
+:deep(.filter-control select) {
+  @apply !h-11 !w-full !rounded-[1.5rem] !border-none !bg-transparent !px-0 !text-sm !shadow-none !ring-0 font-medium text-slate-600 placeholder:text-slate-400 focus:!outline-none dark:text-slate-200 dark:placeholder:text-slate-400;
+}
+
+:deep(.filter-control select option) {
+  @apply text-slate-700 dark:text-slate-100;
+}
+
+.filter-dropdown-button {
+  @apply inline-flex w-full items-center justify-between gap-2 rounded-2xl px-4 py-2 text-sm font-medium transition-colors duration-200;
+}
+
+.filter-dropdown-button span {
+  @apply truncate;
+}
+
+.filter-dropdown-button:hover {
+  @apply text-primary-600 dark:text-primary-200;
+}
+</style>
