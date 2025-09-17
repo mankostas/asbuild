@@ -12,7 +12,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('name');
+            $table->string('description')->nullable();
+            $table->string('slug', 100);
+            $table->json('abilities')->nullable();
+            $table->unsignedInteger('level')->default(0);
             $table->timestamps();
+            $table->unique(['tenant_id', 'slug']);
         });
     }
 

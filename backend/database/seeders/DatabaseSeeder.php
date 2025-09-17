@@ -9,11 +9,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            TenantSeeder::class,
-            RoleSeeder::class,
-            SuperAdminSeeder::class,
-            RoleUserSeeder::class,
-            BrandingSeeder::class,
+            InitialSystemSeeder::class,
         ]);
 
         if (env('ENABLE_DEMO_SEEDER', false)) {

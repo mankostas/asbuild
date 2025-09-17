@@ -10,10 +10,10 @@ return new class extends Migration
     {
         Schema::create('task_subtasks', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('task_id');
+            $table->foreignId('task_id')->constrained('tasks')->cascadeOnDelete();
             $table->string('title');
             $table->boolean('is_completed')->default(false);
-            $table->unsignedBigInteger('assigned_user_id')->nullable();
+            $table->foreignId('assigned_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->boolean('is_required')->default(false);
             $table->unsignedInteger('position')->default(0);
             $table->timestamps();
