@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\AbilityService;
+use App\Services\PermittedClientResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -15,7 +16,7 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
-    public function __construct(private AbilityService $abilityService)
+    public function __construct(private AbilityService $abilityService, private PermittedClientResolver $clientResolver)
     {
     }
 
@@ -145,6 +146,7 @@ class AuthController extends Controller
             'user' => $user,
             'abilities' => $this->abilityService->resolveAbilities($user),
             'features' => $features,
+            'permitted_client_ids' => $this->clientResolver->resolve($user),
         ]);
     }
 }

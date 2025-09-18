@@ -5,14 +5,41 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Manual;
 use App\Models\Task;
+use App\Services\PermittedClientResolver;
+use App\Support\ClientFilter;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
+    public function __construct(private PermittedClientResolver $clients)
+    {
+    }
+
+    protected function clientFilterRules(): array
+    {
+        return [
+            'client_id' => ['sometimes', 'integer', Rule::exists('clients', 'id')],
+            'client_ids' => ['sometimes', 'array'],
+            'client_ids.*' => ['integer', Rule::exists('clients', 'id')],
+        ];
+    }
+
+    protected function resolveClientFilter(Request $request): ?array
+    {
+        $permitted = null;
+
+        if ($this->clients->shouldRestrictReports($request->user())) {
+            $permitted = $this->clients->resolve($request->user());
+        }
+
+        return ClientFilter::resolve($request, $permitted);
+    }
+
 
     protected function dateRange(Request $request): array
     {
@@ -42,12 +69,16 @@ class ReportController extends Controller
     public function overview(Request $request)
     {
         Gate::authorize('reports.view');
+        $request->validate($this->clientFilterRules());
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
+        $clientIds = $this->resolveClientFilter($request);
 
         $base = Task::where('tenant_id', $tenantId)
             ->whereNotNull('completed_at')
             ->whereBetween('completed_at', [$range['from'], $range['to']]);
+
+        ClientFilter::apply($base, $clientIds);
 
         $completed = (clone $base)->count();
         $onTime = (clone $base)
@@ -72,13 +103,16 @@ class ReportController extends Controller
             ['label' => 'Failed Uploads', 'value' => $failedUploads],
         ];
 
-        $chartData = Task::where('tenant_id', $tenantId)
+        $chartQuery = Task::where('tenant_id', $tenantId)
             ->whereNotNull('completed_at')
             ->whereBetween('completed_at', [$range['from'], $range['to']])
             ->select(DB::raw('DATE(completed_at) as date'), DB::raw('count(*) as count'))
             ->groupBy('date')
-            ->orderBy('date')
-            ->get()
+            ->orderBy('date');
+
+        ClientFilter::apply($chartQuery, $clientIds);
+
+        $chartData = $chartQuery->get()
             ->map(fn ($row) => ['x' => $row->date, 'y' => $row->count]);
 
         return response()->json([
@@ -99,12 +133,16 @@ class ReportController extends Controller
     public function kpis(Request $request)
     {
         Gate::authorize('reports.view');
+        $request->validate($this->clientFilterRules());
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
+        $clientIds = $this->resolveClientFilter($request);
 
         $base = Task::where('tenant_id', $tenantId)
             ->whereNotNull('completed_at')
             ->whereBetween('completed_at', [$range['from'], $range['to']]);
+
+        ClientFilter::apply($base, $clientIds);
 
         $completed = (clone $base)->count();
         $onTime = (clone $base)
@@ -133,6 +171,13 @@ class ReportController extends Controller
     public function materials(Request $request)
     {
         Gate::authorize('reports.view');
+        $request->validate($this->clientFilterRules());
+        $clientIds = $this->resolveClientFilter($request);
+
+        if ($clientIds !== null) {
+            return response()->json([]);
+        }
+
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
 
@@ -148,14 +193,20 @@ class ReportController extends Controller
     public function tasksOverview(Request $request)
     {
         Gate::authorize('reports.view');
+        $request->validate(array_merge($this->clientFilterRules(), [
+            'type_id' => ['sometimes', 'integer'],
+        ]));
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
         $typeId = (int) $request->query('type_id');
+        $clientIds = $this->resolveClientFilter($request);
 
         $base = Task::where('tenant_id', $tenantId)
             ->where('task_type_id', $typeId)
             ->whereNotNull('completed_at')
             ->whereBetween('completed_at', [$range['from'], $range['to']]);
+
+        ClientFilter::apply($base, $clientIds);
 
         $throughput = (clone $base)
             ->select(DB::raw('DATE(completed_at) as date'), DB::raw('count(*) as count'))
@@ -197,13 +248,18 @@ class ReportController extends Controller
     public function export(Request $request): StreamedResponse
     {
         Gate::authorize('reports.view');
+        $request->validate($this->clientFilterRules());
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
+        $clientIds = $this->resolveClientFilter($request);
 
-        $tasks = Task::where('tenant_id', $tenantId)
+        $query = Task::where('tenant_id', $tenantId)
             ->whereNotNull('completed_at')
-            ->whereBetween('completed_at', [$range['from'], $range['to']])
-            ->get();
+            ->whereBetween('completed_at', [$range['from'], $range['to']]);
+
+        ClientFilter::apply($query, $clientIds);
+
+        $tasks = $query->get();
 
         $headers = [
             'Content-Type' => 'text/csv',

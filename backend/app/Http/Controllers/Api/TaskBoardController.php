@@ -10,6 +10,7 @@ use App\Models\TaskStatus;
 use App\Models\TaskType;
 use App\Services\BoardPositionService;
 use App\Services\StatusFlowService;
+use App\Services\PermittedClientResolver;
 use App\Services\TaskQueryFilters;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -21,9 +22,9 @@ class TaskBoardController extends Controller
         return (int) $request->attributes->get('tenant_id', $request->user()->tenant_id);
     }
 
-    public function index(Request $request, TaskQueryFilters $filters)
+    protected function filterValidationRules(): array
     {
-        $request->validate([
+        return [
             'type_ids' => ['sometimes', 'array'],
             'type_ids.*' => ['integer'],
             'assignee_id' => ['sometimes', 'integer'],
@@ -38,7 +39,20 @@ class TaskBoardController extends Controller
             'breached_only' => ['sometimes', 'boolean'],
             'due_today' => ['sometimes', 'boolean'],
             'has_photos' => ['sometimes', 'boolean'],
-        ]);
+            'client_id' => ['sometimes', 'integer', Rule::exists('clients', 'id')],
+            'client_ids' => ['sometimes', 'array'],
+            'client_ids.*' => ['integer', Rule::exists('clients', 'id')],
+        ];
+    }
+
+    public function index(Request $request, TaskQueryFilters $filters, PermittedClientResolver $clients)
+    {
+        $request->validate($this->filterValidationRules());
+
+        $permittedClientIds = null;
+        if ($clients->shouldRestrictTasks($request->user())) {
+            $permittedClientIds = $clients->resolve($request->user());
+        }
 
         $tenantId = $this->tenantId($request);
 
@@ -65,12 +79,12 @@ class TaskBoardController extends Controller
             ->orderBy('slug')
             ->get();
 
-        $columns = $statuses->map(function (TaskStatus $status) use ($tenantId, $request, $filters) {
+        $columns = $statuses->map(function (TaskStatus $status) use ($tenantId, $request, $filters, $permittedClientIds) {
             $limit = 50;
             $query = Task::where('tenant_id', $tenantId)
                 ->where('status_slug', $status->slug);
 
-            $filters->apply($query, $request);
+            $filters->apply($query, $request, $permittedClientIds);
 
             $total = (clone $query)->count();
             $tasks = $query
@@ -98,26 +112,17 @@ class TaskBoardController extends Controller
         return response()->json(['data' => $columns]);
     }
 
-    public function column(Request $request, TaskQueryFilters $filters)
+    public function column(Request $request, TaskQueryFilters $filters, PermittedClientResolver $clients)
     {
-        $data = $request->validate([
+        $data = $request->validate(array_merge($this->filterValidationRules(), [
             'status' => ['required', 'string'],
             'page' => ['sometimes', 'integer', 'min:1'],
-            'type_ids' => ['sometimes', 'array'],
-            'type_ids.*' => ['integer'],
-            'assignee_id' => ['sometimes', 'integer'],
-            'priority' => ['sometimes', 'integer'],
-            'q' => ['sometimes', 'string'],
-            'sla' => ['sometimes', 'string'],
-            'created_from' => ['sometimes', 'date'],
-            'created_to' => ['sometimes', 'date'],
-            'due_from' => ['sometimes', 'date'],
-            'due_to' => ['sometimes', 'date'],
-            'mine' => ['sometimes', 'boolean'],
-            'breached_only' => ['sometimes', 'boolean'],
-            'due_today' => ['sometimes', 'boolean'],
-            'has_photos' => ['sometimes', 'boolean'],
-        ]);
+        ]));
+
+        $permittedClientIds = null;
+        if ($clients->shouldRestrictTasks($request->user())) {
+            $permittedClientIds = $clients->resolve($request->user());
+        }
 
         $tenantId = $this->tenantId($request);
         $prefixed = TaskStatus::prefixSlug($data['status'], $tenantId);
@@ -128,7 +133,7 @@ class TaskBoardController extends Controller
         $query = Task::where('tenant_id', $tenantId)
             ->where('status_slug', $prefixed);
 
-        $filters->apply($query, $request);
+        $filters->apply($query, $request, $permittedClientIds);
 
         $total = (clone $query)->count();
         $tasks = $query

@@ -2,13 +2,17 @@
 
 namespace App\Services;
 
+use App\Support\ClientFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class TaskQueryFilters
 {
-    public function apply(Builder $query, Request $request): Builder
+    public function apply(Builder $query, Request $request, ?array $permittedClientIds = null): Builder
     {
+        $clientFilter = ClientFilter::resolve($request, $permittedClientIds);
+        ClientFilter::apply($query, $clientFilter);
+
         if ($request->boolean('mine')) {
             $query->where('assigned_user_id', $request->user()->id);
         }
