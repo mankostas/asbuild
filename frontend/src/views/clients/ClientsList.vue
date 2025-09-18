@@ -1,14 +1,5 @@
 <template>
   <div class="p-4 space-y-4">
-    <Alert
-      v-if="errorMessage"
-      type="danger-light"
-      icon="heroicons-outline:exclamation-triangle"
-      dismissible
-    >
-      {{ errorMessage }}
-    </Alert>
-
     <ClientsTable
       v-if="!loading"
       :rows="tableRows"
@@ -87,7 +78,6 @@ import ClientTenantSelect from '@/components/clients/ClientTenantSelect.vue';
 import ClientSortSelect from '@/components/clients/ClientSortSelect.vue';
 import ClientsStatusFilters from '@/components/clients/ClientsStatusFilters.vue';
 import SkeletonTable from '@/components/ui/Skeleton/Table.vue';
-import Alert from '@/components/ui/Alert/index.vue';
 import Button from '@/components/ui/Button';
 import { useClientsStore } from '@/stores/clients';
 import { useTenantStore } from '@/stores/tenant';
@@ -126,7 +116,6 @@ const {
   trashFilter,
 } = storeToRefs(clientsStore);
 
-const errorMessage = ref<string | null>(null);
 const searchTerm = ref(search.value || '');
 const selectedIds = ref<Array<number | string>>([]);
 const tenantFilter = ref<string>(
@@ -299,13 +288,11 @@ watch(sortSelection, (value, oldValue) => {
 });
 
 async function reloadClients(overrides: Partial<ClientListParams> = {}) {
-  errorMessage.value = null;
   try {
     await clientsStore.fetch(overrides);
     selectedIds.value = [];
   } catch (error: any) {
-    errorMessage.value = error?.message || t('clients.list.loadError');
-    notify.error(errorMessage.value);
+    notify.error(error?.message || t('clients.list.loadError'));
   }
 }
 
