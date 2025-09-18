@@ -16,7 +16,9 @@
           <span v-if="item.icon" class="icon-box">
             <Icon :icon="item.icon" />
           </span>
-          <div v-if="item.title" class="text-box">{{ item.title }}</div>
+          <div v-if="item.title" class="text-box">
+            {{ item.titleKey ? $t(item.titleKey) : item.title }}
+          </div>
         </div>
       </router-link>
       <a v-if="item.child || item.megamenu" href="javascript: void(0);">
@@ -24,7 +26,9 @@
           <span v-if="item.icon" class="icon-box">
             <Icon :icon="item.icon"
           /></span>
-          <div v-if="item.title" class="text-box">{{ item.title }}</div>
+          <div v-if="item.title" class="text-box">
+            {{ item.titleKey ? $t(item.titleKey) : item.title }}
+          </div>
         </div>
         <div
           class="flex-none text-sm ltr:ml-3 rtl:mr-3 leading-[1] relative top-1"
@@ -41,13 +45,15 @@
           <router-link v-if="!childitem.submenu" :to="{ name: childitem.childlink }">
             <div class="flex space-x-2 items-start rtl:space-x-reverse">
               <Icon :icon="childitem.childicon" class="leading-[1] text-base" />
-              <span class="leading-[1]">{{ childitem.childtitle }}</span>
+              <span class="leading-[1]">
+                {{ childitem.childtitleKey ? $t(childitem.childtitleKey) : childitem.childtitle }}
+              </span>
             </div>
           </router-link>
 
-          <a v-if="childitem.submenu" href="javascript: void(0);">{{
-            childitem.childtitle
-          }}</a>
+          <a v-if="childitem.submenu" href="javascript: void(0);">
+            {{ childitem.childtitleKey ? $t(childitem.childtitleKey) : childitem.childtitle }}
+          </a>
 
           <ul v-if="childitem.submenu" class="sub-menu">
             <li

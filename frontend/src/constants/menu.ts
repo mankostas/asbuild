@@ -162,6 +162,8 @@ export interface SidebarMenuChild extends RouteAccess {
   childlink: string;
   childicon?: string;
   topTitle?: string;
+  childtitleKey?: string;
+  topTitleKey?: string;
 }
 
 export interface SidebarMenuItem extends RouteAccess {
@@ -170,6 +172,7 @@ export interface SidebarMenuItem extends RouteAccess {
   link?: string;
   child?: SidebarMenuChild[];
   isHeadr?: boolean;
+  titleKey?: string;
 }
 
 interface MenuItemDefinition extends SidebarMenuItem {
@@ -183,6 +186,8 @@ interface SidebarMenuChildBlueprint {
   childlink: string;
   childicon?: string;
   topTitle?: string;
+  childtitleKey?: string;
+  topTitleKey?: string;
 }
 
 interface MenuItemBlueprint {
@@ -191,6 +196,7 @@ interface MenuItemBlueprint {
   link?: string;
   child?: SidebarMenuChildBlueprint[];
   isHeadr?: boolean;
+  titleKey?: string;
   topNav?: {
     flattenChildren?: boolean;
   };
@@ -249,14 +255,17 @@ const menuBlueprints: readonly MenuItemBlueprint[] = [
       {
         childtitle: 'Employees',
         childlink: 'employees.list',
+        childtitleKey: 'routes.employees',
       },
       {
         childtitle: 'Clients',
         childlink: 'clients.list',
+        childtitleKey: 'routes.clients',
       },
       {
         childtitle: 'Tenants',
         childlink: 'tenants.list',
+        childtitleKey: 'routes.tenants',
       },
     ],
   },
@@ -321,12 +330,14 @@ export interface TopMenuItem extends RouteAccess {
   link?: string;
   child?: SidebarMenuChild[];
   isHeadr?: boolean;
+  titleKey?: string;
 }
 
 const toTopMenuItems = (item: MenuItemDefinition): TopMenuItem[] => {
   if (item.topNav?.flattenChildren && item.child) {
     return item.child.map((child, index) => ({
       title: child.topTitle ?? child.childtitle,
+      titleKey: child.topTitleKey ?? child.childtitleKey,
       icon: child.childicon ?? (index === 0 ? item.icon : undefined),
       link: child.childlink,
       requiredAbilities: child.requiredAbilities,

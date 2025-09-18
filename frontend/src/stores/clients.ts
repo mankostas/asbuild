@@ -9,6 +9,7 @@ import clientsApi, {
 } from '@/services/api/clients';
 import { useTenantStore } from '@/stores/tenant';
 import { useAuthStore } from '@/stores/auth';
+import i18n from '@/i18n';
 
 const SUPER_ADMIN_TENANT_ID = 'super_admin';
 
@@ -359,7 +360,7 @@ export const useClientsStore = defineStore('clients', {
     },
     async submitTransfer(ownerId: number | null = null) {
       if (this.transfer.clientId === null) {
-        throw new Error('No client selected for transfer');
+        throw new Error(i18n.global.t('clients.transfer.errors.noClient'));
       }
       const targetOwner = ownerId ?? this.transfer.ownerId ?? null;
       this.transfer.loading = true;

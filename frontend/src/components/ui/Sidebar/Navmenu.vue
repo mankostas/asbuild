@@ -22,7 +22,7 @@
           <Icon :icon="item.icon"
         /></span>
         <div v-if="item.title" class="text-box flex-grow">
-          {{ item.title }}
+          {{ item.titleKey ? $t(item.titleKey) : item.title }}
         </div>
         <span
           v-if="item.badge && !$store.themeSettingsStore.sidebarCollasp"
@@ -33,7 +33,7 @@
 
       <!-- ?? only for menulabel ??  -->
       <div v-else-if="item.isHeadr && !item.child" class="menulabel">
-        {{ item.title }}
+        {{ item.titleKey ? $t(item.titleKey) : item.title }}
       </div>
       <!-- !!sub menu parent li !! -->
         <button
@@ -49,7 +49,9 @@
           <span v-show="item.icon" class="menu-icon">
             <Icon :icon="item.icon"
           /></span>
-          <div v-if="item.title" class="text-box">{{ item.title }}</div>
+          <div v-if="item.title" class="text-box">
+            {{ item.titleKey ? $t(item.titleKey) : item.title }}
+          </div>
         </div>
         <div class="flex-0">
           <div
@@ -99,7 +101,7 @@
                   "
                 ></span>
                 <span class="flex-1">
-                  {{ ci.childtitle }}
+                  {{ ci.childtitleKey ? $t(ci.childtitleKey) : ci.childtitle }}
                 </span>
               </span>
             </router-link>

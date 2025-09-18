@@ -159,7 +159,7 @@
                 class="ml-2 text-danger-500 hover:underline"
                 @click="$emit('delete-selected', selectedIds)"
               >
-                {{ t('actions.delete') }}
+                {{ t('clients.bulk.deleteSelected') }}
               </button>
             </slot>
           </div>
