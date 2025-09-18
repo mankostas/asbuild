@@ -32,7 +32,6 @@
       @restore="handleRestore"
       @delete="confirmDelete"
       @delete-selected="confirmDeleteSelected"
-      @transfer="openTransferDialog"
     >
       <template #header-actions>
         <Button
@@ -48,12 +47,6 @@
 
       <template #filters>
         <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <ClientOwnerSelect
-            v-model="ownerFilter"
-            :options="ownerOptions"
-            :placeholder="t('clients.filters.owner')"
-            :aria-label="t('clients.filters.owner')"
-          />
           <ClientTenantSelect
             v-if="auth.isSuperAdmin"
             v-model="tenantFilter"
@@ -81,41 +74,6 @@
       <SkeletonTable :count="10" />
     </div>
 
-    <Modal
-      v-if="canTransfer"
-      :active-modal="transfer.open"
-      centered
-      :title="t('clients.transfer.title')"
-      @close="closeTransfer"
-    >
-      <p class="text-sm text-slate-600 dark:text-slate-300">
-        {{ t('clients.transfer.description') }}
-      </p>
-      <div class="mt-4 space-y-4">
-        <Select
-          v-model="transferOwnerId"
-          :options="transferOwnerOptions"
-          classInput="text-sm !h-10"
-          :aria-label="t('clients.transfer.ownerLabel')"
-        />
-      </div>
-      <template #footer>
-        <Button
-          type="button"
-          btnClass="btn-outline-secondary"
-          :text="t('actions.cancel')"
-          @click="closeTransfer"
-        />
-        <Button
-          type="button"
-          btnClass="btn-primary"
-          :text="t('clients.transfer.submit')"
-          :disabled="transfer.loading"
-          :loading="transfer.loading"
-          @click="submitTransfer"
-        />
-      </template>
-    </Modal>
   </div>
 </template>
 
@@ -125,21 +83,17 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import Swal from 'sweetalert2';
 import ClientsTable from '@/components/clients/ClientsTable.vue';
-import ClientOwnerSelect from '@/components/clients/ClientOwnerSelect.vue';
 import ClientTenantSelect from '@/components/clients/ClientTenantSelect.vue';
 import ClientSortSelect from '@/components/clients/ClientSortSelect.vue';
 import ClientsStatusFilters from '@/components/clients/ClientsStatusFilters.vue';
 import SkeletonTable from '@/components/ui/Skeleton/Table.vue';
 import Alert from '@/components/ui/Alert/index.vue';
 import Button from '@/components/ui/Button';
-import Select from '@/components/ui/Select/index.vue';
-import Modal from '@/components/ui/Modal/index.vue';
 import { useClientsStore } from '@/stores/clients';
 import { useTenantStore } from '@/stores/tenant';
 import { useAuthStore, can } from '@/stores/auth';
 import { useI18n } from 'vue-i18n';
 import { useNotify } from '@/plugins/notify';
-import api, { extractData } from '@/services/api';
 import type { Client, ClientListParams } from '@/services/api/clients';
 
 interface ClientTableRow {
@@ -147,9 +101,6 @@ interface ClientTableRow {
   name: string;
   email: string | null;
   phone: string | null;
-  ownerId: number | null;
-  ownerName: string | null;
-  ownerEmail: string | null;
   tenantId: number | string | null;
   tenantName: string | null;
   status: 'active' | 'archived' | 'trashed';
@@ -173,17 +124,11 @@ const {
   direction,
   archiveFilter,
   trashFilter,
-  transfer,
 } = storeToRefs(clientsStore);
 
 const errorMessage = ref<string | null>(null);
 const searchTerm = ref(search.value || '');
 const selectedIds = ref<Array<number | string>>([]);
-const ownerFilter = ref(
-  clientsStore.filters.ownerId !== null && clientsStore.filters.ownerId !== undefined
-    ? String(clientsStore.filters.ownerId)
-    : '',
-);
 const tenantFilter = ref<string>(
   auth.isSuperAdmin && clientsStore.filters.tenantId !== null && clientsStore.filters.tenantId !== undefined
     ? String(clientsStore.filters.tenantId)
@@ -192,18 +137,13 @@ const tenantFilter = ref<string>(
     : '',
 );
 const sortSelection = ref(`${sort.value}:${direction.value}`);
-const availableOwners = ref<Array<{ id: number | string; name?: string | null; email?: string | null }>>([]);
 let hasInitialized = false;
 let searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
 const canCreate = computed(() => can('clients.create') || can('clients.manage'));
 const canManage = computed(() => can('clients.manage'));
 const canDelete = computed(() => can('clients.delete') || canManage.value);
-const canTransfer = computed(() => canManage.value);
 const canBulkManage = computed(() => canDelete.value);
-const canLoadOwners = computed(
-  () => canManage.value || can('employees.manage') || can('employees.view'),
-);
 
 const includeArchived = computed({
   get: () => archiveFilter.value.includeArchived,
@@ -282,9 +222,6 @@ const tableRows = computed<ClientTableRow[]>(() =>
       name: client.name,
       email: client.email ?? null,
       phone: client.phone ?? null,
-      ownerId: client.owner?.id ?? null,
-      ownerName: client.owner?.name ?? null,
-      ownerEmail: client.owner?.email ?? null,
       tenantId,
       tenantName: tenant?.name ?? null,
       status,
@@ -294,71 +231,12 @@ const tableRows = computed<ClientTableRow[]>(() =>
   }),
 );
 
-const rowById = computed(() => {
-  const map = new Map<string, ClientTableRow>();
-  tableRows.value.forEach((row) => {
-    map.set(String(row.id), row);
-  });
-  return map;
-});
-
-const ownerLookup = computed(() => {
-  const map = new Map<string, { value: string; label: string }>();
-  const fallbackLabel = (owner: { id: number | string; name?: string | null; email?: string | null }) =>
-    owner.name || owner.email || t('clients.table.unknownOwner', { id: owner.id });
-
-  availableOwners.value.forEach((owner) => {
-    const key = String(owner.id);
-    map.set(key, { value: key, label: fallbackLabel(owner) });
-  });
-
-  tableRows.value.forEach((row) => {
-    if (row.ownerId !== null && row.ownerId !== undefined) {
-      const key = String(row.ownerId);
-      if (!map.has(key)) {
-        map.set(key, {
-          value: key,
-          label:
-            row.ownerName ||
-            row.ownerEmail ||
-            t('clients.table.unknownOwner', { id: row.ownerId }),
-        });
-      }
-    }
-  });
-
-  return map;
-});
-
-const ownerOptions = computed(() => [
-  { value: '', label: t('clients.filters.allOwners') },
-  ...Array.from(ownerLookup.value.values()),
-]);
-
-const transferOwnerOptions = computed(() => [
-  { value: '', label: t('clients.transfer.noOwner') },
-  ...Array.from(ownerLookup.value.values()),
-]);
-
 const sortOptions = computed(() => [
   { value: 'name:asc', label: t('clients.sort.nameAsc') },
   { value: 'name:desc', label: t('clients.sort.nameDesc') },
   { value: 'created_at:desc', label: t('clients.sort.newest') },
   { value: 'created_at:asc', label: t('clients.sort.oldest') },
 ]);
-
-const transferOwnerId = computed({
-  get: () =>
-    transfer.value.ownerId === null || transfer.value.ownerId === undefined
-      ? ''
-      : String(transfer.value.ownerId),
-  set: (value: string) => {
-    const numeric = value === '' ? null : Number(value);
-    clientsStore.setTransferOwner(
-      numeric === null || Number.isNaN(numeric) ? null : numeric,
-    );
-  },
-});
 
 watch(search, (value) => {
   if ((value || '') !== searchTerm.value) {
@@ -372,17 +250,6 @@ watch(
     sortSelection.value = `${nextSort}:${nextDirection}`;
   },
   { immediate: true },
-);
-
-watch(
-  () => clientsStore.filters.ownerId,
-  (value) => {
-    if (value !== null && value !== undefined) {
-      ownerFilter.value = String(value);
-    } else if (!hasInitialized) {
-      ownerFilter.value = '';
-    }
-  },
 );
 
 watch(
@@ -400,25 +267,15 @@ watch(
     if (hasInitialized) {
       clientsStore.setPage(1);
       reloadClients({ page: 1 });
-      loadOwnerOptions();
     }
   },
 );
 
-watch(ownerFilter, (value, oldValue) => {
-  if (!hasInitialized || value === oldValue) return;
-  clientsStore.setOwnerFilter(value === '' ? null : value);
-  clientsStore.setPage(1);
-  reloadClients({ page: 1 });
-});
-
 watch(tenantFilter, (value, oldValue) => {
   if (!hasInitialized || value === oldValue) return;
   clientsStore.setTenantFilter(value === '' ? null : value);
-  clientsStore.setOwnerFilter(null);
-  ownerFilter.value = '';
   clientsStore.setPage(1);
-  Promise.all([reloadClients({ page: 1 }), loadOwnerOptions()]).catch(() => {});
+  reloadClients({ page: 1 });
 });
 
 watch(sortSelection, (value, oldValue) => {
@@ -429,36 +286,6 @@ watch(sortSelection, (value, oldValue) => {
   clientsStore.setPage(1);
   reloadClients({ page: 1, sort: field as ClientListParams['sort'], dir: directionValue });
 });
-
-function resolveTenantForOwners(): string | number | undefined {
-  if (auth.isSuperAdmin) {
-    return tenantFilter.value || undefined;
-  }
-  return tenantStore.currentTenantId || undefined;
-}
-
-async function loadOwnerOptions() {
-  if (!canLoadOwners.value) {
-    availableOwners.value = [];
-    return;
-  }
-  try {
-    const params: Record<string, unknown> = { per_page: 100 };
-    const tenantId = resolveTenantForOwners();
-    if (tenantId !== undefined && tenantId !== '') {
-      params.tenant_id = tenantId;
-    }
-    const response = await api.get('/employees', { params });
-    const data = extractData<any[]>(response.data) || [];
-    availableOwners.value = data.map((employee: any) => ({
-      id: employee.id,
-      name: employee.name ?? null,
-      email: employee.email ?? null,
-    }));
-  } catch (error) {
-    availableOwners.value = [];
-  }
-}
 
 async function reloadClients(overrides: Partial<ClientListParams> = {}) {
   errorMessage.value = null;
@@ -599,54 +426,12 @@ async function confirmDeleteSelected(ids: Array<number | string>) {
   }
 }
 
-function normalizeId(value: number | string): number | null {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return value;
-  }
-  const numeric = Number(value);
-  if (Number.isFinite(numeric)) {
-    return numeric;
-  }
-  const parsed = parseInt(String(value), 10);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function openTransferDialog(id: number | string) {
-  if (!canTransfer.value) {
-    notify.forbidden();
-    return;
-  }
-  const row = rowById.value.get(String(id));
-  const clientId = normalizeId(id);
-  if (!row || clientId === null) {
-    return;
-  }
-  clientsStore.openTransfer(clientId, row.ownerId ?? null);
-}
-
-function closeTransfer() {
-  clientsStore.closeTransfer();
-}
-
-async function submitTransfer() {
-  if (!canTransfer.value) {
-    notify.forbidden();
-    return;
-  }
-  try {
-    await clientsStore.submitTransfer();
-    await reloadClients();
-  } catch (error: any) {
-    notify.error(error?.message || t('common.error'));
-  }
-}
-
 onMounted(async () => {
   try {
     if (auth.isSuperAdmin) {
       await tenantStore.loadTenants({ per_page: 100 });
     }
-    await Promise.all([reloadClients(), loadOwnerOptions()]);
+    await reloadClients();
   } finally {
     hasInitialized = true;
   }

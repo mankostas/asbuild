@@ -52,9 +52,6 @@
           <span v-else-if="rowProps.column.field === 'phone'">
             {{ rowProps.row.phone || '—' }}
           </span>
-          <span v-else-if="rowProps.column.field === 'ownerName'">
-            {{ rowProps.row.ownerName || '—' }}
-          </span>
           <span v-else-if="rowProps.column.field === 'tenantName'">
             {{ rowProps.row.tenantName || '—' }}
           </span>
@@ -87,18 +84,6 @@
                       ><Icon icon="heroicons-outline:pencil-square"
                     /></span>
                     <span>{{ t('actions.edit') }}</span>
-                  </button>
-                </MenuItem>
-                <MenuItem v-if="canTransfer && rowProps.row.status !== 'trashed'">
-                  <button
-                    type="button"
-                    class="menu-item"
-                    @click="$emit('transfer', rowProps.row.id)"
-                  >
-                    <span class="text-base"
-                      ><Icon icon="heroicons-outline:user-group"
-                    /></span>
-                    <span>{{ t('actions.transferOwnership') }}</span>
                   </button>
                 </MenuItem>
                 <MenuItem v-if="canEdit && rowProps.row.status === 'active'">
@@ -199,7 +184,6 @@ interface ClientTableRow {
   name: string;
   email?: string | null;
   phone?: string | null;
-  ownerName?: string | null;
   tenantName?: string | null;
   status: 'active' | 'archived' | 'trashed';
 }
@@ -229,7 +213,6 @@ const emit = defineEmits<{
   (e: 'restore', payload: { id: number | string; type: 'archive' | 'trash' }): void;
   (e: 'delete', id: number | string): void;
   (e: 'delete-selected', ids: Array<number | string>): void;
-  (e: 'transfer', id: number | string): void;
 }>();
 
 const { t } = useI18n();
@@ -250,7 +233,6 @@ const columns = computed(() => {
     { label: t('clients.table.columns.name'), field: 'name', sortable: true },
     { label: t('clients.table.columns.email'), field: 'email', sortable: false },
     { label: t('clients.table.columns.phone'), field: 'phone', sortable: false },
-    { label: t('clients.table.columns.owner'), field: 'ownerName', sortable: false },
   ];
 
   if (props.showTenant) {
@@ -310,7 +292,6 @@ const searchQuery = computed(() => props.search);
 
 const canView = computed(() => can('clients.view'));
 const canEdit = computed(() => can('clients.manage'));
-const canTransfer = computed(() => can('clients.manage'));
 const canDelete = computed(() => can('clients.delete') || can('clients.manage'));
 
 watch(

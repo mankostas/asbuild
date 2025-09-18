@@ -4,12 +4,10 @@ import clientsApi, {
   type ClientListParams,
   type CreateClientPayload,
   type ListMeta,
-  type TransferClientPayload,
   type UpdateClientPayload,
 } from '@/services/api/clients';
 import { useTenantStore } from '@/stores/tenant';
 import { useAuthStore } from '@/stores/auth';
-import i18n from '@/i18n';
 
 const SUPER_ADMIN_TENANT_ID = 'super_admin';
 
@@ -30,24 +28,12 @@ interface TrashFilterState {
   trashedOnly: boolean;
 }
 
-interface TransferState {
-  clientId: number | null;
-  ownerId: number | null;
-  open: boolean;
-  loading: boolean;
-}
-
 function normalizeNumeric(value: string | number | null | undefined): number | undefined {
   if (value === null || value === undefined || value === '') {
     return undefined;
   }
   const numeric = typeof value === 'number' ? value : Number(value);
   return Number.isFinite(numeric) ? numeric : undefined;
-}
-
-function toNullableNumber(value: string | number | null | undefined): number | null {
-  const numeric = normalizeNumeric(value);
-  return numeric === undefined ? null : numeric;
 }
 
 function normalizeTenantId(value: string | number | null | undefined): number | undefined {
@@ -71,7 +57,6 @@ export const useClientsStore = defineStore('clients', {
     sort: 'name' as ClientListParams['sort'],
     direction: 'asc' as ClientListParams['dir'],
     filters: {
-      ownerId: null as number | null,
       tenantId: null as string | number | null,
     },
     archiveFilter: {
@@ -82,18 +67,7 @@ export const useClientsStore = defineStore('clients', {
       includeTrashed: false,
       trashedOnly: false,
     } as TrashFilterState,
-    transfer: {
-      clientId: null,
-      ownerId: null,
-      open: false,
-      loading: false,
-    } as TransferState,
   }),
-  getters: {
-    hasActiveTransfer(state): boolean {
-      return state.transfer.open && state.transfer.clientId !== null;
-    },
-  },
   actions: {
     setPage(page: number) {
       this.pagination.page = Math.max(1, page || 1);
@@ -107,14 +81,6 @@ export const useClientsStore = defineStore('clients', {
     setSort(sort: NonNullable<ClientListParams['sort']>, dir: NonNullable<ClientListParams['dir']> = this.direction) {
       this.sort = sort;
       this.direction = dir;
-    },
-    setOwnerFilter(ownerId: number | string | null) {
-      const auth = useAuthStore();
-      if ((auth.user as any)?.type === 'client') {
-        this.filters.ownerId = toNullableNumber((auth.user as any)?.id);
-        return;
-      }
-      this.filters.ownerId = toNullableNumber(ownerId);
     },
     setTenantFilter(tenantId: string | number | null) {
       const auth = useAuthStore();
@@ -151,20 +117,6 @@ export const useClientsStore = defineStore('clients', {
           this.trashFilter.includeTrashed = true;
         }
       }
-    },
-    openTransfer(clientId: number, ownerId: number | null = null) {
-      this.transfer.clientId = clientId;
-      this.transfer.ownerId = ownerId;
-      this.transfer.open = true;
-    },
-    closeTransfer() {
-      this.transfer.clientId = null;
-      this.transfer.ownerId = null;
-      this.transfer.open = false;
-      this.transfer.loading = false;
-    },
-    setTransferOwner(ownerId: number | null) {
-      this.transfer.ownerId = ownerId;
     },
     resolveArchivedParam(): ClientListParams['archived'] {
       if (this.archiveFilter.archivedOnly) {
@@ -207,16 +159,6 @@ export const useClientsStore = defineStore('clients', {
       const tenantId = normalizeTenantId(tenantCandidate);
       if (tenantId !== undefined) {
         params.tenant_id = tenantId;
-      }
-
-      const ownerCandidate =
-        overrides.owner_id ??
-        ((auth.user as any)?.type === 'client'
-          ? (auth.user as any)?.id
-          : this.filters.ownerId ?? undefined);
-      const ownerId = normalizeNumeric(ownerCandidate);
-      if (ownerId !== undefined) {
-        params.owner_id = ownerId;
       }
 
       const archivedParam = overrides.archived ?? this.resolveArchivedParam();
@@ -271,12 +213,6 @@ export const useClientsStore = defineStore('clients', {
         data.tenant_id = normalized === undefined ? null : normalized;
       }
 
-      if ((auth.user as any)?.type === 'client') {
-        data.owner_id = toNullableNumber((auth.user as any)?.id);
-      } else if (data.owner_id !== undefined) {
-        data.owner_id = toNullableNumber(data.owner_id);
-      }
-
       return data;
     },
     coerceUpdatePayload(payload: UpdateClientPayload): UpdateClientPayload {
@@ -288,12 +224,6 @@ export const useClientsStore = defineStore('clients', {
       } else if (data.tenant_id !== undefined) {
         const normalizedTenant = normalizeTenantId(data.tenant_id);
         data.tenant_id = normalizedTenant === undefined ? null : normalizedTenant;
-      }
-
-      if ((auth.user as any)?.type === 'client') {
-        data.owner_id = toNullableNumber((auth.user as any)?.id);
-      } else if (data.owner_id !== undefined) {
-        data.owner_id = toNullableNumber(data.owner_id);
       }
 
       return data;
@@ -351,28 +281,6 @@ export const useClientsStore = defineStore('clients', {
       const { data } = await clientsApi.unarchive(id);
       this.upsertClientInState(data);
       return data;
-    },
-    async transferClient(clientId: number | string, ownerId: number | null) {
-      const payload: TransferClientPayload = { owner_id: toNullableNumber(ownerId) };
-      const { data } = await clientsApi.transfer(clientId, payload);
-      this.upsertClientInState(data);
-      return data;
-    },
-    async submitTransfer(ownerId: number | null = null) {
-      if (this.transfer.clientId === null) {
-        throw new Error(i18n.global.t('clients.transfer.errors.noClient'));
-      }
-      const targetOwner = ownerId ?? this.transfer.ownerId ?? null;
-      this.transfer.loading = true;
-      try {
-        const client = await this.transferClient(this.transfer.clientId, targetOwner);
-        this.transfer.ownerId = client.owner?.id ?? null;
-        this.transfer.open = false;
-        this.transfer.clientId = null;
-        return client;
-      } finally {
-        this.transfer.loading = false;
-      }
     },
   },
 });
