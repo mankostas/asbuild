@@ -194,7 +194,7 @@ export const useClientsStore = defineStore('clients', {
       const params: ClientListParams = {
         page,
         per_page: perPage,
-        search: overrides.search ?? this.search || undefined,
+        search: overrides.search ?? (this.search || undefined),
         sort: overrides.sort ?? this.sort,
         dir: overrides.dir ?? this.direction,
       };
