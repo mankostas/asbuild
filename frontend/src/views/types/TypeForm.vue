@@ -68,8 +68,12 @@
       <TypeMetaBar
         v-model:name="name"
         v-model:tenant-id="tenantId"
+        v-model:client-id="clientId"
         v-model:require-subtasks-complete="requireSubtasksComplete"
         :show-tenant-select="auth.isSuperAdmin"
+        :client-options="clientOptions"
+        :loading-clients="clientsLoading"
+        :tenant-name="selectedTenantName"
         class="border-b mb-4"
       />
       <template v-if="tenantId || !isCreate">
@@ -459,6 +463,9 @@ interface Permission {
 
 const name = ref('');
 const tenantId = ref<number | ''>('');
+const clientId = ref<number | ''>('');
+const clientsLoading = ref(false);
+const clientOptions = ref<{ value: number; label: string }[]>([]);
 const requireSubtasksComplete = ref(false);
 const tenantFeatures = computed(() => {
   const tenant = tenantStore.tenants.find(
@@ -471,6 +478,19 @@ const tenantFeatureAbilities = computed(() => {
     String(tenantId.value) || '',
   );
   return Object.keys(abilities).length ? abilities : undefined;
+});
+const selectedTenantName = computed(() => {
+  if (!tenantId.value) {
+    return t('types.form.global');
+  }
+  const tenant = tenantStore.tenants.find(
+    (t: any) => String(t.id) === String(tenantId.value),
+  );
+  if (tenant?.name) {
+    return tenant.name;
+  }
+  const userTenant = (auth.user as any)?.tenant?.name || (auth.user as any)?.tenant_name;
+  return userTenant || '';
 });
 const transitionsEditor = ref<any>(null);
 const automationsEditor = ref<any>(null);
@@ -582,6 +602,64 @@ const viewportClass = computed(() => {
   }
 });
 
+async function refreshClientsForTenant(
+  id: number | '',
+  { resetSelection = false }: { resetSelection?: boolean } = {},
+) {
+  if (!canAccess.value) {
+    return;
+  }
+  if (!id) {
+    clientOptions.value = [];
+    if (resetSelection) {
+      clientId.value = '';
+    }
+    return;
+  }
+  clientsLoading.value = true;
+  try {
+    const { data } = await api.get('/clients', {
+      params: { tenant_id: id, per_page: 100, sort: 'name', dir: 'asc' },
+    });
+    const payload = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
+    clientOptions.value = (payload as any[])
+      .filter((item) => item && item.id !== undefined)
+      .map((client: any) => ({
+        value: Number(client.id),
+        label: client.name || `#${client.id}`,
+      }));
+
+    const numericClientId = clientId.value === '' ? null : Number(clientId.value);
+    if (numericClientId !== null) {
+      const exists = clientOptions.value.some((option) => option.value === numericClientId);
+      if (!exists) {
+        if (resetSelection) {
+          clientId.value = '';
+        } else {
+          const fallbackName =
+            (currentVersion.value?.client?.id === numericClientId
+              ? currentVersion.value?.client?.name
+              : undefined) ||
+            (payload as any[]).find(
+              (client: any) => Number(client?.id) === numericClientId,
+            )?.name ||
+            `#${numericClientId}`;
+          clientOptions.value.push({ value: numericClientId, label: fallbackName });
+        }
+      }
+    } else if (resetSelection) {
+      clientId.value = '';
+    }
+  } catch (_error) {
+    clientOptions.value = [];
+    if (resetSelection) {
+      clientId.value = '';
+    }
+  } finally {
+    clientsLoading.value = false;
+  }
+}
+
 async function refreshTenant(id: number | '', oldId?: number | '') {
   if (!canAccess.value) return;
   const normalized = id ? String(id) : '';
@@ -592,7 +670,9 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
   if (tenantStore.tenantId !== normalized) {
     tenantStore.setTenant(normalized);
   }
-  if (oldId !== undefined && id !== oldId) {
+  const tenantChanged = oldId !== undefined && id !== oldId;
+
+  if (tenantChanged) {
     sections.value.forEach((s) =>
       sectionAllFields(s).forEach((f) => {
         f.roles.view = ['super_admin'];
@@ -615,6 +695,8 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
       statusFlow.value = [];
     }
   }
+  await refreshClientsForTenant(id, { resetSelection: tenantChanged });
+
   if (id) {
     if (canViewRoles.value) {
       try {
@@ -706,19 +788,25 @@ onMounted(async () => {
 
     if (isEdit.value && typeRes) {
       const typeData = typeRes.data.data ?? typeRes.data;
+      currentVersion.value = typeData;
       name.value = typeData.name || '';
       tenantId.value =
         typeData.tenant_id !== null && typeData.tenant_id !== undefined
           ? Number(typeData.tenant_id)
           : '';
+      clientId.value =
+        typeData.client_id !== null && typeData.client_id !== undefined
+          ? Number(typeData.client_id)
+          : '';
       requireSubtasksComplete.value = !!typeData.require_subtasks_complete;
       await refreshTenant(tenantId.value);
-      currentVersion.value = typeData;
       loadVersion(typeData);
     } else if (!auth.isSuperAdmin) {
       await refreshTenant(tenantId.value);
       tenantStore.setTenant(String(tenantId.value));
     } else {
+      clientId.value = '';
+      clientOptions.value = [];
       tenantStore.setTenant('');
     }
   } catch (err) {
@@ -1030,6 +1118,7 @@ async function onSubmit() {
   const payload = {
     name: name.value,
     tenant_id: tenantId.value || undefined,
+    client_id: clientId.value || undefined,
     require_subtasks_complete: requireSubtasksComplete.value,
     schema_json: JSON.stringify({
       sections: sections.value.map((s) => {
