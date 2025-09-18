@@ -161,6 +161,38 @@
             {{ t('clients.table.empty') }}
           </div>
         </template>
+
+        <template #pagination-bottom="pagerProps">
+          <div
+            class="border-t border-slate-100 px-3 py-4 dark:border-slate-700"
+          >
+            <div
+              class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+            >
+              <label
+                class="flex items-center gap-2 text-sm text-slate-500"
+                for="clients-table-per-page"
+              >
+                <span>{{ t('clients.table.perPage') }}</span>
+                <Select
+                  id="clients-table-per-page"
+                  :modelValue="currentPerPage"
+                  :options="perPageSelectOptions"
+                  classInput="!h-9 w-24"
+                  @update:model-value="(value) => onPerPageSelect(Number(value), pagerProps)"
+                />
+              </label>
+              <Pagination
+                :total="total"
+                :current="currentPage"
+                :per-page="currentPerPage"
+                :pageRange="pageRange"
+                :pageChanged="pagerProps.pageChanged"
+                :perPageChanged="pagerProps.perPageChanged"
+              />
+            </div>
+          </div>
+        </template>
       </VueGoodTable>
     </div>
   </Card>
@@ -178,6 +210,8 @@ import Badge from '@/components/ui/Badge';
 import Breadcrumbs from '@/Layout/Breadcrumbs.vue';
 import { useI18n } from 'vue-i18n';
 import { can } from '@/stores/auth';
+import Pagination from '@/components/ui/Pagination';
+import Select from '@/components/ui/Select';
 
 interface ClientTableRow {
   id: number | string;
@@ -222,6 +256,8 @@ const selectedIds = ref<Array<number | string>>([]);
 const rows = computed(() => props.rows);
 const total = computed(() => props.total);
 const loading = computed(() => props.loading ?? false);
+const currentPage = computed(() => props.page);
+const currentPerPage = computed(() => props.perPage);
 
 const tableKey = computed(
   () =>
@@ -254,6 +290,11 @@ const columns = computed(() => {
 });
 
 const perPageOptions = [10, 20, 50, 100];
+const pageRange = 5;
+
+const perPageSelectOptions = computed(() =>
+  perPageOptions.map((option) => ({ value: option, label: String(option) })),
+);
 
 const paginationOptions = computed(() => ({
   enabled: true,
@@ -266,6 +307,7 @@ const paginationOptions = computed(() => ({
   pageLabel: t('clients.table.page'),
   totalLabel: t('clients.table.total'),
   perPageDropdown: perPageOptions,
+  perPageDropdownEnabled: false,
   dropdownAllowAll: false,
   setCurrentPage: props.page,
 }));
@@ -311,8 +353,28 @@ function onPageChange({ currentPage }: { currentPage: number }) {
   emit('update:page', currentPage);
 }
 
-function onPerPageChange({ currentPerPage }: { currentPerPage: number }) {
+function onPerPageChange({
+  currentPerPage,
+  currentPage,
+}: {
+  currentPerPage: number;
+  currentPage?: number;
+}) {
   emit('update:per-page', currentPerPage);
+  if (typeof currentPage === 'number') {
+    emit('update:page', currentPage);
+  }
+}
+
+interface PagerSlotHandlers {
+  perPageChanged?: (payload: { currentPerPage: number }) => void;
+}
+
+function onPerPageSelect(value: number, pagerProps: PagerSlotHandlers) {
+  if (!Number.isFinite(value) || value <= 0 || value === props.perPage) {
+    return;
+  }
+  pagerProps.perPageChanged?.({ currentPerPage: value });
 }
 
 function onSortChange(params: Array<{ field: string; type: 'asc' | 'desc' }>) {
