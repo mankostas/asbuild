@@ -112,12 +112,23 @@ interface Role {
 
 interface Permission {
   read: boolean;
+  clientRead: boolean;
   edit: boolean;
+  clientEdit: boolean;
   delete: boolean;
   export: boolean;
   assign: boolean;
   transition: boolean;
 }
+
+type PermissionKey = keyof Permission;
+
+const PERMISSION_KEY_ALIASES: Record<string, PermissionKey> = {
+  client_view: 'clientRead',
+  client_read: 'clientRead',
+  client_edit: 'clientEdit',
+  client_update: 'clientEdit',
+};
 
 const props = defineProps<{
   modelValue: Record<string, Permission>;
@@ -130,12 +141,31 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
 
+const emptyPermission = (): Permission => ({
+  read: false,
+  clientRead: false,
+  edit: false,
+  clientEdit: false,
+  delete: false,
+  export: false,
+  assign: false,
+  transition: false,
+});
+
+const normalizePermission = (value: Partial<Record<string, unknown>> | undefined): Permission => {
+  const normalized = emptyPermission();
+  Object.entries(value ?? {}).forEach(([key, raw]) => {
+    const mappedKey = (PERMISSION_KEY_ALIASES[key] ?? key) as PermissionKey;
+    if (mappedKey in normalized) {
+      (normalized as any)[mappedKey] = !!raw;
+    }
+  });
+  return normalized;
+};
+
 const localPermissions = reactive<Record<string, Permission>>(
   Object.fromEntries(
-    Object.entries(props.modelValue).map(([k, v]) => [
-      k,
-      { transition: false, ...v } as Permission,
-    ]),
+    Object.entries(props.modelValue).map(([k, v]) => [k, normalizePermission(v)]),
   ),
 );
 
@@ -150,16 +180,9 @@ watch(
     });
     roles.forEach((r) => {
       if (!localPermissions[r.slug]) {
-        localPermissions[r.slug] = {
-          read: false,
-          edit: false,
-          delete: false,
-          export: false,
-          assign: false,
-          transition: false,
-        };
-      } else if (localPermissions[r.slug].transition === undefined) {
-        localPermissions[r.slug].transition = false;
+        localPermissions[r.slug] = emptyPermission();
+      } else {
+        localPermissions[r.slug] = normalizePermission(localPermissions[r.slug]);
       }
     });
   },
@@ -177,14 +200,7 @@ watch(
     // normalize incoming values to booleans
     Object.entries(val).forEach(([k, v]) => {
       const perms = v as Record<keyof Permission, any>;
-      localPermissions[k] = {
-        read: !!perms.read,
-        edit: !!perms.edit,
-        delete: !!perms.delete,
-        export: !!perms.export,
-        assign: !!perms.assign,
-        transition: !!perms.transition,
-      };
+      localPermissions[k] = normalizePermission(perms as Permission);
     });
     nextTick(() => {
       updatingFromParent = false;
@@ -207,7 +223,9 @@ type AbilityListItem = { key: AbilityKey; label: string };
 
 const baseAbilityList: AbilityListItem[] = [
   { key: 'read', label: t('abilities.read') },
+  { key: 'clientRead', label: t('abilities.clientRead') },
   { key: 'edit', label: t('abilities.edit') },
+  { key: 'clientEdit', label: t('abilities.clientEdit') },
   { key: 'delete', label: t('abilities.delete') },
   { key: 'export', label: t('abilities.export') },
   { key: 'assign', label: t('abilities.assign') },
@@ -216,7 +234,9 @@ const baseAbilityList: AbilityListItem[] = [
 
 const abilityMap: Record<AbilityKey, string[]> = {
   read: ['tasks.view'],
+  clientRead: ['tasks.client.view'],
   edit: ['tasks.update'],
+  clientEdit: ['tasks.client.update'],
   delete: ['tasks.delete'],
   export: ['tasks.export'],
   assign: ['tasks.assign'],

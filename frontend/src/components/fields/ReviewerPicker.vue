@@ -16,6 +16,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import Tabs from '@/components/ui/Tabs.vue';
 import { useLookupsStore } from '@/stores/lookups';
+import { useAuthStore } from '@/stores/auth';
 
 interface ReviewerValue {
   kind: 'team' | 'employee';
@@ -30,6 +31,7 @@ const props = defineProps<{
 const emit = defineEmits<{ (e: 'update:modelValue', value: ReviewerValue | null): void }>();
 
 const lookups = useLookupsStore();
+const auth = useAuthStore();
 const tab = ref<'teams' | 'employees'>('teams');
 const selected = ref<any>(null);
 
@@ -42,7 +44,7 @@ const options = computed(() => lookups.assignees[tab.value]);
 
 onMounted(async () => {
   if (!lookups.assignees.teams.length && !lookups.assignees.employees.length) {
-    await lookups.fetchAssignees('all');
+    await lookups.fetchAssignees('all', false, auth.allowedClientParams());
   }
   if (props.modelValue) {
     tab.value = props.modelValue.kind === 'team' ? 'teams' : 'employees';

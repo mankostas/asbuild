@@ -17,6 +17,7 @@ export const useLookupsStore = defineStore('lookups', {
     async fetchAssignees(
       type: 'all' | 'teams' | 'employees' = 'all',
       force = false,
+      extraParams: Record<string, any> = {},
     ) {
       const ttl = 5 * 60 * 1000; // 5 minutes
       const now = Date.now();
@@ -32,7 +33,8 @@ export const useLookupsStore = defineStore('lookups', {
         return this.assignees[type];
       }
 
-      const { data } = await api.get('/lookups/assignees', { params: withListParams({ type }) });
+      const params = withListParams({ type, ...extraParams });
+      const { data } = await api.get('/lookups/assignees', { params });
 
       if (type === 'all') {
         this.assignees.teams = data.filter((a: any) => a.kind === 'team');

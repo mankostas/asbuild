@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto max-w-7xl space-y-8 p-6">
+  <div v-if="canViewReports" class="mx-auto max-w-7xl space-y-8 p-6">
     <div class="flex justify-end mb-4">
       <div class="flex flex-wrap items-end gap-2">
         <Dropdown>
@@ -109,6 +109,7 @@ import KpiCards from '@/components/reports/KpiCards.vue';
 import ChartCard from '@/components/reports/ChartCard.vue';
 import FlatPickr from 'vue-flatpickr-component';
 import 'flatpickr/dist/flatpickr.css';
+import { useAuthStore } from '@/stores/auth';
 
 interface KpiResponse {
   completed: number;
@@ -154,6 +155,10 @@ const rangeOptions = [
 const rangeLabel = computed(
   () => rangeOptions.find((o) => o.value === range.value)?.label || '',
 );
+const auth = useAuthStore();
+const canViewReports = computed(() =>
+  auth.hasAny(['reports.view', 'reports.client.view']),
+);
 
 function selectRange(val: string) {
   range.value = val;
@@ -170,9 +175,9 @@ function params() {
     dateRange.value.length === 2
   ) {
     const [from, to] = dateRange.value as Date[];
-    return { from: formatDate(from), to: formatDate(to) };
+    return auth.allowedClientParams({ from: formatDate(from), to: formatDate(to) });
   }
-  return { range: range.value };
+  return auth.allowedClientParams({ range: range.value });
 }
 
 function applyRange() {
@@ -186,6 +191,9 @@ const kpiCards = ref<KpiCard[]>([]);
 const chartSeries = ref<Series[]>([]);
 
 async function fetchKpis() {
+  if (!canViewReports.value) {
+    return;
+  }
   kpisLoading.value = true;
   kpisError.value = false;
   try {
@@ -229,6 +237,9 @@ const materialsError = ref(false);
 const materials = ref<Material[]>([]);
 
 async function fetchMaterials() {
+  if (!canViewReports.value) {
+    return;
+  }
   materialsLoading.value = true;
   materialsError.value = false;
   try {
@@ -247,6 +258,9 @@ async function fetchMaterials() {
 }
 
 async function exportCsv() {
+  if (!canViewReports.value) {
+    return;
+  }
   const response = await api.get('/reports/export', {
     params: params(),
     responseType: 'blob',
@@ -261,7 +275,9 @@ async function exportCsv() {
 }
 
 onMounted(() => {
-  fetchKpis();
-  fetchMaterials();
+  if (canViewReports.value) {
+    fetchKpis();
+    fetchMaterials();
+  }
 });
 </script>

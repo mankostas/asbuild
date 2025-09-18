@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto max-w-7xl space-y-8 p-6">
+  <div v-if="canViewReports" class="mx-auto max-w-7xl space-y-8 p-6">
     <div class="flex justify-end mb-4">
       <div class="flex flex-wrap items-end gap-2">
         <Select v-model="range" label="Range" class="w-40" aria-label="Range">
@@ -44,12 +44,17 @@ import Textinput from '@/components/ui/Textinput/index.vue';
 import Select from '@/components/ui/Select/index.vue';
 import KpiCards from '@/components/reports/KpiCards.vue';
 import ChartCard from '@/components/reports/ChartCard.vue';
+import { useAuthStore } from '@/stores/auth';
 
 const range = ref('today');
 const from = ref('');
 const to = ref('');
 const kpis = ref([] as any);
 const materials = ref([] as any);
+const auth = useAuthStore();
+const canViewReports = computed(() =>
+  auth.hasAny(['reports.view', 'reports.client.view']),
+);
 const materialSeries = computed(() => [
   {
     label: 'Materials',
@@ -59,12 +64,15 @@ const materialSeries = computed(() => [
 
 function params() {
   if (range.value === 'custom') {
-    return { from: from.value, to: to.value };
+    return auth.allowedClientParams({ from: from.value, to: to.value });
   }
-  return { range: range.value };
+  return auth.allowedClientParams({ range: range.value });
 }
 
 async function fetchData() {
+  if (!canViewReports.value) {
+    return;
+  }
   const { data } = await api.get('/reports/kpis', { params: params() });
   kpis.value = [
     { label: 'Completed', value: data.completed },
@@ -80,6 +88,9 @@ async function fetchData() {
 }
 
 async function exportCsv() {
+  if (!canViewReports.value) {
+    return;
+  }
   const response = await api.get('/reports/export', {
     params: params(),
     responseType: 'blob',
@@ -93,5 +104,9 @@ async function exportCsv() {
   document.body.removeChild(link);
 }
 
-onMounted(fetchData);
+onMounted(() => {
+  if (canViewReports.value) {
+    void fetchData();
+  }
+});
 </script>

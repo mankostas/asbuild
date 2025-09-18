@@ -169,7 +169,9 @@
   "abilities": {
     "title": "Abilities",
     "read": "Read",
+    "clientRead": "Client view",
     "edit": "Edit",
+    "clientEdit": "Client edit",
     "delete": "Delete",
     "export": "Export",
     "assign": "Assign",
@@ -179,7 +181,9 @@
   "permissions": {
     "tooltip": {
       "read": "Allow viewing tasks of this type",
+      "clientRead": "Allow client-assigned users to view tasks of this type",
       "edit": "Allow editing tasks of this type",
+      "clientEdit": "Allow client-assigned users to edit tasks of this type",
       "delete": "Allow deleting tasks of this type",
       "export": "Allow exporting tasks of this type",
       "assign": "Allow assigning tasks of this type",

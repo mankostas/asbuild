@@ -328,12 +328,14 @@ async function loadOptions(force = false) {
     taskTypeOptions.value = [];
     return;
   }
-  await lookups.fetchAssignees('employees', force);
+  await lookups.fetchAssignees('employees', force, auth.allowedClientParams());
   assigneeOptions.value = lookups.assignees.employees.map((a: any) => ({
     value: String(a.id),
     label: a.name,
   }));
-  const { data } = await api.get('/task-types/options');
+  const { data } = await api.get('/task-types/options', {
+    params: auth.allowedClientParams(),
+  });
   taskTypeOptions.value = data.map((t: any) => ({ value: String(t.id), label: t.name }));
 }
 

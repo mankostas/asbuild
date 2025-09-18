@@ -21,7 +21,9 @@ import { useFeaturesStore } from '@/stores/features';
 
 interface Abilities {
   read: boolean;
+  clientRead: boolean;
   edit: boolean;
+  clientEdit: boolean;
   delete: boolean;
   export: boolean;
   assign: boolean;
@@ -32,11 +34,22 @@ const props = defineProps<{ modelValue: Abilities; features: string[] }>();
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
 
-const localAbilities = reactive({ ...props.modelValue });
+const localAbilities = reactive({
+  read: !!props.modelValue.read,
+  clientRead: !!props.modelValue.clientRead,
+  edit: !!props.modelValue.edit,
+  clientEdit: !!props.modelValue.clientEdit,
+  delete: !!props.modelValue.delete,
+  export: !!props.modelValue.export,
+  assign: !!props.modelValue.assign,
+  transition: !!props.modelValue.transition,
+});
 
 const baseAbilityLabels: Record<keyof Abilities, string> = {
   read: t('abilities.read'),
+  clientRead: t('abilities.clientRead'),
   edit: t('abilities.edit'),
+  clientEdit: t('abilities.clientEdit'),
   delete: t('abilities.delete'),
   export: t('abilities.export'),
   assign: t('abilities.assign'),
@@ -45,7 +58,9 @@ const baseAbilityLabels: Record<keyof Abilities, string> = {
 
 const abilityMap: Record<keyof Abilities, string[]> = {
   read: ['tasks.view'],
+  clientRead: ['tasks.client.view'],
   edit: ['tasks.update'],
+  clientEdit: ['tasks.client.update'],
   delete: ['tasks.delete'],
   export: ['tasks.export'],
   assign: ['tasks.assign'],
@@ -94,7 +109,7 @@ watch(
       }
     });
     keys.forEach((k) => {
-      (localAbilities as any)[k] = props.modelValue[k];
+      (localAbilities as any)[k] = !!props.modelValue[k];
     });
   },
   { immediate: true },

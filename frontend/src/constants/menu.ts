@@ -428,6 +428,8 @@ interface QuickActionBlueprint {
   label: string;
   icon: string;
   link: string;
+  requiredAbilities?: string[];
+  requireAllAbilities?: boolean;
 }
 
 const quickActionBlueprints: readonly QuickActionBlueprint[] = [
@@ -435,6 +437,7 @@ const quickActionBlueprints: readonly QuickActionBlueprint[] = [
     label: 'Task',
     icon: 'heroicons-outline:calendar',
     link: 'tasks.create',
+    requiredAbilities: ['tasks.create', 'tasks.client.create'],
   },
   {
     label: 'Task Type',
@@ -471,10 +474,26 @@ const quickActionBlueprints: readonly QuickActionBlueprint[] = [
 const addNewOptionsState = reactive<QuickAction[]>([]);
 
 function rebuildQuickActions(): void {
-  const actions = quickActionBlueprints.map((action) => ({
-    ...action,
-    ...accessForRoute(action.link),
-  }));
+  const actions = quickActionBlueprints.map((blueprint) => {
+    const access = accessForRoute(blueprint.link);
+    const abilitySet = new Set<string>([
+      ...(access.requiredAbilities ?? []),
+      ...(blueprint.requiredAbilities ?? []),
+    ]);
+
+    const action: QuickAction = {
+      ...blueprint,
+      ...access,
+    };
+
+    if (abilitySet.size) {
+      action.requiredAbilities = Array.from(abilitySet);
+      action.requireAllAbilities =
+        blueprint.requireAllAbilities ?? access.requireAllAbilities ?? false;
+    }
+
+    return action;
+  });
   addNewOptionsState.splice(0, addNewOptionsState.length, ...actions);
 }
 

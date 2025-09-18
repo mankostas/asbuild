@@ -18,6 +18,7 @@ import vSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
 import VueSelect from '@/components/ui/Select/VueSelect.vue';
 import { useLookupsStore } from '@/stores/lookups';
+import { useAuthStore } from '@/stores/auth';
 
 interface AssigneeValue {
   id: number;
@@ -31,13 +32,14 @@ const props = defineProps<{
 const emit = defineEmits<{ (e: 'update:modelValue', value: AssigneeValue | null): void }>();
 
 const lookups = useLookupsStore();
+const auth = useAuthStore();
 const selected = ref<any>(null);
 
 const options = computed(() => lookups.assignees.employees);
 
 onMounted(async () => {
   if (!lookups.assignees.employees.length) {
-    await lookups.fetchAssignees('all');
+    await lookups.fetchAssignees('all', false, auth.allowedClientParams());
   }
   if (props.modelValue) {
     const list = lookups.assignees.employees;

@@ -210,7 +210,7 @@ const auth = useAuthStore();
 const router = useRouter();
 const tenantStore = useTenantStore();
 
-const canViewBoard = computed(() => auth.can('tasks.view'));
+const canViewBoard = computed(() => auth.hasAny(['tasks.view', 'tasks.client.view']));
 const canMoveTasks = computed(() => auth.hasAny(['tasks.update', 'tasks.manage']));
 const canTaskTypes = computed(() => can('task_types.view'));
 
@@ -394,7 +394,7 @@ function buildQuery() {
   params.sort = prefs.sorting.key;
   params.sort_dir = prefs.sorting.dir;
   params.include = 'client';
-  return params;
+  return auth.allowedClientParams(params);
 }
 
 async function load() {

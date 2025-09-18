@@ -16,6 +16,62 @@ if (initialAccess) {
   api.defaults.headers.common['Authorization'] = `Bearer ${initialAccess}`;
 }
 
+const CLIENT_SEGMENT = 'client';
+
+function expandAbilityVariants(ability: string): string[] {
+  if (!ability || !ability.includes('.')) {
+    return [ability];
+  }
+
+  const parts = ability.split('.');
+  const feature = parts[0];
+  const rest = parts.slice(1);
+  if (!feature || rest.length === 0) {
+    return [ability];
+  }
+
+  const variants = new Set<string>([ability]);
+
+  if (rest[0] === CLIENT_SEGMENT) {
+    const suffix = rest.slice(1).join('.');
+    if (suffix) {
+      variants.add(`${feature}.${suffix}`);
+    }
+  } else {
+    const suffix = rest.join('.');
+    variants.add(`${feature}.${CLIENT_SEGMENT}.${suffix}`);
+  }
+
+  variants.add(`${feature}.manage`);
+  variants.add(`${feature}.${CLIENT_SEGMENT}.manage`);
+
+  return Array.from(variants);
+}
+
+function abilitySatisfied(
+  ability: string,
+  abilities: string[],
+  clientAbilities: string[],
+): boolean {
+  return expandAbilityVariants(ability).some(
+    (candidate) => abilities.includes(candidate) || clientAbilities.includes(candidate),
+  );
+}
+
+function toClientAbility(ability: string): string {
+  if (!ability.includes('.')) {
+    return ability;
+  }
+  const parts = ability.split('.');
+  if (parts.length < 2) {
+    return ability;
+  }
+  if (parts[1] === CLIENT_SEGMENT) {
+    return ability;
+  }
+  return [parts[0], CLIENT_SEGMENT, ...parts.slice(1)].join('.');
+}
+
 interface LoginPayload {
   email: string;
   password: string;
@@ -29,7 +85,9 @@ export const useAuthStore = defineStore('auth', {
     impersonatedTenant: localStorage.getItem('impersonatingTenant') || '',
     impersonator: JSON.parse(localStorage.getItem('impersonator') || 'null') as any,
     abilities: [] as string[],
+    clientAbilities: [] as string[],
     features: [] as string[],
+    permittedClientIds: [] as Array<string | number>,
   }),
   getters: {
     isAuthenticated: (state) => !!state.accessToken,
@@ -44,11 +102,7 @@ export const useAuthStore = defineStore('auth', {
         if (this.isSuperAdmin) {
           return true;
         }
-        if (state.abilities.includes(ability)) {
-          return true;
-        }
-        const prefix = ability.split('.')[0];
-        return prefix ? state.abilities.includes(`${prefix}.manage`) : false;
+        return abilitySatisfied(ability, state.abilities, state.clientAbilities);
       };
     },
     hasAny(state) {
@@ -56,13 +110,9 @@ export const useAuthStore = defineStore('auth', {
         if (abilities.length === 0 || this.isSuperAdmin) {
           return true;
         }
-        return abilities.some((ability) => {
-          if (state.abilities.includes(ability)) {
-            return true;
-          }
-          const prefix = ability.split('.')[0];
-          return prefix ? state.abilities.includes(`${prefix}.manage`) : false;
-        });
+        return abilities.some((ability) =>
+          abilitySatisfied(ability, state.abilities, state.clientAbilities),
+        );
       };
     },
     hasAll(state) {
@@ -70,16 +120,32 @@ export const useAuthStore = defineStore('auth', {
         if (abilities.length === 0 || this.isSuperAdmin) {
           return true;
         }
-        return abilities.every((ability) => {
-          if (state.abilities.includes(ability)) {
-            return true;
-          }
-          const prefix = ability.split('.')[0];
-          return prefix ? state.abilities.includes(`${prefix}.manage`) : false;
-        });
+        return abilities.every((ability) =>
+          abilitySatisfied(ability, state.abilities, state.clientAbilities),
+        );
+      };
+    },
+    canClient(state) {
+      return (ability: string) => {
+        if (this.isSuperAdmin) {
+          return true;
+        }
+        return abilitySatisfied(toClientAbility(ability), state.abilities, state.clientAbilities);
       };
     },
     userId: (state) => state.user?.id,
+    permittedClientIds: (state) => state.permittedClientIds,
+    allowedClientParams(state) {
+      return <T extends Record<string, any>>(params: T = {} as T) => {
+        if (!state.permittedClientIds?.length) {
+          return { ...params };
+        }
+        return {
+          ...params,
+          client_ids: [...state.permittedClientIds],
+        } as T & { client_ids: Array<string | number> };
+      };
+    },
   },
   actions: {
     async login(payload: LoginPayload) {
@@ -98,7 +164,11 @@ export const useAuthStore = defineStore('auth', {
       const { data } = await api.get('/me');
       this.user = data.user;
       this.abilities = data.abilities || [];
+      this.clientAbilities = data.client_abilities || [];
       this.features = data.features || [];
+      this.permittedClientIds = Array.isArray(data.permitted_client_ids)
+        ? data.permitted_client_ids
+        : [];
       const tenantStore = useTenantStore();
       const tenantId = data.user?.tenant_id || '';
       tenantStore.setTenant(this.isSuperAdmin ? '' : tenantId);
@@ -116,6 +186,8 @@ export const useAuthStore = defineStore('auth', {
       this.refreshToken = '';
       this.user = null;
       this.abilities = [];
+      this.clientAbilities = [];
+      this.permittedClientIds = [];
       clearTokens();
       delete api.defaults.headers.common['Authorization'];
       this.impersonatedTenant = '';
@@ -211,6 +283,14 @@ export function hasFeature(feature: string): boolean {
 
 export function userId(): string | number | undefined {
   return useAuthStore().userId;
+}
+
+export function canClient(ability: string): boolean {
+  return useAuthStore().canClient(ability);
+}
+
+export function allowedClientParams<T extends Record<string, any>>(params?: T) {
+  return useAuthStore().allowedClientParams(params ?? ({} as T));
 }
 
 registerAuthStore(() => useAuthStore());
