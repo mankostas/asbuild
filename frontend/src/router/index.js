@@ -7,6 +7,8 @@ import { setTokens } from '@/services/authStorage';
 
 const APP_NAME = import.meta.env.VITE_APP_NAME || 'AsBuild';
 
+const EmptyRouterView = { render: () => null };
+
 export const routes = [
   {
     path: '/',
@@ -414,41 +416,55 @@ export const routes = [
       },
       {
         path: 'clients',
-        name: 'clients.list',
-        component: () => import('@/views/clients/ClientsList.vue'),
+        component: () => import('@/views/clients/ClientsIndex.vue'),
         meta: {
           requiresAuth: true,
-          ...accessForRoute('clients.list'),
           breadcrumb: 'routes.clients',
           title: 'Clients',
           layout: 'app',
         },
-      },
-      {
-        path: 'clients/create',
-        name: 'clients.create',
-        component: () => import('@/views/clients/ClientForm.vue'),
-        meta: {
-          requiresAuth: true,
-          ...accessForRoute('clients.create'),
-          breadcrumb: 'routes.clientCreate',
-          title: 'Create Client',
-          layout: 'app',
-          groupParent: 'clients.list',
-        },
-      },
-      {
-        path: 'clients/:id/edit',
-        name: 'clients.edit',
-        component: () => import('@/views/clients/ClientForm.vue'),
-        meta: {
-          requiresAuth: true,
-          ...accessForRoute('clients.edit'),
-          breadcrumb: 'routes.clientEdit',
-          title: 'Edit Client',
-          layout: 'app',
-          groupParent: 'clients.list',
-        },
+        children: [
+          {
+            path: '',
+            name: 'clients.list',
+            component: EmptyRouterView,
+            meta: {
+              requiresAuth: true,
+              ...accessForRoute('clients.list'),
+              breadcrumb: 'routes.clients',
+              title: 'Clients',
+              layout: 'app',
+            },
+          },
+          {
+            path: 'create',
+            name: 'clients.create',
+            component: () => import('@/views/clients/ClientForm.vue'),
+            meta: {
+              requiresAuth: true,
+              ...accessForRoute('clients.create'),
+              breadcrumb: 'routes.clientCreate',
+              title: 'Create Client',
+              layout: 'app',
+              groupParent: 'clients.list',
+              modal: true,
+            },
+          },
+          {
+            path: ':id/edit',
+            name: 'clients.edit',
+            component: () => import('@/views/clients/ClientForm.vue'),
+            meta: {
+              requiresAuth: true,
+              ...accessForRoute('clients.edit'),
+              breadcrumb: 'routes.clientEdit',
+              title: 'Edit Client',
+              layout: 'app',
+              groupParent: 'clients.list',
+              modal: true,
+            },
+          },
+        ],
       },
       {
         path: 'tenants',

@@ -1,9 +1,113 @@
 <template>
-  <div class="p-4">
+  <Modal
+    v-if="isModal"
+    :activeModal="true"
+    :title="modalTitle"
+    sizeClass="max-w-3xl"
+    @close="closeModal"
+  >
+    <p class="text-slate-600 mb-6">
+      {{ t('routes.clients') }}
+    </p>
+
+    <div v-if="canAccess" class="space-y-6">
+      <Alert v-if="loadError" type="danger-light">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <span>{{ loadError }}</span>
+          <Button type="button" btnClass="btn-dark btn-sm" @click="reloadClient">
+            {{ t('actions.retry') }}
+          </Button>
+        </div>
+      </Alert>
+
+      <div v-if="loading" class="grid gap-3">
+        <Skeleton class="h-9 w-2/3" />
+        <Skeleton class="h-9 w-2/3" />
+        <Skeleton class="h-9 w-1/2" />
+        <Skeleton class="h-32 w-full" />
+      </div>
+
+      <form v-else class="grid gap-4" @submit.prevent="submit">
+        <Textinput
+          v-model="form.name"
+          :label="t('clients.form.name')"
+          :placeholder="t('clients.form.name')"
+          :error="errors.name"
+        />
+
+        <Textinput
+          v-model="form.email"
+          type="email"
+          :label="t('clients.form.email')"
+          :placeholder="t('clients.form.email')"
+          :error="errors.email"
+        />
+
+        <Switch
+          v-if="!isEdit"
+          v-model="notifyClient"
+          :label="t('clients.form.notify.label')"
+          :description="t('clients.form.notify.description')"
+          :disabled="notifyDisabled"
+          :error="errors.notify"
+        />
+
+        <Textinput
+          v-model="form.phone"
+          :label="t('clients.form.phone')"
+          :placeholder="t('clients.form.phone')"
+          :error="errors.phone"
+        />
+
+        <Select
+          v-if="showTenantSelect"
+          v-model="form.tenantId"
+          :options="tenantOptions"
+          :placeholder="t('common.select')"
+          :label="t('clients.form.tenant')"
+          :aria-label="t('clients.form.tenant')"
+          :error="errors.tenant"
+        />
+
+        <Textarea
+          v-model="form.notes"
+          :label="t('clients.form.notes')"
+          :placeholder="t('clients.form.notesPlaceholder')"
+          :rows="4"
+          :aria-label="t('clients.form.notes')"
+          :error="errors.notes"
+        />
+
+        <p v-if="serverError" class="text-sm text-danger-500">
+          {{ serverError }}
+        </p>
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex gap-3 sm:ml-auto">
+            <Button
+              type="button"
+              btnClass="btn-outline-secondary"
+              :text="t('actions.cancel')"
+              @click="goBack"
+            />
+            <Button
+              type="submit"
+              btnClass="btn-dark"
+              :text="isEdit ? t('clients.form.submitUpdate') : t('clients.form.submitCreate')"
+              :disabled="saving"
+              :loading="saving"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+  </Modal>
+
+  <div v-else class="p-4">
     <Card class="max-w-3xl mx-auto">
       <template #header>
         <h1 class="text-lg font-semibold">
-          {{ isEdit ? t('routes.clientEdit') : t('routes.clientCreate') }}
+          {{ modalTitle }}
         </h1>
       </template>
       <p class="text-slate-600 mb-6">
@@ -118,6 +222,7 @@ import Card from '@/components/ui/Card/index.vue';
 import Alert from '@/components/ui/Alert/index.vue';
 import Skeleton from '@/components/ui/Skeleton.vue';
 import Switch from '@/components/ui/Switch/index.vue';
+import Modal from '@/components/ui/Modal';
 import { useClientsStore } from '@/stores/clients';
 import { useTenantStore } from '@/stores/tenant';
 import { can, useAuthStore } from '@/stores/auth';
@@ -133,10 +238,14 @@ const notify = useNotify();
 const { t } = useI18n();
 
 const isEdit = computed(() => route.name === 'clients.edit');
+const isModal = computed(() => Boolean(route.meta?.modal));
 const canAccess = computed(() =>
   isEdit.value ? can('clients.manage') : can('clients.create') || can('clients.manage'),
 );
 const isSuperAdmin = computed(() => auth.isSuperAdmin);
+const modalTitle = computed(() =>
+  isEdit.value ? t('routes.clientEdit') : t('routes.clientCreate'),
+);
 
 const form = reactive({
   name: '',
@@ -278,7 +387,7 @@ async function submit() {
       await clientsStore.create(payload);
       notify.success(t('clients.form.success.created'));
     }
-    router.push({ name: 'clients.list' });
+    navigateToList();
   } catch (error: any) {
     const formErrors = extractFormErrors(error);
     if (Object.keys(formErrors).length) {
@@ -291,7 +400,21 @@ async function submit() {
   }
 }
 
+function navigateToList() {
+  if (route.name !== 'clients.list') {
+    router.push({ name: 'clients.list' });
+  }
+}
+
+function closeModal() {
+  navigateToList();
+}
+
 function goBack() {
+  if (isModal.value) {
+    navigateToList();
+    return;
+  }
   router.back();
 }
 
