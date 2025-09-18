@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Client;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 
 class ClientPolicy extends TenantOwnedPolicy
@@ -13,7 +14,7 @@ class ClientPolicy extends TenantOwnedPolicy
         return Gate::allows('clients.view') || Gate::allows('clients.manage');
     }
 
-    public function view(User $user, Client $client): bool
+    public function view(User $user, Model $client): bool
     {
         return $this->viewAny($user) && parent::view($user, $client);
     }
@@ -23,13 +24,13 @@ class ClientPolicy extends TenantOwnedPolicy
         return Gate::allows('clients.create') || Gate::allows('clients.manage');
     }
 
-    public function update(User $user, Client $client): bool
+    public function update(User $user, Model $client): bool
     {
         return (Gate::allows('clients.update') || Gate::allows('clients.manage'))
             && parent::update($user, $client);
     }
 
-    public function delete(User $user, Client $client): bool
+    public function delete(User $user, Model $client): bool
     {
         return (Gate::allows('clients.delete') || Gate::allows('clients.manage'))
             && parent::delete($user, $client);
