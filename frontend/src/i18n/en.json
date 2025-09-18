@@ -31,7 +31,11 @@
     "back": "Back",
     "export": "Export",
     "chooseFile": "Choose File",
-    "view": "View"
+    "view": "View",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "restore": "Restore",
+    "transferOwnership": "Transfer ownership"
   },
   "messages": {
     "helloToast": "Hello from toast"
@@ -483,6 +487,68 @@
     "addClient": "Add Client",
     "form": {
       "search": "Search"
+    },
+    "filters": {
+      "owner": "Owner",
+      "tenant": "Tenant",
+      "sort": {
+        "label": "Sort by"
+      },
+      "includeArchived": "Include archived",
+      "archivedOnly": "Archived only",
+      "includeTrashed": "Include trashed",
+      "trashedOnly": "Trashed only",
+      "allOwners": "All owners"
+    },
+    "sort": {
+      "nameAsc": "Name (A–Z)",
+      "nameDesc": "Name (Z–A)",
+      "newest": "Newest first",
+      "oldest": "Oldest first"
+    },
+    "table": {
+      "loading": "Loading clients…",
+      "empty": "No clients found",
+      "perPage": "Rows per page",
+      "page": "Page",
+      "total": "Total",
+      "rowsSelected": "rows selected",
+      "unknownOwner": "Owner #{id}",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "owner": "Owner",
+        "tenant": "Tenant",
+        "status": "Status"
+      }
+    },
+    "status": {
+      "active": "Active",
+      "archived": "Archived",
+      "trashed": "Trashed"
+    },
+    "transfer": {
+      "title": "Transfer ownership",
+      "description": "Select a new owner for this client.",
+      "ownerLabel": "New owner",
+      "submit": "Transfer",
+      "noOwner": "Unassigned"
+    },
+    "confirmArchive": {
+      "title": "Archive client?",
+      "message": "The client will be moved to the archive.",
+      "confirm": "Yes, archive"
+    },
+    "confirmDelete": {
+      "title": "Delete client?",
+      "message": "This action cannot be undone.",
+      "confirm": "Yes, delete"
+    },
+    "confirmDeleteSelected": {
+      "title": "Delete selected clients?",
+      "message": "Delete {count} selected clients? This action cannot be undone.",
+      "confirm": "Yes, delete"
     }
   },
   "roles": {
