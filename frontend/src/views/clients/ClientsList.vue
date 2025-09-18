@@ -48,46 +48,32 @@
 
       <template #filters>
         <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <Select
+          <ClientOwnerSelect
             v-model="ownerFilter"
             :options="ownerOptions"
-            classInput="text-xs !h-9"
+            :placeholder="t('clients.filters.owner')"
             :aria-label="t('clients.filters.owner')"
           />
-          <Select
+          <ClientTenantSelect
             v-if="auth.isSuperAdmin"
             v-model="tenantFilter"
             :options="tenantOptions"
-            classInput="text-xs !h-9"
+            :placeholder="t('clients.filters.tenant')"
             :aria-label="t('clients.filters.tenant')"
           />
-          <Select
+          <ClientSortSelect
             v-model="sortSelection"
             :options="sortOptions"
-            classInput="text-xs !h-9"
+            :placeholder="t('clients.filters.sort.label')"
             :aria-label="t('clients.filters.sort.label')"
           />
         </div>
-        <div class="flex flex-wrap items-center gap-4 pt-2">
-          <Checkbox
-            v-model="includeArchived"
-            :label="t('clients.filters.includeArchived')"
-          />
-          <Checkbox
-            v-model="archivedOnly"
-            :label="t('clients.filters.archivedOnly')"
-            :disabled="!includeArchived"
-          />
-          <Checkbox
-            v-model="includeTrashed"
-            :label="t('clients.filters.includeTrashed')"
-          />
-          <Checkbox
-            v-model="trashedOnly"
-            :label="t('clients.filters.trashedOnly')"
-            :disabled="!includeTrashed"
-          />
-        </div>
+        <ClientsStatusFilters
+          v-model:include-archived="includeArchived"
+          v-model:archived-only="archivedOnly"
+          v-model:include-trashed="includeTrashed"
+          v-model:trashed-only="trashedOnly"
+        />
       </template>
     </ClientsTable>
 
@@ -139,11 +125,14 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import Swal from 'sweetalert2';
 import ClientsTable from '@/components/clients/ClientsTable.vue';
+import ClientOwnerSelect from '@/components/clients/ClientOwnerSelect.vue';
+import ClientTenantSelect from '@/components/clients/ClientTenantSelect.vue';
+import ClientSortSelect from '@/components/clients/ClientSortSelect.vue';
+import ClientsStatusFilters from '@/components/clients/ClientsStatusFilters.vue';
 import SkeletonTable from '@/components/ui/Skeleton/Table.vue';
 import Alert from '@/components/ui/Alert/index.vue';
 import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select/index.vue';
-import Checkbox from '@/components/ui/Checkbox/index.vue';
 import Modal from '@/components/ui/Modal/index.vue';
 import { useClientsStore } from '@/stores/clients';
 import { useTenantStore } from '@/stores/tenant';

@@ -12,7 +12,7 @@
             prependIcon="heroicons-outline:search"
             merged
             classInput="text-xs !h-8"
-            @update:modelValue="onSearch"
+            @update:model-value="onSearch"
           />
         </div>
       </div>
