@@ -10,6 +10,7 @@ use App\Services\PermittedClientResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -142,9 +143,27 @@ class AuthController extends Controller
                 ->all();
         }
 
+        $allAbilities = $this->abilityService->resolveAbilities($user);
+
+        $abilities = [];
+        $clientAbilities = [];
+
+        foreach ($allAbilities as $ability) {
+            if (! is_string($ability)) {
+                continue;
+            }
+
+            if (Str::contains($ability, '.client.')) {
+                $clientAbilities[] = $ability;
+            } else {
+                $abilities[] = $ability;
+            }
+        }
+
         return response()->json([
             'user' => $user,
-            'abilities' => $this->abilityService->resolveAbilities($user),
+            'abilities' => $abilities,
+            'client_abilities' => $clientAbilities,
             'features' => $features,
             'permitted_client_ids' => $this->clientResolver->resolve($user),
         ]);

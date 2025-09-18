@@ -3,6 +3,16 @@ info:
   title: Asbuild API
   version: '1.0'
 paths:
+  /me:
+    get:
+      summary: Get authenticated user context
+      responses:
+        '200':
+          description: Authenticated user context
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthMeResponse'
   /tasks:
     get:
       summary: List tasks
@@ -1575,6 +1585,29 @@ components:
       properties:
         message:
           type: string
+    AuthMeResponse:
+      type: object
+      properties:
+        user:
+          type: object
+          description: Authenticated user with assigned roles and tenant context.
+        abilities:
+          type: array
+          items:
+            type: string
+        client_abilities:
+          type: array
+          items:
+            type: string
+        features:
+          type: array
+          items:
+            type: string
+        permitted_client_ids:
+          type: array
+          nullable: true
+          items:
+            type: integer
     Client:
       type: object
       properties:
