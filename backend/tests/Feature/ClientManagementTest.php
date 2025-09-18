@@ -107,23 +107,12 @@ class ClientManagementTest extends TestCase
             ->postJson("/api/clients/{$clientId}/restore")
             ->assertOk();
 
-        $this->assertDatabaseHas('clients', ['id' => $clientId, 'deleted_at' => null]);
-
-        $newOwner = User::create([
-            'name' => 'Owner',
-            'email' => 'owner@example.com',
-            'password' => Hash::make('secret'),
-            'tenant_id' => $tenant->id,
-            'phone' => '1234567',
-            'address' => 'Street 2',
-        ]);
+        $this->assertDatabaseHas('clients', ['id' => $clientId, 'deleted_at' => null, 'user_id' => null]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/clients/{$clientId}/transfer", ['owner_id' => $newOwner->id])
+            ->getJson("/api/clients/{$clientId}")
             ->assertOk()
-            ->assertJsonPath('data.owner.id', $newOwner->id);
-
-        $this->assertDatabaseHas('clients', ['id' => $clientId, 'user_id' => $newOwner->id]);
+            ->assertJsonMissingPath('data.owner');
     }
 
     public function test_tenant_cannot_use_foreign_client_for_task_type_or_task(): void
@@ -131,6 +120,7 @@ class ClientManagementTest extends TestCase
         [$tenantA, $user] = $this->createTenantUserWithAbilities([
             'task_types.create',
             'tasks.create',
+            'tasks.manage',
             'clients.view',
         ]);
 

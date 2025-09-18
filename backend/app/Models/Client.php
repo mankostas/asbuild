@@ -13,7 +13,6 @@ class Client extends Model
 
     protected $fillable = [
         'tenant_id',
-        'user_id',
         'name',
         'email',
         'phone',
@@ -23,18 +22,12 @@ class Client extends Model
 
     protected $casts = [
         'tenant_id' => 'integer',
-        'user_id' => 'integer',
         'archived_at' => 'datetime',
     ];
 
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
-    }
-
-    public function owner(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function taskTypes(): HasMany

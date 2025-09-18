@@ -492,7 +492,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Acme Corp\",\n  \"email\": \"contact@example.com\",\n  \"phone\": \"+1-555-1234\",\n  \"notes\": \"Important client\",\n  \"owner_id\": 10\n}",
+              "raw": "{\n  \"name\": \"Acme Corp\",\n  \"email\": \"contact@example.com\",\n  \"phone\": \"+1-555-1234\",\n  \"notes\": \"Important client\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -548,7 +548,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Acme Corp\",\n  \"email\": \"ops@example.com\",\n  \"phone\": \"+1-555-9876\",\n  \"notes\": \"Updated contact\",\n  \"owner_id\": 12\n}",
+              "raw": "{\n  \"name\": \"Acme Corp\",\n  \"email\": \"ops@example.com\",\n  \"phone\": \"+1-555-9876\",\n  \"notes\": \"Updated contact\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -668,40 +668,6 @@
           },
           "response": []
         },
-        {
-          "name": "transfer",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"owner_id\": 15\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/api/clients/{client}/transfer",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "clients",
-                "{client}",
-                "transfer"
-              ]
-            }
-          },
-          "response": []
-        }
       ]
     },
     {

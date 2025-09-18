@@ -51,8 +51,4 @@ class ClientPolicy extends TenantOwnedPolicy
         return $this->update($user, $client);
     }
 
-    public function transfer(User $user, Client $client): bool
-    {
-        return Gate::allows('clients.manage') && parent::update($user, $client);
-    }
 }

@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Client;
-use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class ClientRequest extends FormRequest
 {
@@ -31,29 +29,13 @@ class ClientRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
             'tenant_id' => $tenantRules,
-            'owner_id' => ['nullable', 'integer', Rule::exists('users', 'id')],
-        ];
-    }
-
-    public function attributes(): array
-    {
-        return [
-            'owner_id' => 'owner',
         ];
     }
 
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            $ownerId = $this->input('owner_id');
             $tenantId = $this->determineTargetTenant();
-
-            if ($ownerId) {
-                $owner = User::query()->find($ownerId);
-                if (! $owner || ($tenantId !== null && (int) $owner->tenant_id !== (int) $tenantId)) {
-                    $validator->errors()->add('owner_id', 'The selected owner is invalid.');
-                }
-            }
 
             if ($this->isMethod('post') && $tenantId === null) {
                 $validator->errors()->add('tenant_id', 'The tenant field is required.');

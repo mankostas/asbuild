@@ -178,10 +178,6 @@ paths:
           schema:
             type: string
             enum: [with, only]
-        - name: owner_id
-          in: query
-          schema:
-            type: integer
         - name: tenant_id
           in: query
           schema:
@@ -222,9 +218,6 @@ paths:
                   type: string
                   nullable: true
                 tenant_id:
-                  type: integer
-                  nullable: true
-                owner_id:
                   type: integer
                   nullable: true
       responses:
@@ -278,9 +271,6 @@ paths:
                   type: string
                   nullable: true
                 tenant_id:
-                  type: integer
-                  nullable: true
-                owner_id:
                   type: integer
                   nullable: true
       responses:
@@ -351,32 +341,6 @@ paths:
       responses:
         '200':
           description: Restored client
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Client'
-  /clients/{client}/transfer:
-    post:
-      summary: Transfer client ownership
-      parameters:
-        - name: client
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                owner_id:
-                  type: integer
-                  nullable: true
-      responses:
-        '200':
-          description: Updated client owner
           content:
             application/json:
               schema:
@@ -1635,14 +1599,6 @@ components:
           type: string
           format: date-time
           nullable: true
-        owner:
-          type: object
-          nullable: true
-          properties:
-            id:
-              type: integer
-            name:
-              type: string
     ClientSummary:
       type: object
       properties:

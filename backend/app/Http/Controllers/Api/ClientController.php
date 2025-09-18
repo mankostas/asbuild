@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
-use App\Models\User;
 use App\Support\ListQuery;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class ClientController extends Controller
@@ -18,7 +16,7 @@ class ClientController extends Controller
     {
         $this->authorize('viewAny', Client::class);
 
-        $query = Client::query()->with(['owner']);
+        $query = Client::query();
 
         if ($request->user()->isSuperAdmin()) {
             if ($request->filled('tenant_id')) {
@@ -44,10 +42,6 @@ class ClientController extends Controller
             $query->onlyTrashed();
         }
 
-        if ($ownerId = $request->query('owner_id')) {
-            $query->where('user_id', (int) $ownerId);
-        }
-
         $result = $this->listQuery($query, $request, ['name', 'email', 'phone'], ['name', 'created_at']);
 
         return ClientResource::collection($result['data'])->additional([
@@ -69,17 +63,7 @@ class ClientController extends Controller
         }
 
         $data['tenant_id'] = $tenantId;
-        $ownerId = $data['owner_id'] ?? null;
-
-        if (! $ownerId && $request->user()->tenant_id === $tenantId) {
-            $ownerId = $request->user()->id;
-        }
-
-        $data['user_id'] = $ownerId;
-        unset($data['owner_id']);
-
         $client = Client::create($data);
-        $client->load('owner');
 
         return (new ClientResource($client))->response()->setStatusCode(201);
     }
@@ -88,7 +72,7 @@ class ClientController extends Controller
     {
         $this->authorize('view', $client);
 
-        return new ClientResource($client->load('owner'));
+        return new ClientResource($client);
     }
 
     public function update(ClientRequest $request, Client $client)
@@ -108,20 +92,10 @@ class ClientController extends Controller
 
         $data['tenant_id'] = $tenantId;
 
-        if (array_key_exists('owner_id', $data)) {
-            $data['user_id'] = $data['owner_id'];
-        } elseif ($tenantChanged) {
-            $data['user_id'] = null;
-        } elseif (! $client->user_id && $request->user()->tenant_id === $tenantId) {
-            $data['user_id'] = $request->user()->id;
-        }
-
-        unset($data['owner_id']);
-
         $client->fill($data);
         $client->save();
 
-        return new ClientResource($client->load('owner'));
+        return new ClientResource($client);
     }
 
     public function destroy(Client $client)
@@ -140,7 +114,7 @@ class ClientController extends Controller
 
         $model->restore();
 
-        return new ClientResource($model->load('owner'));
+        return new ClientResource($model);
     }
 
     public function archive(Client $client)
@@ -150,7 +124,7 @@ class ClientController extends Controller
         $client->archived_at = now();
         $client->save();
 
-        return new ClientResource($client->load('owner'));
+        return new ClientResource($client);
     }
 
     public function unarchive(Client $client)
@@ -160,31 +134,6 @@ class ClientController extends Controller
         $client->archived_at = null;
         $client->save();
 
-        return new ClientResource($client->load('owner'));
-    }
-
-    public function transfer(Request $request, Client $client)
-    {
-        $this->authorize('transfer', $client);
-
-        $data = $request->validate([
-            'owner_id' => ['nullable', 'integer', Rule::exists('users', 'id')],
-        ]);
-
-        $ownerId = $data['owner_id'] ?? null;
-        if ($ownerId) {
-            $owner = User::find($ownerId);
-            if (! $owner || (int) $owner->tenant_id !== (int) $client->tenant_id) {
-                return response()->json([
-                    'message' => 'The selected owner is invalid.',
-                    'errors' => ['owner_id' => ['The selected owner is invalid.']],
-                ], 422);
-            }
-        }
-
-        $client->user_id = $ownerId;
-        $client->save();
-
-        return new ClientResource($client->load('owner'));
+        return new ClientResource($client);
     }
 }
