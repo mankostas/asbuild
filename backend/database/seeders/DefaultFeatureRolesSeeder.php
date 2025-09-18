@@ -14,6 +14,8 @@ class DefaultFeatureRolesSeeder extends Seeder
         $map = config('feature_map', []);
 
         $roles = [];
+        $clientViewerAbilities = [];
+        $clientContributorAbilities = [];
 
         foreach ($features as $feature) {
             $config = $map[$feature] ?? null;
@@ -24,6 +26,38 @@ class DefaultFeatureRolesSeeder extends Seeder
             $selected = $abilityMap[$feature] ?? [];
             $label = $config['label'] ?? ucfirst($feature);
             $abilities = $config['abilities'] ?? [];
+
+            $selectedAbilities = array_values(array_intersect($abilities, $selected));
+
+            $clientAbilities = array_values(array_filter(
+                $selectedAbilities,
+                fn ($ability) => str_contains($ability, '.client.')
+            ));
+
+            if ($clientAbilities !== []) {
+                $clientViewerAbilities = array_merge(
+                    $clientViewerAbilities,
+                    array_filter(
+                        $clientAbilities,
+                        fn ($ability) => str_ends_with($ability, '.view')
+                    )
+                );
+
+                $clientContributorAbilities = array_merge(
+                    $clientContributorAbilities,
+                    array_filter(
+                        $clientAbilities,
+                        fn ($ability) => str_ends_with($ability, '.view')
+                            || str_ends_with($ability, '.create')
+                            || str_ends_with($ability, '.update')
+                    )
+                );
+            }
+
+            $nonClientAbilities = array_values(array_filter(
+                $abilities,
+                fn ($ability) => ! str_contains($ability, '.client.')
+            ));
 
             $roleDefinitions = [
                 [
@@ -63,17 +97,34 @@ class DefaultFeatureRolesSeeder extends Seeder
 
             foreach ($roleDefinitions as $definition) {
                 $filteredAbilities = $definition['filter']
-                    ? array_filter($abilities, $definition['filter'])
-                    : $abilities;
+                    ? array_filter($nonClientAbilities, $definition['filter'])
+                    : $nonClientAbilities;
 
                 $roles[] = [
                     'slug' => "{$feature}_{$definition['suffix']}",
                     'name' => $definition['name'],
-                    'abilities' => array_intersect($filteredAbilities, $selected),
+                    'abilities' => array_values(array_intersect($filteredAbilities, $selected)),
                     'level' => $definition['level'],
                 ];
             }
         }
+
+        $clientViewerAbilities = array_values(array_unique($clientViewerAbilities));
+        $clientContributorAbilities = array_values(array_unique($clientContributorAbilities));
+
+        $roles[] = [
+            'slug' => 'client_viewer',
+            'name' => 'Client Viewer',
+            'abilities' => $clientViewerAbilities,
+            'level' => 5,
+        ];
+
+        $roles[] = [
+            'slug' => 'client_contributor',
+            'name' => 'Client Contributor',
+            'abilities' => $clientContributorAbilities,
+            'level' => 4,
+        ];
 
         foreach ($roles as $role) {
             $existing = DB::table('roles')

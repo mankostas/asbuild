@@ -87,7 +87,18 @@ class AbilityService
             return true;
         }
 
-        $prefix = explode('.', $code)[0] . '.manage';
+        $parts = explode('.', $code);
+
+        if (count($parts) >= 2) {
+            $clientParts = array_merge([$parts[0], 'client'], array_slice($parts, 1));
+            $clientAbility = implode('.', $clientParts);
+
+            if (in_array($clientAbility, $abilities, true)) {
+                return true;
+            }
+        }
+
+        $prefix = $parts[0] . '.manage';
 
         return in_array($prefix, $abilities, true);
     }
