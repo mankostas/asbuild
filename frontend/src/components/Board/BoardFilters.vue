@@ -294,13 +294,17 @@ const filterControlClasses = (value: unknown, variant: FilterVariant = 'input') 
 let syncingFromProps = false;
 const syncLocalFromProps = (val: Filters) => {
   const incoming = normalizeFilters(val);
-  if (filtersEqual(lastSynced, incoming)) {
+  const matchesSynced = filtersEqual(lastSynced, incoming);
+  const matchesLocal = filtersEqual(normalizeFilters(local.value), incoming);
+
+  clearTimeout(timer);
+
+  if (matchesSynced && matchesLocal) {
     lastSynced = { ...incoming, typeIds: [...incoming.typeIds] };
     return;
   }
 
   syncingFromProps = true;
-  clearTimeout(timer);
   Object.assign(local.value, incoming);
   lastSynced = { ...incoming, typeIds: [...incoming.typeIds] };
 
