@@ -32,7 +32,11 @@ class TaskUpsertRequest extends FormRequest
             'reviewer' => ['nullable', 'array'],
             'reviewer.kind' => ['required_with:reviewer', 'in:team,employee'],
             'reviewer.id' => ['required_with:reviewer', 'integer'],
-            'client_id' => ['nullable', 'integer', Rule::exists('clients', 'id')],
+            'client_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('clients', 'id')->whereNull('deleted_at'),
+            ],
         ];
 
         if ($task = $this->route('task')) {
@@ -89,8 +93,10 @@ class TaskUpsertRequest extends FormRequest
                 return;
             }
 
-            $client = Client::query()->find($clientId);
-            if (! $client) {
+            $client = Client::query()->withTrashed()->find($clientId);
+            if (! $client || $client->trashed()) {
+                $validator->errors()->add('client_id', 'The selected client is invalid.');
+
                 return;
             }
 
