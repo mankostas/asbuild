@@ -21,7 +21,42 @@
             :reduce="(o: Option) => o.value"
             label="label"
             :clearable="true"
+            data-testid="tenant-select"
             @search="onTenantSearch"
+          />
+        </template>
+      </VueSelect>
+      <div
+        v-else
+        class="flex-1 min-w-[150px]"
+      >
+        <span
+          class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1"
+        >
+          {{ t('types.form.tenant') }}
+        </span>
+        <div
+          data-testid="tenant-display"
+          class="text-sm text-slate-900 dark:text-slate-200"
+        >
+          {{ tenantDisplayName }}
+        </div>
+      </div>
+      <VueSelect
+        class="flex-1 min-w-[150px]"
+        :label="t('types.form.client')"
+      >
+        <template #default="{ inputId }">
+          <vSelect
+            :id="inputId"
+            v-model="localClientId"
+            :options="props.clientOptions"
+            :reduce="(o: Option) => o.value"
+            label="label"
+            :clearable="true"
+            :disabled="isClientDisabled"
+            :loading="props.loadingClients"
+            data-testid="client-select"
           />
         </template>
       </VueSelect>
@@ -35,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Card from '@/components/ui/Card/index.vue';
 import Textinput from '@/components/ui/Textinput/index.vue';
@@ -53,14 +88,26 @@ const props = withDefaults(
   defineProps<{
     name: string;
     tenantId: number | '';
+    clientId?: number | '';
     showTenantSelect?: boolean;
     requireSubtasksComplete: boolean;
+    clientOptions?: Option[];
+    loadingClients?: boolean;
+    tenantName?: string;
   }>(),
-  { showTenantSelect: true, requireSubtasksComplete: false },
+  {
+    showTenantSelect: true,
+    requireSubtasksComplete: false,
+    clientId: '',
+    clientOptions: () => [],
+    loadingClients: false,
+    tenantName: '',
+  },
 );
 const emit = defineEmits<{
   (e: 'update:name', value: string): void;
   (e: 'update:tenantId', value: number | ''): void;
+  (e: 'update:clientId', value: number | ''): void;
   (e: 'update:requireSubtasksComplete', value: boolean): void;
 }>();
 
@@ -68,17 +115,13 @@ const { t } = useI18n();
 const tenantStore = useTenantStore();
 
 const tenantOptions = ref<Option[]>([]);
-
-watch(
-  () => tenantStore.tenants,
-  (tenants) => {
-    tenantOptions.value = [
-      { value: null, label: 'Global' },
-      ...tenants.map((t: any) => ({ value: t.id, label: t.name })),
-    ];
-  },
-  { immediate: true },
-);
+watchEffect(() => {
+  const tenants = tenantStore.tenants;
+  tenantOptions.value = [
+    { value: null, label: t('types.form.global') },
+    ...tenants.map((tenant: any) => ({ value: tenant.id, label: tenant.name })),
+  ];
+});
 
 const localName = computed({
   get: () => props.name,
@@ -90,9 +133,32 @@ const localTenantId = computed<any>({
   set: (v: number | null) => emit('update:tenantId', v === null ? '' : Number(v)),
 });
 
+const localClientId = computed<any>({
+  get: () => (props.clientId === '' ? null : props.clientId),
+  set: (v: number | null) => emit('update:clientId', v === null ? '' : Number(v)),
+});
+
 const localRequireSubtasksComplete = computed({
   get: () => props.requireSubtasksComplete,
   set: (v: boolean) => emit('update:requireSubtasksComplete', v),
+});
+
+const isClientDisabled = computed(() => localTenantId.value === null);
+
+const tenantDisplayName = computed(() => {
+  if (localTenantId.value === null) {
+    return t('types.form.global');
+  }
+  const option = tenantOptions.value.find(
+    (item) => item.value !== null && Number(item.value) === Number(localTenantId.value),
+  );
+  if (option) {
+    return option.label;
+  }
+  if (props.tenantName) {
+    return props.tenantName;
+  }
+  return '';
 });
 
 async function onTenantSearch(search: string) {

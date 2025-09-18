@@ -361,6 +361,8 @@
     "form": {
       "name": "Name",
       "tenant": "Tenant",
+      "client": "Client",
+      "global": "Global",
       "requireSubtasksComplete": "Require subtasks completed",
       "search": "Search",
       "searchHelp": "Filters sections and fields in the canvas."
