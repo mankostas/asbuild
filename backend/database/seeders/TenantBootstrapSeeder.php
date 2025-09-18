@@ -111,6 +111,39 @@ class TenantBootstrapSeeder extends Seeder
         );
         $agentId = DB::table('users')->where('email', 'agent@acme.test')->value('id');
 
+        // Clients
+        $clients = [
+            [
+                'name' => 'Bella Barker',
+                'email' => 'bella.barker@example.test',
+                'phone' => '555-200-0001',
+                'notes' => 'Owner of two golden retrievers.',
+            ],
+            [
+                'name' => 'Charlie Cat',
+                'phone' => '555-200-0002',
+                'notes' => 'Prefers evening appointments and quiet rooms.',
+            ],
+            [
+                'name' => 'Oscar Otter',
+                'email' => 'oscar.otter@example.test',
+                'notes' => 'New client referred by Bella Barker.',
+            ],
+        ];
+
+        foreach ($clients as $client) {
+            DB::table('clients')->updateOrInsert(
+                ['tenant_id' => $tenantId, 'name' => $client['name']],
+                [
+                    'email' => $client['email'] ?? null,
+                    'phone' => $client['phone'] ?? null,
+                    'notes' => $client['notes'] ?? null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+        }
+
         // Assign existing feature roles to employees
         $managerRoleIds = DB::table('roles')
             ->where('tenant_id', $tenantId)

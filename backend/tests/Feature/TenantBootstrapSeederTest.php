@@ -34,5 +34,17 @@ class TenantBootstrapSeederTest extends TestCase
         $this->assertTrue(in_array(['review', 'redo'], $edges, true));
         $this->assertTrue(in_array(['review', 'rejected'], $edges, true));
         $this->assertTrue(in_array(['redo', 'in_progress'], $edges, true));
+
+        $this->assertDatabaseCount('clients', 3);
+        $this->assertDatabaseHas('clients', [
+            'tenant_id' => 1,
+            'name' => 'Bella Barker',
+            'email' => 'bella.barker@example.test',
+        ]);
+        $this->assertDatabaseHas('clients', [
+            'tenant_id' => 1,
+            'name' => 'Charlie Cat',
+            'phone' => '555-200-0002',
+        ]);
     }
 }
