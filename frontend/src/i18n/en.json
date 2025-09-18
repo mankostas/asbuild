@@ -486,7 +486,32 @@
   "clients": {
     "addClient": "Add Client",
     "form": {
-      "search": "Search"
+      "search": "Search",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes",
+      "tenant": "Tenant",
+      "owner": "Owner",
+      "ownerPlaceholder": "Select owner",
+      "ownerHelp": "Select a tenant to load owners.",
+      "selectTenantFirst": "Select a tenant first",
+      "loadingOwners": "Loading owners…",
+      "ownerLoadError": "Unable to load owners.",
+      "loadError": "Failed to load client.",
+      "errors": {
+        "name": "Name is required",
+        "tenant": "Tenant is required",
+        "owner": "Owner is required"
+      },
+      "success": {
+        "created": "Client created",
+        "updated": "Client updated",
+        "transfer": "Ownership updated"
+      },
+      "submitCreate": "Create client",
+      "submitUpdate": "Save changes"
     },
     "filters": {
       "owner": "Owner",
