@@ -1,8 +1,5 @@
 <template>
   <div class="p-4">
-    <div class="flex items-center justify-between mb-4">
-      <h1 class="text-xl font-semibold">{{ t('routes.taskBoard') }}</h1>
-    </div>
     <Card
       class="mb-6"
       :bodyClass="cardBodyClass"
