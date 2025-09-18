@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Client;
 use App\Models\Manual;
 use App\Models\Role;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\TaskType;
 use App\Models\Team;
+use App\Policies\ClientPolicy;
 use App\Policies\ManualPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\TaskPolicy;
@@ -27,6 +29,7 @@ class AuthServiceProvider extends ServiceProvider
         Manual::class => ManualPolicy::class,
         Role::class => RolePolicy::class,
         Team::class => TeamPolicy::class,
+        Client::class => ClientPolicy::class,
     ];
 
     public function boot(AbilityService $abilityService): void

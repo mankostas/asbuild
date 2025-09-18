@@ -20,6 +20,7 @@ class TaskType extends Model
         'statuses',
         'status_flow_json',
         'tenant_id',
+        'client_id',
         'require_subtasks_complete',
         'abilities_json',
     ];
@@ -29,6 +30,7 @@ class TaskType extends Model
         'statuses' => 'array',
         'status_flow_json' => 'array',
         'tenant_id' => 'integer',
+        'client_id' => 'integer',
         'require_subtasks_complete' => 'boolean',
         'abilities_json' => 'array',
     ];
@@ -51,6 +53,11 @@ class TaskType extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
     }
 
     protected function schemaJson(): Attribute

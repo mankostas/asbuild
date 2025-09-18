@@ -74,7 +74,7 @@ class TaskBoardController extends Controller
 
             $total = (clone $query)->count();
             $tasks = $query
-                ->with(['type', 'assignee'])
+                ->with(['type', 'assignee', 'client'])
                 ->withCount(['comments', 'attachments', 'watchers', 'subtasks'])
                 ->orderBy('board_position')
                 ->limit($limit + 1)
@@ -132,7 +132,7 @@ class TaskBoardController extends Controller
 
         $total = (clone $query)->count();
         $tasks = $query
-            ->with(['type', 'assignee'])
+            ->with(['type', 'assignee', 'client'])
             ->withCount(['comments', 'attachments', 'watchers', 'subtasks'])
             ->orderBy('board_position')
             ->offset($offset)
@@ -183,7 +183,7 @@ class TaskBoardController extends Controller
 
         $positions->move($task, $status->slug, $data['index']);
 
-        $task = $task->fresh(['type', 'assignee', 'watchers'])
+        $task = $task->fresh(['type', 'assignee', 'watchers', 'client'])
             ->loadCount(['comments', 'attachments', 'watchers', 'subtasks']);
 
         return new TaskResource($task);

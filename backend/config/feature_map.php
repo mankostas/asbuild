@@ -22,6 +22,16 @@ return [
             'tasks.manage',
         ],
     ],
+    'clients' => [
+        'label' => 'Clients',
+        'abilities' => [
+            'clients.view',
+            'clients.create',
+            'clients.update',
+            'clients.delete',
+            'clients.manage',
+        ],
+    ],
     'manuals' => [
         'label' => 'Manuals',
         'abilities' => [

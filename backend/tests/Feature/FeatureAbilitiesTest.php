@@ -72,6 +72,7 @@ class FeatureAbilitiesTest extends TestCase
             'task_types' => ['task_types', '/api/task-types', 'task_types.view'],
             'teams' => ['teams', '/api/teams', 'teams.view'],
             'task_statuses' => ['task_statuses', '/api/task-statuses', 'task_statuses.view'],
+            'clients' => ['clients', '/api/clients', 'clients.view'],
         ];
     }
 }

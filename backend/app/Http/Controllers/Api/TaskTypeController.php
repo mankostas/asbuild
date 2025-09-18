@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TaskTypeRequest;
 use App\Http\Resources\TaskTypeResource;
+use App\Models\Client;
 use App\Models\TaskType;
 use App\Services\FormSchemaService;
 use App\Services\StatusFlowService;
 use App\Support\ListQuery;
 use App\Support\TenantDefaults;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class TaskTypeController extends Controller
 {
@@ -24,7 +27,7 @@ class TaskTypeController extends Controller
 
         // Task types are no longer versioned, so we only eager load the tenant
         // and append a count of related tasks
-        $query = TaskType::query()->with(['tenant'])->withCount('tasks');
+        $query = TaskType::query()->with(['tenant', 'client'])->withCount('tasks');
 
         if ($request->user()->hasRole('SuperAdmin')) {
             $scope = $request->query('scope', 'all');
@@ -86,6 +89,7 @@ class TaskTypeController extends Controller
         }
 
         $type = TaskType::create($data);
+        $type->load('client');
 
         return (new TaskTypeResource($type))->response()->setStatusCode(201);
     }
@@ -126,6 +130,7 @@ class TaskTypeController extends Controller
         }
 
         $taskType->update($data);
+        $taskType->load('client');
 
         return new TaskTypeResource($taskType);
     }
@@ -169,7 +174,9 @@ class TaskTypeController extends Controller
 
         $copy = $taskType->replicate();
         $copy->tenant_id = $tenantId;
+        $copy->client_id = null;
         $copy->save();
+        $copy->load('client');
 
         return (new TaskTypeResource($copy))
             ->response()
@@ -209,7 +216,9 @@ class TaskTypeController extends Controller
 
             $copy = $type->replicate();
             $copy->tenant_id = $tenantId;
+            $copy->client_id = null;
             $copy->save();
+            $copy->load('client');
 
             $copies->push($copy);
         }
@@ -263,17 +272,35 @@ class TaskTypeController extends Controller
         $data = $request->validate([
             'name' => 'required|string',
             'schema_json' => 'array',
+            'tenant_id' => ['nullable', 'integer', 'exists:tenants,id'],
+            'client_id' => ['nullable', 'integer', Rule::exists('clients', 'id')],
         ]);
 
         if (isset($data['schema_json'])) {
             $this->formSchemaService->validate($data['schema_json']);
         }
 
-        $data['tenant_id'] = $request->user()->hasRole('SuperAdmin')
-            ? ($data['tenant_id'] ?? null)
+        $targetTenant = $request->user()->hasRole('SuperAdmin')
+            ? ($data['tenant_id'] ?? $request->attributes->get('tenant_id'))
             : $request->user()->tenant_id;
 
+        if (! $request->user()->hasRole('SuperAdmin')) {
+            $data['tenant_id'] = $targetTenant;
+        } else {
+            $data['tenant_id'] = $data['tenant_id'] ?? $targetTenant;
+        }
+
+        if (isset($data['client_id'])) {
+            $client = Client::find($data['client_id']);
+            if (! $client || $targetTenant === null || (int) $client->tenant_id !== (int) $targetTenant) {
+                throw ValidationException::withMessages([
+                    'client_id' => ['The selected client is invalid.'],
+                ]);
+            }
+        }
+
         $type = TaskType::create($data);
+        $type->load('client');
 
         return (new TaskTypeResource($type))->response()->setStatusCode(201);
     }

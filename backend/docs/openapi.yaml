@@ -23,6 +23,10 @@ paths:
           in: query
           schema:
             type: integer
+        - name: client_id
+          in: query
+          schema:
+            type: integer
         - name: due_from
           in: query
           schema:
@@ -138,6 +142,245 @@ paths:
                 $ref: '#/components/schemas/Task'
         '422':
           description: Invalid transition
+  /clients:
+    get:
+      summary: List clients
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [name, created_at]
+        - name: dir
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+        - name: archived
+          in: query
+          schema:
+            type: string
+            enum: [all, only]
+        - name: trashed
+          in: query
+          schema:
+            type: string
+            enum: [with, only]
+        - name: owner_id
+          in: query
+          schema:
+            type: integer
+        - name: tenant_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of clients
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Client'
+                  meta:
+                    $ref: '#/components/schemas/ListMeta'
+    post:
+      summary: Create client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                  nullable: true
+                phone:
+                  type: string
+                  nullable: true
+                notes:
+                  type: string
+                  nullable: true
+                tenant_id:
+                  type: integer
+                  nullable: true
+                owner_id:
+                  type: integer
+                  nullable: true
+      responses:
+        '201':
+          description: Created client
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+  /clients/{client}:
+    get:
+      summary: View client
+      parameters:
+        - name: client
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Client details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+    patch:
+      summary: Update client
+      parameters:
+        - name: client
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                  nullable: true
+                phone:
+                  type: string
+                  nullable: true
+                notes:
+                  type: string
+                  nullable: true
+                tenant_id:
+                  type: integer
+                  nullable: true
+                owner_id:
+                  type: integer
+                  nullable: true
+      responses:
+        '200':
+          description: Updated client
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+    delete:
+      summary: Delete client
+      parameters:
+        - name: client
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted client
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /clients/{client}/archive:
+    post:
+      summary: Archive client
+      parameters:
+        - name: client
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Archived client
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+    delete:
+      summary: Unarchive client
+      parameters:
+        - name: client
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Unarchived client
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+  /clients/{client}/restore:
+    post:
+      summary: Restore client
+      parameters:
+        - name: client
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Restored client
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+  /clients/{client}/transfer:
+    post:
+      summary: Transfer client ownership
+      parameters:
+        - name: client
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                owner_id:
+                  type: integer
+                  nullable: true
+      responses:
+        '200':
+          description: Updated client owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
   /tasks/{task}/watch:
     post:
       summary: Watch task
@@ -1121,6 +1364,9 @@ components:
         priority:
           type: integer
           nullable: true
+        client_id:
+          type: integer
+          nullable: true
         assignee:
           $ref: '#/components/schemas/Employee'
         counts:
@@ -1143,6 +1389,10 @@ components:
             - breached
         is_watching:
           type: boolean
+        client:
+          allOf:
+            - $ref: '#/components/schemas/ClientSummary'
+          nullable: true
     TaskComment:
       type: object
       properties:
@@ -1278,8 +1528,15 @@ components:
         tenant_id:
           type: integer
           nullable: true
+        client_id:
+          type: integer
+          nullable: true
         abilities_json:
           type: object
+          nullable: true
+        client:
+          allOf:
+            - $ref: '#/components/schemas/ClientSummary'
           nullable: true
     TaskStatus:
       type: object
@@ -1350,4 +1607,46 @@ components:
         - message
       properties:
         message:
+          type: string
+    Client:
+      type: object
+      properties:
+        id:
+          type: integer
+        tenant_id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        archived_at:
+          type: string
+          format: date-time
+          nullable: true
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        owner:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+    ClientSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
           type: string

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Client;
 use App\Models\File;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,6 +30,7 @@ class Task extends Model
         'kau_notes',
         'form_data',
         'task_type_id',
+        'client_id',
         'assigned_user_id',
         'title',
         'description',
@@ -49,6 +51,7 @@ class Task extends Model
         'completed_at' => 'datetime',
         'form_data' => 'array',
         'due_at' => 'datetime',
+        'client_id' => 'integer',
     ];
 
     public function comments(): HasMany
@@ -74,6 +77,11 @@ class Task extends Model
     public function type(): BelongsTo
     {
         return $this->belongsTo(TaskType::class, 'task_type_id');
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
     }
 
     public function status(): BelongsTo
