@@ -43,6 +43,15 @@
             :error="errors.email"
           />
 
+          <Switch
+            v-if="!isEdit"
+            v-model="notifyClient"
+            :label="t('clients.form.notify.label')"
+            :description="t('clients.form.notify.description')"
+            :disabled="notifyDisabled"
+            :error="errors.notify"
+          />
+
           <Textinput
             v-model="form.phone"
             :label="t('clients.form.phone')"
@@ -108,6 +117,7 @@ import Button from '@/components/ui/Button/index.vue';
 import Card from '@/components/ui/Card/index.vue';
 import Alert from '@/components/ui/Alert/index.vue';
 import Skeleton from '@/components/ui/Skeleton.vue';
+import Switch from '@/components/ui/Switch/index.vue';
 import { useClientsStore } from '@/stores/clients';
 import { useTenantStore } from '@/stores/tenant';
 import { can, useAuthStore } from '@/stores/auth';
@@ -136,12 +146,15 @@ const form = reactive({
   tenantId: '',
 });
 
+const notifyClient = ref(false);
+
 const errors = reactive({
   name: '',
   email: '',
   phone: '',
   notes: '',
   tenant: '',
+  notify: '',
 });
 
 const serverError = ref('');
@@ -157,6 +170,7 @@ const tenantOptions = computed(() =>
 const showTenantSelect = computed(() => isSuperAdmin.value);
 
 const tenantRequired = computed(() => isSuperAdmin.value && !isEdit.value);
+const notifyDisabled = computed(() => !form.email);
 
 function resetErrors() {
   errors.name = '';
@@ -164,6 +178,7 @@ function resetErrors() {
   errors.phone = '';
   errors.notes = '';
   errors.tenant = '';
+  errors.notify = '';
   serverError.value = '';
 }
 
@@ -181,6 +196,7 @@ function applyServerErrors(formErrors: Record<string, string[]>) {
   errors.phone = format(formErrors.phone);
   errors.notes = format(formErrors.notes);
   errors.tenant = format(formErrors.tenant_id);
+  errors.notify = format(formErrors.notify_client);
 }
 
 function validateForm(): boolean {
@@ -258,6 +274,7 @@ async function submit() {
       await clientsStore.update(route.params.id as string | number, payload);
       notify.success(t('clients.form.success.updated'));
     } else {
+      payload.notify_client = notifyClient.value;
       await clientsStore.create(payload);
       notify.success(t('clients.form.success.created'));
     }
@@ -292,6 +309,30 @@ watch(
   () => {
     if (errors.name) {
       errors.name = '';
+    }
+  },
+);
+
+watch(
+  () => form.email,
+  (value) => {
+    if (!value) {
+      notifyClient.value = false;
+    }
+    if (errors.email) {
+      errors.email = '';
+    }
+    if (errors.notify) {
+      errors.notify = '';
+    }
+  },
+);
+
+watch(
+  () => notifyClient.value,
+  () => {
+    if (errors.notify) {
+      errors.notify = '';
     }
   },
 );

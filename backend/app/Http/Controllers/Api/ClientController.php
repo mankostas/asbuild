@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ClientWelcomeMail;
 use App\Models\Client;
 use App\Support\ListQuery;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Mail;
 
 class ClientController extends Controller
 {
@@ -53,6 +55,7 @@ class ClientController extends Controller
     {
         $this->authorize('create', Client::class);
 
+        $shouldNotify = $request->boolean('notify_client');
         $data = $request->validated();
         $tenantId = $request->determineTargetTenant();
 
@@ -64,6 +67,10 @@ class ClientController extends Controller
 
         $data['tenant_id'] = $tenantId;
         $client = Client::create($data);
+
+        if ($shouldNotify && $client->email) {
+            Mail::to($client->email)->send(new ClientWelcomeMail($client));
+        }
 
         return (new ClientResource($client))->response()->setStatusCode(201);
     }

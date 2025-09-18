@@ -35,6 +35,7 @@ export interface CreateClientPayload {
   phone?: string | null;
   notes?: string | null;
   tenant_id?: number | string | null;
+  notify_client?: boolean;
 }
 
 export interface UpdateClientPayload {

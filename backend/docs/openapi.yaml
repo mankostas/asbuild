@@ -217,6 +217,9 @@ paths:
                 notes:
                   type: string
                   nullable: true
+                notify_client:
+                  type: boolean
+                  description: Send a welcome email to the client (requires email)
                 tenant_id:
                   type: integer
                   nullable: true
