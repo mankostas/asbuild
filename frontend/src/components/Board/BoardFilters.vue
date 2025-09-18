@@ -209,7 +209,7 @@ const slaOptions: Option[] = [
 
 const dropdownMenuClass = 'mt-2 w-64 p-2';
 
-const local = ref<Filters>({
+const createEmptyFilters = (): Filters => ({
   assigneeId: null,
   priority: null,
   sla: null,
@@ -220,6 +220,39 @@ const local = ref<Filters>({
   dueToday: false,
   breachedOnly: false,
 });
+
+const local = ref<Filters>(createEmptyFilters());
+
+const normalizeFilters = (value?: Partial<Filters> | null): Filters => {
+  const source = value ?? {};
+  return {
+    assigneeId: source.assigneeId ?? null,
+    priority: source.priority ?? null,
+    sla: source.sla ?? null,
+    q: source.q ?? null,
+    hasPhotos: source.hasPhotos ?? null,
+    typeIds: Array.isArray(source.typeIds) ? [...source.typeIds] : [],
+    mine: !!source.mine,
+    dueToday: !!source.dueToday,
+    breachedOnly: !!source.breachedOnly,
+  };
+};
+
+const arraysEqual = (a: unknown[], b: unknown[]) =>
+  a.length === b.length && a.every((item, index) => item === b[index]);
+
+const filtersEqual = (a: Filters, b: Filters) =>
+  a.assigneeId === b.assigneeId &&
+  a.priority === b.priority &&
+  a.sla === b.sla &&
+  a.q === b.q &&
+  a.hasPhotos === b.hasPhotos &&
+  arraysEqual(a.typeIds, b.typeIds) &&
+  a.mine === b.mine &&
+  a.dueToday === b.dueToday &&
+  a.breachedOnly === b.breachedOnly;
+
+let lastSynced = normalizeFilters(local.value);
 
 const hasPhotosToggle = computed({
   get: () => !!local.value.hasPhotos,
@@ -260,19 +293,16 @@ const filterControlClasses = (value: unknown, variant: FilterVariant = 'input') 
 
 let syncingFromProps = false;
 const syncLocalFromProps = (val: Filters) => {
-  syncingFromProps = true;
-  const previousTypeIds = Array.isArray(local.value.typeIds) ? local.value.typeIds : [];
-  const incomingTypeIds = Array.isArray(val.typeIds) ? val.typeIds : [];
-  const typeIdsChanged =
-    incomingTypeIds.length !== previousTypeIds.length ||
-    incomingTypeIds.some((id, index) => id !== previousTypeIds[index]);
+  const incoming = normalizeFilters(val);
+  if (filtersEqual(lastSynced, incoming)) {
+    lastSynced = { ...incoming, typeIds: [...incoming.typeIds] };
+    return;
+  }
 
-  Object.assign(local.value, val);
-  local.value.typeIds = incomingTypeIds.length
-    ? typeIdsChanged
-      ? [...incomingTypeIds]
-      : previousTypeIds
-    : [];
+  syncingFromProps = true;
+  clearTimeout(timer);
+  Object.assign(local.value, incoming);
+  lastSynced = { ...incoming, typeIds: [...incoming.typeIds] };
 
   nextTick(() => {
     syncingFromProps = false;
@@ -341,7 +371,19 @@ watch(
   (val) => {
     if (syncingFromProps) return;
     clearTimeout(timer);
-    timer = window.setTimeout(() => emit('update:modelValue', { ...val }), 300);
+    const nextFilters = normalizeFilters(val);
+    if (filtersEqual(lastSynced, nextFilters)) return;
+
+    timer = window.setTimeout(() => {
+      const payload = {
+        ...(props.modelValue as Record<string, unknown>),
+        ...nextFilters,
+        typeIds: [...nextFilters.typeIds],
+      } as Filters;
+
+      lastSynced = { ...nextFilters, typeIds: [...nextFilters.typeIds] };
+      emit('update:modelValue', payload);
+    }, 300);
   },
   { deep: true },
 );
