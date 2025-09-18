@@ -454,12 +454,43 @@ interface SectionTab {
 
 interface Permission {
   read: boolean;
+  clientRead: boolean;
   edit: boolean;
+  clientEdit: boolean;
   delete: boolean;
   export: boolean;
   assign: boolean;
   transition: boolean;
 }
+
+const PERMISSION_KEY_ALIASES: Record<string, keyof Permission> = {
+  client_view: 'clientRead',
+  client_read: 'clientRead',
+  client_edit: 'clientEdit',
+  client_update: 'clientEdit',
+};
+
+const emptyPermission = (): Permission => ({
+  read: false,
+  clientRead: false,
+  edit: false,
+  clientEdit: false,
+  delete: false,
+  export: false,
+  assign: false,
+  transition: false,
+});
+
+const normalizePermission = (value: Partial<Record<string, unknown>> | undefined): Permission => {
+  const normalized = emptyPermission();
+  Object.entries(value ?? {}).forEach(([key, raw]) => {
+    const mappedKey = (PERMISSION_KEY_ALIASES[key] ?? key) as keyof Permission;
+    if (mappedKey in normalized) {
+      (normalized as any)[mappedKey] = !!raw;
+    }
+  });
+  return normalized;
+};
 
 const name = ref('');
 const tenantId = ref<number | ''>('');
@@ -725,16 +756,9 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
         }
         tenantRoles.value.forEach((r) => {
           if (!permissions.value[r.slug]) {
-            permissions.value[r.slug] = {
-              read: false,
-              edit: false,
-              delete: false,
-              export: false,
-              assign: false,
-              transition: false,
-            };
-          } else if (permissions.value[r.slug].transition === undefined) {
-            permissions.value[r.slug].transition = false;
+            permissions.value[r.slug] = emptyPermission();
+          } else {
+            permissions.value[r.slug] = normalizePermission(permissions.value[r.slug]);
           }
         });
         const validSlugs = tenantRoles.value.map((r) => r.slug);
@@ -979,28 +1003,14 @@ function loadVersion(v: any) {
   permissions.value = Object.fromEntries(
     Object.entries(abilities).map(([role, perms]) => [
       roleSlugMap[role] || role,
-      {
-        read: !!(perms as any).read,
-        edit: !!(perms as any).edit,
-        delete: !!(perms as any).delete,
-        export: !!(perms as any).export,
-        assign: !!(perms as any).assign,
-        transition: !!(perms as any).transition,
-      } as Permission,
+      normalizePermission(perms as Record<string, unknown>),
     ]),
   );
   tenantRoles.value.forEach((r) => {
     if (!permissions.value[r.slug]) {
-      permissions.value[r.slug] = {
-        read: false,
-        edit: false,
-        delete: false,
-        export: false,
-        assign: false,
-        transition: false,
-      };
-    } else if (permissions.value[r.slug].transition === undefined) {
-      permissions.value[r.slug].transition = false;
+      permissions.value[r.slug] = emptyPermission();
+    } else {
+      permissions.value[r.slug] = normalizePermission(permissions.value[r.slug]);
     }
   });
   nextTick(() => {

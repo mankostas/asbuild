@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-8">
+  <div v-if="canViewDashboard" class="space-y-8">
     <!-- Loading state -->
     <div v-if="loading" class="space-y-6">
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import KpiCards from '@/components/reports/KpiCards.vue';
@@ -56,7 +56,7 @@ import Card from '@/components/ui/Card/index.vue';
 import Skeleton from '@/components/ui/Skeleton.vue';
 import Button from '@/components/ui/Button/index.vue';
 import { parseISO } from '@/utils/datetime';
-import { can } from '@/stores/auth';
+import { useAuthStore } from '@/stores/auth';
 
 interface Kpi {
   label: string;
@@ -72,6 +72,10 @@ interface Series {
 }
 
 const { t } = useI18n();
+const auth = useAuthStore();
+const canViewDashboard = computed(() =>
+  auth.hasAny(['dashboard.view', 'dashboard.client.view']),
+);
 
 const kpis = ref<Kpi[]>([]);
 const chartSeries = ref<Series[]>([]);
@@ -81,13 +85,15 @@ const loading = ref(false);
 const error = ref(false);
 
 async function fetchData() {
-  if (!can('dashboard.view')) {
+  if (!canViewDashboard.value) {
     return;
   }
   loading.value = true;
   error.value = false;
   try {
-    const { data } = await api.get('/reports/overview');
+    const { data } = await api.get('/reports/overview', {
+      params: auth.allowedClientParams(),
+    });
     kpis.value = data.kpis || [];
     chartSeries.value = (data.chart?.series || []).map((s: any) => ({
       label: s.label,
@@ -102,6 +108,10 @@ async function fetchData() {
   }
 }
 
-onMounted(fetchData);
+onMounted(() => {
+  if (canViewDashboard.value) {
+    void fetchData();
+  }
+});
 </script>
 
