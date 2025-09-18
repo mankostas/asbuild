@@ -515,22 +515,14 @@
       "notes": "Notes",
       "notesPlaceholder": "Additional notes",
       "tenant": "Tenant",
-      "owner": "Owner",
-      "ownerPlaceholder": "Select owner",
-      "ownerHelp": "Select a tenant to load owners.",
-      "selectTenantFirst": "Select a tenant first",
-      "loadingOwners": "Loading owners…",
-      "ownerLoadError": "Unable to load owners.",
       "loadError": "Failed to load client.",
       "errors": {
         "name": "Name is required",
-        "tenant": "Tenant is required",
-        "owner": "Owner is required"
+        "tenant": "Tenant is required"
       },
       "success": {
         "created": "Client created",
-        "updated": "Client updated",
-        "transfer": "Ownership updated"
+        "updated": "Client updated"
       },
       "submitCreate": "Create client",
       "submitUpdate": "Save changes"
@@ -539,7 +531,6 @@
       "loadError": "Failed to load clients."
     },
     "filters": {
-      "owner": "Owner",
       "tenant": "Tenant",
       "sort": {
         "label": "Sort by"
@@ -547,8 +538,7 @@
       "includeArchived": "Include archived",
       "archivedOnly": "Archived only",
       "includeTrashed": "Include trashed",
-      "trashedOnly": "Trashed only",
-      "allOwners": "All owners"
+      "trashedOnly": "Trashed only"
     },
     "bulk": {
       "deleteSelected": "Delete selected clients"
@@ -566,12 +556,10 @@
       "page": "Page",
       "total": "Total",
       "rowsSelected": "rows selected",
-      "unknownOwner": "Owner #{id}",
       "columns": {
         "name": "Name",
         "email": "Email",
         "phone": "Phone",
-        "owner": "Owner",
         "tenant": "Tenant",
         "status": "Status"
       }
@@ -580,16 +568,6 @@
       "active": "Active",
       "archived": "Archived",
       "trashed": "Trashed"
-    },
-    "transfer": {
-      "title": "Transfer ownership",
-      "description": "Select a new owner for this client.",
-      "ownerLabel": "New owner",
-      "submit": "Transfer",
-      "noOwner": "Unassigned",
-      "errors": {
-        "noClient": "Select a client before transferring ownership."
-      }
     },
     "confirmArchive": {
       "title": "Archive client?",

@@ -1,10 +1,5 @@
 import api from '@/services/api';
 
-export interface ClientOwner {
-  id: number;
-  name: string;
-}
-
 export interface Client {
   id: number;
   tenant_id: number | null;
@@ -14,7 +9,6 @@ export interface Client {
   notes?: string | null;
   archived_at?: string | null;
   deleted_at?: string | null;
-  owner?: ClientOwner | null;
 }
 
 export interface ListMeta {
@@ -32,7 +26,6 @@ export interface ClientListParams {
   dir?: 'asc' | 'desc';
   archived?: 'all' | 'only';
   trashed?: 'with' | 'only';
-  owner_id?: number | string | null;
   tenant_id?: number | string | null;
 }
 
@@ -42,7 +35,6 @@ export interface CreateClientPayload {
   phone?: string | null;
   notes?: string | null;
   tenant_id?: number | string | null;
-  owner_id?: number | string | null;
 }
 
 export interface UpdateClientPayload {
@@ -51,11 +43,6 @@ export interface UpdateClientPayload {
   phone?: string | null;
   notes?: string | null;
   tenant_id?: number | string | null;
-  owner_id?: number | string | null;
-}
-
-export interface TransferClientPayload {
-  owner_id: number | string | null;
 }
 
 export interface ClientListResponse {
@@ -87,9 +74,6 @@ const clientsApi = {
   },
   unarchive(id: number | string) {
     return api.delete<Client>(`/clients/${id}/archive`);
-  },
-  transfer(id: number | string, payload: TransferClientPayload) {
-    return api.post<Client>(`/clients/${id}/transfer`, payload);
   },
 };
 
