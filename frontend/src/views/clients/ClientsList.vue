@@ -261,6 +261,17 @@ watch(
 );
 
 watch(
+  () => auth.isSuperAdmin,
+  (isSuperAdmin) => {
+    if (!isSuperAdmin) {
+      tenantFilter.value = '';
+      clientsStore.setTenantFilter(null);
+    }
+  },
+  { immediate: true },
+);
+
+watch(
   () => tenantStore.currentTenantId,
   () => {
     if (auth.isSuperAdmin) return;
