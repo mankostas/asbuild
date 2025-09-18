@@ -5,14 +5,18 @@ return [
         'label' => 'Dashboard',
         'abilities' => [
             'dashboard.view',
+            'dashboard.client.view',
         ],
     ],
     'tasks' => [
         'label' => 'Tasks',
         'abilities' => [
             'tasks.view',
+            'tasks.client.view',
             'tasks.create',
+            'tasks.client.create',
             'tasks.update',
+            'tasks.client.update',
             'tasks.delete',
             'tasks.assign',
             'tasks.status.update',
@@ -50,6 +54,7 @@ return [
         'label' => 'Reports',
         'abilities' => [
             'reports.view',
+            'reports.client.view',
             'reports.manage',
         ],
     ],

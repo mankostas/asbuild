@@ -73,6 +73,41 @@ class AbilityServiceTest extends TestCase
         $this->assertFalse($this->service->userHasAbility($user, 'reports.view'));
     }
 
+    public function test_client_scoped_abilities_match_core_checks(): void
+    {
+        $tenant = Tenant::create(['name' => 'Client Tenant', 'features' => ['dashboard', 'tasks', 'reports']]);
+
+        $user = User::create([
+            'name' => 'Client User',
+            'email' => 'client@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $role = Role::where('tenant_id', $tenant->id)
+            ->where('slug', 'client_contributor')
+            ->firstOrFail();
+
+        $this->assertEqualsCanonicalizing([
+            'dashboard.client.view',
+            'tasks.client.view',
+            'tasks.client.create',
+            'tasks.client.update',
+            'reports.client.view',
+        ], $role->abilities);
+
+        $role->users()->attach($user->id, ['tenant_id' => $tenant->id]);
+
+        $this->assertTrue($this->service->userHasAbility($user, 'dashboard.view'));
+        $this->assertTrue($this->service->userHasAbility($user, 'tasks.view'));
+        $this->assertTrue($this->service->userHasAbility($user, 'tasks.create'));
+        $this->assertTrue($this->service->userHasAbility($user, 'tasks.update'));
+        $this->assertTrue($this->service->userHasAbility($user, 'reports.view'));
+
+        $this->assertFalse($this->service->userHasAbility($user, 'tasks.delete'));
+        $this->assertFalse($this->service->userHasAbility($user, 'tasks.manage'));
+    }
+
     public function test_tenant_specific_abilities_are_isolated(): void
     {
         $tenantOne = Tenant::create(['name' => 'Tenant One', 'features' => []]);
