@@ -4,6 +4,7 @@ import api from './api';
 export interface FeatureDefinition {
   label: string;
   abilities: string[];
+  roles?: string[];
 }
 
 export type FeatureMap = Record<string, FeatureDefinition>;
@@ -147,6 +148,10 @@ export function featureLabel(feature: string, fallback?: string): string {
 
 export function featureAbilities(feature: string): string[] {
   return state.featureMap[feature]?.abilities ?? [];
+}
+
+export function featureRoles(feature: string): string[] {
+  return state.featureMap[feature]?.roles ?? [];
 }
 
 export const permissionsState = readonly(state);

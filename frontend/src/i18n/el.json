@@ -139,6 +139,9 @@
     "employees": "Υπάλληλοι",
     "employeeCreate": "Δημιουργία Υπαλλήλου",
     "employeeEdit": "Επεξεργασία Υπαλλήλου",
+    "clients": "Πελάτες",
+    "clientCreate": "Δημιουργία Πελάτη",
+    "clientEdit": "Επεξεργασία Πελάτη",
     "tenants": "Μισθωτές",
     "profile": "Προφίλ",
     "branding": "Branding",
@@ -464,6 +467,12 @@
     },
     "passwordReset": {
       "success": "Στάλθηκε email επαναφοράς κωδικού"
+    }
+  },
+  "clients": {
+    "addClient": "Προσθήκη πελάτη",
+    "form": {
+      "search": "Αναζήτηση"
     }
   },
   "roles": {

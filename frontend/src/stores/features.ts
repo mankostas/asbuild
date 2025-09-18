@@ -4,6 +4,7 @@ import api from '@/services/api';
 export interface FeatureDefinition {
   label: string;
   abilities: string[];
+  roles?: string[];
 }
 
 export type FeatureMap = Record<string, FeatureDefinition>;
@@ -22,6 +23,7 @@ export const useFeaturesStore = defineStore('features', {
         slug,
         label: data.label,
         abilities: data.abilities,
+        roles: data.roles ?? [],
       })),
     featureOptions: (state) =>
       Object.entries(state.featureMap).map(([slug, data]) => ({
@@ -30,6 +32,7 @@ export const useFeaturesStore = defineStore('features', {
       })),
     abilitiesFor: (state) => (slug: string) =>
       state.featureMap[slug]?.abilities ?? [],
+    rolesFor: (state) => (slug: string) => state.featureMap[slug]?.roles ?? [],
   },
   actions: {
     async load(force = false) {

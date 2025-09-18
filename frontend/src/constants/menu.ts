@@ -55,6 +55,13 @@ const routeAccessConfig: Record<string, RouteAccessConfig> = {
     abilities: ['view', 'manage'],
     requireAllAbilities: true,
   },
+  'clients.list': { feature: 'clients', abilities: ['view'] },
+  'clients.create': { feature: 'clients', abilities: ['create'] },
+  'clients.edit': {
+    feature: 'clients',
+    abilities: ['view', 'manage'],
+    requireAllAbilities: true,
+  },
   'tenants.list': { feature: 'tenants', abilities: ['view'] },
   'tenants.create': { feature: 'tenants', abilities: ['create'] },
   'tenants.edit': {
@@ -244,6 +251,10 @@ const menuBlueprints: readonly MenuItemBlueprint[] = [
         childlink: 'employees.list',
       },
       {
+        childtitle: 'Clients',
+        childlink: 'clients.list',
+      },
+      {
         childtitle: 'Tenants',
         childlink: 'tenants.list',
       },
@@ -428,6 +439,11 @@ const quickActionBlueprints: readonly QuickActionBlueprint[] = [
     label: 'Employee',
     icon: 'heroicons-outline:users',
     link: 'employees.create',
+  },
+  {
+    label: 'Client',
+    icon: 'heroicons-outline:user-group',
+    link: 'clients.create',
   },
   {
     label: 'Task Status',
