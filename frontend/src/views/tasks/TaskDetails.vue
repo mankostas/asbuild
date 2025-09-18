@@ -22,6 +22,7 @@
         <li>Due: {{ format(task.due_at) || '—' }}</li>
         <li>Started: {{ format(task.started_at) || '—' }}</li>
         <li>Completed: {{ format(task.completed_at) || '—' }}</li>
+        <li>{{ t('tasks.details.client') }}: {{ task.client?.name || t('tasks.noClient', '—') }}</li>
         <li>Assignee: {{ task.assignee?.name || '—' }}</li>
         <li>Priority: {{ task.priority || '—' }}</li>
         <li>{{ t('tasks.form.slaStart') }}: {{ format(task.sla_start_at) || '—' }}</li>
@@ -175,7 +176,9 @@ function hasThumb(file: any) {
 }
 
 async function load() {
-  const { data } = await api.get(`/tasks/${route.params.id}`);
+  const { data } = await api.get(`/tasks/${route.params.id}`, {
+    params: { include: 'client' },
+  });
   task.value = data;
   const res = await statusesStore.fetch('all');
   statuses.value = res.data;

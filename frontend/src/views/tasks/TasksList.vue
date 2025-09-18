@@ -42,6 +42,12 @@
             :label="t('tasks.filters.type')"
             :options="[{ value: '', label: t('tasks.filters.allTypes') }, ...typeOptions.map((type) => ({ value: type.id, label: type.name }))]"
           />
+          <Select
+            id="filter-client"
+            v-model="clientFilter"
+            :label="t('tasks.filters.client')"
+            :options="clientSelectOptions"
+          />
           <div class="flex flex-col sm:col-span-2 lg:col-span-1">
             <span id="filter-assignee-label" class="mb-1 text-sm">{{ t('tasks.filters.assignee') }}</span>
             <AssigneePicker v-model="assigneeFilter" :aria-labelledby="'filter-assignee-label'" />
@@ -163,6 +169,7 @@
 import { ref, watch, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { storeToRefs } from 'pinia';
 import DashcodeServerTable from '@/components/datatable/DashcodeServerTable.vue';
 import api from '@/services/api';
 import { useNotify } from '@/plugins/notify';
@@ -176,15 +183,19 @@ import Select from '@/components/ui/Select/index.vue';
 import Textinput from '@/components/ui/Textinput/index.vue';
 import Checkbox from '@/components/ui/Checkbox/index.vue';
 import { loadListPrefs, saveListPrefs, type ListPrefs } from '@/services/listPrefs';
+import { useClientsStore } from '@/stores/clients';
 
 const router = useRouter();
 const notify = useNotify();
 const { t } = useI18n();
 const auth = useAuthStore();
+const clientsStore = useClientsStore();
+const { clients: clientList } = storeToRefs(clientsStore);
 
 const showFilters = ref(false);
 const statusFilter = ref('');
 const typeFilter = ref('');
+const clientFilter = ref('');
 const assigneeFilter = ref<{ id: number } | null>(null);
 const priorityFilter = ref('');
 const dueStart = ref('');
@@ -200,6 +211,25 @@ const tableKey = ref(0);
 
 const statusOptions = ref<string[]>([]);
 const typeOptions = ref<any[]>([]);
+const clientSelectOptions = computed(() => {
+  const options = clientList.value.map((client) => ({
+    value: String(client.id),
+    label: client.name || t('tasks.clientFallback', { id: client.id }),
+  }));
+  if (
+    clientFilter.value &&
+    !options.some((option) => option.value === String(clientFilter.value))
+  ) {
+    options.push({
+      value: String(clientFilter.value),
+      label: t('tasks.clientFallback', { id: clientFilter.value }),
+    });
+  }
+  return [
+    { value: '', label: t('tasks.filters.allClients', 'All clients') },
+    ...options,
+  ];
+});
 const priorityOptions = [
   { value: 'low' },
   { value: 'medium' },
@@ -207,16 +237,17 @@ const priorityOptions = [
   { value: 'urgent' },
 ];
 
-const columns = [
-  { label: 'ID', field: 'id', sortable: true },
-  { label: 'Type', field: 'type', sortable: false },
-  { label: 'Priority', field: 'priority', sortable: true, html: true },
-  { label: 'Status', field: 'status', sortable: false, html: true },
-  { label: 'Scheduled', field: 'scheduled_at', sortable: true },
-  { label: 'SLA End', field: 'sla_end_at', sortable: true, html: true },
-  { label: 'Started', field: 'started_at', sortable: true },
-  { label: 'Completed', field: 'completed_at', sortable: true },
-];
+const columns = computed(() => [
+  { label: t('tasks.table.id', 'ID'), field: 'id', sortable: true },
+  { label: t('tasks.table.type', 'Type'), field: 'type', sortable: false },
+  { label: t('tasks.table.client', 'Client'), field: 'client', sortable: false },
+  { label: t('tasks.table.priority', 'Priority'), field: 'priority', sortable: true, html: true },
+  { label: t('tasks.table.status', 'Status'), field: 'status', sortable: false, html: true },
+  { label: t('tasks.table.scheduled', 'Scheduled'), field: 'scheduled_at', sortable: true },
+  { label: t('tasks.table.slaEnd', 'SLA End'), field: 'sla_end_at', sortable: true, html: true },
+  { label: t('tasks.table.started', 'Started'), field: 'started_at', sortable: true },
+  { label: t('tasks.table.completed', 'Completed'), field: 'completed_at', sortable: true },
+]);
 
 const statusClasses: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-800',
@@ -278,6 +309,14 @@ onMounted(async () => {
   statusOptions.value = statusData.map((s: any) => s.name);
   typeOptions.value = typeRes.data?.data ?? typeRes.data;
 
+  if (!clientList.value.length) {
+    try {
+      await clientsStore.fetch({ per_page: 100, sort: 'name', dir: 'asc' });
+    } catch (error) {
+      console.warn('Failed to load clients for filter', error);
+    }
+  }
+
   if (prefs.value.filters) {
     statusFilter.value = prefs.value.filters.status || '';
     typeFilter.value = prefs.value.filters.type || '';
@@ -287,6 +326,7 @@ onMounted(async () => {
     dueEnd.value = prefs.value.filters.dueEnd || '';
     hasPhotos.value = prefs.value.filters.hasPhotos || false;
     mine.value = prefs.value.filters.mine || false;
+    clientFilter.value = prefs.value.filters.client || '';
   }
 });
 
@@ -306,6 +346,7 @@ function saveView() {
       dueEnd: dueEnd.value,
       hasPhotos: hasPhotos.value,
       mine: mine.value,
+      client: clientFilter.value,
     },
     sort: currentSort.value,
     pageSize: pageSize.value,
@@ -339,11 +380,19 @@ async function fetchTasks({ page, perPage, sort, search }: any) {
   currentSort.value = sort || null;
   pageSize.value = perPage;
   if (!all.value.length) {
-    const { data } = await api.get('/tasks');
+    const params: Record<string, any> = { include: 'client' };
+    if (clientFilter.value) {
+      params.client_id = Number(clientFilter.value);
+    }
+    const { data } = await api.get('/tasks', { params });
     all.value = data?.data ?? data;
   }
   let rows = all.value.slice();
 
+  if (clientFilter.value) {
+    const clientId = Number(clientFilter.value);
+    rows = rows.filter((r) => r.client && Number(r.client.id) === clientId);
+  }
   if (statusFilter.value) {
     rows = rows.filter((r) => r.status === statusFilter.value);
   }
@@ -374,9 +423,15 @@ async function fetchTasks({ page, perPage, sort, search }: any) {
   }
   if (search) {
     const q = String(search).toLowerCase();
-    rows = rows.filter((r) =>
-      Object.values(r).some((v) => String(v ?? '').toLowerCase().includes(q)),
-    );
+    rows = rows.filter((r) => {
+      const values = [
+        ...Object.values(r),
+        r.client?.name,
+        r.type?.name,
+        r.assignee?.name,
+      ];
+      return values.some((v) => String(v ?? '').toLowerCase().includes(q));
+    });
   }
   if (sort && sort.field) {
     rows.sort((a, b) => {
@@ -400,6 +455,7 @@ async function fetchTasks({ page, perPage, sort, search }: any) {
         ? `<span class="badge ${priorityClasses[r.priority] || ''}">${t(`tasks.priority.${r.priority}`)}</span>`
         : '',
       status: `<span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClasses[statusKey] ?? ''}">${statusLabel.replace(/_/g, ' ')}</span>`,
+      client: r.client?.name || t('tasks.noClient', '—'),
       scheduled_at: r.scheduled_at ? formatDisplay(r.scheduled_at) : '',
       sla_end_at: r.sla_end_at
         ? `<span class="badge ${slaBadgeClass(r.sla_end_at)}">${formatDisplay(r.sla_end_at)}</span>`
@@ -429,6 +485,11 @@ watch(
   reload,
   { deep: true },
 );
+
+watch(clientFilter, () => {
+  all.value = [];
+  reload();
+});
 
 function view(id: number) {
   router.push({ name: 'tasks.details', params: { id } });

@@ -9,12 +9,13 @@ export type ListPrefs = {
     dueEnd: string;
     hasPhotos: boolean;
     mine: boolean;
+    client: string;
   };
   sort: { field: string; type: 'asc' | 'desc' } | null;
   pageSize: number;
 };
 
-const KEY = (userId: string | number) => `asbuild:tasksList:v1:${userId}`;
+const KEY = (userId: string | number) => `asbuild:tasksList:v2:${userId}`;
 
 export function loadListPrefs(userId: string | number): ListPrefs {
   try {

@@ -14,6 +14,12 @@ export const useTasksStore = defineStore('tasks', {
           name: payload.assignee.name,
         };
       }
+      if (payload.client) {
+        payload.client = {
+          id: payload.client.id,
+          name: payload.client.name,
+        };
+      }
       return payload;
     },
     toPayload(payload: any) {
@@ -27,8 +33,9 @@ export const useTasksStore = defineStore('tasks', {
     },
     async fetch(params: ListParams = {}) {
       try {
+        const query = withListParams({ ...params, include: 'client' });
         const { data } = await api.get('/tasks', {
-          params: withListParams(params),
+          params: query,
         });
         this.tasks = data.data.map((a: any) => this.normalize(a));
         return data.meta;
