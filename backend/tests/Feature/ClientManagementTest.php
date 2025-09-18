@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Mail\ClientWelcomeMail;
 use App\Models\Client;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -40,6 +42,70 @@ class ClientManagementTest extends TestCase
         Sanctum::actingAs($user);
 
         return [$tenant, $user];
+    }
+
+    public function test_client_creation_can_send_welcome_email(): void
+    {
+        Mail::fake();
+
+        [$tenant] = $this->createTenantUserWithAbilities([
+            'clients.create',
+            'clients.manage',
+        ]);
+
+        $response = $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson('/api/clients', [
+                'name' => 'Acme Corp',
+                'email' => 'welcome@example.com',
+                'notify_client' => true,
+            ])
+            ->assertCreated();
+
+        $clientId = $response->json('data.id');
+        $this->assertNotNull($clientId);
+
+        Mail::assertSent(ClientWelcomeMail::class, function (ClientWelcomeMail $mail) {
+            return $mail->hasTo('welcome@example.com');
+        });
+    }
+
+    public function test_client_creation_without_notify_flag_does_not_send_email(): void
+    {
+        Mail::fake();
+
+        [$tenant] = $this->createTenantUserWithAbilities([
+            'clients.create',
+            'clients.manage',
+        ]);
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson('/api/clients', [
+                'name' => 'Silent Corp',
+                'email' => 'silent@example.com',
+            ])
+            ->assertCreated();
+
+        Mail::assertNothingSent();
+    }
+
+    public function test_client_creation_requires_email_when_notifying(): void
+    {
+        Mail::fake();
+
+        [$tenant] = $this->createTenantUserWithAbilities([
+            'clients.create',
+            'clients.manage',
+        ]);
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson('/api/clients', [
+                'name' => 'Acme Corp',
+                'notify_client' => true,
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
+
+        Mail::assertNothingSent();
     }
 
     public function test_tenant_manager_can_perform_full_client_lifecycle(): void

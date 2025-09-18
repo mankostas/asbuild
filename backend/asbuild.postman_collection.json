@@ -492,7 +492,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Acme Corp\",\n  \"email\": \"contact@example.com\",\n  \"phone\": \"+1-555-1234\",\n  \"notes\": \"Important client\"\n}",
+              "raw": "{\n  \"name\": \"Acme Corp\",\n  \"email\": \"contact@example.com\",\n  \"phone\": \"+1-555-1234\",\n  \"notes\": \"Important client\",\n  \"notify_client\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"

@@ -28,6 +28,7 @@ class ClientRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
+            'notify_client' => ['sometimes', 'boolean'],
             'tenant_id' => $tenantRules,
         ];
     }
@@ -39,6 +40,10 @@ class ClientRequest extends FormRequest
 
             if ($this->isMethod('post') && $tenantId === null) {
                 $validator->errors()->add('tenant_id', 'The tenant field is required.');
+            }
+
+            if ($this->boolean('notify_client') && ! $this->filled('email')) {
+                $validator->errors()->add('email', 'An email address is required to notify the client.');
             }
 
             if ($this->route('client') instanceof Client && ! $this->user()->isSuperAdmin()) {
@@ -56,6 +61,8 @@ class ClientRequest extends FormRequest
         if (! $this->user()->isSuperAdmin()) {
             unset($data['tenant_id']);
         }
+
+        unset($data['notify_client']);
 
         return $data;
     }

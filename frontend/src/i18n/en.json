@@ -524,6 +524,10 @@
         "created": "Client created",
         "updated": "Client updated"
       },
+      "notify": {
+        "label": "Send welcome email",
+        "description": "Email the client a welcome message after creation. Requires an email address."
+      },
       "submitCreate": "Create client",
       "submitUpdate": "Save changes"
     },
