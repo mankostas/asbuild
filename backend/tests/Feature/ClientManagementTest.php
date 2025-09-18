@@ -212,6 +212,90 @@ class ClientManagementTest extends TestCase
             ->assertStatus(422);
     }
 
+    public function test_super_admin_can_list_clients_for_specific_tenant(): void
+    {
+        $tenantA = Tenant::create(['name' => 'Tenant A', 'features' => ['clients', 'tasks', 'task_types']]);
+        $tenantB = Tenant::create(['name' => 'Tenant B', 'features' => ['clients', 'tasks', 'task_types']]);
+
+        $clientA = Client::create([
+            'tenant_id' => $tenantA->id,
+            'name' => 'Tenant A Client',
+            'email' => 'a@example.com',
+        ]);
+
+        $clientB1 = Client::create([
+            'tenant_id' => $tenantB->id,
+            'name' => 'Tenant B One',
+            'email' => 'b1@example.com',
+        ]);
+
+        $clientB2 = Client::create([
+            'tenant_id' => $tenantB->id,
+            'name' => 'Tenant B Two',
+            'email' => 'b2@example.com',
+        ]);
+
+        $role = Role::create([
+            'name' => 'SuperAdmin',
+            'slug' => 'super_admin',
+            'tenant_id' => $tenantA->id,
+            'abilities' => ['*'],
+            'level' => 0,
+        ]);
+
+        $super = User::create([
+            'name' => 'Super',
+            'email' => 'super@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $tenantA->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $super->roles()->attach($role->id, ['tenant_id' => $tenantA->id]);
+
+        Sanctum::actingAs($super);
+
+        $response = $this->getJson('/api/clients?tenant_id=' . $tenantB->id)
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('meta.total', 2)
+            ->json('data');
+
+        $this->assertEqualsCanonicalizing([
+            $clientB1->id,
+            $clientB2->id,
+        ], collect($response)->pluck('id')->all());
+
+        $this->assertTrue(
+            collect($response)->every(fn ($client) => (int) $client['tenant_id'] === $tenantB->id)
+        );
+
+        $this->assertNotContains($clientA->id, collect($response)->pluck('id')->all());
+    }
+
+    public function test_tenant_user_cannot_override_tenant_scope_or_view_foreign_clients(): void
+    {
+        [$tenantA, $user] = $this->createTenantUserWithAbilities([
+            'clients.view',
+            'clients.manage',
+        ]);
+
+        $tenantB = Tenant::create(['name' => 'Tenant B', 'features' => ['clients', 'tasks', 'task_types']]);
+        $clientB = Client::create([
+            'tenant_id' => $tenantB->id,
+            'name' => 'Tenant B Client',
+            'email' => 'tenant-b@example.com',
+        ]);
+
+        $this->withHeader('X-Tenant-ID', $tenantB->id)
+            ->getJson('/api/clients')
+            ->assertForbidden();
+
+        $this->withHeader('X-Tenant-ID', $tenantA->id)
+            ->getJson("/api/clients/{$clientB->id}")
+            ->assertForbidden();
+    }
+
     public function test_super_admin_can_target_any_tenant_client(): void
     {
         $tenantA = Tenant::create(['name' => 'A', 'features' => ['clients', 'task_types', 'tasks']]);
