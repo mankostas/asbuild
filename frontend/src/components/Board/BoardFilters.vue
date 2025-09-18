@@ -161,7 +161,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, watch, onMounted, computed, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import Dropdown from '@dc/components/Dropdown';
@@ -258,6 +258,27 @@ const filterControlClasses = (value: unknown, variant: FilterVariant = 'input') 
   return classes.join(' ');
 };
 
+let syncingFromProps = false;
+const syncLocalFromProps = (val: Filters) => {
+  syncingFromProps = true;
+  const previousTypeIds = Array.isArray(local.value.typeIds) ? local.value.typeIds : [];
+  const incomingTypeIds = Array.isArray(val.typeIds) ? val.typeIds : [];
+  const typeIdsChanged =
+    incomingTypeIds.length !== previousTypeIds.length ||
+    incomingTypeIds.some((id, index) => id !== previousTypeIds[index]);
+
+  Object.assign(local.value, val);
+  local.value.typeIds = incomingTypeIds.length
+    ? typeIdsChanged
+      ? [...incomingTypeIds]
+      : previousTypeIds
+    : [];
+
+  nextTick(() => {
+    syncingFromProps = false;
+  });
+};
+
 const onSelectChange = (
   key: 'assigneeId' | 'priority' | 'sla',
   event: Event,
@@ -284,11 +305,7 @@ async function loadOptions(force = false) {
 
 onMounted(async () => {
   await loadOptions();
-  Object.assign(local.value, props.modelValue, {
-    typeIds: Array.isArray(props.modelValue.typeIds)
-      ? [...props.modelValue.typeIds]
-      : [],
-  });
+  syncLocalFromProps(props.modelValue);
 });
 
 watch(
@@ -312,10 +329,9 @@ watch(
 
 watch(
   () => props.modelValue,
-  (val) =>
-    Object.assign(local.value, val, {
-      typeIds: Array.isArray(val.typeIds) ? [...val.typeIds] : [],
-    }),
+  (val) => {
+    syncLocalFromProps(val);
+  },
   { deep: true },
 );
 
@@ -323,6 +339,7 @@ let timer: number | undefined;
 watch(
   local,
   (val) => {
+    if (syncingFromProps) return;
     clearTimeout(timer);
     timer = window.setTimeout(() => emit('update:modelValue', { ...val }), 300);
   },
