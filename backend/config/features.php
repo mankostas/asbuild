@@ -3,6 +3,7 @@
 return [
     'dashboard',
     'tasks',
+    'clients',
     'manuals',
     'notifications',
     'reports',

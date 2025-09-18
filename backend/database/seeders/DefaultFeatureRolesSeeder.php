@@ -25,36 +25,54 @@ class DefaultFeatureRolesSeeder extends Seeder
             $label = $config['label'] ?? ucfirst($feature);
             $abilities = $config['abilities'] ?? [];
 
-            $viewerAbilities = array_filter(
-                $abilities,
-                fn ($ability) => str_ends_with($ability, '.view')
-            );
-            $roles[] = [
-                'slug' => "{$feature}_viewer",
-                'name' => "$label Viewer",
-                'abilities' => array_intersect($viewerAbilities, $selected),
-                'level' => 3,
+            $roleDefinitions = [
+                [
+                    'suffix' => 'viewer',
+                    'name' => "$label Viewer",
+                    'filter' => fn ($ability) => str_ends_with($ability, '.view'),
+                    'level' => 3,
+                ],
             ];
 
-            $editorAbilities = array_filter(
-                $abilities,
-                fn ($ability) => str_ends_with($ability, '.view')
-                    || str_ends_with($ability, '.create')
-                    || str_ends_with($ability, '.update')
-            );
-            $roles[] = [
-                'slug' => "{$feature}_editor",
-                'name' => "$label Editor",
-                'abilities' => array_intersect($editorAbilities, $selected),
-                'level' => 3,
-            ];
+            if ($feature === 'clients') {
+                $roleDefinitions[] = [
+                    'suffix' => 'contributor',
+                    'name' => "$label Contributor",
+                    'filter' => fn ($ability) => str_ends_with($ability, '.view')
+                        || str_ends_with($ability, '.create')
+                        || str_ends_with($ability, '.update'),
+                    'level' => 3,
+                ];
+            } else {
+                $roleDefinitions[] = [
+                    'suffix' => 'editor',
+                    'name' => "$label Editor",
+                    'filter' => fn ($ability) => str_ends_with($ability, '.view')
+                        || str_ends_with($ability, '.create')
+                        || str_ends_with($ability, '.update'),
+                    'level' => 3,
+                ];
+            }
 
-            $roles[] = [
-                'slug' => "{$feature}_manager",
+            $roleDefinitions[] = [
+                'suffix' => 'manager',
                 'name' => "$label Manager",
-                'abilities' => array_intersect($abilities, $selected),
+                'filter' => null,
                 'level' => 2,
             ];
+
+            foreach ($roleDefinitions as $definition) {
+                $filteredAbilities = $definition['filter']
+                    ? array_filter($abilities, $definition['filter'])
+                    : $abilities;
+
+                $roles[] = [
+                    'slug' => "{$feature}_{$definition['suffix']}",
+                    'name' => $definition['name'],
+                    'abilities' => array_intersect($filteredAbilities, $selected),
+                    'level' => $definition['level'],
+                ];
+            }
         }
 
         foreach ($roles as $role) {

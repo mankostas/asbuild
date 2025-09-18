@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Client;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class TaskTypeRequest extends FormRequest
 {
@@ -24,6 +26,7 @@ class TaskTypeRequest extends FormRequest
             'tenant_id' => ['sometimes', 'integer'],
             'abilities_json' => ['nullable', 'json'],
             'require_subtasks_complete' => ['sometimes', 'boolean'],
+            'client_id' => ['nullable', 'integer', Rule::exists('clients', 'id')],
         ];
     }
 
@@ -37,6 +40,7 @@ class TaskTypeRequest extends FormRequest
             'tenant_id' => 'tenant',
             'abilities_json' => 'abilities',
             'require_subtasks_complete' => 'require subtasks complete',
+            'client_id' => 'client',
         ];
     }
 
@@ -49,6 +53,39 @@ class TaskTypeRequest extends FormRequest
             'max' => 'The :attribute may not be greater than :max characters.',
             'string' => 'The :attribute must be a string.',
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $clientId = $this->input('client_id');
+            if (! $clientId) {
+                return;
+            }
+
+            $client = Client::query()->find($clientId);
+            if (! $client) {
+                return;
+            }
+
+            $targetTenant = null;
+
+            if ($this->user()->isSuperAdmin()) {
+                $targetTenant = $this->input('tenant_id');
+                if ($targetTenant === null) {
+                    $targetTenant = $this->attributes->get('tenant_id');
+                }
+                if ($targetTenant === null && ($type = $this->route('taskType'))) {
+                    $targetTenant = $type->tenant_id;
+                }
+            } else {
+                $targetTenant = $this->user()->tenant_id;
+            }
+
+            if ($targetTenant === null || (int) $client->tenant_id !== (int) $targetTenant) {
+                $validator->errors()->add('client_id', 'The selected client is invalid.');
+            }
+        });
     }
 
     public function validated($key = null, $default = null)

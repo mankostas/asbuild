@@ -28,8 +28,10 @@ class TaskController extends Controller
 
     public function index(Request $request)
     {
-        $base = Task::where('tenant_id', $request->user()->tenant_id)
-            ->with(['type', 'assignee', 'status'])
+        $tenantId = $request->attributes->get('tenant_id', $request->user()->tenant_id);
+
+        $base = Task::where('tenant_id', $tenantId)
+            ->with(['type', 'assignee', 'status', 'client'])
             ->withCount(['comments', 'attachments', 'watchers', 'subtasks']);
 
         if ($type = $request->query('type')) {
@@ -46,6 +48,10 @@ class TaskController extends Controller
 
         if ($priority = $request->query('priority')) {
             $base->where('priority', $priority);
+        }
+
+        if ($clientId = $request->query('client_id')) {
+            $base->where('client_id', $clientId);
         }
 
         if ($dueFrom = $request->query('due_from')) {
@@ -91,6 +97,9 @@ class TaskController extends Controller
         if (isset($data['task_type_id'])) {
             $type = TaskType::find($data['task_type_id']);
         }
+        if (($data['client_id'] ?? null) === null && $type?->client_id) {
+            $data['client_id'] = $type->client_id;
+        }
         $statuses = $type?->statuses ?? [];
         $data['status'] = $statuses ? array_key_first($statuses) : Task::STATUS_DRAFT;
         $data['status_slug'] = TaskStatus::prefixSlug($data['status'], $tenantId);
@@ -116,7 +125,7 @@ class TaskController extends Controller
         if ($task->assigned_user_id) {
             $task->watchers()->firstOrCreate(['user_id' => $task->assigned_user_id]);
         }
-        $task->load('type', 'assignee', 'watchers');
+        $task->load('type', 'assignee', 'watchers', 'client');
 
         return (new TaskResource($task))
             ->response()
@@ -126,7 +135,7 @@ class TaskController extends Controller
     public function show(Task $task)
     {
         $this->authorize('view', $task);
-        return new TaskResource($task->load('comments', 'type', 'assignee', 'watchers'));
+        return new TaskResource($task->load('comments', 'type', 'assignee', 'watchers', 'client'));
     }
 
     public function update(TaskUpsertRequest $request, Task $task)
@@ -152,6 +161,9 @@ class TaskController extends Controller
 
         $typeId = $data['task_type_id'] ?? $task->task_type_id;
         $type = $typeId ? TaskType::find($typeId) : $task->type;
+        if (! array_key_exists('client_id', $data) && $type?->client_id) {
+            $data['client_id'] = $type->client_id;
+        }
         $this->validateAgainstSchema($type, $data['form_data'] ?? $task->form_data ?? [], $task);
         $this->formSchemaService->mapAssignee($type->schema_json ?? [], $data);
         $this->formSchemaService->mapReviewer($type->schema_json ?? [], $data);
@@ -181,7 +193,7 @@ class TaskController extends Controller
             $task->watchers()->firstOrCreate(['user_id' => $task->assigned_user_id]);
         }
 
-        return new TaskResource($task->load('comments', 'type', 'assignee', 'watchers'));
+        return new TaskResource($task->load('comments', 'type', 'assignee', 'watchers', 'client'));
     }
 
     public function assign(Request $request, Task $task)
@@ -199,7 +211,7 @@ class TaskController extends Controller
             $task->watchers()->firstOrCreate(['user_id' => $task->assigned_user_id]);
         }
 
-        return new TaskResource($task->load('assignee', 'watchers'));
+        return new TaskResource($task->load('assignee', 'watchers', 'client'));
     }
 
     public function destroy(Task $task)

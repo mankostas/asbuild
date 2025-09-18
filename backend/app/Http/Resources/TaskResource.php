@@ -30,6 +30,15 @@ class TaskResource extends JsonResource
 
         $data['status_color'] = $this->status->color ?? null;
 
+        if ($this->relationLoaded('client') || $this->client) {
+            $data['client'] = $this->client
+                ? [
+                    'id' => $this->client->id,
+                    'name' => $this->client->name,
+                ]
+                : null;
+        }
+
         $data['counts'] = [
             'comments' => $this->comments_count ?? 0,
             'attachments' => $this->attachments_count ?? 0,

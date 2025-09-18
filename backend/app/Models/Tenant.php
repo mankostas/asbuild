@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\App;
+use App\Models\Client;
 use App\Models\Task;
 use App\Support\AbilityNormalizer;
 
@@ -73,6 +74,11 @@ class Tenant extends Model
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function clients(): HasMany
+    {
+        return $this->hasMany(Client::class);
     }
 
     public function roles(): HasMany

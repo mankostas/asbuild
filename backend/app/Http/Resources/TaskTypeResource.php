@@ -20,6 +20,14 @@ class TaskTypeResource extends JsonResource
                 $request->user()
             );
         }
+        if ($this->relationLoaded('client') || $this->client) {
+            $data['client'] = $this->client
+                ? [
+                    'id' => $this->client->id,
+                    'name' => $this->client->name,
+                ]
+                : null;
+        }
         return $this->formatDates($data);
     }
 }

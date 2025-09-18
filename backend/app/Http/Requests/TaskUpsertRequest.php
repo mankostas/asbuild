@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Client;
 use App\Models\Task;
 use App\Models\TaskType;
 use App\Services\ComputeService;
@@ -31,6 +32,7 @@ class TaskUpsertRequest extends FormRequest
             'reviewer' => ['nullable', 'array'],
             'reviewer.kind' => ['required_with:reviewer', 'in:team,employee'],
             'reviewer.id' => ['required_with:reviewer', 'integer'],
+            'client_id' => ['nullable', 'integer', Rule::exists('clients', 'id')],
         ];
 
         if ($task = $this->route('task')) {
@@ -62,6 +64,7 @@ class TaskUpsertRequest extends FormRequest
             'reviewer.kind' => 'reviewer type',
             'reviewer.id' => 'reviewer',
             'status' => 'status',
+            'client_id' => 'client',
         ];
     }
 
@@ -76,6 +79,39 @@ class TaskUpsertRequest extends FormRequest
             'array' => 'The :attribute must be an array.',
             'string' => 'The :attribute must be a string.',
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $clientId = $this->input('client_id');
+            if (! $clientId) {
+                return;
+            }
+
+            $client = Client::query()->find($clientId);
+            if (! $client) {
+                return;
+            }
+
+            $targetTenant = null;
+
+            if ($this->user()->isSuperAdmin()) {
+                $targetTenant = $this->attributes->get('tenant_id');
+                if ($targetTenant === null) {
+                    $targetTenant = $this->input('tenant_id');
+                }
+                if ($targetTenant === null && $task = $this->route('task')) {
+                    $targetTenant = $task->tenant_id;
+                }
+            } else {
+                $targetTenant = $this->user()->tenant_id;
+            }
+
+            if ($targetTenant === null || (int) $client->tenant_id !== (int) $targetTenant) {
+                $validator->errors()->add('client_id', 'The selected client is invalid.');
+            }
+        });
     }
 
     public function validated($key = null, $default = null)

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Api\TaskWatcherController;
 use App\Http\Controllers\Api\TaskTypeController;
+use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\TaskBoardController;
 use App\Http\Controllers\Api\ManualController;
 use App\Http\Controllers\Api\NotificationController;
@@ -87,6 +88,25 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         'update' => Ability::class . ':tasks.update',
         'destroy' => Ability::class . ':tasks.delete',
     ]);
+    Route::apiResource('clients', ClientController::class)->middleware([
+        'index' => Ability::class . ':clients.view',
+        'show' => Ability::class . ':clients.view',
+        'store' => Ability::class . ':clients.create',
+        'update' => Ability::class . ':clients.update',
+        'destroy' => Ability::class . ':clients.delete',
+    ]);
+    Route::post('clients/{client}/restore', [ClientController::class, 'restore'])
+        ->middleware(Ability::class . ':clients.update')
+        ->whereNumber('client');
+    Route::post('clients/{client}/archive', [ClientController::class, 'archive'])
+        ->middleware(Ability::class . ':clients.update')
+        ->whereNumber('client');
+    Route::delete('clients/{client}/archive', [ClientController::class, 'unarchive'])
+        ->middleware(Ability::class . ':clients.update')
+        ->whereNumber('client');
+    Route::post('clients/{client}/transfer', [ClientController::class, 'transfer'])
+        ->middleware(Ability::class . ':clients.manage')
+        ->whereNumber('client');
     Route::patch('tasks/{task}/assign', [TaskController::class, 'assign'])
         ->middleware(Ability::class . ':tasks.assign');
     Route::post('tasks/{task}/status', [TaskController::class, 'updateStatus'])
