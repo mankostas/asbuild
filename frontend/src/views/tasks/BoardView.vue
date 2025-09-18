@@ -225,6 +225,7 @@ interface Task {
   board_position?: number | null;
   sla_chip?: string | null;
   assignee?: { id: number; name: string };
+  client?: { id: number; name?: string | null } | null;
   counts?: {
     comments?: number;
     attachments?: number;
@@ -392,6 +393,7 @@ function buildQuery() {
   if (f.dates?.to) params.created_to = f.dates.to;
   params.sort = prefs.sorting.key;
   params.sort_dir = prefs.sorting.dir;
+  params.include = 'client';
   return params;
 }
 

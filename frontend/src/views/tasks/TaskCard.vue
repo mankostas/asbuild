@@ -13,6 +13,9 @@
           <div class="dark:text-slate-200 text-slate-900 max-w-[160px] truncate">
             {{ task.title }}
           </div>
+          <div class="text-xs text-slate-500 dark:text-slate-400 max-w-[160px] truncate">
+            {{ t('tasks.details.client') }}: {{ clientName }}
+          </div>
         </div>
       </div>
       <div>
@@ -184,6 +187,7 @@ interface Task {
   description?: string | null;
   due_at?: string | null;
   assignee?: { id: number; name: string } | null;
+  client?: { id: number; name?: string | null } | null;
   priority?: string | null;
   sla_chip?: 'ok' | 'dueSoon' | 'breached' | null;
   status_slug: string;
@@ -283,6 +287,8 @@ const assigneeInitials = computed(() =>
     .join('')
     .slice(0, 2) || '',
 );
+
+const clientName = computed(() => props.task.client?.name || t('tasks.noClient', '—'));
 
 const daysLeft = computed(() => {
   if (!props.task.due_at) return 0;

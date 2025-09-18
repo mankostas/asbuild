@@ -210,6 +210,7 @@
       "toggle": "Filters",
       "status": "Status",
       "type": "Type",
+      "client": "Client",
       "assignee": "Assignee",
       "priority": "Priority",
       "dueFrom": "Due From",
@@ -218,6 +219,7 @@
       "mine": "Mine",
       "allStatuses": "All statuses",
       "allTypes": "All types",
+      "allClients": "All clients",
       "allPriorities": "All priorities",
       "savedViews": "Saved views",
       "savedViewsPlaceholder": "Saved views",
@@ -264,7 +266,8 @@
       "comments": "Comments"
     },
     "details": {
-      "sla": "SLA"
+      "sla": "SLA",
+      "client": "Client"
     },
     "subtasks": {
       "title": "Subtasks",
@@ -273,7 +276,9 @@
     "watch": "Watch",
     "unwatch": "Unwatch",
     "unassigned": "Unassigned",
+    "noClient": "No client",
     "noTeam": "No team",
+    "clientFallback": "Client #{id}",
     "chips": {
       "priority": "Priority",
       "sla": {
@@ -282,6 +287,17 @@
         "breached": "Breached"
       },
       "due": "Due"
+    },
+    "table": {
+      "id": "ID",
+      "type": "Type",
+      "client": "Client",
+      "priority": "Priority",
+      "status": "Status",
+      "scheduled": "Scheduled",
+      "slaEnd": "SLA End",
+      "started": "Started",
+      "completed": "Completed"
     }
   },
   "board": {

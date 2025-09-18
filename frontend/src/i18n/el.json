@@ -210,6 +210,7 @@
       "toggle": "Φίλτρα",
       "status": "Κατάσταση",
       "type": "Τύπος",
+      "client": "Πελάτης",
       "assignee": "Υπεύθυνος",
       "priority": "Προτεραιότητα",
       "dueFrom": "Προθεσμία από",
@@ -218,6 +219,7 @@
       "mine": "Δικές μου",
       "allStatuses": "Όλες οι καταστάσεις",
       "allTypes": "Όλοι οι τύποι",
+      "allClients": "Όλοι οι πελάτες",
       "allPriorities": "Όλες οι προτεραιότητες",
       "savedViews": "Αποθηκευμένες προβολές",
       "savedViewsPlaceholder": "Αποθηκευμένες προβολές",
@@ -264,7 +266,8 @@
       "comments": "Σχόλια"
     },
     "details": {
-      "sla": "SLA"
+      "sla": "SLA",
+      "client": "Πελάτης"
     },
     "subtasks": {
       "title": "Υποεργασίες",
@@ -273,7 +276,9 @@
     "watch": "Παρακολούθηση",
     "unwatch": "Διακοπή παρακολούθησης",
     "unassigned": "Χωρίς ανάθεση",
+    "noClient": "Χωρίς πελάτη",
     "noTeam": "Χωρίς ομάδα",
+    "clientFallback": "Πελάτης #{id}",
     "chips": {
       "priority": "Προτεραιότητα",
       "sla": {
@@ -282,6 +287,17 @@
         "breached": "Παράβαση SLA"
       },
       "due": "Προθεσμία"
+    },
+    "table": {
+      "id": "ID",
+      "type": "Τύπος",
+      "client": "Πελάτης",
+      "priority": "Προτεραιότητα",
+      "status": "Κατάσταση",
+      "scheduled": "Προγραμματισμένο",
+      "slaEnd": "Λήξη SLA",
+      "started": "Έναρξη",
+      "completed": "Ολοκληρώθηκε"
     }
   },
   "board": {
