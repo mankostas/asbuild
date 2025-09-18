@@ -139,6 +139,9 @@
     "employees": "Employees",
     "employeeCreate": "Create Employee",
     "employeeEdit": "Edit Employee",
+    "clients": "Clients",
+    "clientCreate": "Create Client",
+    "clientEdit": "Edit Client",
     "tenants": "Tenants",
     "profile": "Profile",
     "branding": "Branding",
@@ -474,6 +477,12 @@
     },
     "passwordReset": {
       "success": "Password reset email sent"
+    }
+  },
+  "clients": {
+    "addClient": "Add Client",
+    "form": {
+      "search": "Search"
     }
   },
   "roles": {
