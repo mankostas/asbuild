@@ -466,7 +466,7 @@ async function reloadClients(overrides: Partial<ClientListParams> = {}) {
     await clientsStore.fetch(overrides);
     selectedIds.value = [];
   } catch (error: any) {
-    errorMessage.value = error?.message || t('common.error');
+    errorMessage.value = error?.message || t('clients.list.loadError');
     notify.error(errorMessage.value);
   }
 }

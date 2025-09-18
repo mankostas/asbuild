@@ -513,6 +513,9 @@
       "submitCreate": "Create client",
       "submitUpdate": "Save changes"
     },
+    "list": {
+      "loadError": "Failed to load clients."
+    },
     "filters": {
       "owner": "Owner",
       "tenant": "Tenant",
@@ -524,6 +527,9 @@
       "includeTrashed": "Include trashed",
       "trashedOnly": "Trashed only",
       "allOwners": "All owners"
+    },
+    "bulk": {
+      "deleteSelected": "Delete selected clients"
     },
     "sort": {
       "nameAsc": "Name (A–Z)",
@@ -558,7 +564,10 @@
       "description": "Select a new owner for this client.",
       "ownerLabel": "New owner",
       "submit": "Transfer",
-      "noOwner": "Unassigned"
+      "noOwner": "Unassigned",
+      "errors": {
+        "noClient": "Select a client before transferring ownership."
+      }
     },
     "confirmArchive": {
       "title": "Archive client?",
