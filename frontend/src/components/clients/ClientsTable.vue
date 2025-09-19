@@ -53,11 +53,16 @@
         @on-selected-rows-change="onSelectedRowsChange"
       >
         <template #table-row="rowProps">
-          <div v-if="rowProps.column.field === 'name'" class="flex flex-col">
+          <div
+            v-if="rowProps.column.field === 'name'"
+            class="flex items-center gap-3"
+          >
+            <div
+              class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-sm font-medium text-slate-600"
+            >
+              {{ getInitials(rowProps.row.name) }}
+            </div>
             <span class="text-sm font-medium">{{ rowProps.row.name }}</span>
-            <span v-if="rowProps.row.email" class="text-xs text-slate-500">
-              {{ rowProps.row.email }}
-            </span>
           </div>
           <span v-else-if="rowProps.column.field === 'email'">
             {{ rowProps.row.email || '—' }}
@@ -375,6 +380,16 @@ const togglingStatusSet = computed(() => {
 const canView = computed(() => can('clients.view'));
 const canEdit = computed(() => can('clients.manage'));
 const canDelete = computed(() => can('clients.delete') || can('clients.manage'));
+
+function getInitials(name: string) {
+  return (name || '')
+    .split(' ')
+    .filter(Boolean)
+    .map((n) => n[0] ?? '')
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+}
 
 watch(
   () => props.search,
