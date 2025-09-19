@@ -282,5 +282,10 @@ export const useClientsStore = defineStore('clients', {
       this.upsertClientInState(data);
       return data;
     },
+    async toggleStatus(id: number | string) {
+      const { data } = await clientsApi.toggleStatus(id);
+      this.upsertClientInState(data);
+      return data;
+    },
   },
 });

@@ -56,9 +56,27 @@
             {{ rowProps.row.tenantName || '—' }}
           </span>
           <span v-else-if="rowProps.column.field === 'status'">
-            <Badge :badge-class="statusBadge(rowProps.row.status).class">
-              {{ statusBadge(rowProps.row.status).label }}
-            </Badge>
+            <div
+              v-if="rowProps.row.status === 'archived' || rowProps.row.status === 'trashed'"
+              class="flex justify-center"
+            >
+              <Badge :badge-class="statusBadge(rowProps.row.status).class">
+                {{ statusBadge(rowProps.row.status).label }}
+              </Badge>
+            </div>
+            <div v-else class="flex items-center gap-2">
+              <Switch
+                :model-value="rowProps.row.status === 'active'"
+                :disabled="togglingStatusSet.has(String(rowProps.row.id)) || !canEdit"
+                :aria-label="t('clients.table.columns.status')"
+                @update:modelValue="(value: boolean) =>
+                  $emit('toggle-status', { id: rowProps.row.id, active: value })
+                "
+              />
+              <Badge :badge-class="statusBadge(rowProps.row.status).class">
+                {{ statusBadge(rowProps.row.status).label }}
+              </Badge>
+            </div>
           </span>
           <span v-else-if="rowProps.column.field === 'actions'">
             <Dropdown classMenuItems="w-56">
@@ -86,7 +104,9 @@
                     <span>{{ t('actions.edit') }}</span>
                   </button>
                 </MenuItem>
-                <MenuItem v-if="canEdit && rowProps.row.status === 'active'">
+                <MenuItem
+                  v-if="canEdit && ['active', 'inactive'].includes(rowProps.row.status)"
+                >
                   <button
                     type="button"
                     class="menu-item"
@@ -212,6 +232,7 @@ import { useI18n } from 'vue-i18n';
 import { can } from '@/stores/auth';
 import Pagination from '@/components/ui/Pagination';
 import Select from '@/components/ui/Select';
+import Switch from '@/components/ui/Switch/index.vue';
 
 interface ClientTableRow {
   id: number | string;
@@ -219,7 +240,7 @@ interface ClientTableRow {
   email?: string | null;
   phone?: string | null;
   tenantName?: string | null;
-  status: 'active' | 'archived' | 'trashed';
+  status: 'active' | 'inactive' | 'archived' | 'trashed';
 }
 
 const props = defineProps<{
@@ -233,6 +254,7 @@ const props = defineProps<{
   direction: 'asc' | 'desc';
   selectable?: boolean;
   showTenant?: boolean;
+  togglingStatusIds?: Array<number | string>;
 }>();
 
 const emit = defineEmits<{
@@ -244,6 +266,7 @@ const emit = defineEmits<{
   (e: 'view', id: number | string): void;
   (e: 'edit', id: number | string): void;
   (e: 'archive', id: number | string): void;
+  (e: 'toggle-status', payload: { id: number | string; active: boolean }): void;
   (e: 'restore', payload: { id: number | string; type: 'archive' | 'trash' }): void;
   (e: 'delete', id: number | string): void;
   (e: 'delete-selected', ids: Array<number | string>): void;
@@ -332,6 +355,10 @@ const selectOptions = computed(() => {
 
 const searchQuery = computed(() => props.search);
 
+const togglingStatusSet = computed(() => {
+  return new Set((props.togglingStatusIds ?? []).map((value) => String(value)));
+});
+
 const canView = computed(() => can('clients.view'));
 const canEdit = computed(() => can('clients.manage'));
 const canDelete = computed(() => can('clients.delete') || can('clients.manage'));
@@ -395,7 +422,7 @@ function onSelectedRowsChange(selection: {
   emit('selection-change', selectedIds.value);
 }
 
-function statusBadge(status: 'active' | 'archived' | 'trashed') {
+function statusBadge(status: 'active' | 'inactive' | 'archived' | 'trashed') {
   switch (status) {
     case 'archived':
       return {
@@ -406,6 +433,11 @@ function statusBadge(status: 'active' | 'archived' | 'trashed') {
       return {
         label: t('clients.status.trashed'),
         class: 'bg-danger-100 text-danger-600 dark:bg-danger-400/10 dark:text-danger-300',
+      };
+    case 'inactive':
+      return {
+        label: t('clients.status.inactive'),
+        class: 'bg-slate-200 text-slate-600 dark:bg-slate-700/40 dark:text-slate-200',
       };
     default:
       return {

@@ -7,6 +7,7 @@ export interface Client {
   email?: string | null;
   phone?: string | null;
   notes?: string | null;
+  status?: 'active' | 'inactive';
   archived_at?: string | null;
   deleted_at?: string | null;
 }
@@ -36,6 +37,7 @@ export interface CreateClientPayload {
   notes?: string | null;
   tenant_id?: number | string | null;
   notify_client?: boolean;
+  status?: 'active' | 'inactive';
 }
 
 export interface UpdateClientPayload {
@@ -44,6 +46,7 @@ export interface UpdateClientPayload {
   phone?: string | null;
   notes?: string | null;
   tenant_id?: number | string | null;
+  status?: 'active' | 'inactive';
 }
 
 export interface ClientListResponse {
@@ -75,6 +78,9 @@ const clientsApi = {
   },
   unarchive(id: number | string) {
     return api.delete<Client>(`/clients/${id}/archive`);
+  },
+  toggleStatus(id: number | string) {
+    return api.patch<Client>(`/clients/${id}/toggle-status`);
   },
 };
 

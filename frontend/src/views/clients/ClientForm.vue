@@ -10,7 +10,20 @@
       {{ t('routes.clients') }}
     </p>
 
-    <div v-if="canAccess" class="space-y-6">
+    <div
+      v-if="initializing"
+      class="flex justify-center py-10"
+      role="status"
+      aria-live="polite"
+    >
+      <span class="sr-only">{{ t('clients.table.loading') }}</span>
+      <span
+        class="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-primary-500"
+        aria-hidden="true"
+      />
+    </div>
+
+    <div v-else-if="canAccess" class="space-y-6">
       <Alert v-if="loadError" type="danger-light">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <span>{{ loadError }}</span>
@@ -94,8 +107,8 @@
               type="submit"
               btnClass="btn-dark"
               :text="isEdit ? t('clients.form.submitUpdate') : t('clients.form.submitCreate')"
-              :disabled="saving"
-              :loading="saving"
+              :isDisabled="saving"
+              :isLoading="saving"
             />
           </div>
         </div>
@@ -114,7 +127,20 @@
         {{ t('routes.clients') }}
       </p>
 
-      <div v-if="canAccess" class="space-y-6">
+      <div
+        v-if="initializing"
+        class="flex justify-center py-16"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="sr-only">{{ t('clients.table.loading') }}</span>
+        <span
+          class="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-primary-500"
+          aria-hidden="true"
+        />
+      </div>
+
+      <div v-else-if="canAccess" class="space-y-6">
         <Alert v-if="loadError" type="danger-light">
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <span>{{ loadError }}</span>
@@ -198,8 +224,8 @@
                 type="submit"
                 btnClass="btn-dark"
                 :text="isEdit ? t('clients.form.submitUpdate') : t('clients.form.submitCreate')"
-                :disabled="saving"
-                :loading="saving"
+                :isDisabled="saving"
+                :isLoading="saving"
               />
             </div>
           </div>
@@ -270,6 +296,7 @@ const serverError = ref('');
 const loadError = ref('');
 const loading = ref(false);
 const saving = ref(false);
+const initializing = ref(true);
 const tenantOptions = computed(() =>
   tenantStore.tenants.map((tenant: any) => ({
     value: String(tenant.id),
@@ -461,13 +488,21 @@ watch(
 );
 
 onMounted(async () => {
-  if (!canAccess.value) return;
-  if (isSuperAdmin.value) {
-    await tenantStore.loadTenants({ per_page: 100 }).catch(() => {});
+  if (!canAccess.value) {
+    initializing.value = false;
+    return;
   }
-  await loadClient();
-  if (!isEdit.value && isSuperAdmin.value && tenantStore.currentTenantId) {
-    form.tenantId = String(tenantStore.currentTenantId);
+
+  try {
+    if (isSuperAdmin.value) {
+      await tenantStore.loadTenants({ per_page: 100 }).catch(() => {});
+    }
+    await loadClient();
+    if (!isEdit.value && isSuperAdmin.value && tenantStore.currentTenantId) {
+      form.tenantId = String(tenantStore.currentTenantId);
+    }
+  } finally {
+    initializing.value = false;
   }
 });
 </script>

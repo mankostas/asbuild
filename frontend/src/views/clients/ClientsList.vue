@@ -12,6 +12,7 @@
       :direction="direction"
       :selectable="canBulkManage"
       :show-tenant="auth.isSuperAdmin"
+      :toggling-status-ids="togglingStatusIds"
       @update:search="handleSearch"
       @update:page="handlePageChange"
       @update:per-page="handlePerPageChange"
@@ -20,6 +21,7 @@
       @view="viewClient"
       @edit="editClient"
       @archive="confirmArchive"
+      @toggle-status="handleToggleStatus"
       @restore="handleRestore"
       @delete="confirmDelete"
       @delete-selected="confirmDeleteSelected"
@@ -93,7 +95,7 @@ interface ClientTableRow {
   phone: string | null;
   tenantId: number | string | null;
   tenantName: string | null;
-  status: 'active' | 'archived' | 'trashed';
+  status: 'active' | 'inactive' | 'archived' | 'trashed';
   archivedAt: string | null;
   deletedAt: string | null;
 }
@@ -118,6 +120,7 @@ const {
 
 const searchTerm = ref(search.value || '');
 const selectedIds = ref<Array<number | string>>([]);
+const togglingStatusIds = ref<Array<number | string>>([]);
 const tenantFilter = ref<string>(
   auth.isSuperAdmin && clientsStore.filters.tenantId !== null && clientsStore.filters.tenantId !== undefined
     ? String(clientsStore.filters.tenantId)
@@ -199,11 +202,12 @@ const tenantMap = computed(() => {
 
 const tableRows = computed<ClientTableRow[]>(() =>
   clients.value.map((client: Client) => {
+    const baseStatus: ClientTableRow['status'] = client.status === 'inactive' ? 'inactive' : 'active';
     const status: ClientTableRow['status'] = client.deleted_at
       ? 'trashed'
       : client.archived_at
       ? 'archived'
-      : 'active';
+      : baseStatus;
     const tenantId = client.tenant_id ?? null;
     const tenant = tenantId !== null ? tenantMap.value.get(String(tenantId)) : undefined;
     return {
@@ -291,6 +295,7 @@ async function reloadClients(overrides: Partial<ClientListParams> = {}) {
   try {
     await clientsStore.fetch(overrides);
     selectedIds.value = [];
+    togglingStatusIds.value = [];
   } catch (error: any) {
     notify.error(error?.message || t('clients.list.loadError'));
   }
@@ -298,6 +303,38 @@ async function reloadClients(overrides: Partial<ClientListParams> = {}) {
 
 function handleSelectionChange(ids: Array<number | string>) {
   selectedIds.value = ids;
+}
+
+async function handleToggleStatus(payload: { id: number | string; active: boolean }) {
+  const numericId = Number(payload.id);
+  const target = clients.value.find((clientItem) => clientItem.id === numericId);
+  if (!target) {
+    return;
+  }
+
+  if (target.deleted_at || target.archived_at) {
+    return;
+  }
+
+  const previousStatus: Client['status'] = target.status === 'inactive' ? 'inactive' : 'active';
+  const nextStatus: Client['status'] = payload.active ? 'active' : 'inactive';
+  if (previousStatus === nextStatus) {
+    return;
+  }
+
+  const snapshot: Client = { ...target };
+  togglingStatusIds.value = [...togglingStatusIds.value.filter((id) => id !== payload.id), payload.id];
+
+  clientsStore.upsertClientInState({ ...snapshot, status: nextStatus });
+
+  try {
+    await clientsStore.toggleStatus(payload.id);
+  } catch (error: any) {
+    clientsStore.upsertClientInState({ ...snapshot, status: previousStatus });
+    notify.error(error?.message || t('common.error'));
+  } finally {
+    togglingStatusIds.value = togglingStatusIds.value.filter((id) => id !== payload.id);
+  }
 }
 
 function handleSearch(value: string) {

@@ -17,12 +17,17 @@ class Client extends Model
         'email',
         'phone',
         'notes',
+        'status',
         'archived_at',
     ];
 
     protected $casts = [
         'tenant_id' => 'integer',
         'archived_at' => 'datetime',
+    ];
+
+    protected $attributes = [
+        'status' => 'active',
     ];
 
     public function tenant(): BelongsTo
