@@ -53,7 +53,7 @@ const items = computed(() =>
 
 const go = (name: string) => {
   if (name === 'clients.create') {
-    clientModal.open();
+    clientModal.open(router.resolve({ name }));
     return;
   }
 
