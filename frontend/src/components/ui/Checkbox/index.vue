@@ -130,7 +130,7 @@ export default defineComponent({
         return value.some((item) => item === props.value);
       }
 
-      return Boolean(value);
+      return value === true;
     });
 
     // normalize error to string
