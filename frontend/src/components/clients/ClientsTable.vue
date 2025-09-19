@@ -50,7 +50,7 @@
         @on-page-change="onPageChange"
         @on-per-page-change="onPerPageChange"
         @on-sort-change="onSortChange"
-        @on-selected-rows-change="onSelectedRowsChange"
+        @selected-rows-change="onSelectedRowsChange"
       >
         <template #table-row="rowProps">
           <div
