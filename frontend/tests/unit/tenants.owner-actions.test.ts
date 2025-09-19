@@ -59,8 +59,10 @@ describe('TenantsList owner management actions', () => {
     tenantStore.currentTenantId = '' as any;
     tenantStore.loadTenants = vi.fn().mockResolvedValue(undefined) as any;
 
-    getSpy = vi.spyOn(api, 'get').mockImplementation((url: string) => {
+    getSpy = vi.spyOn(api, 'get').mockImplementation((url: string, config?: any) => {
       if (url === '/tenants') {
+        const page = config?.params?.page ?? 1;
+        const perPage = config?.params?.per_page ?? 10;
         return Promise.resolve({
           data: {
             data: [
@@ -72,9 +74,11 @@ describe('TenantsList owner management actions', () => {
                 features: null,
                 phone: null,
                 address: null,
+                archived_at: null,
+                deleted_at: null,
               },
             ],
-            meta: { last_page: 1 },
+            meta: { page, per_page: perPage, total: 1, last_page: 1 },
           },
         } as any);
       }

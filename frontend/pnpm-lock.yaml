@@ -68,6 +68,9 @@ importers:
       simplebar-vue:
         specifier: ^2.3.3
         version: 2.4.2(vue@3.5.21(typescript@5.3.3))
+      sweetalert2:
+        specifier: ^11.4.4
+        version: 11.4.4
       swiper:
         specifier: ^8.2.6
         version: 8.4.7
