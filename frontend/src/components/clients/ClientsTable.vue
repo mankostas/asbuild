@@ -446,12 +446,19 @@ function onPerPageChange({
 }
 
 interface PagerSlotHandlers {
+  pageChanged?: (payload: { currentPage: number }) => void;
   perPageChanged?: (payload: { currentPerPage: number }) => void;
 }
 
 function onPerPageSelect(value: number, pagerProps: PagerSlotHandlers) {
   if (!Number.isFinite(value) || value <= 0 || value === props.perPage) {
     return;
+  }
+  const firstPage = 1;
+  if (pagerProps.pageChanged) {
+    pagerProps.pageChanged({ currentPage: firstPage });
+  } else {
+    emit('update:page', firstPage);
   }
   pagerProps.perPageChanged?.({ currentPerPage: value });
 }
