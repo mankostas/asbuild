@@ -143,4 +143,14 @@ class ClientController extends Controller
 
         return new ClientResource($client);
     }
+
+    public function toggleStatus(Client $client)
+    {
+        $this->authorize('update', $client);
+
+        $client->status = $client->status === 'active' ? 'inactive' : 'active';
+        $client->save();
+
+        return new ClientResource($client);
+    }
 }

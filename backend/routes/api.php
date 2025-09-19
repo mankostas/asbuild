@@ -104,6 +104,9 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
     Route::delete('clients/{client}/archive', [ClientController::class, 'unarchive'])
         ->middleware(Ability::class . ':clients.update')
         ->whereNumber('client');
+    Route::patch('clients/{client}/toggle-status', [ClientController::class, 'toggleStatus'])
+        ->middleware(Ability::class . ':clients.update')
+        ->whereNumber('client');
     Route::patch('tasks/{task}/assign', [TaskController::class, 'assign'])
         ->middleware(Ability::class . ':tasks.assign');
     Route::post('tasks/{task}/status', [TaskController::class, 'updateStatus'])

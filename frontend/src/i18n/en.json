@@ -570,6 +570,7 @@
     },
     "status": {
       "active": "Active",
+      "inactive": "Inactive",
       "archived": "Archived",
       "trashed": "Trashed"
     },
