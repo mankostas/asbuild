@@ -108,12 +108,27 @@
     },
     "table": {
       "rowsSelected": "rows selected",
+      "perPage": "Rows per page",
+      "page": "Page",
+      "total": "Total",
+      "loading": "Loading tenants…",
+      "empty": "No tenants found",
       "columns": {
         "name": "Name",
         "phone": "Phone",
         "address": "Address",
-        "features": "Features"
+        "features": "Features",
+        "status": "Status"
       }
+    },
+    "status": {
+      "active": "Active",
+      "archived": "Archived",
+      "trashed": "Trashed"
+    },
+    "bulk": {
+      "archiveSelected": "Archive selected",
+      "deleteSelected": "Delete selected"
     },
     "details": {
       "id": "ID",
