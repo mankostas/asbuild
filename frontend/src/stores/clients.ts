@@ -43,6 +43,12 @@ function normalizeTenantId(value: string | number | null | undefined): number | 
   return normalizeNumeric(value);
 }
 
+function normalizeIds(ids: Array<number | string>): number[] {
+  return ids
+    .map((value) => (typeof value === 'number' ? value : Number(value)))
+    .filter((value): value is number => Number.isFinite(value));
+}
+
 export const useClientsStore = defineStore('clients', {
   state: () => ({
     clients: [] as Client[],
@@ -282,10 +288,30 @@ export const useClientsStore = defineStore('clients', {
       this.upsertClientInState(data);
       return data;
     },
+    async archiveMany(ids: Array<number | string>) {
+      const numericIds = normalizeIds(ids);
+      if (!numericIds.length) {
+        return [] as Client[];
+      }
+      const response = await clientsApi.bulkArchive(numericIds);
+      const archived = response.data?.data ?? [];
+      archived.forEach((client: Client) => {
+        this.upsertClientInState(client);
+      });
+      return archived;
+    },
     async toggleStatus(id: number | string) {
       const { data } = await clientsApi.toggleStatus(id);
       this.upsertClientInState(data);
       return data;
+    },
+    async removeMany(ids: Array<number | string>) {
+      const numericIds = normalizeIds(ids);
+      if (!numericIds.length) {
+        return;
+      }
+      await clientsApi.bulkDelete(numericIds);
+      this.clients = this.clients.filter((client) => !numericIds.includes(client.id));
     },
   },
 });

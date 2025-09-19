@@ -240,6 +240,59 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Client'
+  /clients/bulk-archive:
+    post:
+      summary: Archive multiple clients
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Clients archived
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Client'
+  /clients/bulk-delete:
+    post:
+      summary: Delete multiple clients
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Clients deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: deleted
   /clients/{client}:
     get:
       summary: View client
