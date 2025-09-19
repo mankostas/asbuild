@@ -1,24 +1,37 @@
 <template>
   <Card>
     <div class="space-y-4">
-      <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <Breadcrumbs v-if="!$route.meta.hide" />
-        <div class="flex flex-col-reverse gap-2 md:flex-row md:items-center md:justify-end">
-          <slot name="header-actions" />
-          <InputGroup
-            v-model="localSearch"
-            :placeholder="t('clients.form.search')"
-            type="text"
-            prependIcon="heroicons-outline:search"
-            merged
-            classInput="text-xs !h-8"
-            @update:model-value="onSearch"
-          />
-        </div>
+      <div
+        v-if="!$route.meta.hide"
+        class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between"
+      >
+        <Breadcrumbs />
       </div>
 
-      <div v-if="$slots.filters" class="space-y-3">
-        <slot name="filters" />
+      <div class="space-y-3">
+        <div
+          class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between"
+        >
+          <div v-if="$slots.filters" class="flex-1 space-y-3">
+            <slot name="filters" />
+          </div>
+
+          <div
+            class="flex flex-col-reverse gap-2 md:flex-row md:items-center md:justify-end"
+            :class="{ 'md:ml-auto': !$slots.filters }"
+          >
+            <slot name="header-actions" />
+            <InputGroup
+              v-model="localSearch"
+              :placeholder="t('clients.form.search')"
+              type="text"
+              prependIcon="heroicons-outline:search"
+              merged
+              classInput="text-xs !h-8"
+              @update:model-value="onSearch"
+            />
+          </div>
+        </div>
       </div>
     </div>
 
