@@ -22,7 +22,7 @@
       :pagination-options="{ enabled: true, perPage: perPage }"
       :search-options="{ enabled: true, externalQuery: searchTerm }"
       :select-options="selectOptions"
-      @on-selected-rows-change="onSelectedRowsChange"
+      @selected-rows-change="onSelectedRowsChange"
     >
       <template #table-row="rowProps">
         <div v-if="rowProps.column.field === 'name'" class="flex flex-col leading-tight">
