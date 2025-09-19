@@ -121,6 +121,12 @@
         "status": "Status"
       }
     },
+    "filters": {
+      "includeArchived": "Include archived tenants",
+      "archivedOnly": "Archived tenants only",
+      "includeTrashed": "Include deleted tenants",
+      "trashedOnly": "Deleted tenants only"
+    },
     "status": {
       "active": "Active",
       "archived": "Archived",
@@ -129,6 +135,34 @@
     "bulk": {
       "archiveSelected": "Archive selected",
       "deleteSelected": "Delete selected"
+    },
+    "confirmArchive": {
+      "title": "Archive tenant?",
+      "message": "The tenant will be archived and remain inaccessible until restored.",
+      "confirm": "Yes, archive"
+    },
+    "confirmArchiveSelected": {
+      "title": "Archive selected tenants?",
+      "message": "Archive {count} selected tenants?",
+      "confirm": "Yes, archive"
+    },
+    "confirmDelete": {
+      "title": "Delete tenant?",
+      "message": "The tenant will be moved to the trash.",
+      "confirm": "Yes, delete"
+    },
+    "confirmDeleteSelected": {
+      "title": "Delete selected tenants?",
+      "message": "Delete {count} selected tenants?",
+      "confirm": "Yes, delete"
+    },
+    "notifications": {
+      "archived": "Tenant archived",
+      "unarchived": "Tenant unarchived",
+      "restored": "Tenant restored",
+      "deleted": "Tenant deleted",
+      "bulkArchived": "Archived {count} tenants",
+      "bulkDeleted": "Deleted {count} tenants"
     },
     "details": {
       "id": "ID",

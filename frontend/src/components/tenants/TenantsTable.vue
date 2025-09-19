@@ -10,8 +10,13 @@
 
       <div class="space-y-3">
         <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div v-if="$slots.filters" class="flex-1 space-y-3">
+            <slot name="filters" />
+          </div>
+
           <div
-            class="flex flex-col-reverse gap-2 md:flex-row md:items-center md:justify-end md:ml-auto"
+            class="flex flex-col-reverse gap-2 md:flex-row md:items-center md:justify-end"
+            :class="{ 'md:ml-auto': !$slots.filters }"
           >
             <InputGroup
               v-model="localSearch"
