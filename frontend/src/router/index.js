@@ -489,6 +489,7 @@ export const routes = [
           title: 'Create Tenant',
           layout: 'app',
           groupParent: 'tenants.list',
+          modal: true,
         },
       },
       {
@@ -502,6 +503,7 @@ export const routes = [
           title: 'Edit Tenant',
           layout: 'app',
           groupParent: 'tenants.list',
+          modal: true,
         },
       },
       {

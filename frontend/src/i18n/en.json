@@ -82,9 +82,17 @@
       "address": "Address",
       "adminName": "Admin Name",
       "adminEmail": "Admin Email",
+      "notify": {
+        "label": "Send owner invite email",
+        "description": "Email the tenant owner a welcome invitation after creation. Requires an email address."
+      },
       "features": "Features",
       "abilitiesPerFeature": "Abilities per feature",
-      "saveError": "Failed to save tenant"
+      "saveError": "Failed to save tenant",
+      "success": {
+        "created": "Tenant created",
+        "updated": "Tenant updated"
+      }
     },
     "list": {
       "addTenant": "Add Tenant",
