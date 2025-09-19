@@ -64,6 +64,68 @@
 <script>
 import Icon from "@/components/Icon";
 import { computed, defineComponent } from "vue";
+
+const isObject = (value) => value !== null && typeof value === "object";
+
+const looseEqual = (a, b) => {
+  if (a === b) {
+    return true;
+  }
+
+  const isObjectA = isObject(a);
+  const isObjectB = isObject(b);
+
+  if (isObjectA && isObjectB) {
+    try {
+      const isArrayA = Array.isArray(a);
+      const isArrayB = Array.isArray(b);
+
+      if (isArrayA && isArrayB) {
+        return (
+          a.length === b.length &&
+          a.every((element, index) => looseEqual(element, b[index]))
+        );
+      }
+
+      if (a instanceof Date && b instanceof Date) {
+        return a.getTime() === b.getTime();
+      }
+
+      if (!isArrayA && !isArrayB) {
+        const keysA = Object.keys(a);
+        const keysB = Object.keys(b);
+
+        return (
+          keysA.length === keysB.length &&
+          keysA.every((key) => looseEqual(a[key], b[key]))
+        );
+      }
+
+      return false;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  if (!isObjectA && !isObjectB) {
+    return String(a) === String(b);
+  }
+
+  return false;
+};
+
+const resolveAttr = (attrs, camelKey, kebabKey, fallback) => {
+  if (camelKey in attrs) {
+    return attrs[camelKey];
+  }
+
+  if (kebabKey in attrs) {
+    return attrs[kebabKey];
+  }
+
+  return fallback;
+};
+
 export default defineComponent({
   name: "Checkbox",
   components: { Icon },
@@ -123,14 +185,18 @@ export default defineComponent({
       return value;
     });
 
+    const trueValue = computed(() =>
+      resolveAttr(context.attrs, "trueValue", "true-value", true)
+    );
+
     const ck = computed(() => {
       const value = checkboxValue.value;
 
       if (Array.isArray(value)) {
-        return value.some((item) => item === props.value);
+        return value.some((item) => looseEqual(item, props.value));
       }
 
-      return value === true;
+      return looseEqual(value, trueValue.value);
     });
 
     // normalize error to string
