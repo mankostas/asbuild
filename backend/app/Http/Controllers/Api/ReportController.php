@@ -173,16 +173,16 @@ class ReportController extends Controller
         Gate::authorize('reports.view');
         $request->validate($this->clientFilterRules());
         $clientIds = $this->resolveClientFilter($request);
-
-        if ($clientIds !== null) {
-            return response()->json([]);
-        }
-
         $range = $this->dateRange($request);
         $tenantId = $request->user()->tenant_id;
 
-        $materials = Manual::where('tenant_id', $tenantId)
-            ->whereBetween('created_at', [$range['from'], $range['to']])
+        $materialsQuery = Manual::query()
+            ->where('tenant_id', $tenantId)
+            ->whereBetween('created_at', [$range['from'], $range['to']]);
+
+        ClientFilter::apply($materialsQuery, $clientIds, 'client_id');
+
+        $materials = $materialsQuery
             ->select('category', DB::raw('count(*) as count'))
             ->groupBy('category')
             ->get();
