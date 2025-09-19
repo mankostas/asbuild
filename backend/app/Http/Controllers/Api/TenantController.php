@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Support\ListQuery;
 use App\Http\Resources\TenantOwnerResource;
+use Database\Seeders\DefaultFeatureRolesSeeder;
 
 class TenantController extends Controller
 {
@@ -90,14 +91,20 @@ class TenantController extends Controller
                 $user->roles()->attach($roleId, ['tenant_id' => $tenant->id]);
             }
 
-            Password::sendResetLink(['email' => $user->email]);
+            if ($data['notify_owner'] ?? true) {
+                Password::sendResetLink(['email' => $user->email]);
+            }
 
             return $tenant;
         });
 
+        $tenant->refresh();
+        DefaultFeatureRolesSeeder::syncDefaultRolesForFeatures($tenant, $tenant->selectedFeatureAbilities());
+        $tenant->refresh();
+
         app(TenantSetupService::class)->createDefaultTaskStatuses($tenant);
 
-        return response()->json($tenant->load('roles'), 201);
+        return response()->json($this->transformTenant($tenant), 201);
     }
 
     public function show(Request $request, Tenant $tenant)
@@ -111,6 +118,13 @@ class TenantController extends Controller
         $this->ensureSuperAdmin($request);
         $data = $request->validated();
         $tenant->update($data);
+
+        if (array_key_exists('features', $data) || array_key_exists('feature_abilities', $data)) {
+            $tenant->refresh();
+            DefaultFeatureRolesSeeder::syncDefaultRolesForFeatures($tenant, $tenant->selectedFeatureAbilities());
+            $tenant->refresh();
+        }
+
         return $this->transformTenant($tenant);
     }
 
