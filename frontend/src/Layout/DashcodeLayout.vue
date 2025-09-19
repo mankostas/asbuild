@@ -60,6 +60,7 @@
       v-if="window.width > 768"
       :class="window.width > 1280 ? switchHeaderClass() : ''"
     />
+    <ClientQuickCreateModal />
   </main>
 </template>
 <script>
@@ -71,6 +72,7 @@ import Sidebar from './Sidebar.vue';
 import window from "@/mixins/window";
 import MobileSidebar from "@/components/ui/Sidebar/MobileSidebar.vue";
 import FooterMenu from "@/components/ui/Footer/FooterMenu.vue";
+import ClientQuickCreateModal from "@/components/clients/ClientQuickCreateModal.vue";
 
 export default {
   components: {
@@ -81,6 +83,7 @@ export default {
     Breadcrumbs,
     FooterMenu,
     MobileSidebar,
+    ClientQuickCreateModal,
   },
   mixins: [window],
   methods: {

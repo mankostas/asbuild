@@ -34,9 +34,11 @@ import Dropdown from '@/components/Dropdown';
 import Icon from '@/components/Icon';
 import { addNewOptions } from '@/constants/menu';
 import { useAuthStore } from '@/stores/auth';
+import { useClientModalStore } from '@/stores/clientModal';
 
 const router = useRouter();
 const auth = useAuthStore();
+const clientModal = useClientModalStore();
 
 const items = computed(() =>
   addNewOptions.filter((i) => {
@@ -50,6 +52,11 @@ const items = computed(() =>
 );
 
 const go = (name: string) => {
+  if (name === 'clients.create') {
+    clientModal.open();
+    return;
+  }
+
   router.push({ name });
 };
 </script>

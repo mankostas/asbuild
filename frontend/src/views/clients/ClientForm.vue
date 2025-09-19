@@ -251,6 +251,9 @@ import { can, useAuthStore } from '@/stores/auth';
 import { useNotify } from '@/plugins/notify';
 import { extractFormErrors } from '@/services/api';
 
+const props = defineProps<{ forceModal?: boolean }>();
+const emit = defineEmits<{ (event: 'close'): void }>();
+
 const route = useRoute();
 const router = useRouter();
 const clientsStore = useClientsStore();
@@ -260,7 +263,8 @@ const notify = useNotify();
 const { t } = useI18n();
 
 const isEdit = computed(() => route.name === 'clients.edit');
-const isModal = computed(() => Boolean(route.meta?.modal));
+const isForcedModal = computed(() => Boolean(props.forceModal));
+const isModal = computed(() => isForcedModal.value || Boolean(route.meta?.modal));
 const canAccess = computed(() =>
   isEdit.value ? can('clients.manage') : can('clients.create') || can('clients.manage'),
 );
@@ -424,6 +428,11 @@ async function submit() {
 }
 
 function navigateToList() {
+  if (isForcedModal.value) {
+    emit('close');
+    return;
+  }
+
   if (route.name !== 'clients.list') {
     router.push({ name: 'clients.list' });
   }
