@@ -55,7 +55,7 @@
         <template #table-row="rowProps">
           <div
             v-if="rowProps.column.field === 'name'"
-            class="flex items-center gap-3"
+            class="flex items-center justify-center gap-3"
           >
             <div
               class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-sm font-medium text-slate-600"
@@ -64,16 +64,25 @@
             </div>
             <span class="text-sm font-medium">{{ rowProps.row.name }}</span>
           </div>
-          <span v-else-if="rowProps.column.field === 'email'">
+          <span
+            v-else-if="rowProps.column.field === 'email'"
+            class="block text-center"
+          >
             {{ rowProps.row.email || '—' }}
           </span>
-          <span v-else-if="rowProps.column.field === 'phone'">
+          <span
+            v-else-if="rowProps.column.field === 'phone'"
+            class="block text-center"
+          >
             {{ rowProps.row.phone || '—' }}
           </span>
-          <span v-else-if="rowProps.column.field === 'tenantName'">
+          <span
+            v-else-if="rowProps.column.field === 'tenantName'"
+            class="block text-center"
+          >
             {{ rowProps.row.tenantName || '—' }}
           </span>
-          <span v-else-if="rowProps.column.field === 'status'">
+          <div v-else-if="rowProps.column.field === 'status'" class="flex justify-center">
             <div
               v-if="rowProps.row.status === 'archived' || rowProps.row.status === 'trashed'"
               class="flex justify-center"
@@ -82,7 +91,7 @@
                 {{ statusBadge(rowProps.row.status).label }}
               </Badge>
             </div>
-            <div v-else class="flex items-center gap-2">
+            <div v-else class="flex items-center justify-center gap-2">
               <Switch
                 :model-value="rowProps.row.status === 'active'"
                 :disabled="togglingStatusSet.has(String(rowProps.row.id)) || !canEdit"
@@ -95,8 +104,8 @@
                 {{ statusBadge(rowProps.row.status).label }}
               </Badge>
             </div>
-          </span>
-          <span v-else-if="rowProps.column.field === 'actions'">
+          </div>
+          <div v-else-if="rowProps.column.field === 'actions'" class="flex justify-center">
             <Dropdown classMenuItems="w-56">
               <span class="text-xl"><Icon icon="heroicons-outline:dots-vertical" /></span>
               <template #menus>
@@ -170,7 +179,7 @@
                 </MenuItem>
               </template>
             </Dropdown>
-          </span>
+          </div>
         </template>
 
         <template #selected-row-actions>
