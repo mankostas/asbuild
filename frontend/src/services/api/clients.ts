@@ -79,6 +79,12 @@ const clientsApi = {
   unarchive(id: number | string) {
     return api.delete<Client>(`/clients/${id}/archive`);
   },
+  bulkArchive(ids: Array<number | string>) {
+    return api.post<{ data: Client[] }>('/clients/bulk-archive', { ids });
+  },
+  bulkDelete(ids: Array<number | string>) {
+    return api.post<{ message: string }>('/clients/bulk-delete', { ids });
+  },
   toggleStatus(id: number | string) {
     return api.patch<Client>(`/clients/${id}/toggle-status`);
   },

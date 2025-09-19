@@ -144,6 +144,53 @@ class ClientController extends Controller
         return new ClientResource($client);
     }
 
+    public function bulkArchive(Request $request)
+    {
+        $data = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $clients = Client::query()->whereIn('id', $data['ids'])->get();
+
+        $clients->each(function (Client $client) {
+            $this->authorize('archive', $client);
+        });
+
+        $now = now();
+
+        foreach ($clients as $client) {
+            if ($client->trashed() || $client->archived_at !== null) {
+                continue;
+            }
+
+            $client->archived_at = $now;
+            $client->save();
+        }
+
+        return ClientResource::collection($clients);
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $data = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $clients = Client::query()->whereIn('id', $data['ids'])->get();
+
+        $clients->each(function (Client $client) {
+            $this->authorize('delete', $client);
+        });
+
+        if ($clients->isNotEmpty()) {
+            Client::query()->whereKey($clients->modelKeys())->delete();
+        }
+
+        return response()->json(['message' => 'deleted']);
+    }
+
     public function toggleStatus(Client $client)
     {
         $this->authorize('update', $client);

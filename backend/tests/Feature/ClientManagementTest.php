@@ -345,4 +345,121 @@ class ClientManagementTest extends TestCase
 
         $this->assertEquals($clientB->id, $task['client']['id']);
     }
+
+    public function test_tenant_manager_can_bulk_archive_clients(): void
+    {
+        [$tenant] = $this->createTenantUserWithAbilities([
+            'clients.view',
+            'clients.update',
+            'clients.manage',
+        ]);
+
+        $clients = collect(range(1, 3))->map(function (int $i) use ($tenant) {
+            return Client::create([
+                'tenant_id' => $tenant->id,
+                'name' => "Client {$i}",
+                'email' => "client{$i}@example.com",
+            ]);
+        });
+
+        $ids = $clients->pluck('id')->all();
+
+        $response = $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson('/api/clients/bulk-archive', ['ids' => $ids])
+            ->assertOk();
+
+        $response->assertJsonCount(3, 'data');
+
+        foreach ($clients as $client) {
+            $this->assertNotNull($client->fresh()->archived_at);
+        }
+    }
+
+    public function test_bulk_archive_rejects_foreign_clients(): void
+    {
+        [$tenant] = $this->createTenantUserWithAbilities([
+            'clients.view',
+            'clients.update',
+            'clients.manage',
+        ]);
+
+        $tenantB = Tenant::create(['name' => 'Tenant B', 'features' => ['clients', 'tasks', 'task_types']]);
+
+        $ownClient = Client::create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Local',
+            'email' => 'local@example.com',
+        ]);
+
+        $foreignClient = Client::create([
+            'tenant_id' => $tenantB->id,
+            'name' => 'Foreign',
+            'email' => 'foreign@example.com',
+        ]);
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson('/api/clients/bulk-archive', ['ids' => [$ownClient->id, $foreignClient->id]])
+            ->assertForbidden();
+
+        $this->assertNull($ownClient->fresh()->archived_at);
+        $this->assertNull($foreignClient->fresh()->archived_at);
+    }
+
+    public function test_tenant_manager_can_bulk_delete_clients(): void
+    {
+        [$tenant] = $this->createTenantUserWithAbilities([
+            'clients.view',
+            'clients.delete',
+            'clients.manage',
+        ]);
+
+        $clients = collect(range(1, 2))->map(function (int $i) use ($tenant) {
+            return Client::create([
+                'tenant_id' => $tenant->id,
+                'name' => "Client {$i}",
+                'email' => "client{$i}@example.com",
+            ]);
+        });
+
+        $ids = $clients->pluck('id')->all();
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson('/api/clients/bulk-delete', ['ids' => $ids])
+            ->assertOk()
+            ->assertJson(['message' => 'deleted']);
+
+        foreach ($clients as $client) {
+            $this->assertSoftDeleted('clients', ['id' => $client->id]);
+        }
+    }
+
+    public function test_bulk_delete_rejects_foreign_clients(): void
+    {
+        [$tenant] = $this->createTenantUserWithAbilities([
+            'clients.view',
+            'clients.delete',
+            'clients.manage',
+        ]);
+
+        $tenantB = Tenant::create(['name' => 'Tenant B', 'features' => ['clients', 'tasks', 'task_types']]);
+
+        $ownClient = Client::create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Local',
+            'email' => 'local@example.com',
+        ]);
+
+        $foreignClient = Client::create([
+            'tenant_id' => $tenantB->id,
+            'name' => 'Foreign',
+            'email' => 'foreign@example.com',
+        ]);
+
+        $this->withHeader('X-Tenant-ID', $tenant->id)
+            ->postJson('/api/clients/bulk-delete', ['ids' => [$ownClient->id, $foreignClient->id]])
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('clients', ['id' => $ownClient->id, 'deleted_at' => null]);
+        $this->assertDatabaseHas('clients', ['id' => $foreignClient->id, 'deleted_at' => null]);
+    }
 }

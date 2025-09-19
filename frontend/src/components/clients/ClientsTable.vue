@@ -175,7 +175,19 @@
 
         <template #selected-row-actions>
           <div class="flex items-center gap-3">
-            <slot name="selected-row-actions" :selected-ids="selectedIds">
+            <slot
+              name="selected-row-actions"
+              :selected-ids="selectedIds"
+              :archivable-ids="archivableSelectedIds"
+            >
+              <button
+                v-if="canEdit && archivableSelectedIds.length"
+                type="button"
+                class="ml-2 text-amber-500 hover:underline"
+                @click="$emit('archive-selected', archivableSelectedIds)"
+              >
+                {{ t('clients.bulk.archiveSelected') }}
+              </button>
               <button
                 v-if="canDelete && selectedIds.length"
                 type="button"
@@ -287,6 +299,7 @@ const emit = defineEmits<{
   (e: 'toggle-status', payload: { id: number | string; active: boolean }): void;
   (e: 'restore', payload: { id: number | string; type: 'archive' | 'trash' }): void;
   (e: 'delete', id: number | string): void;
+  (e: 'archive-selected', ids: Array<number | string>): void;
   (e: 'delete-selected', ids: Array<number | string>): void;
 }>();
 
@@ -372,6 +385,17 @@ const selectOptions = computed(() => {
 });
 
 const searchQuery = computed(() => props.search);
+
+const selectedRows = computed(() => {
+  const idSet = new Set(selectedIds.value.map((value) => String(value)));
+  return rows.value.filter((row) => idSet.has(String(row.id)));
+});
+
+const archivableSelectedIds = computed(() =>
+  selectedRows.value
+    .filter((row) => row.status === 'active' || row.status === 'inactive')
+    .map((row) => row.id),
+);
 
 const togglingStatusSet = computed(() => {
   return new Set((props.togglingStatusIds ?? []).map((value) => String(value)));

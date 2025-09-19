@@ -88,6 +88,10 @@ Route::middleware(['auth:sanctum', EnsureTenantScope::class])->group(function ()
         'update' => Ability::class . ':tasks.update',
         'destroy' => Ability::class . ':tasks.delete',
     ]);
+    Route::post('clients/bulk-archive', [ClientController::class, 'bulkArchive'])
+        ->middleware(Ability::class . ':clients.update');
+    Route::post('clients/bulk-delete', [ClientController::class, 'bulkDestroy'])
+        ->middleware(Ability::class . ':clients.delete');
     Route::apiResource('clients', ClientController::class)->middleware([
         'index' => Ability::class . ':clients.view',
         'show' => Ability::class . ':clients.view',

@@ -545,6 +545,7 @@
       "trashedOnly": "Trashed only"
     },
     "bulk": {
+      "archiveSelected": "Archive selected clients",
       "deleteSelected": "Delete selected clients"
     },
     "sort": {
@@ -577,6 +578,11 @@
     "confirmArchive": {
       "title": "Archive client?",
       "message": "The client will be moved to the archive.",
+      "confirm": "Yes, archive"
+    },
+    "confirmArchiveSelected": {
+      "title": "Archive selected clients?",
+      "message": "Archive {count} selected clients?",
       "confirm": "Yes, archive"
     },
     "confirmDelete": {

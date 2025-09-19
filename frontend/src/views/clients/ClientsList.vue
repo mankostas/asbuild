@@ -24,6 +24,7 @@
       @toggle-status="handleToggleStatus"
       @restore="handleRestore"
       @delete="confirmDelete"
+      @archive-selected="confirmArchiveSelected"
       @delete-selected="confirmDeleteSelected"
     >
       <template #header-actions>
@@ -136,6 +137,12 @@ const canCreate = computed(() => can('clients.create') || can('clients.manage'))
 const canManage = computed(() => can('clients.manage'));
 const canDelete = computed(() => can('clients.delete') || canManage.value);
 const canBulkManage = computed(() => canDelete.value);
+
+function normalizeSelection(ids: Array<number | string>): number[] {
+  return ids
+    .map((value) => (typeof value === 'number' ? value : Number(value)))
+    .filter((value): value is number => Number.isFinite(value));
+}
 
 const includeArchived = computed({
   get: () => archiveFilter.value.includeArchived,
@@ -399,6 +406,49 @@ async function confirmArchive(id: number | string) {
   }
 }
 
+async function confirmArchiveSelected(ids: Array<number | string>) {
+  if (!ids.length) return;
+  if (!canManage.value) {
+    notify.forbidden();
+    return;
+  }
+
+  const numericIds = normalizeSelection(ids);
+  if (!numericIds.length) {
+    return;
+  }
+
+  const idSet = new Set(numericIds);
+  const archivableIds = clients.value
+    .filter(
+      (clientItem) =>
+        idSet.has(clientItem.id) && !clientItem.deleted_at && !clientItem.archived_at,
+    )
+    .map((clientItem) => clientItem.id);
+
+  if (!archivableIds.length) {
+    return;
+  }
+
+  const result = await Swal.fire({
+    title: t('clients.confirmArchiveSelected.title'),
+    text: t('clients.confirmArchiveSelected.message', { count: archivableIds.length }),
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: t('clients.confirmArchiveSelected.confirm'),
+    cancelButtonText: t('actions.cancel'),
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    await clientsStore.archiveMany(archivableIds);
+    await reloadClients();
+  } catch (error: any) {
+    notify.error(error?.message || t('common.error'));
+  }
+}
+
 async function handleRestore(payload: { id: number | string; type: 'archive' | 'trash' }) {
   if (!canDelete.value && !canManage.value) {
     notify.forbidden();
@@ -444,9 +494,13 @@ async function confirmDeleteSelected(ids: Array<number | string>) {
     notify.forbidden();
     return;
   }
+  const numericIds = normalizeSelection(ids);
+  if (!numericIds.length) {
+    return;
+  }
   const result = await Swal.fire({
     title: t('clients.confirmDeleteSelected.title'),
-    text: t('clients.confirmDeleteSelected.message', { count: ids.length }),
+    text: t('clients.confirmDeleteSelected.message', { count: numericIds.length }),
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: t('clients.confirmDeleteSelected.confirm'),
@@ -454,7 +508,7 @@ async function confirmDeleteSelected(ids: Array<number | string>) {
   });
   if (!result.isConfirmed) return;
   try {
-    await Promise.all(ids.map((id) => clientsStore.remove(id)));
+    await clientsStore.removeMany(numericIds);
     await reloadClients();
   } catch (error: any) {
     notify.error(error?.message || t('common.error'));
