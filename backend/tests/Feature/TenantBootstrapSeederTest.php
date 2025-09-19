@@ -40,11 +40,25 @@ class TenantBootstrapSeederTest extends TestCase
             'tenant_id' => 1,
             'name' => 'Bella Barker',
             'email' => 'bella.barker@example.test',
+            'status' => 'active',
+            'archived_at' => null,
+            'deleted_at' => null,
         ]);
         $this->assertDatabaseHas('clients', [
             'tenant_id' => 1,
             'name' => 'Charlie Cat',
             'phone' => '555-200-0002',
+            'status' => 'active',
+            'archived_at' => null,
+            'deleted_at' => null,
+        ]);
+        $this->assertDatabaseHas('clients', [
+            'tenant_id' => 1,
+            'name' => 'Oscar Otter',
+            'email' => 'oscar.otter@example.test',
+            'status' => 'active',
+            'archived_at' => null,
+            'deleted_at' => null,
         ]);
     }
 }
