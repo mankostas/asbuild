@@ -35,10 +35,12 @@ import Icon from '@/components/Icon';
 import { addNewOptions } from '@/constants/menu';
 import { useAuthStore } from '@/stores/auth';
 import { useClientModalStore } from '@/stores/clientModal';
+import { useTenantModalStore } from '@/stores/tenantModal';
 
 const router = useRouter();
 const auth = useAuthStore();
 const clientModal = useClientModalStore();
+const tenantModal = useTenantModalStore();
 
 const items = computed(() =>
   addNewOptions.filter((i) => {
@@ -54,6 +56,11 @@ const items = computed(() =>
 const go = (name: string) => {
   if (name === 'clients.create') {
     clientModal.open(router.resolve({ name }));
+    return;
+  }
+
+  if (name === 'tenants.create') {
+    tenantModal.open(router.resolve({ name }));
     return;
   }
 

@@ -61,6 +61,7 @@
       :class="window.width > 1280 ? switchHeaderClass() : ''"
     />
     <ClientQuickCreateModal />
+    <TenantQuickCreateModal />
   </main>
 </template>
 <script>
@@ -73,6 +74,7 @@ import window from "@/mixins/window";
 import MobileSidebar from "@/components/ui/Sidebar/MobileSidebar.vue";
 import FooterMenu from "@/components/ui/Footer/FooterMenu.vue";
 import ClientQuickCreateModal from "@/components/clients/ClientQuickCreateModal.vue";
+import TenantQuickCreateModal from "@/components/tenants/TenantQuickCreateModal.vue";
 
 export default {
   components: {
@@ -84,6 +86,7 @@ export default {
     FooterMenu,
     MobileSidebar,
     ClientQuickCreateModal,
+    TenantQuickCreateModal,
   },
   mixins: [window],
   methods: {
