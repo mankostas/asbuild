@@ -25,6 +25,10 @@ class TenantUpsertRequest extends FormRequest
             'feature_abilities' => ['array'],
             'feature_abilities.*' => ['array'],
             'feature_abilities.*.*' => ['string'],
+            'notify_owner' => array_filter([
+                $this->isMethod('POST') ? null : 'sometimes',
+                'boolean',
+            ]),
             'phone' => array_filter([
                 $this->isMethod('POST') ? null : 'sometimes',
                 'nullable',
@@ -43,6 +47,23 @@ class TenantUpsertRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $notifyOwner = $this->input('notify_owner');
+
+        if ($notifyOwner === null && $this->isMethod('POST')) {
+            $this->merge(['notify_owner' => true]);
+
+            return;
+        }
+
+        if ($notifyOwner !== null) {
+            $this->merge([
+                'notify_owner' => filter_var($notifyOwner, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $notifyOwner,
+            ]);
+        }
     }
 
     public function withValidator($validator)
