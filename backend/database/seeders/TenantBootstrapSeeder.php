@@ -140,6 +140,9 @@ class TenantBootstrapSeeder extends Seeder
                     'email' => $client['email'] ?? null,
                     'phone' => $client['phone'] ?? null,
                     'notes' => $client['notes'] ?? null,
+                    'status' => 'active',
+                    'archived_at' => null,
+                    'deleted_at' => null,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]
