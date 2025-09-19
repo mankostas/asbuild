@@ -61,6 +61,79 @@ describe('Navmenu feature gating', () => {
     expect(visible[0].child).toHaveLength(1);
   });
 
+  it('filters Tenants child items when access is missing', () => {
+    const menu = [
+      {
+        title: 'Users',
+        child: [
+          {
+            childtitle: 'Employees',
+            childlink: 'employees.list',
+            requiredAbilities: ['employees.view'],
+            requiredFeatures: ['employees'],
+          },
+          {
+            childtitle: 'Tenants',
+            childlink: 'tenants.list',
+            requiredAbilities: ['tenants.view'],
+            requiredFeatures: ['tenants'],
+          },
+        ],
+      },
+    ];
+
+    const auth = useAuthStore();
+
+    auth.features = ['employees'];
+    auth.abilities = ['employees.view', 'tenants.view'];
+    let visible = runVisible(menu);
+    expect(visible).toHaveLength(1);
+    expect(visible[0].child?.map((item: any) => item.childlink)).toEqual([
+      'employees.list',
+    ]);
+
+    auth.features = ['employees', 'tenants'];
+    auth.abilities = ['employees.view'];
+    visible = runVisible(menu);
+    expect(visible).toHaveLength(1);
+    expect(visible[0].child?.map((item: any) => item.childlink)).toEqual([
+      'employees.list',
+    ]);
+  });
+
+  it('shows Tenants child items when access is available', () => {
+    const menu = [
+      {
+        title: 'Users',
+        child: [
+          {
+            childtitle: 'Employees',
+            childlink: 'employees.list',
+            requiredAbilities: ['employees.view'],
+            requiredFeatures: ['employees'],
+          },
+          {
+            childtitle: 'Tenants',
+            childlink: 'tenants.list',
+            requiredAbilities: ['tenants.view'],
+            requiredFeatures: ['tenants'],
+          },
+        ],
+      },
+    ];
+
+    const auth = useAuthStore();
+    auth.features = ['employees', 'tenants'];
+    auth.abilities = ['employees.view', 'tenants.view'];
+
+    const visible = runVisible(menu);
+    expect(visible).toHaveLength(1);
+    expect(visible[0].child?.map((item: any) => item.childlink)).toEqual([
+      'employees.list',
+      'tenants.list',
+    ]);
+  });
+
   it('shows the profile menu item without feature or ability requirements', () => {
     const auth = useAuthStore();
     auth.abilities = [];
