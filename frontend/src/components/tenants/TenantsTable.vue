@@ -51,14 +51,24 @@
         @selected-rows-change="onSelectedRowsChange"
       >
         <template #table-row="rowProps">
-          <div v-if="rowProps.column.field === 'name'" class="flex flex-col leading-tight">
-            <span class="text-sm font-medium">{{ rowProps.row.name }}</span>
-            <span
-              v-if="rowProps.row.slug || rowProps.row.domain"
-              class="text-xs text-gray-500"
+          <div
+            v-if="rowProps.column.field === 'name'"
+            class="flex items-center justify-center gap-3"
+          >
+            <div
+              class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-sm font-medium text-slate-600"
             >
-              {{ rowProps.row.domain || rowProps.row.slug }}
-            </span>
+              {{ getInitials(rowProps.row.name) }}
+            </div>
+            <div class="flex flex-col leading-tight text-left">
+              <span class="text-sm font-medium">{{ rowProps.row.name }}</span>
+              <span
+                v-if="rowProps.row.slug || rowProps.row.domain"
+                class="text-xs text-gray-500"
+              >
+                {{ rowProps.row.domain || rowProps.row.slug }}
+              </span>
+            </div>
           </div>
           <span v-else-if="rowProps.column.field === 'phone'">
             {{ rowProps.row.phone || '—' }}
@@ -70,9 +80,30 @@
             {{ formatFeatureCount(rowProps.row) }}
           </span>
           <div v-else-if="rowProps.column.field === 'status'" class="flex justify-center">
-            <Badge :badge-class="statusBadge(statusForRow(rowProps.row)).class">
-              {{ statusBadge(statusForRow(rowProps.row)).label }}
-            </Badge>
+            <div
+              v-if="statusForRow(rowProps.row) === 'trashed'"
+              class="flex justify-center"
+            >
+              <Badge :badge-class="statusBadge('trashed').class">
+                {{ statusBadge('trashed').label }}
+              </Badge>
+            </div>
+            <div v-else class="flex items-center justify-center gap-2">
+              <Switch
+                :model-value="statusForRow(rowProps.row) === 'active'"
+                :disabled="
+                  togglingStatusSet.has(String(rowProps.row.id)) ||
+                  !canToggle
+                "
+                :aria-label="t('tenants.table.columns.status')"
+                @update:modelValue="(value: boolean) =>
+                  $emit('toggle-status', { id: rowProps.row.id, active: value })
+                "
+              />
+              <Badge :badge-class="statusBadge(statusForRow(rowProps.row)).class">
+                {{ statusBadge(statusForRow(rowProps.row)).label }}
+              </Badge>
+            </div>
           </div>
           <div v-else-if="rowProps.column.field === 'actions'" class="flex justify-center">
             <Dropdown classMenuItems="w-56">
@@ -238,6 +269,7 @@ import Icon from '@/components/ui/Icon';
 import Badge from '@/components/ui/Badge';
 import Pagination from '@/components/ui/Pagination';
 import Select from '@/components/ui/Select';
+import Switch from '@/components/ui/Switch/index.vue';
 import Breadcrumbs from '@/Layout/Breadcrumbs.vue';
 import { useI18n } from 'vue-i18n';
 import { can } from '@/stores/auth';
@@ -276,6 +308,7 @@ const props = defineProps<{
   direction: SortDirection;
   loading?: boolean;
   selectable?: boolean;
+  togglingStatusIds?: Array<number | string>;
 }>();
 
 const emit = defineEmits<{
@@ -296,6 +329,7 @@ const emit = defineEmits<{
   (e: 'unarchive', id: number | string): void;
   (e: 'restore', id: number | string): void;
   (e: 'archive-selected', ids: Array<number | string>): void;
+  (e: 'toggle-status', payload: { id: number | string; active: boolean }): void;
 }>();
 
 const { t } = useI18n();
@@ -375,9 +409,27 @@ const archivableSelectedIds = computed(() =>
     .map((row) => row.id),
 );
 
+const togglingStatusSet = computed(
+  () =>
+    new Set(
+      (props.togglingStatusIds ?? []).map((value) => String(value)),
+    ),
+);
+
 const canView = computed(() => can('tenants.view'));
 const canManage = computed(() => can('tenants.manage'));
+const canToggle = computed(() => can('tenants.update') || canManage.value);
 const canDelete = computed(() => can('tenants.delete') || can('tenants.manage'));
+
+function getInitials(name: string) {
+  return (name || '')
+    .split(' ')
+    .filter(Boolean)
+    .map((n) => n[0] ?? '')
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+}
 
 watch(
   () => props.search,

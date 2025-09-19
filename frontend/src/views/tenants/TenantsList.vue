@@ -11,6 +11,7 @@
       :sort="sort"
       :direction="direction"
       :selectable="canBulkManage"
+      :toggling-status-ids="togglingStatusIds"
       @update:search="handleSearch"
       @update:page="handlePageChange"
       @update:per-page="handlePerPageChange"
@@ -18,6 +19,7 @@
       @selection-change="handleSelectionChange"
       @view="view"
       @edit="edit"
+      @toggle-status="toggleTenantStatus"
       @archive="confirmArchive"
       @unarchive="confirmUnarchive"
       @restore="handleRestore"
@@ -56,6 +58,13 @@
       </template>
     </TenantsTable>
 
+    <TenantDetails
+      v-if="viewingTenantId !== null"
+      :tenant-id="viewingTenantId"
+      force-modal
+      @close="closeTenantDetails"
+    />
+
     <div v-else class="p-4">
       <SkeletonTable :count="10" />
     </div>
@@ -67,6 +76,7 @@ import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
 import TenantsTable from '@/components/tenants/TenantsTable.vue';
+import TenantDetails from '@/views/tenants/TenantDetails.vue';
 import ClientsStatusFilters from '@/components/clients/ClientsStatusFilters.vue';
 import SkeletonTable from '@/components/ui/Skeleton/Table.vue';
 import Button from '@/components/ui/Button';
@@ -144,6 +154,8 @@ const includeTrashed = ref(false);
 const trashedOnly = ref(false);
 
 const selectedIds = ref<Array<number | string>>([]);
+const togglingStatusIds = ref<Array<number | string>>([]);
+const viewingTenantId = ref<number | string | null>(null);
 
 const showSkeleton = computed(() => initialLoading.value || loading.value);
 const tableRows = computed(() => all.value);
@@ -314,6 +326,7 @@ async function reloadTenants(overrides: Partial<TenantListParams> = {}) {
     }
 
     all.value = mapped;
+    togglingStatusIds.value = [];
     selectedIds.value = [];
 
     const meta = response.data?.meta ?? {};
@@ -428,7 +441,11 @@ function handleSortChange(payload: { sort: string; direction: SortDirection }) {
 
 function view(id: number | string) {
   if (!canViewTenants.value) return;
-  router.push({ name: 'tenants.view', params: { id } });
+  viewingTenantId.value = id;
+}
+
+function closeTenantDetails() {
+  viewingTenantId.value = null;
 }
 
 function edit(id: number | string) {
@@ -508,6 +525,43 @@ async function handleRestore(id: number | string) {
     await refreshAfterMutation();
   } catch (error: any) {
     notify.error(error?.message || t('common.error'));
+  }
+}
+
+async function toggleTenantStatus({
+  id,
+  active,
+}: {
+  id: number | string;
+  active: boolean;
+}) {
+  if (!canUpdate.value) {
+    notify.forbidden();
+    return;
+  }
+
+  const key = String(id);
+  if (togglingStatusIds.value.includes(key)) {
+    return;
+  }
+
+  togglingStatusIds.value = [...togglingStatusIds.value, key];
+
+  try {
+    if (active) {
+      await api.delete(`/tenants/${id}/archive`);
+      notify.success(t('tenants.notifications.unarchived'));
+    } else {
+      await api.post(`/tenants/${id}/archive`);
+      notify.success(t('tenants.notifications.archived'));
+    }
+    await refreshAfterMutation();
+  } catch (error: any) {
+    notify.error(error?.message || t('common.error'));
+  } finally {
+    togglingStatusIds.value = togglingStatusIds.value.filter(
+      (value) => String(value) !== key,
+    );
   }
 }
 
