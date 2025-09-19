@@ -20,16 +20,16 @@
             class="flex flex-col-reverse gap-2 md:flex-row md:items-center md:justify-end"
             :class="{ 'md:ml-auto': !$slots.filters }"
           >
-            <slot name="header-actions" />
             <InputGroup
-              v-model="localSearch"
-              :placeholder="t('clients.form.search')"
-              type="text"
-              prependIcon="heroicons-outline:search"
-              merged
-              classInput="text-xs !h-8"
-              @update:modelValue="onSearch"
+                v-model="localSearch"
+                :placeholder="t('clients.form.search')"
+                type="text"
+                prependIcon="heroicons-outline:search"
+                merged
+                classInput="text-xs !h-8"
+                @update:modelValue="onSearch"
             />
+            <slot name="header-actions" />
           </div>
         </div>
       </div>
