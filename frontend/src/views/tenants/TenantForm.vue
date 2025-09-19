@@ -1,56 +1,146 @@
 <template>
-  <div v-if="canAccess">
-    <form class="max-w-md grid gap-4" @submit.prevent="onSubmit">
-      <Textinput v-model="form.name" :label="t('tenants.form.name')" />
-      <div v-if="errors.name" class="text-red-600 text-sm">{{ errors.name }}</div>
-      <Textinput
-        v-model.number="form.quota_storage_mb"
-        :label="t('tenants.form.storageQuota')"
-        type="number"
-      />
-      <Textinput v-model="form.phone" :label="t('tenants.form.phone')" />
-      <Textinput v-model="form.address" :label="t('tenants.form.address')" />
-      <Textinput v-if="!isEdit" v-model="form.user_name" :label="t('tenants.form.adminName')" />
-      <div v-if="!isEdit && errors.user_name" class="text-red-600 text-sm">{{ errors.user_name }}</div>
-      <Textinput
-        v-if="!isEdit"
-        v-model="form.user_email"
-        :label="t('tenants.form.adminEmail')"
-        type="email"
-      />
-      <div v-if="!isEdit && errors.user_email" class="text-red-600 text-sm">{{ errors.user_email }}</div>
-      <VueSelect :label="t('tenants.form.features')" :error="errors.features">
-        <template #default="{ inputId }">
-          <vSelect
-            :id="inputId"
-            v-model="form.features"
-            :options="featureOptions"
-            multiple
-            :reduce="(f: any) => f.value"
+  <Modal
+    v-if="isModal"
+    :activeModal="true"
+    :title="modalTitle"
+    sizeClass="max-w-3xl"
+    @close="closeModal"
+  >
+    <div v-if="canAccess" class="max-w-md grid gap-4">
+      <form class="grid gap-4" @submit.prevent="onSubmit">
+        <Textinput v-model="form.name" :label="t('tenants.form.name')" />
+        <div v-if="errors.name" class="text-red-600 text-sm">{{ errors.name }}</div>
+        <Textinput
+          v-model.number="form.quota_storage_mb"
+          :label="t('tenants.form.storageQuota')"
+          type="number"
+        />
+        <Textinput v-model="form.phone" :label="t('tenants.form.phone')" />
+        <Textinput v-model="form.address" :label="t('tenants.form.address')" />
+        <Textinput v-if="!isEdit" v-model="form.user_name" :label="t('tenants.form.adminName')" />
+        <div v-if="!isEdit && errors.user_name" class="text-red-600 text-sm">{{ errors.user_name }}</div>
+        <Textinput
+          v-if="!isEdit"
+          v-model="form.user_email"
+          :label="t('tenants.form.adminEmail')"
+          type="email"
+        />
+        <div v-if="!isEdit" class="space-y-2">
+          <div v-if="errors.user_email" class="text-red-600 text-sm">
+            {{ errors.user_email }}
+          </div>
+          <Switch
+            v-model="notifyOwner"
+            :label="t('tenants.form.notify.label')"
+            :description="t('tenants.form.notify.description')"
+            :disabled="notifyDisabled"
           />
-        </template>
-      </VueSelect>
-      <div v-if="form.features.length" class="grid gap-4">
-        <h3 class="font-medium">{{ t('tenants.form.abilitiesPerFeature') }}</h3>
-        <VueSelect
-          v-for="f in form.features"
-          :key="f"
-          :label="featureMap[f]?.label || f"
-        >
+          <div v-if="errors.notify_owner" class="text-red-600 text-sm">
+            {{ errors.notify_owner }}
+          </div>
+        </div>
+        <VueSelect :label="t('tenants.form.features')" :error="errors.features">
           <template #default="{ inputId }">
             <vSelect
               :id="inputId"
-              v-model="featureAbilities[f]"
-              :options="abilityOptionsFor(f)"
+              v-model="form.features"
+              :options="featureOptions"
               multiple
-              :reduce="(a: any) => a.value"
+              :reduce="(f: any) => f.value"
             />
           </template>
         </VueSelect>
-      </div>
-      <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
-      <Button type="submit" :text="t('actions.save')" btnClass="btn-dark" />
-    </form>
+        <div v-if="form.features.length" class="grid gap-4">
+          <h3 class="font-medium">{{ t('tenants.form.abilitiesPerFeature') }}</h3>
+          <VueSelect
+            v-for="f in form.features"
+            :key="f"
+            :label="featureMap[f]?.label || f"
+          >
+            <template #default="{ inputId }">
+              <vSelect
+                :id="inputId"
+                v-model="featureAbilities[f]"
+                :options="abilityOptionsFor(f)"
+                multiple
+                :reduce="(a: any) => a.value"
+              />
+            </template>
+          </VueSelect>
+        </div>
+        <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
+        <Button type="submit" :text="t('actions.save')" btnClass="btn-dark" />
+      </form>
+    </div>
+  </Modal>
+
+  <div v-else class="p-4">
+    <div v-if="canAccess" class="max-w-md grid gap-4">
+      <form class="grid gap-4" @submit.prevent="onSubmit">
+        <Textinput v-model="form.name" :label="t('tenants.form.name')" />
+        <div v-if="errors.name" class="text-red-600 text-sm">{{ errors.name }}</div>
+        <Textinput
+          v-model.number="form.quota_storage_mb"
+          :label="t('tenants.form.storageQuota')"
+          type="number"
+        />
+        <Textinput v-model="form.phone" :label="t('tenants.form.phone')" />
+        <Textinput v-model="form.address" :label="t('tenants.form.address')" />
+        <Textinput v-if="!isEdit" v-model="form.user_name" :label="t('tenants.form.adminName')" />
+        <div v-if="!isEdit && errors.user_name" class="text-red-600 text-sm">{{ errors.user_name }}</div>
+        <Textinput
+          v-if="!isEdit"
+          v-model="form.user_email"
+          :label="t('tenants.form.adminEmail')"
+          type="email"
+        />
+        <div v-if="!isEdit" class="space-y-2">
+          <div v-if="errors.user_email" class="text-red-600 text-sm">
+            {{ errors.user_email }}
+          </div>
+          <Switch
+            v-model="notifyOwner"
+            :label="t('tenants.form.notify.label')"
+            :description="t('tenants.form.notify.description')"
+            :disabled="notifyDisabled"
+          />
+          <div v-if="errors.notify_owner" class="text-red-600 text-sm">
+            {{ errors.notify_owner }}
+          </div>
+        </div>
+        <VueSelect :label="t('tenants.form.features')" :error="errors.features">
+          <template #default="{ inputId }">
+            <vSelect
+              :id="inputId"
+              v-model="form.features"
+              :options="featureOptions"
+              multiple
+              :reduce="(f: any) => f.value"
+            />
+          </template>
+        </VueSelect>
+        <div v-if="form.features.length" class="grid gap-4">
+          <h3 class="font-medium">{{ t('tenants.form.abilitiesPerFeature') }}</h3>
+          <VueSelect
+            v-for="f in form.features"
+            :key="f"
+            :label="featureMap[f]?.label || f"
+          >
+            <template #default="{ inputId }">
+              <vSelect
+                :id="inputId"
+                v-model="featureAbilities[f]"
+                :options="abilityOptionsFor(f)"
+                multiple
+                :reduce="(a: any) => a.value"
+              />
+            </template>
+          </VueSelect>
+        </div>
+        <div v-if="serverError" class="text-red-600 text-sm">{{ serverError }}</div>
+        <Button type="submit" :text="t('actions.save')" btnClass="btn-dark" />
+      </form>
+    </div>
   </div>
 </template>
 
@@ -68,6 +158,9 @@ import hasAbility from '@/utils/ability';
 import { useFeaturesStore } from '@/stores/features';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
+import Switch from '@/components/ui/Switch/index.vue';
+import Modal from '@/components/ui/Modal';
+import { useNotify } from '@/plugins/notify';
 
 const route = useRoute();
 const router = useRouter();
@@ -76,6 +169,16 @@ const tenantStore = useTenantStore();
 const featuresStore = useFeaturesStore();
 const { featureMap } = storeToRefs(featuresStore);
 const { t } = useI18n();
+const notify = useNotify();
+
+const props = defineProps<{ forceModal?: boolean }>();
+const emit = defineEmits<{ (event: 'close'): void }>();
+
+const isForcedModal = computed(() => Boolean(props.forceModal));
+const isModal = computed(() => isForcedModal.value || Boolean(route.meta?.modal));
+const modalTitle = computed(() =>
+  isEdit.value ? t('routes.tenantEdit') : t('routes.tenantCreate'),
+);
 
 const canAccess = computed(
   () =>
@@ -99,6 +202,24 @@ const featureAbilities = ref<Record<string, string[]>>({});
 
 const serverError = ref('');
 const { handleSubmit, setErrors, errors } = useForm();
+const notifyOwner = ref(false);
+const notifyDisabled = computed(() => !form.value.user_email);
+
+watch(
+  () => form.value.user_email,
+  (email) => {
+    if (!email && notifyOwner.value) {
+      notifyOwner.value = false;
+    }
+    if (!email) {
+      setErrors({ notify_owner: '' });
+    }
+  },
+);
+
+function closeModal() {
+  emit('close');
+}
 
 onMounted(async () => {
   if (!canAccess.value) return;
@@ -123,6 +244,7 @@ onMounted(async () => {
       user_email: '',
     };
     featureAbilities.value = { ...(data.feature_abilities || {}) };
+    notifyOwner.value = false;
     form.value.features.forEach((f: string) => {
       if (!featureAbilities.value[f]) {
         featureAbilities.value[f] = [...featuresStore.abilitiesFor(f)];
@@ -150,6 +272,7 @@ const onSubmit = handleSubmit(async () => {
   if (!isEdit.value) {
     payload.user_name = form.value.user_name;
     payload.user_email = form.value.user_email;
+    payload.notify_owner = notifyOwner.value;
   }
   try {
     if (isEdit.value) {
@@ -157,8 +280,15 @@ const onSubmit = handleSubmit(async () => {
     } else {
       await api.post('/tenants', payload);
     }
+    notify.success(
+      isEdit.value ? t('tenants.form.success.updated') : t('tenants.form.success.created'),
+    );
     await tenantStore.loadTenants();
-    router.push({ name: 'tenants.list' });
+    if (isModal.value) {
+      emit('close');
+    } else {
+      router.push({ name: 'tenants.list' });
+    }
   } catch (e: any) {
     const errs = extractFormErrors(e);
     if (Object.keys(errs).length) {
