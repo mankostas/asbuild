@@ -23,6 +23,8 @@ class InitialSystemSeeder extends Seeder
                 'features' => $features,
                 'phone' => '123-456-7890',
                 'address' => '123 Main St',
+                'archived_at' => null,
+                'deleted_at' => null,
             ]
         );
 

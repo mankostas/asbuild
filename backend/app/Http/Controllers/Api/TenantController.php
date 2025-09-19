@@ -39,10 +39,26 @@ class TenantController extends Controller
             $query->where('id', $tenantId);
         }
 
+        $trashed = $request->query('trashed');
+        if ($trashed === 'with') {
+            $query->withTrashed();
+        } elseif ($trashed === 'only') {
+            $query->onlyTrashed();
+        }
+
+        $archived = $request->query('archived');
+        if (! ($trashed === 'only' && $archived === null)) {
+            if (in_array($archived, ['only', 'true', '1'], true)) {
+                $query->whereNotNull('archived_at');
+            } elseif ($archived !== 'all') {
+                $query->whereNull('archived_at');
+            }
+        }
+
         $result = $this->listQuery($query, $request, ['name'], ['name']);
 
         $result['data'] = array_map(function ($tenant) {
-            return $tenant->makeVisible('feature_abilities');
+            return $this->transformTenant($tenant);
         }, $result['data']);
 
         return response()->json($result);
@@ -95,7 +111,7 @@ class TenantController extends Controller
         $this->ensureSuperAdmin($request);
         $data = $request->validated();
         $tenant->update($data);
-        return $tenant->load('roles');
+        return $this->transformTenant($tenant);
     }
 
     public function destroy(Request $request, Tenant $tenant)
@@ -103,6 +119,130 @@ class TenantController extends Controller
         $this->ensureSuperAdmin($request);
         $tenant->delete();
         return response()->noContent();
+    }
+
+    public function archive(Request $request, Tenant $tenant)
+    {
+        $this->ensureSuperAdmin($request);
+
+        if ($tenant->archived_at === null) {
+            $tenant->archived_at = now();
+            $tenant->save();
+        }
+
+        return $this->transformTenant($tenant);
+    }
+
+    public function unarchive(Request $request, Tenant $tenant)
+    {
+        $this->ensureSuperAdmin($request);
+
+        if ($tenant->archived_at !== null) {
+            $tenant->archived_at = null;
+            $tenant->save();
+        }
+
+        return $this->transformTenant($tenant);
+    }
+
+    public function restore(Request $request, int $tenant)
+    {
+        $this->ensureSuperAdmin($request);
+
+        $model = Tenant::withTrashed()->findOrFail($tenant);
+        if ($model->trashed()) {
+            $model->restore();
+        }
+
+        if ($model->archived_at !== null) {
+            $model->archived_at = null;
+            $model->save();
+        }
+
+        return $this->transformTenant($model);
+    }
+
+    public function bulkArchive(Request $request)
+    {
+        $this->ensureSuperAdmin($request);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $tenants = Tenant::query()->whereIn('id', $data['ids'])->get();
+
+        $now = now();
+
+        foreach ($tenants as $tenant) {
+            if ($tenant->trashed() || $tenant->archived_at !== null) {
+                continue;
+            }
+
+            $tenant->archived_at = $now;
+            $tenant->save();
+        }
+
+        return $tenants->map(function (Tenant $tenant) {
+            return $this->transformTenant($tenant);
+        })->values();
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $this->ensureSuperAdmin($request);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $tenants = Tenant::query()->whereIn('id', $data['ids'])->get();
+
+        if ($tenants->isNotEmpty()) {
+            Tenant::query()->whereKey($tenants->modelKeys())->delete();
+        }
+
+        $trashed = Tenant::withTrashed()->whereIn('id', $tenants->modelKeys())->get();
+
+        return $trashed->map(function (Tenant $tenant) {
+            return $this->transformTenant($tenant);
+        })->values();
+    }
+
+    public function bulkRestore(Request $request)
+    {
+        $this->ensureSuperAdmin($request);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $tenants = Tenant::withTrashed()->whereIn('id', $data['ids'])->get();
+
+        foreach ($tenants as $tenant) {
+            if ($tenant->trashed()) {
+                $tenant->restore();
+            }
+
+            if ($tenant->archived_at !== null) {
+                $tenant->archived_at = null;
+                $tenant->save();
+            }
+        }
+
+        return $tenants->map(function (Tenant $tenant) {
+            return $this->transformTenant($tenant);
+        })->values();
+    }
+
+    protected function transformTenant(Tenant $tenant): Tenant
+    {
+        $tenant->loadMissing('roles');
+
+        return $tenant->makeVisible('feature_abilities');
     }
 
     public function impersonate(Request $request, Tenant $tenant)

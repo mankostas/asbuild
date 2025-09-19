@@ -44,6 +44,8 @@ class TenantBootstrapSeeder extends Seeder
                 'features' => json_encode($defaultFeatures),
                 'phone' => '555-123-4567',
                 'address' => '1 Pet Street',
+                'archived_at' => null,
+                'deleted_at' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]

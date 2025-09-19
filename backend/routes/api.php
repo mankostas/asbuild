@@ -76,6 +76,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
         'update' => Ability::class . ':tenants.update',
         'destroy' => Ability::class . ':tenants.delete',
     ]);
+    Route::post('tenants/{tenant}/restore', [TenantController::class, 'restore'])
+        ->middleware(Ability::class . ':tenants.update')
+        ->whereNumber('tenant');
+    Route::post('tenants/{tenant}/archive', [TenantController::class, 'archive'])
+        ->middleware(Ability::class . ':tenants.update')
+        ->whereNumber('tenant');
+    Route::delete('tenants/{tenant}/archive', [TenantController::class, 'unarchive'])
+        ->middleware(Ability::class . ':tenants.update')
+        ->whereNumber('tenant');
+    Route::post('tenants/bulk-archive', [TenantController::class, 'bulkArchive'])
+        ->middleware(Ability::class . ':tenants.update');
+    Route::post('tenants/bulk-delete', [TenantController::class, 'bulkDestroy'])
+        ->middleware(Ability::class . ':tenants.delete');
+    Route::post('tenants/bulk-restore', [TenantController::class, 'bulkRestore'])
+        ->middleware(Ability::class . ':tenants.update');
     Route::post('tenants/{tenant}/impersonate', [TenantController::class, 'impersonate'])
         ->middleware(Ability::class . ':tenants.manage');
 });

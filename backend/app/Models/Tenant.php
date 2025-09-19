@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\App;
 use App\Models\Client;
 use App\Models\Task;
@@ -11,6 +12,8 @@ use App\Support\AbilityNormalizer;
 
 class Tenant extends Model
 {
+    use SoftDeletes;
+
     protected static ?Tenant $current = null;
     protected $fillable = [
         'name',
@@ -19,11 +22,13 @@ class Tenant extends Model
         'feature_abilities',
         'phone',
         'address',
+        'archived_at',
     ];
 
     protected $casts = [
         'features' => 'array',
         'feature_abilities' => 'array',
+        'archived_at' => 'datetime',
     ];
 
     protected static function booted(): void
