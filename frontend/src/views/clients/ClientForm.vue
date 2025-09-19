@@ -6,10 +6,6 @@
     sizeClass="max-w-3xl"
     @close="closeModal"
   >
-    <p class="text-slate-600 mb-6">
-      {{ t('routes.clients') }}
-    </p>
-
     <div
       v-if="initializing"
       class="flex justify-center py-10"
