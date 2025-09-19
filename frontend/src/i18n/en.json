@@ -137,6 +137,7 @@
     },
     "status": {
       "active": "Active",
+      "inactive": "Inactive",
       "archived": "Archived",
       "trashed": "Trashed"
     },
@@ -167,6 +168,8 @@
     "notifications": {
       "archived": "Tenant archived",
       "unarchived": "Tenant unarchived",
+      "activated": "Tenant activated",
+      "deactivated": "Tenant deactivated",
       "restored": "Tenant restored",
       "deleted": "Tenant deleted",
       "bulkArchived": "Archived {count} tenants",

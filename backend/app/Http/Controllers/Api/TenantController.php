@@ -77,6 +77,7 @@ class TenantController extends Controller
                 'feature_abilities' => $data['feature_abilities'] ?? [],
                 'phone' => $data['phone'] ?? null,
                 'address' => $data['address'] ?? null,
+                'status' => $data['status'] ?? 'active',
             ]);
 
             $user = User::create([
