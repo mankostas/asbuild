@@ -1,7 +1,7 @@
 <template>
   <div class="p-4 space-y-4">
     <ClientsTable
-      v-if="!loading"
+      v-if="!showSkeleton"
       :rows="tableRows"
       :loading="loading"
       :total="pagination.total"
@@ -130,7 +130,9 @@ const tenantFilter = ref<string>(
     : '',
 );
 const sortSelection = ref(`${sort.value}:${direction.value}`);
-let hasInitialized = false;
+const hasInitialized = ref(false);
+const initialLoading = ref(true);
+const showSkeleton = computed(() => initialLoading.value || loading.value);
 let searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
 const canCreate = computed(() => can('clients.create') || can('clients.manage'));
@@ -148,7 +150,7 @@ const includeArchived = computed({
   get: () => archiveFilter.value.includeArchived,
   set: (value: boolean) => {
     clientsStore.setArchiveFilter({ include: value });
-    if (hasInitialized) {
+    if (hasInitialized.value) {
       clientsStore.setPage(1);
       reloadClients({ page: 1 });
     }
@@ -159,7 +161,7 @@ const archivedOnly = computed({
   get: () => archiveFilter.value.archivedOnly,
   set: (value: boolean) => {
     clientsStore.setArchiveFilter({ only: value });
-    if (hasInitialized) {
+    if (hasInitialized.value) {
       clientsStore.setPage(1);
       reloadClients({ page: 1 });
     }
@@ -170,7 +172,7 @@ const includeTrashed = computed({
   get: () => trashFilter.value.includeTrashed,
   set: (value: boolean) => {
     clientsStore.setTrashedFilter({ include: value });
-    if (hasInitialized) {
+    if (hasInitialized.value) {
       clientsStore.setPage(1);
       reloadClients({ page: 1 });
     }
@@ -181,7 +183,7 @@ const trashedOnly = computed({
   get: () => trashFilter.value.trashedOnly,
   set: (value: boolean) => {
     clientsStore.setTrashedFilter({ only: value });
-    if (hasInitialized) {
+    if (hasInitialized.value) {
       clientsStore.setPage(1);
       reloadClients({ page: 1 });
     }
@@ -275,7 +277,7 @@ watch(
   () => tenantStore.currentTenantId,
   () => {
     if (auth.isSuperAdmin) return;
-    if (hasInitialized) {
+    if (hasInitialized.value) {
       clientsStore.setPage(1);
       reloadClients({ page: 1 });
     }
@@ -283,14 +285,14 @@ watch(
 );
 
 watch(tenantFilter, (value, oldValue) => {
-  if (!hasInitialized || value === oldValue) return;
+  if (!hasInitialized.value || value === oldValue) return;
   clientsStore.setTenantFilter(value === '' ? null : value);
   clientsStore.setPage(1);
   reloadClients({ page: 1 });
 });
 
 watch(sortSelection, (value, oldValue) => {
-  if (!hasInitialized || value === oldValue) return;
+  if (!hasInitialized.value || value === oldValue) return;
   const [field, dir] = value.split(':');
   const directionValue = dir === 'desc' ? 'desc' : 'asc';
   clientsStore.setSort(field as NonNullable<ClientListParams['sort']>, directionValue);
@@ -305,6 +307,10 @@ async function reloadClients(overrides: Partial<ClientListParams> = {}) {
     togglingStatusIds.value = [];
   } catch (error: any) {
     notify.error(error?.message || t('clients.list.loadError'));
+  } finally {
+    if (initialLoading.value) {
+      initialLoading.value = false;
+    }
   }
 }
 
@@ -522,7 +528,7 @@ onMounted(async () => {
     }
     await reloadClients();
   } finally {
-    hasInitialized = true;
+    hasInitialized.value = true;
   }
 });
 </script>
