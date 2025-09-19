@@ -22,6 +22,7 @@ class Tenant extends Model
         'feature_abilities',
         'phone',
         'address',
+        'status',
         'archived_at',
     ];
 

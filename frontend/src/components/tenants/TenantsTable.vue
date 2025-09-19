@@ -93,7 +93,8 @@
                 :model-value="statusForRow(rowProps.row) === 'active'"
                 :disabled="
                   togglingStatusSet.has(String(rowProps.row.id)) ||
-                  !canToggle
+                  !canToggle ||
+                  ['archived', 'trashed'].includes(statusForRow(rowProps.row))
                 "
                 :aria-label="t('tenants.table.columns.status')"
                 @update:modelValue="(value: boolean) =>
@@ -275,7 +276,7 @@ import { useI18n } from 'vue-i18n';
 import { can } from '@/stores/auth';
 
 type SortDirection = 'asc' | 'desc';
-type TenantStatus = 'active' | 'archived' | 'trashed';
+type TenantStatus = 'active' | 'inactive' | 'archived' | 'trashed';
 
 interface TenantOwner {
   id: number | string;
@@ -294,6 +295,7 @@ interface TenantRow {
   feature_count?: number | null;
   features_count?: number | null;
   owner?: TenantOwner | null;
+  status?: 'active' | 'inactive';
   archived_at?: string | null;
   deleted_at?: string | null;
 }
@@ -405,7 +407,10 @@ const selectedRows = computed(() => {
 
 const archivableSelectedIds = computed(() =>
   selectedRows.value
-    .filter((row) => statusForRow(row) === 'active')
+    .filter((row) => {
+      const status = statusForRow(row);
+      return status === 'active' || status === 'inactive';
+    })
     .map((row) => row.id),
 );
 
@@ -504,11 +509,19 @@ function statusForRow(row: TenantRow): TenantStatus {
   if (row.archived_at) {
     return 'archived';
   }
+  if (row.status === 'inactive') {
+    return 'inactive';
+  }
   return 'active';
 }
 
 function statusBadge(status: TenantStatus) {
   switch (status) {
+    case 'inactive':
+      return {
+        label: t('tenants.status.inactive'),
+        class: 'bg-slate-200 text-slate-600 dark:bg-slate-700/40 dark:text-slate-200',
+      };
     case 'archived':
       return {
         label: t('tenants.status.archived'),

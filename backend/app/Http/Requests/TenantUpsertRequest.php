@@ -39,6 +39,11 @@ class TenantUpsertRequest extends FormRequest
                 'nullable',
                 'string',
             ]),
+            'status' => array_filter([
+                $this->isMethod('POST') ? null : 'sometimes',
+                'string',
+                Rule::in(['active', 'inactive']),
+            ]),
         ];
 
         if ($this->isMethod('POST')) {

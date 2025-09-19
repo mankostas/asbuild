@@ -57,6 +57,9 @@
         />
       </template>
     </TenantsTable>
+    <div v-else class="p-4">
+      <SkeletonTable :count="10" />
+    </div>
 
     <TenantDetails
       v-if="viewingTenantId !== null"
@@ -64,10 +67,6 @@
       force-modal
       @close="closeTenantDetails"
     />
-
-    <div v-else class="p-4">
-      <SkeletonTable :count="10" />
-    </div>
   </div>
 </template>
 
@@ -112,6 +111,7 @@ interface TenantRow {
   feature_count?: number | null;
   features_count?: number | null;
   owner?: TenantOwner | null;
+  status?: 'active' | 'inactive';
   archived_at?: string | null;
   deleted_at?: string | null;
 }
@@ -311,6 +311,7 @@ async function reloadTenants(overrides: Partial<TenantListParams> = {}) {
           ? tenant.features_count
           : undefined,
       owner: tenant.owner ?? null,
+      status: tenant.status === 'inactive' ? 'inactive' : 'active',
       archived_at: tenant.archived_at ?? null,
       deleted_at: tenant.deleted_at ?? null,
     }));
@@ -541,6 +542,21 @@ async function toggleTenantStatus({
   }
 
   const key = String(id);
+  const tenant = all.value.find((item) => String(item.id) === key);
+  if (!tenant) {
+    return;
+  }
+
+  if (tenant.deleted_at || tenant.archived_at) {
+    return;
+  }
+
+  const previousStatus = tenant.status === 'inactive' ? 'inactive' : 'active';
+  const nextStatus = active ? 'active' : 'inactive';
+  if (previousStatus === nextStatus) {
+    return;
+  }
+
   if (togglingStatusIds.value.includes(key)) {
     return;
   }
@@ -548,13 +564,14 @@ async function toggleTenantStatus({
   togglingStatusIds.value = [...togglingStatusIds.value, key];
 
   try {
-    if (active) {
-      await api.delete(`/tenants/${id}/archive`);
-      notify.success(t('tenants.notifications.unarchived'));
-    } else {
-      await api.post(`/tenants/${id}/archive`);
-      notify.success(t('tenants.notifications.archived'));
-    }
+    await api.patch(`/tenants/${id}`, {
+      status: active ? 'active' : 'inactive',
+    });
+    notify.success(
+      active
+        ? t('tenants.notifications.activated')
+        : t('tenants.notifications.deactivated'),
+    );
     await refreshAfterMutation();
   } catch (error: any) {
     notify.error(error?.message || t('common.error'));
