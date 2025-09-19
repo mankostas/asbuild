@@ -32,12 +32,13 @@
       <template #header-actions>
         <Button
           v-if="canCreate"
-          :link="{ name: 'tenants.create' }"
           btnClass="btn-primary btn-sm min-w-[120px] !h-8 !py-0"
           icon="heroicons-outline:plus"
           iconClass="w-4 h-4"
           :text="t('tenants.list.addTenant')"
           :aria-label="t('tenants.list.addTenant')"
+          type="button"
+          @click="openCreateTenantModal"
         />
       </template>
 
@@ -73,6 +74,7 @@ import api, { extractData } from '@/services/api';
 import { useNotify } from '@/plugins/notify';
 import { useAuthStore, can } from '@/stores/auth';
 import { useTenantStore } from '@/stores/tenant';
+import { useTenantModalStore } from '@/stores/tenantModal';
 import { useI18n } from 'vue-i18n';
 
 type SortDirection = 'asc' | 'desc';
@@ -118,6 +120,7 @@ const router = useRouter();
 const notify = useNotify();
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
+const tenantModal = useTenantModalStore();
 const { t } = useI18n();
 
 const all = ref<TenantRow[]>([]);
@@ -156,6 +159,11 @@ const canViewTenants = computed(
 
 let searchDebounce: ReturnType<typeof setTimeout> | null = null;
 let filterReloadTimeout: ReturnType<typeof setTimeout> | null = null;
+
+function openCreateTenantModal(): void {
+  const target = router.resolve({ name: 'tenants.create' });
+  tenantModal.open(target);
+}
 
 function normalizeSelection(ids: Array<number | string>): number[] {
   return ids
