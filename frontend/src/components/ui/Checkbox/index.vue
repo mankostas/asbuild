@@ -5,17 +5,17 @@
   >
     <label
       :for="inputId"
-      :class="disabled ? ' cursor-not-allowed opacity-50' : 'cursor-pointer'"
       class="flex items-center"
+      :class="disabled ? ' cursor-not-allowed opacity-50' : 'cursor-pointer'"
     >
       <input
         :id="inputId"
         v-model="localValue"
         type="checkbox"
         class="hidden"
-        :disabled="disabled"
         :name="name"
         :value="value"
+        :disabled="disabled"
         v-bind="$attrs"
         @change="onChange"
       />
@@ -63,7 +63,7 @@
 </template>
 <script>
 import Icon from "@/components/Icon";
-import { computed, defineComponent, ref } from "vue";
+import { computed, defineComponent } from "vue";
 export default defineComponent({
   name: "Checkbox",
   components: { Icon },
@@ -96,12 +96,10 @@ export default defineComponent({
   emits: ["update:modelValue", "input", "change"],
 
   setup(props, context) {
-    const ck = ref(props.checked);
     const uid = `fld-${Math.random().toString(36).slice(2)}`;
     const inputId = computed(() => props.id || uid);
 
     const onChange = (e) => {
-      ck.value = !ck.value;
       context.emit("change", e);
       context.emit("input", e);
     };
@@ -109,6 +107,30 @@ export default defineComponent({
     const localValue = computed({
       get: () => props.modelValue,
       set: (newValue) => context.emit("update:modelValue", newValue),
+    });
+
+    const checkboxValue = computed(() => {
+      const value = localValue.value;
+
+      if (Array.isArray(value)) {
+        return value;
+      }
+
+      if (value === undefined || value === null || value === "") {
+        return props.checked;
+      }
+
+      return value;
+    });
+
+    const ck = computed(() => {
+      const value = checkboxValue.value;
+
+      if (Array.isArray(value)) {
+        return value.some((item) => item === props.value);
+      }
+
+      return Boolean(value);
     });
 
     // normalize error to string
@@ -136,8 +158,8 @@ export default defineComponent({
     );
 
     return {
-      localValue,
       ck,
+      localValue,
       onChange,
       inputId,
       errorText,
