@@ -43,9 +43,10 @@ export const useTasksStore = defineStore('tasks', {
         this.tasks = [];
       }
     },
-    async get(id: string) {
+    async get(id: string | number) {
       if (!this.tasks.length) await this.fetch();
-      return this.tasks.find((a: any) => a.id == id);
+      const identifier = String(id);
+      return this.tasks.find((a: any) => String(a.id) === identifier);
     },
     async create(payload: any) {
       const res = await api.post('/tasks', this.toPayload(payload));
@@ -53,10 +54,11 @@ export const useTasksStore = defineStore('tasks', {
       this.tasks.push(task);
       return task;
     },
-    async update(id: string, payload: any) {
-      const { data: updated } = await api.patch(`/tasks/${id}`, this.toPayload(payload));
+    async update(id: string | number, payload: any) {
+      const identifier = String(id);
+      const { data: updated } = await api.patch(`/tasks/${identifier}`, this.toPayload(payload));
       const task = this.normalize(updated);
-      this.tasks = this.tasks.map((a: any) => (a.id === id ? task : a));
+      this.tasks = this.tasks.map((a: any) => (String(a.id) === identifier ? task : a));
       return task;
     },
   },

@@ -4,8 +4,8 @@ import type { components } from '@/types/api';
 import { withListParams, type ListParams } from './list';
 
 type Team = components['schemas']['Team'] & {
-  tenant_id?: number | null;
-  tenant?: { id: number; name: string } | null;
+  tenant_id?: string | null;
+  tenant?: { id: string; name: string } | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -13,7 +13,7 @@ type Team = components['schemas']['Team'] & {
 type TeamPayload = {
   name: string;
   description?: string | null;
-  tenant_id?: number | null;
+  tenant_id?: string | null;
 };
 
 export const useTeamsStore = defineStore('teams', {
@@ -22,33 +22,42 @@ export const useTeamsStore = defineStore('teams', {
   }),
   actions: {
     async fetch(params: ListParams & { tenant_id?: string | number } = {}) {
-      const { data } = await api.get('/teams', { params: withListParams(params) });
+      const query = withListParams({
+        ...params,
+        ...(params.tenant_id != null ? { tenant_id: String(params.tenant_id) } : {}),
+      });
+      const { data } = await api.get('/teams', { params: query });
       this.teams = data.data as Team[];
       return data.meta;
     },
-    async get(id: number) {
+    async get(id: string | number) {
       if (!this.teams.length) await this.fetch();
-      return this.teams.find((t: Team) => t.id == id);
+      const identifier = String(id);
+      return this.teams.find((t: Team) => String(t.id) === identifier);
     },
     async create(payload: TeamPayload) {
       const { data } = await api.post('/teams', payload);
       this.teams.push(data as Team);
       return data as Team;
     },
-    async update(id: number, payload: TeamPayload) {
-      const { data } = await api.patch(`/teams/${id}`, payload);
-      this.teams = this.teams.map((t: Team) => (t.id === id ? (data as Team) : t));
+    async update(id: string | number, payload: TeamPayload) {
+      const identifier = String(id);
+      const { data } = await api.patch(`/teams/${identifier}`, payload);
+      this.teams = this.teams.map((t: Team) => (String(t.id) === identifier ? (data as Team) : t));
       return data as Team;
     },
-    async remove(id: number) {
-      await api.delete(`/teams/${id}`);
-      this.teams = this.teams.filter((t: Team) => t.id !== id);
+    async remove(id: string | number) {
+      const identifier = String(id);
+      await api.delete(`/teams/${identifier}`);
+      this.teams = this.teams.filter((t: Team) => String(t.id) !== identifier);
     },
-    async syncEmployees(teamId: number, employeeIds: number[]) {
-      const { data } = await api.post(`/teams/${teamId}/employees`, {
-        employee_ids: employeeIds,
+    async syncEmployees(teamId: string | number, employeeIds: Array<string | number>) {
+      const identifier = String(teamId);
+      const payloadIds = employeeIds.map((employeeId) => String(employeeId));
+      const { data } = await api.post(`/teams/${identifier}/employees`, {
+        employee_ids: payloadIds,
       });
-      this.teams = this.teams.map((t: Team) => (t.id === teamId ? (data as Team) : t));
+      this.teams = this.teams.map((t: Team) => (String(t.id) === identifier ? (data as Team) : t));
       return data as Team;
     },
   },
