@@ -20,7 +20,7 @@ import { useAuthStore } from '@/stores/auth';
 
 interface ReviewerValue {
   kind: 'team' | 'employee';
-  id: number;
+  id: string;
 }
 
 const props = defineProps<{
@@ -49,14 +49,15 @@ onMounted(async () => {
   if (props.modelValue) {
     tab.value = props.modelValue.kind === 'team' ? 'teams' : 'employees';
     const list = lookups.assignees[tab.value];
-    selected.value = list.find((a: any) => a.id === props.modelValue?.id) || null;
+    selected.value =
+      list.find((a: any) => String(a.id) === String(props.modelValue?.id)) || null;
   }
 });
 
 watch(
   selected,
   (val) => {
-    if (val) emit('update:modelValue', { kind: val.kind, id: val.id });
+    if (val) emit('update:modelValue', { kind: val.kind, id: String(val.id) });
     else emit('update:modelValue', null);
   },
   { deep: true },
@@ -71,7 +72,8 @@ watch(
     }
     tab.value = val.kind === 'team' ? 'teams' : 'employees';
     const list = lookups.assignees[tab.value];
-    selected.value = list.find((a: any) => a.id === val.id) || null;
+    selected.value =
+      list.find((a: any) => String(a.id) === String(val.id)) || null;
   },
   { deep: true },
 );

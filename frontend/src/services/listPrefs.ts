@@ -3,7 +3,7 @@ export type ListPrefs = {
   filters: {
     status: string;
     type: string;
-    assignee: { id: number } | null;
+    assignee: { id: string } | null;
     priority: string;
     dueStart: string;
     dueEnd: string;

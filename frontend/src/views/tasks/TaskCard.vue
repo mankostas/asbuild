@@ -182,12 +182,12 @@ import { MenuItem } from '@headlessui/vue';
 import { computeAllowedTransitions } from './allowedTransitions';
 
 interface Task {
-  id: number;
+  id: string;
   title: string;
   description?: string | null;
   due_at?: string | null;
-  assignee?: { id: number; name: string } | null;
-  client?: { id: number; name?: string | null } | null;
+  assignee?: { id: string; name: string } | null;
+  client?: { id: string; name?: string | null } | null;
   priority?: string | null;
   sla_chip?: 'ok' | 'dueSoon' | 'breached' | null;
   status_slug: string;
@@ -314,11 +314,11 @@ async function assignMe() {
   if (!id) return;
   try {
     await api.patch(`/tasks/${id}/assign`, {
-      assigned_user_id: auth.user.id,
+      assigned_user_id: String(auth.user.id),
     });
     emit('assigned', {
       ...props.task,
-      assignee: { id: auth.user.id, name: auth.user.name },
+      assignee: { id: String(auth.user.id), name: auth.user.name },
     });
   } catch {
     notify.error(t('tasks.messages.error'));

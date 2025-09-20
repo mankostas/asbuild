@@ -226,12 +226,17 @@ const local = ref<Filters>(createEmptyFilters());
 const normalizeFilters = (value?: Partial<Filters> | null): Filters => {
   const source = value ?? {};
   return {
-    assigneeId: source.assigneeId ?? null,
+    assigneeId:
+      source.assigneeId === null || source.assigneeId === undefined || source.assigneeId === ''
+        ? null
+        : String(source.assigneeId),
     priority: source.priority ?? null,
     sla: source.sla ?? null,
     q: source.q ?? null,
     hasPhotos: source.hasPhotos ?? null,
-    typeIds: Array.isArray(source.typeIds) ? [...source.typeIds] : [],
+    typeIds: Array.isArray(source.typeIds)
+      ? source.typeIds.map((id) => String(id))
+      : [],
     mine: !!source.mine,
     dueToday: !!source.dueToday,
     breachedOnly: !!source.breachedOnly,

@@ -8,26 +8,48 @@ export const useTasksStore = defineStore('tasks', {
   }),
   actions: {
     normalize(payload: any) {
+      const data: any = {
+        ...payload,
+      };
+
+      if (data.id !== undefined && data.id !== null) {
+        data.id = String(data.id);
+      }
+      if (data.public_id !== undefined && data.public_id !== null) {
+        data.public_id = String(data.public_id);
+      }
+
       if (payload.assignee) {
-        payload.assignee = {
-          id: payload.assignee.id,
-          name: payload.assignee.name,
-        };
+        const assigneeId = payload.assignee.public_id ?? payload.assignee.id;
+        if (assigneeId !== undefined && assigneeId !== null) {
+          data.assignee = {
+            id: String(assigneeId),
+            name: payload.assignee.name,
+          };
+        }
       }
       if (payload.client) {
-        payload.client = {
-          id: payload.client.id,
-          name: payload.client.name,
-        };
+        const clientId = payload.client.public_id ?? payload.client.id;
+        if (clientId !== undefined && clientId !== null) {
+          data.client = {
+            id: String(clientId),
+            name: payload.client.name,
+          };
+        }
       }
-      return payload;
+      return data;
     },
     toPayload(payload: any) {
       const data = { ...payload };
       if (payload.assignee) {
-        data.assignee = {
-          id: payload.assignee.id,
-        };
+        const assigneeId = payload.assignee.public_id ?? payload.assignee.id;
+        if (assigneeId !== undefined && assigneeId !== null) {
+          data.assignee = {
+            id: String(assigneeId),
+          };
+        } else {
+          delete data.assignee;
+        }
       }
       return data;
     },

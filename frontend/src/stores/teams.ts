@@ -16,6 +16,29 @@ type TeamPayload = {
   tenant_id?: string | null;
 };
 
+function normalizeTeam<T extends { id: string | number; tenant_id?: string | number | null; tenant?: { id?: string | number } | null }>(
+  team: T,
+): T {
+  const normalized: T = {
+    ...team,
+    id: String(team.id),
+  };
+  if ('tenant_id' in normalized) {
+    const tenantId = (normalized as any).tenant_id;
+    (normalized as any).tenant_id = tenantId === null || tenantId === undefined ? null : String(tenantId);
+  }
+  if (normalized.tenant) {
+    normalized.tenant = {
+      ...normalized.tenant,
+      id:
+        normalized.tenant?.id === null || normalized.tenant?.id === undefined
+          ? normalized.tenant?.id
+          : String(normalized.tenant.id),
+    } as any;
+  }
+  return normalized;
+}
+
 export const useTeamsStore = defineStore('teams', {
   state: () => ({
     teams: [] as Team[],
@@ -27,7 +50,7 @@ export const useTeamsStore = defineStore('teams', {
         ...(params.tenant_id != null ? { tenant_id: String(params.tenant_id) } : {}),
       });
       const { data } = await api.get('/teams', { params: query });
-      this.teams = data.data as Team[];
+      this.teams = (data.data as Team[]).map((team: Team) => normalizeTeam(team) as Team);
       return data.meta;
     },
     async get(id: string | number) {
@@ -37,14 +60,16 @@ export const useTeamsStore = defineStore('teams', {
     },
     async create(payload: TeamPayload) {
       const { data } = await api.post('/teams', payload);
-      this.teams.push(data as Team);
-      return data as Team;
+      const normalized = normalizeTeam(data);
+      this.teams.push(normalized as Team);
+      return normalized as Team;
     },
     async update(id: string | number, payload: TeamPayload) {
       const identifier = String(id);
       const { data } = await api.patch(`/teams/${identifier}`, payload);
-      this.teams = this.teams.map((t: Team) => (String(t.id) === identifier ? (data as Team) : t));
-      return data as Team;
+      const normalized = normalizeTeam(data);
+      this.teams = this.teams.map((t: Team) => (String(t.id) === identifier ? (normalized as Team) : t));
+      return normalized as Team;
     },
     async remove(id: string | number) {
       const identifier = String(id);
@@ -57,8 +82,9 @@ export const useTeamsStore = defineStore('teams', {
       const { data } = await api.post(`/teams/${identifier}/employees`, {
         employee_ids: payloadIds,
       });
-      this.teams = this.teams.map((t: Team) => (String(t.id) === identifier ? (data as Team) : t));
-      return data as Team;
+      const normalized = normalizeTeam(data);
+      this.teams = this.teams.map((t: Team) => (String(t.id) === identifier ? (normalized as Team) : t));
+      return normalized as Team;
     },
   },
 });
