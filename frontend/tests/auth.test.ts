@@ -1,11 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import MockAdapter from 'axios-mock-adapter';
 import { setActivePinia, createPinia } from 'pinia';
+import { fakeTenantId, fakeUserId } from './utils/publicIds';
 
 let api: any;
 let useAuthStore: any;
 let injectStorage: any;
 let hasFeature: any;
+
+const primaryUserId = fakeUserId('primary');
+const impersonatedTenantId = fakeTenantId('acme');
 
 describe('auth store', () => {
   let mock: MockAdapter;
@@ -52,13 +56,13 @@ describe('auth store', () => {
       access_token: 'access',
       refresh_token: 'refresh',
     });
-    mock.onGet('/me').reply(200, { user: { id: 1 } });
+    mock.onGet('/me').reply(200, { user: { id: primaryUserId } });
 
     await auth.login({ email: 'a', password: 'b' });
 
     expect(auth.accessToken).toBe('access');
     expect(auth.refreshToken).toBe('refresh');
-    expect(auth.user).toEqual({ id: 1 });
+    expect(auth.user).toEqual({ id: primaryUserId });
     expect(api.defaults.headers.common['Authorization']).toBe('Bearer access');
     expect(memory.accessToken).toBe('access');
     expect(memory.refreshToken).toBe('refresh');
@@ -70,7 +74,7 @@ describe('auth store', () => {
       refresh_token: 'ref',
     });
 
-    mock.onGet('/me').reply(200, { user: { id: 1 } });
+    mock.onGet('/me').reply(200, { user: { id: primaryUserId } });
 
     await auth.login({ email: 'a', password: 'b' });
 
@@ -88,7 +92,7 @@ describe('auth store', () => {
       access_token: 'token',
       refresh_token: 'ref',
     });
-    mock.onGet('/me').reply(200, { user: { id: 1 } });
+    mock.onGet('/me').reply(200, { user: { id: primaryUserId } });
 
     await auth.login({ email: 'a', password: 'b' });
 
@@ -128,7 +132,7 @@ describe('auth store', () => {
     });
     mock
       .onGet('/me')
-      .reply(200, { user: { id: 1, roles: [{ slug: 'super_admin' }] } });
+      .reply(200, { user: { id: primaryUserId, roles: [{ slug: 'super_admin' }] } });
     mock.onGet('/tenants').reply(200, { data: [], meta: {} });
 
     await auth.login({ email: 'a', password: 'b' });
@@ -159,12 +163,12 @@ describe('auth store', () => {
     mock
       .onGet('/me')
       .reply(200, {
-        user: { id: 1, roles: [{ slug: 'super_admin' }] },
+        user: { id: primaryUserId, roles: [{ slug: 'super_admin' }] },
         abilities: ['*'],
         features: ['branding'],
       });
     mock.onGet('/tenants').reply(200, {
-      data: [{ id: 123, name: 'Acme', features: [] }],
+      data: [{ id: impersonatedTenantId, name: 'Acme', features: [] }],
       meta: {},
     });
 
@@ -174,15 +178,15 @@ describe('auth store', () => {
     expect(auth.can('anything')).toBe(true);
 
     mock
-      .onPost('/tenants/123/impersonate')
+      .onPost(`/tenants/${impersonatedTenantId}/impersonate`)
       .reply(200, { access_token: 'imp', refresh_token: 'imp-ref' });
     mock.onGet('/me').reply(200, {
-      user: { id: 1, roles: [{ slug: 'super_admin' }] },
+      user: { id: primaryUserId, roles: [{ slug: 'super_admin' }] },
       abilities: ['*'],
       features: ['branding'],
     });
 
-    await auth.impersonate(123 as any, 'Acme');
+    await auth.impersonate(impersonatedTenantId, 'Acme');
     expect(auth.isImpersonating).toBe(true);
     expect(auth.can('other')).toBe(true);
     expect(hasFeature('branding')).toBe(true);

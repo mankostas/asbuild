@@ -1,6 +1,7 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect, vi } from 'vitest';
 import { ref } from 'vue';
+import { fakePublicId, fakeRoleId, fakeTenantId } from '../utils/publicIds';
 
 // Mock router and i18n dependencies
 vi.mock('vue-router', () => ({
@@ -81,6 +82,11 @@ vi.mock('sweetalert2', () => ({
 import api from '@/services/api';
 import TypeForm from '@/views/types/TypeForm.vue';
 
+const sectionId = fakePublicId('type-form-section');
+const tenantContextId = fakeTenantId('type-form-tenant');
+const tenantRoleId = fakeRoleId('tenant-role');
+const globalRoleId = fakeRoleId('global-role');
+
 describe('TypeForm photo serialization', () => {
   it('includes empty photos array when none are defined', () => {
     const result = (TypeForm as any).setup({}, { expose: () => {}, emit: () => {} });
@@ -89,7 +95,7 @@ describe('TypeForm photo serialization', () => {
 
     sections.value = [
       {
-        id: 1,
+        id: sectionId,
         key: 'main',
         label: { en: 'Main', el: 'Main' },
         fields: [],
@@ -108,13 +114,13 @@ describe('TypeForm tenant workflow', () => {
     const result = (TypeForm as any).setup({}, { expose: () => {}, emit: () => {} });
     const mockGet = api.get as unknown as vi.Mock;
     mockGet.mockImplementation((url: string, opts: any) => {
-      if (url === '/task-statuses' && opts?.params?.tenant_id === 5) {
+      if (url === '/task-statuses' && opts?.params?.tenant_id === tenantContextId) {
         return Promise.resolve({ data: { data: [{ slug: 'open' }, { slug: 'closed' }] } });
       }
       return Promise.resolve({ data: {} });
     });
 
-    await result.refreshTenant(5, '');
+    await result.refreshTenant(tenantContextId, '');
     expect(result.statuses.value).toEqual(['open', 'closed']);
     expect(result.statusFlow.value).toEqual([]);
 
@@ -127,11 +133,11 @@ describe('TypeForm tenant workflow', () => {
     const mockGet = api.get as unknown as vi.Mock;
     mockGet.mockReset();
     mockGet.mockImplementation((url: string, opts: any) => {
-      if (url === '/roles' && opts?.params?.tenant_id === 5) {
-        return Promise.resolve({ data: { data: [{ id: 1, slug: 'tenant_role' }] } });
+      if (url === '/roles' && opts?.params?.tenant_id === tenantContextId) {
+        return Promise.resolve({ data: { data: [{ id: tenantRoleId, slug: 'tenant_role' }] } });
       }
       if (url === '/roles' && opts?.params?.scope === 'global') {
-        return Promise.resolve({ data: { data: [{ id: 2, slug: 'super_admin' }] } });
+        return Promise.resolve({ data: { data: [{ id: globalRoleId, slug: 'super_admin' }] } });
       }
       if (url === '/task-statuses') {
         return Promise.resolve({ data: { data: [] } });
@@ -143,7 +149,7 @@ describe('TypeForm tenant workflow', () => {
       roles: { view: ['super_admin', 'tenant_role'], edit: ['super_admin'] },
     } as any;
 
-    await result.refreshTenant(5, '');
+    await result.refreshTenant(tenantContextId, '');
     expect(result.tenantRoles.value.map((r: any) => r.slug)).toContain(
       'super_admin',
     );

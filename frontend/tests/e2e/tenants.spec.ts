@@ -1,4 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { fakeTenantId } from '../utils/publicIds';
+
+const editTenantId = fakeTenantId('tenants-edit');
+const impersonationTenantId = fakeTenantId('tenants-impersonate');
 
 // No running server in the environment; this test documents the expected flow.
 test.skip('tenant deletion requires confirmation', async ({ page }) => {
@@ -19,7 +23,7 @@ test.skip('super admin can create a tenant', async ({ page }) => {
 });
 
 test.skip('super admin can edit a tenant', async ({ page }) => {
-  await page.goto('/users/tenants/1/edit');
+  await page.goto(`/users/tenants/${editTenantId}/edit`);
   await page.getByLabel('Name').fill('Updated Tenant');
   await page.getByRole('button', { name: 'Save' }).click();
 });
@@ -48,6 +52,6 @@ test.skip('impersonation is forbidden without tenants.manage', async ({ page }) 
   await expect(page.getByRole('menuitem', { name: 'Impersonate' })).toHaveCount(0);
 
   // Even if the API is called manually, the backend should respond with 403.
-  const response = await page.request.post('/api/tenants/1/impersonate');
+  const response = await page.request.post(`/api/tenants/${impersonationTenantId}/impersonate`);
   expect(response.status()).toBe(403);
 });

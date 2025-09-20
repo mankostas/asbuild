@@ -1,6 +1,7 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
+import { fakeClientId, fakeTenantId } from '../../utils/publicIds';
 
 const useAuthStoreMock = vi.fn();
 const useTenantStoreMock = vi.fn();
@@ -58,7 +59,7 @@ describe('clients store tenant filter behaviour', () => {
     const store = useClientsStore();
     store.filters.tenantId = 'keep-me';
 
-    store.setTenantFilter('123');
+    store.setTenantFilter(fakeTenantId('clients-non-admin'));
 
     expect(store.filters.tenantId).toBeNull();
   });
@@ -68,9 +69,10 @@ describe('clients store tenant filter behaviour', () => {
     const { useClientsStore } = await import('@/stores/clients');
     const store = useClientsStore();
 
-    store.setTenantFilter('456');
+    const overrideTenantId = fakeTenantId('clients-admin');
+    store.setTenantFilter(overrideTenantId);
 
-    expect(store.filters.tenantId).toBe('456');
+    expect(store.filters.tenantId).toBe(overrideTenantId);
   });
 });
 
@@ -78,46 +80,52 @@ describe('clients store id normalization', () => {
   it('normalizes ids on create responses', async () => {
     const { useClientsStore } = await import('@/stores/clients');
     const store = useClientsStore();
+    const createdClientId = fakeClientId('clients-create');
+    const createdTenantId = fakeTenantId('clients-create');
     clientsApiMock.create.mockResolvedValue({
-      data: { id: 101, tenant_id: 202, name: 'Client', status: 'active' },
+      data: { id: createdClientId, tenant_id: createdTenantId, name: 'Client', status: 'active' },
     });
 
     const created = await store.create({ name: 'Client' });
 
     expect(clientsApiMock.create).toHaveBeenCalledWith({ name: 'Client' });
-    expect(created.id).toBe('101');
-    expect(created.tenant_id).toBe('202');
-    expect(store.clients[0].id).toBe('101');
+    expect(created.id).toBe(createdClientId);
+    expect(created.tenant_id).toBe(createdTenantId);
+    expect(store.clients[0].id).toBe(createdClientId);
   });
 
   it('normalizes ids on update and merges into state', async () => {
     const { useClientsStore } = await import('@/stores/clients');
     const store = useClientsStore();
-    store.clients = [{ id: '300', name: 'Existing', tenant_id: 'tenant-1' } as any];
+    const existingClientId = fakeClientId('clients-existing');
+    const updatedTenantId = fakeTenantId('clients-updated');
+    store.clients = [{ id: existingClientId, name: 'Existing', tenant_id: fakeTenantId('clients-tenant') } as any];
     clientsApiMock.update.mockResolvedValue({
-      data: { id: 300, tenant_id: 404, name: 'Updated', status: 'active' },
+      data: { id: existingClientId, tenant_id: updatedTenantId, name: 'Updated', status: 'active' },
     });
 
-    const updated = await store.update('300', { name: 'Updated' });
+    const updated = await store.update(existingClientId, { name: 'Updated' });
 
-    expect(clientsApiMock.update).toHaveBeenCalledWith('300', { name: 'Updated' });
-    expect(updated.id).toBe('300');
-    expect(updated.tenant_id).toBe('404');
-    expect(store.clients[0].id).toBe('300');
+    expect(clientsApiMock.update).toHaveBeenCalledWith(existingClientId, { name: 'Updated' });
+    expect(updated.id).toBe(existingClientId);
+    expect(updated.tenant_id).toBe(updatedTenantId);
+    expect(store.clients[0].id).toBe(existingClientId);
     expect(store.clients[0].name).toBe('Updated');
   });
 
   it('normalizes ids returned from bulk archive', async () => {
     const { useClientsStore } = await import('@/stores/clients');
     const store = useClientsStore();
+    const archivedClientId = fakeClientId('clients-archived');
+    const additionalClientId = fakeClientId('clients-additional');
     clientsApiMock.bulkArchive.mockResolvedValue({
-      data: { data: [{ id: 555, name: 'Archived', status: 'inactive' }] },
+      data: { data: [{ id: archivedClientId, name: 'Archived', status: 'inactive' }] },
     });
 
-    const archived = await store.archiveMany([555, '666']);
+    const archived = await store.archiveMany([archivedClientId, additionalClientId]);
 
-    expect(clientsApiMock.bulkArchive).toHaveBeenCalledWith(['555', '666']);
-    expect(archived[0].id).toBe('555');
-    expect(store.clients.some((client) => client.id === '555')).toBe(true);
+    expect(clientsApiMock.bulkArchive).toHaveBeenCalledWith([archivedClientId, additionalClientId]);
+    expect(archived[0].id).toBe(archivedClientId);
+    expect(store.clients.some((client) => client.id === archivedClientId)).toBe(true);
   });
 });

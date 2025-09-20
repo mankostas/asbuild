@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
+import { fakeTenantId } from '../../utils/publicIds';
 
 vi.mock('@/services/api', () => ({
   default: {
@@ -35,9 +36,11 @@ describe('tenant store', () => {
   });
 
   it('clears stale tenant id when not returned from API', async () => {
-    localStorage.setItem(TENANT_ID_KEY, '999');
+    const staleTenantId = fakeTenantId('stale');
+    const tenantApiId = fakeTenantId('api');
+    localStorage.setItem(TENANT_ID_KEY, staleTenantId);
     const { useTenantStore } = await import('@/stores/tenant');
-    (api.get as any).mockResolvedValue({ data: { data: [{ id: 1 }], meta: {} } });
+    (api.get as any).mockResolvedValue({ data: { data: [{ id: tenantApiId }], meta: {} } });
     const store = useTenantStore();
     await store.loadTenants();
     expect(localStorage.getItem(TENANT_ID_KEY)).toBeNull();
@@ -50,19 +53,21 @@ describe('tenant store', () => {
   it('indicates when the tenant id changes', async () => {
     const { useTenantStore } = await import('@/stores/tenant');
     const store = useTenantStore();
-    expect(store.setTenant('123')).toBe(true);
-    expect(store.setTenant('123')).toBe(false);
+    const newTenantId = fakeTenantId('change');
+    expect(store.setTenant(newTenantId)).toBe(true);
+    expect(store.setTenant(newTenantId)).toBe(false);
   });
 
   it('preserves tenant data on 403 errors when loading tenants', async () => {
     const { useTenantStore } = await import('@/stores/tenant');
     (api.get as any).mockRejectedValue({ status: 403 });
     const store = useTenantStore();
-    store.tenants = [{ id: 1, name: 'T1' }];
-    store.setTenant('1');
+    const preservedTenantId = fakeTenantId('preserve');
+    store.tenants = [{ id: preservedTenantId, name: 'T1' }];
+    store.setTenant(preservedTenantId);
     await expect(store.loadTenants()).resolves.toEqual({ total: 1 });
-    expect(store.tenants).toEqual([{ id: 1, name: 'T1' }]);
-    expect(store.currentTenantId).toBe('1');
-    expect(localStorage.getItem(TENANT_ID_KEY)).toBe('1');
+    expect(store.tenants).toEqual([{ id: preservedTenantId, name: 'T1' }]);
+    expect(store.currentTenantId).toBe(preservedTenantId);
+    expect(localStorage.getItem(TENANT_ID_KEY)).toBe(preservedTenantId);
   });
 });

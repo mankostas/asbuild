@@ -1,6 +1,7 @@
 /** @vitest-environment jsdom */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
+import { fakeClientId, fakePublicId, fakeTaskId, fakeUserId } from '../../utils/publicIds';
 
 const postMock = vi.fn();
 const patchMock = vi.fn();
@@ -27,80 +28,97 @@ describe('tasks store id normalization', () => {
   it('normalizes ids and nested relationships to strings', async () => {
     const { useTasksStore } = await import('@/stores/tasks');
     const store = useTasksStore();
+    const taskId = fakeTaskId('normalize');
+    const taskPublicId = fakePublicId('task-normalized');
+    const assigneeId = fakeUserId('assignee');
+    const assigneeFallback = fakeUserId('assignee-fallback');
+    const clientId = fakeClientId('client');
+    const clientFallback = fakeClientId('client-fallback');
     const normalized = store.normalize({
-      id: 42,
-      public_id: 'tsk_hash',
-      assignee: { id: 9, public_id: 'user_hash', name: 'Assignee' },
-      client: { id: 7, public_id: 'client_hash', name: 'Client' },
+      id: taskId,
+      public_id: taskPublicId,
+      assignee: { id: assigneeFallback, public_id: assigneeId, name: 'Assignee' },
+      client: { id: clientFallback, public_id: clientId, name: 'Client' },
     });
 
-    expect(normalized.id).toBe('42');
-    expect(normalized.public_id).toBe('tsk_hash');
-    expect(normalized.assignee).toEqual({ id: 'user_hash', name: 'Assignee' });
-    expect(normalized.client).toEqual({ id: 'client_hash', name: 'Client' });
+    expect(normalized.id).toBe(taskId);
+    expect(normalized.public_id).toBe(taskPublicId);
+    expect(normalized.assignee).toEqual({ id: assigneeId, name: 'Assignee' });
+    expect(normalized.client).toEqual({ id: clientId, name: 'Client' });
   });
 
   it('builds payloads with string ids', async () => {
     const { useTasksStore } = await import('@/stores/tasks');
     const store = useTasksStore();
 
-    const hashed = store.toPayload({ assignee: { id: 'user_hash' } });
+    const hashedAssignee = fakeUserId('payload');
+    const hashed = store.toPayload({ assignee: { id: hashedAssignee } });
     const numeric = store.toPayload({ assignee: { id: 15 } as any });
 
-    expect(hashed.assignee?.id).toBe('user_hash');
+    expect(hashed.assignee?.id).toBe(hashedAssignee);
     expect(numeric.assignee?.id).toBe('15');
   });
 
   it('creates tasks with normalized ids', async () => {
     const { useTasksStore } = await import('@/stores/tasks');
     const store = useTasksStore();
+    const createdTaskId = fakeTaskId('created');
+    const createdAssigneeId = fakeUserId('created-assignee');
+    const createdClientId = fakeClientId('created-client');
     postMock.mockResolvedValue({
       data: {
-        id: 1001,
-        assignee: { id: 22, name: 'Assigned' },
-        client: { id: 'client_77', name: 'Client' },
+        id: createdTaskId,
+        assignee: { id: createdAssigneeId, name: 'Assigned' },
+        client: { id: createdClientId, name: 'Client' },
       },
     });
 
-    const payload = { title: 'Test', assignee: { id: 'user_hash' } };
+    const payload = { title: 'Test', assignee: { id: createdAssigneeId } };
     const created = await store.create(payload);
 
     expect(postMock).toHaveBeenCalledWith('/tasks', {
       title: 'Test',
-      assignee: { id: 'user_hash' },
+      assignee: { id: createdAssigneeId },
     });
-    expect(created.id).toBe('1001');
-    expect(created.assignee?.id).toBe('22');
-    expect(store.tasks[0].client?.id).toBe('client_77');
+    expect(created.id).toBe(createdTaskId);
+    expect(created.assignee?.id).toBe(createdAssigneeId);
+    expect(store.tasks[0].client?.id).toBe(createdClientId);
   });
 
   it('updates tasks while preserving string ids', async () => {
     const { useTasksStore } = await import('@/stores/tasks');
     const store = useTasksStore();
+    const existingTaskId = fakeTaskId('existing');
+    const existingAssigneeId = fakeUserId('existing-assignee');
+    const updatedAssigneeId = fakeUserId('updated-assignee');
+    const updatedClientId = fakeClientId('updated-client');
     store.tasks = [
       store.normalize({
-        id: 2002,
-        assignee: { id: 11, name: 'Old' },
-        client: { id: 33, name: 'Client' },
+        id: existingTaskId,
+        assignee: { id: existingAssigneeId, name: 'Old' },
+        client: { id: updatedClientId, name: 'Client' },
       }),
     ];
     patchMock.mockResolvedValue({
       data: {
-        id: 2002,
-        assignee: { id: 'user_next', name: 'Next' },
-        client: { id: 77, name: 'Client' },
+        id: existingTaskId,
+        assignee: { id: updatedAssigneeId, name: 'Next' },
+        client: { id: updatedClientId, name: 'Client' },
       },
     });
 
-    const updated = await store.update(2002, { title: 'Updated', assignee: { id: 'user_next' } });
-
-    expect(patchMock).toHaveBeenCalledWith('/tasks/2002', {
+    const updated = await store.update(existingTaskId, {
       title: 'Updated',
-      assignee: { id: 'user_next' },
+      assignee: { id: updatedAssigneeId },
     });
-    expect(updated.id).toBe('2002');
-    expect(updated.assignee?.id).toBe('user_next');
-    expect(store.tasks[0].assignee?.id).toBe('user_next');
-    expect(store.tasks[0].client?.id).toBe('77');
+
+    expect(patchMock).toHaveBeenCalledWith(`/tasks/${existingTaskId}`, {
+      title: 'Updated',
+      assignee: { id: updatedAssigneeId },
+    });
+    expect(updated.id).toBe(existingTaskId);
+    expect(updated.assignee?.id).toBe(updatedAssigneeId);
+    expect(store.tasks[0].assignee?.id).toBe(updatedAssigneeId);
+    expect(store.tasks[0].client?.id).toBe(updatedClientId);
   });
 });

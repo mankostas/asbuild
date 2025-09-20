@@ -1,4 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { fakeTenantId } from '../utils/publicIds';
+
+const tenantAlphaId = fakeTenantId('alpha');
+const tenantBetaId = fakeTenantId('beta');
+const tenantGammaId = fakeTenantId('gamma');
 
 const tenantManagementMarkup = `
   <div id="tenant-app">
@@ -25,9 +30,9 @@ const tenantManagementMarkup = `
   <script>
     (() => {
       const tenants = [
-        { id: 1, name: 'Alpha Manufacturing' },
-        { id: 2, name: 'Beta Logistics' },
-        { id: 3, name: 'Gamma Research' }
+        { id: '${tenantAlphaId}', name: 'Alpha Manufacturing' },
+        { id: '${tenantBetaId}', name: 'Beta Logistics' },
+        { id: '${tenantGammaId}', name: 'Gamma Research' }
       ];
       const abilities = new Set(['tenants.view']);
       const tbody = document.getElementById('tenant-rows');
@@ -117,7 +122,7 @@ const tenantManagementMarkup = `
               const input = row.querySelector('input[type="checkbox"]');
               if (input instanceof HTMLInputElement && input.checked) {
                 input.checked = false;
-                selected.delete(Number(input.value));
+                selected.delete(input.value);
               }
             }
           });
@@ -204,7 +209,9 @@ test.describe('tenant management behaviours', () => {
     await expect(bulkDelete).toBeEnabled();
     await bulkDelete.click();
 
-    await expect(page.locator('#toast')).toHaveText('Deleted Tenant #1, Tenant #2');
+    await expect(page.locator('#toast')).toHaveText(
+      `Deleted Tenant #${tenantAlphaId}, Tenant #${tenantBetaId}`,
+    );
     await expect(page.locator('tbody tr')).toHaveCount(1);
     await expect(bulkDelete).toBeDisabled();
   });

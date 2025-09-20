@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { h, defineComponent, nextTick } from 'vue';
 import TenantsTable from '@/components/tenants/TenantsTable.vue';
+import { fakeTenantId } from '../utils/publicIds';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: (key: string) => key }),
@@ -54,6 +55,9 @@ vi.mock('vue-good-table-next', () => {
   return { VueGoodTable: component };
 });
 
+const tenantAlphaId = fakeTenantId('table-alpha');
+const tenantBetaId = fakeTenantId('table-beta');
+
 describe('TenantsTable remote interactions', () => {
   function mountComponent() {
     const InputGroupStub = defineComponent({
@@ -104,14 +108,14 @@ describe('TenantsTable remote interactions', () => {
       props: {
         rows: [
           {
-            id: 1,
+            id: tenantAlphaId,
             name: 'Alpha',
             feature_count: 3,
             archived_at: null,
             deleted_at: null,
           },
           {
-            id: 2,
+            id: tenantBetaId,
             name: 'Beta',
             archived_at: '2024-01-01',
             deleted_at: null,
@@ -177,14 +181,14 @@ describe('TenantsTable remote interactions', () => {
     expect(wrapper.emitted('update:sort')?.[0]).toEqual([{ sort: 'name', direction: 'desc' }]);
 
     table.vm.$emit('selected-rows-change', {
-      selectedRows: [{ id: 1 }, { id: 2 }],
+      selectedRows: [{ id: tenantAlphaId }, { id: tenantBetaId }],
     });
     await nextTick();
-    expect(wrapper.emitted('selection-change')?.[0]).toEqual([[1, 2]]);
+    expect(wrapper.emitted('selection-change')?.[0]).toEqual([[tenantAlphaId, tenantBetaId]]);
     expect(slotSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        selectedIds: [1, 2],
-        archivableIds: [1],
+        selectedIds: [tenantAlphaId, tenantBetaId],
+        archivableIds: [tenantAlphaId],
       }),
     );
 
