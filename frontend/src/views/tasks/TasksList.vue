@@ -419,9 +419,10 @@ async function fetchTasks({ page, perPage, sort, search }: any) {
     );
   }
   if (assigneeFilter.value) {
-    const targetId = assigneeFilter.value.id;
+    const targetId = String(assigneeFilter.value.id);
     rows = rows.filter(
-      (r) => String(r.assignee?.id ?? '') === targetId,
+      (r) =>
+        String(r.assignee?.public_id ?? r.assignee?.id ?? '') === targetId,
     );
   }
   if (priorityFilter.value) {
