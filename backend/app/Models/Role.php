@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPublicId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -9,7 +10,10 @@ use Illuminate\Support\Str;
 
 class Role extends Model
 {
+    use HasPublicId;
+
     protected $fillable = [
+        'public_id',
         'tenant_id',
         'name',
         'description',
@@ -19,6 +23,7 @@ class Role extends Model
     ];
 
     protected $casts = [
+        'public_id' => 'string',
         'abilities' => 'array',
         'description' => 'string',
     ];

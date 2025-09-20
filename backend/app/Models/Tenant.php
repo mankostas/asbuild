@@ -2,20 +2,23 @@
 
 namespace App\Models;
 
+use App\Models\Client;
+use App\Models\Concerns\HasPublicId;
+use App\Models\Task;
+use App\Support\AbilityNormalizer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\App;
-use App\Models\Client;
-use App\Models\Task;
-use App\Support\AbilityNormalizer;
 
 class Tenant extends Model
 {
     use SoftDeletes;
+    use HasPublicId;
 
     protected static ?Tenant $current = null;
     protected $fillable = [
+        'public_id',
         'name',
         'quota_storage_mb',
         'features',
@@ -27,6 +30,7 @@ class Tenant extends Model
     ];
 
     protected $casts = [
+        'public_id' => 'string',
         'features' => 'array',
         'feature_abilities' => 'array',
         'archived_at' => 'datetime',

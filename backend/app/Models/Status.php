@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPublicId;
 use Illuminate\Database\Eloquent\Model;
 
 class Status extends Model
 {
-    protected $fillable = ['name', 'tenant_id'];
+    use HasPublicId;
+
+    protected $fillable = ['public_id', 'name', 'tenant_id'];
 
     protected $casts = [
-        'tenant_id' => 'integer',
+        'public_id' => 'string',
     ];
 }
 

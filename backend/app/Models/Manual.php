@@ -3,12 +3,16 @@
 namespace App\Models;
 
 use App\Models\Client;
+use App\Models\Concerns\HasPublicId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Manual extends Model
 {
+    use HasPublicId;
+
     protected $fillable = [
+        'public_id',
         'tenant_id',
         'file_id',
         'category',
@@ -17,8 +21,8 @@ class Manual extends Model
     ];
 
     protected $casts = [
+        'public_id' => 'string',
         'tags' => 'array',
-        'client_id' => 'integer',
     ];
 
     public function file(): BelongsTo

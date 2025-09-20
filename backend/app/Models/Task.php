@@ -3,22 +3,26 @@
 namespace App\Models;
 
 use App\Models\Client;
+use App\Models\Concerns\HasPublicId;
 use App\Models\File;
+use App\Models\TaskAutomation;
+use App\Models\TaskSlaEvent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\App;
-use App\Models\TaskSlaEvent;
-use App\Models\TaskAutomation;
 
 class Task extends Model
 {
+    use HasPublicId;
+
     public const STATUS_DRAFT = 'draft';
     public const STATUS_IN_PROGRESS = 'in_progress';
     public const STATUS_COMPLETED = 'completed';
 
     protected $fillable = [
+        'public_id',
         'tenant_id',
         'user_id',
         'status',
@@ -44,6 +48,7 @@ class Task extends Model
     ];
 
     protected $casts = [
+        'public_id' => 'string',
         'scheduled_at' => 'datetime',
         'sla_start_at' => 'datetime',
         'sla_end_at' => 'datetime',
@@ -51,7 +56,6 @@ class Task extends Model
         'completed_at' => 'datetime',
         'form_data' => 'array',
         'due_at' => 'datetime',
-        'client_id' => 'integer',
     ];
 
     public function comments(): HasMany

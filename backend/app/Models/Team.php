@@ -2,18 +2,26 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPublicId;
+use App\Models\User as Employee;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use App\Models\User as Employee;
 
 class Team extends Model
 {
+    use HasPublicId;
+
     protected $fillable = [
+        'public_id',
         'tenant_id',
         'name',
         'description',
         'lead_id',
+    ];
+
+    protected $casts = [
+        'public_id' => 'string',
     ];
 
     public function tenant(): BelongsTo

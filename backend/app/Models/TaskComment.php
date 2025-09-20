@@ -2,16 +2,24 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPublicId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class TaskComment extends Model
 {
+    use HasPublicId;
+
     protected $fillable = [
+        'public_id',
         'task_id',
         'user_id',
         'body',
+    ];
+
+    protected $casts = [
+        'public_id' => 'string',
     ];
 
     public function setBodyAttribute(string $value): void

@@ -2,19 +2,22 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Models\Concerns\HasPublicId;
 use App\Services\FormSchemaService;
-use App\Models\Tenant;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property array|null $schema_json Schema definition
  */
 class TaskType extends Model
 {
+    use HasPublicId;
+
     protected $fillable = [
+        'public_id',
         'name',
         'schema_json',
         'statuses',
@@ -26,11 +29,10 @@ class TaskType extends Model
     ];
 
     protected $casts = [
+        'public_id' => 'string',
         'schema_json' => 'array',
         'statuses' => 'array',
         'status_flow_json' => 'array',
-        'tenant_id' => 'integer',
-        'client_id' => 'integer',
         'require_subtasks_complete' => 'boolean',
         'abilities_json' => 'array',
     ];

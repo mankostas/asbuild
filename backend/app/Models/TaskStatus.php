@@ -2,18 +2,26 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPublicId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class TaskStatus extends Model
 {
+    use HasPublicId;
+
     protected $fillable = [
+        'public_id',
         'slug',
         'name',
         'tenant_id',
         'position',
         'color',
+    ];
+
+    protected $casts = [
+        'public_id' => 'string',
     ];
 
     public static function prefixSlug(string $slug, ?int $tenantId): string
