@@ -14,6 +14,25 @@ export const useLookupsStore = defineStore('lookups', {
     },
   }),
   actions: {
+    normalizeAssignee(record: any) {
+      if (!record || typeof record !== 'object') {
+        return record;
+      }
+      const normalized: any = { ...record };
+      if (normalized.id !== undefined && normalized.id !== null) {
+        normalized.id = String(normalized.id);
+      }
+      if (normalized.team_id !== undefined && normalized.team_id !== null) {
+        normalized.team_id = String(normalized.team_id);
+      }
+      if (normalized.user_id !== undefined && normalized.user_id !== null) {
+        normalized.user_id = String(normalized.user_id);
+      }
+      if (normalized.employee_id !== undefined && normalized.employee_id !== null) {
+        normalized.employee_id = String(normalized.employee_id);
+      }
+      return normalized;
+    },
     async fetchAssignees(
       type: 'all' | 'teams' | 'employees' = 'all',
       force = false,
@@ -35,19 +54,22 @@ export const useLookupsStore = defineStore('lookups', {
 
       const params = withListParams({ type, ...extraParams });
       const { data } = await api.get('/lookups/assignees', { params });
+      const normalized = Array.isArray(data)
+        ? data.map((record: any) => this.normalizeAssignee(record))
+        : [];
 
       if (type === 'all') {
-        this.assignees.teams = data.filter((a: any) => a.kind === 'team');
-        this.assignees.employees = data.filter((a: any) => a.kind === 'employee');
+        this.assignees.teams = normalized.filter((a: any) => a.kind === 'team');
+        this.assignees.employees = normalized.filter((a: any) => a.kind === 'employee');
         this.assigneeFetchedAt.teams = now;
         this.assigneeFetchedAt.employees = now;
       } else {
         // @ts-ignore
-        this.assignees[type] = data;
+        this.assignees[type] = normalized;
         this.assigneeFetchedAt[type] = now;
       }
 
-      return data;
+      return normalized;
     },
   },
 });

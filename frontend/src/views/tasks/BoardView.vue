@@ -215,7 +215,7 @@ const canMoveTasks = computed(() => auth.hasAny(['tasks.update', 'tasks.manage']
 const canTaskTypes = computed(() => can('task_types.view'));
 
 interface Task {
-  id: number;
+  id: string;
   title: string;
   status_slug: string;
   previous_status_slug?: string | null;
@@ -224,8 +224,8 @@ interface Task {
   created_at?: string | null;
   board_position?: number | null;
   sla_chip?: string | null;
-  assignee?: { id: number; name: string };
-  client?: { id: number; name?: string | null } | null;
+  assignee?: { id: string; name: string };
+  client?: { id: string; name?: string | null } | null;
   counts?: {
     comments?: number;
     attachments?: number;
@@ -245,8 +245,47 @@ interface Column {
 }
 
 const columns = ref<Column[]>([]);
-const dragSnapshots = new Map<number, Column[][]>();
-const invalidMoveTasks = new Set<number>();
+const dragSnapshots = new Map<string, Column[][]>();
+const invalidMoveTasks = new Set<string>();
+
+const taskKey = (task: Task | any) => String(task?.public_id ?? task?.id ?? '');
+
+function normalizeBoardTask(task: any): Task {
+  const baseId =
+    task?.id !== undefined && task?.id !== null
+      ? task.id
+      : task?.public_id !== undefined && task?.public_id !== null
+        ? task.public_id
+        : '';
+  const normalized: any = {
+    ...task,
+    id: String(baseId),
+  };
+  if (normalized.public_id !== undefined && normalized.public_id !== null) {
+    normalized.public_id = String(normalized.public_id);
+  }
+  if (task?.assignee) {
+    const assigneeId = task.assignee.public_id ?? task.assignee.id;
+    if (assigneeId !== undefined && assigneeId !== null) {
+      normalized.assignee = {
+        id: String(assigneeId),
+        name: task.assignee.name,
+      };
+    }
+  }
+  if (task?.client) {
+    const clientId = task.client.public_id ?? task.client.id;
+    if (clientId !== undefined && clientId !== null) {
+      normalized.client = {
+        id: String(clientId),
+        name: task.client.name,
+      };
+    } else {
+      normalized.client = null;
+    }
+  }
+  return normalized as Task;
+}
 
 function makeDefaultFilters(): BoardPrefs['filters'] {
   return {
@@ -369,10 +408,12 @@ function toggleFilters() {
 }
 
 function updateTask(updated: Task) {
-  const col = columns.value.find((c) => c.tasks.some((t) => t.id === updated.id));
+  const normalized = normalizeBoardTask(updated);
+  const identifier = taskKey(normalized);
+  const col = columns.value.find((c) => c.tasks.some((t) => taskKey(t) === identifier));
   if (!col) return;
-  const idx = col.tasks.findIndex((t) => t.id === updated.id);
-  col.tasks[idx] = updated;
+  const idx = col.tasks.findIndex((t) => taskKey(t) === identifier);
+  col.tasks[idx] = normalized;
   sortColumn(col);
 }
 
@@ -405,9 +446,9 @@ async function load() {
   const { data } = await api.get('/task-board', { params: buildQuery() });
   const cols = (data.data ?? data).map((col: any) => ({
     ...col,
-    tasks: col.tasks?.data ?? col.tasks ?? [],
+    tasks: (col.tasks?.data ?? col.tasks ?? []).map((task: any) => normalizeBoardTask(task)),
   }));
-  columns.value = cols;
+  columns.value = cols as Column[];
   sortColumns();
 }
 
@@ -417,7 +458,8 @@ async function loadMore(col: Column) {
   const { data } = await api.get('/task-board/column', {
     params: { status: col.status.slug, page, ...buildQuery() },
   });
-  col.tasks.push(...data.data);
+  const tasks = (data.data ?? data).map((task: any) => normalizeBoardTask(task));
+  col.tasks.push(...tasks);
   if (!col.meta) col.meta = { total: 0 };
   col.meta.page = page;
   col.meta.total = data.meta.total;
@@ -426,7 +468,26 @@ async function loadMore(col: Column) {
 }
 
 onMounted(() => {
-  Object.assign(prefs, loadBoardPrefs(auth.userId || auth.user?.id || 0));
+  const stored = loadBoardPrefs(auth.userId || auth.user?.id || 0) || ({} as BoardPrefs);
+  if (stored.filters) {
+    stored.filters = {
+      ...makeDefaultFilters(),
+      ...stored.filters,
+      statusIds: Array.isArray(stored.filters.statusIds)
+        ? stored.filters.statusIds.map((id: string | number) => String(id))
+        : [],
+      typeIds: Array.isArray(stored.filters.typeIds)
+        ? stored.filters.typeIds.map((id: string | number) => String(id))
+        : [],
+      assigneeId:
+        stored.filters.assigneeId === null ||
+        stored.filters.assigneeId === undefined ||
+        stored.filters.assigneeId === ''
+          ? null
+          : String(stored.filters.assigneeId),
+    };
+  }
+  Object.assign(prefs, stored);
   if (typeof prefs.showFilters !== 'boolean') {
     prefs.showFilters = true;
   }
@@ -449,9 +510,10 @@ onMounted(() => {
 async function performMove(task: Task, statusSlug: string, index: number) {
   if (!canMoveTasks.value) return;
   const snapshot = columns.value.map((c) => ({ ...c, tasks: [...c.tasks] }));
-  const fromCol = columns.value.find((c) => c.tasks.some((t) => t.id === task.id));
+  const key = taskKey(task);
+  const fromCol = columns.value.find((c) => c.tasks.some((t) => taskKey(t) === key));
   if (fromCol) {
-    const taskIndex = fromCol.tasks.findIndex((t) => t.id === task.id);
+    const taskIndex = fromCol.tasks.findIndex((t) => taskKey(t) === key);
     fromCol.tasks.splice(taskIndex, 1);
   }
   const toCol = columns.value.find((c) => c.status.slug === statusSlug);
@@ -462,7 +524,7 @@ async function performMove(task: Task, statusSlug: string, index: number) {
       status_slug: statusSlug,
       index,
     });
-    Object.assign(task, data.data);
+    Object.assign(task, normalizeBoardTask(data.data ?? data));
     sortColumns();
   } catch {
     columns.value = snapshot;
@@ -472,9 +534,10 @@ async function performMove(task: Task, statusSlug: string, index: number) {
 
 async function onDrop(evt: any) {
   const task: Task = evt.item.__draggable_context.element;
-  const snapshots = dragSnapshots.get(task.id);
+  const key = taskKey(task);
+  const snapshots = dragSnapshots.get(key);
   const snapshot = snapshots?.pop();
-  if (!snapshots?.length) dragSnapshots.delete(task.id);
+  if (!snapshots?.length) dragSnapshots.delete(key);
   if (!canMoveTasks.value) {
     if (snapshot) {
       columns.value = snapshot;
@@ -488,7 +551,7 @@ async function onDrop(evt: any) {
       status_slug: statusSlug,
       index: evt.newIndex,
     });
-    Object.assign(task, data.data);
+    Object.assign(task, normalizeBoardTask(data.data ?? data));
     sortColumns();
   } catch {
     if (snapshot) {
@@ -501,10 +564,11 @@ async function onDrop(evt: any) {
 function onDragStart(evt: any) {
   if (!canMoveTasks.value) return;
   const task: Task = evt.item.__draggable_context.element;
-  invalidMoveTasks.delete(task.id);
-  const snapshots = dragSnapshots.get(task.id) ?? [];
+  const key = taskKey(task);
+  invalidMoveTasks.delete(key);
+  const snapshots = dragSnapshots.get(key) ?? [];
   snapshots.push(columns.value.map((c) => ({ ...c, tasks: [...c.tasks] })));
-  dragSnapshots.set(task.id, snapshots);
+  dragSnapshots.set(key, snapshots);
 }
 
 function allowedTransitions(task: Task, from: string): string[] {
@@ -523,9 +587,10 @@ function onDragMove(evt: any) {
   if (!toStatus || toStatus === task.status_slug) return true;
   const allowed = allowedTransitions(task, task.status_slug);
   if (!allowed.includes(toStatus)) {
-    if (!invalidMoveTasks.has(task.id)) {
+    const key = taskKey(task);
+    if (!invalidMoveTasks.has(key)) {
       notify.error(t('board.errorMove'));
-      invalidMoveTasks.add(task.id);
+      invalidMoveTasks.add(key);
     }
     return false;
   }

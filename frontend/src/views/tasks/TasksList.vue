@@ -202,7 +202,7 @@ const showFilters = ref(false);
 const statusFilter = ref('');
 const typeFilter = ref('');
 const clientFilter = ref('');
-const assigneeFilter = ref<{ id: number } | null>(null);
+const assigneeFilter = ref<{ id: string } | null>(null);
 const priorityFilter = ref('');
 const dueStart = ref('');
 const dueEnd = ref('');
@@ -330,7 +330,9 @@ onMounted(async () => {
   if (prefs.value.filters) {
     statusFilter.value = prefs.value.filters.status || '';
     typeFilter.value = prefs.value.filters.type || '';
-    assigneeFilter.value = prefs.value.filters.assignee || null;
+    assigneeFilter.value = prefs.value.filters.assignee
+      ? { id: String(prefs.value.filters.assignee.id) }
+      : null;
     priorityFilter.value = prefs.value.filters.priority || '';
     dueStart.value = prefs.value.filters.dueStart || '';
     dueEnd.value = prefs.value.filters.dueEnd || '';
@@ -350,7 +352,9 @@ function saveView() {
     filters: {
       status: statusFilter.value,
       type: typeFilter.value,
-      assignee: assigneeFilter.value,
+      assignee: assigneeFilter.value
+        ? { id: String(assigneeFilter.value.id) }
+        : null,
       priority: priorityFilter.value,
       dueStart: dueStart.value,
       dueEnd: dueEnd.value,
@@ -415,8 +419,9 @@ async function fetchTasks({ page, perPage, sort, search }: any) {
     );
   }
   if (assigneeFilter.value) {
+    const targetId = assigneeFilter.value.id;
     rows = rows.filter(
-      (r) => r.assignee && r.assignee.id === assigneeFilter.value.id,
+      (r) => String(r.assignee?.id ?? '') === targetId,
     );
   }
   if (priorityFilter.value) {
@@ -434,7 +439,10 @@ async function fetchTasks({ page, perPage, sort, search }: any) {
     rows = rows.filter((r) => r.photos && r.photos.length);
   }
   if (mine.value && auth.user) {
-    rows = rows.filter((r) => r.assignee && r.assignee.id === auth.user.id);
+    const currentUserId = String(auth.user.id ?? '');
+    rows = rows.filter(
+      (r) => String(r.assignee?.id ?? '') === currentUserId,
+    );
   }
   if (search) {
     const q = String(search).toLowerCase();
