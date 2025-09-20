@@ -91,7 +91,7 @@ interface StatusOption {
   name: string;
 }
 
-const props = defineProps<{ modelValue: string[]; tenantId?: number | '' }>();
+const props = defineProps<{ modelValue: string[]; tenantId?: string | '' }>();
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
 
@@ -112,7 +112,7 @@ const availableStatuses = computed(() =>
   allStatuses.value.filter((s) => !localStatuses.value.includes(s.slug))
 );
 
-async function fetchStatuses(id: number | string) {
+async function fetchStatuses(id: string) {
   const { data } = await api.get('/task-statuses', {
     params: { scope: 'tenant', tenant_id: id, per_page: 100 },
   });
@@ -121,9 +121,9 @@ async function fetchStatuses(id: number | string) {
 
 watch(
   () => props.tenantId,
-  async (id: number | '' | undefined) => {
+  async (id: string | '' | undefined) => {
     if (id) {
-      await fetchStatuses(id);
+      await fetchStatuses(String(id));
     } else {
       allStatuses.value = [];
     }

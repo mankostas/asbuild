@@ -18,6 +18,7 @@
             class="flex flex-col-reverse gap-2 md:flex-row md:items-center md:justify-end"
             :class="{ 'md:ml-auto': !$slots.filters }"
           >
+            <!-- eslint-disable vue/v-on-event-hyphenation -->
             <InputGroup
               v-model="localSearch"
               :placeholder="t('tenants.form.search')"
@@ -27,6 +28,7 @@
               classInput="text-xs !h-8"
               @update:modelValue="onSearch"
             />
+            <!-- eslint-enable vue/v-on-event-hyphenation -->
             <slot name="header-actions" />
           </div>
         </div>
@@ -89,6 +91,7 @@
               </Badge>
             </div>
             <div v-else class="flex items-center justify-center gap-2">
+              <!-- eslint-disable vue/v-on-event-hyphenation -->
               <Switch
                 :model-value="statusForRow(rowProps.row) === 'active'"
                 :disabled="
@@ -101,6 +104,7 @@
                   $emit('toggle-status', { id: rowProps.row.id, active: value })
                 "
               />
+              <!-- eslint-enable vue/v-on-event-hyphenation -->
               <Badge :badge-class="statusBadge(statusForRow(rowProps.row)).class">
                 {{ statusBadge(statusForRow(rowProps.row)).label }}
               </Badge>
@@ -279,13 +283,13 @@ type SortDirection = 'asc' | 'desc';
 type TenantStatus = 'active' | 'inactive' | 'archived' | 'trashed';
 
 interface TenantOwner {
-  id: number | string;
+  id: string;
   name?: string | null;
   email?: string | null;
 }
 
 interface TenantRow {
-  id: number | string;
+  id: string;
   name: string;
   slug?: string | null;
   domain?: string | null;
@@ -310,7 +314,7 @@ const props = defineProps<{
   direction: SortDirection;
   loading?: boolean;
   selectable?: boolean;
-  togglingStatusIds?: Array<number | string>;
+  togglingStatusIds?: string[];
 }>();
 
 const emit = defineEmits<{
@@ -318,25 +322,25 @@ const emit = defineEmits<{
   (e: 'update:page', value: number): void;
   (e: 'update:per-page', value: number): void;
   (e: 'update:sort', value: { sort: string; direction: SortDirection }): void;
-  (e: 'selection-change', ids: Array<number | string>): void;
-  (e: 'view', id: number | string): void;
-  (e: 'edit', id: number | string): void;
-  (e: 'delete', id: number | string): void;
-  (e: 'delete-selected', ids: Array<number | string>): void;
-  (e: 'impersonate', id: number | string): void;
-  (e: 'owner-resend-invite', id: number | string): void;
-  (e: 'owner-reset-email', id: number | string): void;
-  (e: 'owner-password-reset', id: number | string): void;
-  (e: 'archive', id: number | string): void;
-  (e: 'unarchive', id: number | string): void;
-  (e: 'restore', id: number | string): void;
-  (e: 'archive-selected', ids: Array<number | string>): void;
-  (e: 'toggle-status', payload: { id: number | string; active: boolean }): void;
+  (e: 'selection-change', ids: string[]): void;
+  (e: 'view', id: string): void;
+  (e: 'edit', id: string): void;
+  (e: 'delete', id: string): void;
+  (e: 'delete-selected', ids: string[]): void;
+  (e: 'impersonate', id: string): void;
+  (e: 'owner-resend-invite', id: string): void;
+  (e: 'owner-reset-email', id: string): void;
+  (e: 'owner-password-reset', id: string): void;
+  (e: 'archive', id: string): void;
+  (e: 'unarchive', id: string): void;
+  (e: 'restore', id: string): void;
+  (e: 'archive-selected', ids: string[]): void;
+  (e: 'toggle-status', payload: { id: string; active: boolean }): void;
 }>();
 
 const { t } = useI18n();
 const localSearch = ref(props.search);
-const selectedIds = ref<Array<number | string>>([]);
+const selectedIds = ref<string[]>([]);
 
 const rows = computed(() => props.rows);
 const total = computed(() => props.total);
@@ -401,8 +405,8 @@ const selectOptions = computed(() => {
 const searchQuery = computed(() => props.search);
 
 const selectedRows = computed(() => {
-  const idSet = new Set(selectedIds.value.map((value) => String(value)));
-  return rows.value.filter((row) => idSet.has(String(row.id)));
+  const idSet = new Set(selectedIds.value);
+  return rows.value.filter((row) => idSet.has(row.id));
 });
 
 const archivableSelectedIds = computed(() =>
@@ -415,10 +419,7 @@ const archivableSelectedIds = computed(() =>
 );
 
 const togglingStatusSet = computed(
-  () =>
-    new Set(
-      (props.togglingStatusIds ?? []).map((value) => String(value)),
-    ),
+  () => new Set(props.togglingStatusIds ?? []),
 );
 
 const canView = computed(() => can('tenants.view'));
@@ -496,10 +497,12 @@ function onSortChange(params: Array<{ field: string; type: SortDirection }>) {
 }
 
 function onSelectedRowsChange(selection: {
-  selectedRows: Array<{ id: number | string }>;
+  selectedRows: Array<{ id: string | number }>;
 }) {
-  selectedIds.value = selection.selectedRows.map((row) => row.id);
-  emit('selection-change', selectedIds.value);
+  selectedIds.value = selection.selectedRows
+    .map((row) => (row.id === null || row.id === undefined ? '' : String(row.id)))
+    .filter((value) => value.length > 0);
+  emit('selection-change', [...selectedIds.value]);
 }
 
 function statusForRow(row: TenantRow): TenantStatus {

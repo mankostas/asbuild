@@ -1014,7 +1014,7 @@ function loadVersion(v: any) {
     }
   });
   nextTick(() => {
-    automationsEditor.value?.reload?.(tenantId.value as number | string);
+    automationsEditor.value?.reload?.(tenantId.value || undefined);
     slaPolicyEditor.value?.reload?.();
   });
 }

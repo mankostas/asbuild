@@ -20,15 +20,17 @@
             class="flex flex-col-reverse gap-2 md:flex-row md:items-center md:justify-end"
             :class="{ 'md:ml-auto': !$slots.filters }"
           >
+            <!-- eslint-disable vue/v-on-event-hyphenation -->
             <InputGroup
-                v-model="localSearch"
-                :placeholder="t('clients.form.search')"
-                type="text"
-                prependIcon="heroicons-outline:search"
-                merged
-                classInput="text-xs !h-8"
-                @update:modelValue="onSearch"
+              v-model="localSearch"
+              :placeholder="t('clients.form.search')"
+              type="text"
+              prependIcon="heroicons-outline:search"
+              merged
+              classInput="text-xs !h-8"
+              @update:modelValue="onSearch"
             />
+            <!-- eslint-enable vue/v-on-event-hyphenation -->
             <slot name="header-actions" />
           </div>
         </div>
@@ -92,6 +94,7 @@
               </Badge>
             </div>
             <div v-else class="flex items-center justify-center gap-2">
+              <!-- eslint-disable vue/v-on-event-hyphenation -->
               <Switch
                 :model-value="rowProps.row.status === 'active'"
                 :disabled="togglingStatusSet.has(String(rowProps.row.id)) || !canEdit"
@@ -100,6 +103,7 @@
                   $emit('toggle-status', { id: rowProps.row.id, active: value })
                 "
               />
+              <!-- eslint-enable vue/v-on-event-hyphenation -->
               <Badge :badge-class="statusBadge(rowProps.row.status).class">
                 {{ statusBadge(rowProps.row.status).label }}
               </Badge>
@@ -274,7 +278,7 @@ import Select from '@/components/ui/Select';
 import Switch from '@/components/ui/Switch/index.vue';
 
 interface ClientTableRow {
-  id: number | string;
+  id: string;
   name: string;
   email?: string | null;
   phone?: string | null;
@@ -293,7 +297,7 @@ const props = defineProps<{
   direction: 'asc' | 'desc';
   selectable?: boolean;
   showTenant?: boolean;
-  togglingStatusIds?: Array<number | string>;
+  togglingStatusIds?: string[];
 }>();
 
 const emit = defineEmits<{
@@ -301,20 +305,20 @@ const emit = defineEmits<{
   (e: 'update:page', value: number): void;
   (e: 'update:per-page', value: number): void;
   (e: 'update:sort', value: { sort: string; direction: 'asc' | 'desc' }): void;
-  (e: 'selection-change', ids: Array<number | string>): void;
-  (e: 'view', id: number | string): void;
-  (e: 'edit', id: number | string): void;
-  (e: 'archive', id: number | string): void;
-  (e: 'toggle-status', payload: { id: number | string; active: boolean }): void;
-  (e: 'restore', payload: { id: number | string; type: 'archive' | 'trash' }): void;
-  (e: 'delete', id: number | string): void;
-  (e: 'archive-selected', ids: Array<number | string>): void;
-  (e: 'delete-selected', ids: Array<number | string>): void;
+  (e: 'selection-change', ids: string[]): void;
+  (e: 'view', id: string): void;
+  (e: 'edit', id: string): void;
+  (e: 'archive', id: string): void;
+  (e: 'toggle-status', payload: { id: string; active: boolean }): void;
+  (e: 'restore', payload: { id: string; type: 'archive' | 'trash' }): void;
+  (e: 'delete', id: string): void;
+  (e: 'archive-selected', ids: string[]): void;
+  (e: 'delete-selected', ids: string[]): void;
 }>();
 
 const { t } = useI18n();
 const localSearch = ref(props.search);
-const selectedIds = ref<Array<number | string>>([]);
+const selectedIds = ref<string[]>([]);
 
 const rows = computed(() => props.rows);
 const total = computed(() => props.total);
@@ -484,10 +488,12 @@ function onSortChange(params: Array<{ field: string; type: 'asc' | 'desc' }>) {
 }
 
 function onSelectedRowsChange(selection: {
-  selectedRows: Array<{ id: number | string }>;
+  selectedRows: Array<{ id: string | number }>;
 }) {
-  selectedIds.value = selection.selectedRows.map((row) => row.id);
-  emit('selection-change', selectedIds.value);
+  selectedIds.value = selection.selectedRows
+    .map((row) => (row.id === null || row.id === undefined ? '' : String(row.id)))
+    .filter((value) => value.length > 0);
+  emit('selection-change', [...selectedIds.value]);
 }
 
 function statusBadge(status: 'active' | 'inactive' | 'archived' | 'trashed') {

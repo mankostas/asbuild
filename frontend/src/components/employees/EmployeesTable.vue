@@ -49,10 +49,12 @@
           {{ rowProps.row.roles || '—' }}
         </span>
         <span v-else-if="rowProps.column.field === 'status'">
+          <!-- eslint-disable vue/v-on-event-hyphenation -->
           <Switch
             :model-value="rowProps.row.status === 'active'"
             @update:modelValue="(val) => toggleStatus(rowProps.row, val)"
           />
+          <!-- eslint-enable vue/v-on-event-hyphenation -->
         </span>
         <span v-else-if="rowProps.column.field === 'last_login_at'">
           {{ formatDate(rowProps.row.last_login_at) }}

@@ -35,12 +35,12 @@ import Button from '@/components/ui/Button/index.vue';
 import MentionInput from '@/components/tasks/MentionInput.vue';
 import { uploadFile } from '@/services/uploader';
 
-const props = defineProps<{ taskId: number | string; allowFiles?: boolean }>();
+const props = defineProps<{ taskId: string; allowFiles?: boolean }>();
 const emit = defineEmits<{ (e: 'added', comment: any): void }>();
 
 const body = ref('');
 const selectedMentions = ref<any[]>([]);
-const fileIds = ref<number[]>([]);
+const fileIds = ref<string[]>([]);
 const allowFiles = props.allowFiles ?? false;
 const { t } = useI18n();
 
@@ -48,11 +48,13 @@ async function onFileChange(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0];
   if (!file) return;
   const uploaded = await uploadFile(file);
-  fileIds.value.push(uploaded.file_id);
+  fileIds.value.push(String(uploaded.file_id));
 }
 
 async function submit() {
-  const mentions = selectedMentions.value.map((m: any) => m.id ?? m);
+  const mentions = selectedMentions.value
+    .map((m: any) => (m?.id !== undefined ? String(m.id) : m ? String(m) : ''))
+    .filter((value) => value.length > 0);
   const { data } = await api.post(`/tasks/${props.taskId}/comments`, {
     body: body.value,
     mentions,

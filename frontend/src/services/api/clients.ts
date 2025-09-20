@@ -1,8 +1,8 @@
 import api from '@/services/api';
 
 export interface Client {
-  id: number;
-  tenant_id: number | null;
+  id: string;
+  tenant_id: string | null;
   name: string;
   email?: string | null;
   phone?: string | null;
@@ -27,7 +27,7 @@ export interface ClientListParams {
   dir?: 'asc' | 'desc';
   archived?: 'all' | 'only';
   trashed?: 'with' | 'only';
-  tenant_id?: number | string | null;
+  tenant_id?: string | null;
 }
 
 export interface CreateClientPayload {
@@ -35,7 +35,7 @@ export interface CreateClientPayload {
   email?: string | null;
   phone?: string | null;
   notes?: string | null;
-  tenant_id?: number | string | null;
+  tenant_id?: string | null;
   notify_client?: boolean;
   status?: 'active' | 'inactive';
 }
@@ -45,7 +45,7 @@ export interface UpdateClientPayload {
   email?: string | null;
   phone?: string | null;
   notes?: string | null;
-  tenant_id?: number | string | null;
+  tenant_id?: string | null;
   status?: 'active' | 'inactive';
 }
 
@@ -58,34 +58,34 @@ const clientsApi = {
   list(params: ClientListParams = {}) {
     return api.get<ClientListResponse>('/clients', { params });
   },
-  get(id: number | string) {
+  get(id: string) {
     return api.get<Client>(`/clients/${id}`);
   },
   create(payload: CreateClientPayload) {
     return api.post<Client>('/clients', payload);
   },
-  update(id: number | string, payload: UpdateClientPayload) {
+  update(id: string, payload: UpdateClientPayload) {
     return api.patch<Client>(`/clients/${id}`, payload);
   },
-  remove(id: number | string) {
+  remove(id: string) {
     return api.delete(`/clients/${id}`);
   },
-  restore(id: number | string) {
+  restore(id: string) {
     return api.post<Client>(`/clients/${id}/restore`);
   },
-  archive(id: number | string) {
+  archive(id: string) {
     return api.post<Client>(`/clients/${id}/archive`);
   },
-  unarchive(id: number | string) {
+  unarchive(id: string) {
     return api.delete<Client>(`/clients/${id}/archive`);
   },
-  bulkArchive(ids: Array<number | string>) {
+  bulkArchive(ids: string[]) {
     return api.post<{ data: Client[] }>('/clients/bulk-archive', { ids });
   },
-  bulkDelete(ids: Array<number | string>) {
+  bulkDelete(ids: string[]) {
     return api.post<{ message: string }>('/clients/bulk-delete', { ids });
   },
-  toggleStatus(id: number | string) {
+  toggleStatus(id: string) {
     return api.patch<Client>(`/clients/${id}/toggle-status`);
   },
 };

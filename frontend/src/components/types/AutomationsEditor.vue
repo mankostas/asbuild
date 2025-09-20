@@ -56,7 +56,6 @@
                   v-model="a.actions_json[0].team_id"
                   :label="t('automations.team')"
                   class="w-full"
-                  @change="(e) => (a.actions_json[0].team_id = Number((e.target as HTMLSelectElement).value))"
                 >
                   <option
                     v-for="team in teamOptions"
@@ -120,22 +119,22 @@ interface Automation {
 }
 
 const props = defineProps<{
-  taskTypeId?: number;
-  tenantId?: number | '';
+  taskTypeId?: string;
+  tenantId?: string | '';
   statuses?: string[];
 }>();
 const { t } = useI18n();
 const automations = ref<Automation[]>([]);
 const statusOptions = ref<{ value: string; label: string }[]>([]);
 const allStatusOptions = ref<{ value: string; label: string }[]>([]);
-const teamOptions = ref<{ value: number; label: string }[]>([]);
+const teamOptions = ref<{ value: string; label: string }[]>([]);
 const initialized = ref(false);
 
 watch(
   () => props.tenantId,
-  async (id: number | '' | undefined) => {
+  async (id: string | '' | undefined) => {
     if (id) {
-      await load(id);
+      await load(String(id));
       initialized.value = true;
     } else if (initialized.value) {
       statusOptions.value = [];
@@ -147,7 +146,7 @@ watch(
   { immediate: true },
 );
 
-async function load(id: number | string) {
+async function load(id: string) {
   try {
     const statusRes = await api.get('/task-statuses', {
       params: { scope: 'tenant', tenant_id: id, per_page: 100 },
@@ -163,7 +162,7 @@ async function load(id: number | string) {
       const teamRes = await api.get('/teams', { params: { tenant_id: id } });
       const teamData = teamRes.data.data ?? teamRes.data;
       teamOptions.value = teamData.map((t: any) => ({
-        value: t.id,
+        value: String(t.id),
         label: t.name,
       }));
     } else {
@@ -221,9 +220,10 @@ async function save(a: Automation) {
 
 defineExpose({
   getAutomations: () => automations.value,
-  reload: (id?: number | string) => {
-    if (id || props.tenantId) {
-      load(id || (props.tenantId as number | string));
+  reload: (id?: string) => {
+    const target = id ?? props.tenantId ?? '';
+    if (target) {
+      load(String(target));
       initialized.value = true;
     }
   },

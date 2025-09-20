@@ -92,7 +92,7 @@ type ArchiveFilterParam = 'all' | 'only';
 type TrashFilterParam = 'with' | 'only';
 
 interface TenantOwner {
-  id: number | string;
+  id: string;
   name?: string | null;
   email?: string | null;
   phone?: string | null;
@@ -101,7 +101,7 @@ interface TenantOwner {
 }
 
 interface TenantRow {
-  id: number | string;
+  id: string;
   name: string;
   slug?: string | null;
   domain?: string | null;
@@ -153,9 +153,9 @@ const archivedOnly = ref(false);
 const includeTrashed = ref(false);
 const trashedOnly = ref(false);
 
-const selectedIds = ref<Array<number | string>>([]);
-const togglingStatusIds = ref<Array<number | string>>([]);
-const viewingTenantId = ref<number | string | null>(null);
+const selectedIds = ref<string[]>([]);
+const togglingStatusIds = ref<string[]>([]);
+const viewingTenantId = ref<string | null>(null);
 
 const showSkeleton = computed(() => initialLoading.value || loading.value);
 const tableRows = computed(() => all.value);
@@ -177,10 +177,10 @@ function openCreateTenantModal(): void {
   tenantModal.open(target);
 }
 
-function normalizeSelection(ids: Array<number | string>): number[] {
+function normalizeSelection(ids: Array<string | number>): string[] {
   return ids
-    .map((value) => (typeof value === 'number' ? value : Number(value)))
-    .filter((value): value is number => Number.isFinite(value));
+    .map((value) => (value === null || value === undefined ? '' : String(value)))
+    .filter((value): value is string => value.length > 0);
 }
 
 function resolveArchivedParam(): ArchiveFilterParam | undefined {
@@ -291,7 +291,7 @@ async function reloadTenants(overrides: Partial<TenantListParams> = {}) {
     const tenants = extractData<any[]>(response.data) || [];
 
     const mapped: TenantRow[] = tenants.map((tenant: any) => ({
-      id: tenant.id,
+      id: String(tenant.id),
       name: tenant.name,
       slug: tenant.slug ?? null,
       domain: tenant.domain ?? null,
@@ -399,8 +399,8 @@ watch(trashedOnly, (value) => {
   queueFilterReload();
 });
 
-function handleSelectionChange(ids: Array<number | string>) {
-  selectedIds.value = ids;
+function handleSelectionChange(ids: Array<string | number>) {
+  selectedIds.value = normalizeSelection(ids);
 }
 
 function handleSearch(value: string) {
@@ -440,21 +440,21 @@ function handleSortChange(payload: { sort: string; direction: SortDirection }) {
   reloadTenants({ sort: field, dir: nextDirection });
 }
 
-function view(id: number | string) {
+function view(id: string | number) {
   if (!canViewTenants.value) return;
-  viewingTenantId.value = id;
+  viewingTenantId.value = String(id);
 }
 
 function closeTenantDetails() {
   viewingTenantId.value = null;
 }
 
-function edit(id: number | string) {
+function edit(id: string | number) {
   if (!canUpdate.value) return;
-  router.push({ name: 'tenants.edit', params: { id } });
+  router.push({ name: 'tenants.edit', params: { id: String(id) } });
 }
 
-async function impersonate(id: number | string) {
+async function impersonate(id: string | number) {
   if (!canManage.value) return;
   const tenantId = String(id);
   const tenant =
@@ -473,7 +473,7 @@ async function refreshAfterMutation() {
   await Promise.all([refreshTenantCache(), reloadTenants()]);
 }
 
-async function confirmArchive(id: number | string) {
+async function confirmArchive(id: string | number) {
   if (!canUpdate.value) {
     notify.forbidden();
     return;
@@ -491,7 +491,8 @@ async function confirmArchive(id: number | string) {
   if (!result.isConfirmed) return;
 
   try {
-    await api.post(`/tenants/${id}/archive`);
+    const tenantId = String(id);
+    await api.post(`/tenants/${tenantId}/archive`);
     notify.success(t('tenants.notifications.archived'));
     await refreshAfterMutation();
   } catch (error: any) {
@@ -499,14 +500,15 @@ async function confirmArchive(id: number | string) {
   }
 }
 
-async function confirmUnarchive(id: number | string) {
+async function confirmUnarchive(id: string | number) {
   if (!canUpdate.value) {
     notify.forbidden();
     return;
   }
 
   try {
-    await api.delete(`/tenants/${id}/archive`);
+    const tenantId = String(id);
+    await api.delete(`/tenants/${tenantId}/archive`);
     notify.success(t('tenants.notifications.unarchived'));
     await refreshAfterMutation();
   } catch (error: any) {
@@ -514,14 +516,15 @@ async function confirmUnarchive(id: number | string) {
   }
 }
 
-async function handleRestore(id: number | string) {
+async function handleRestore(id: string | number) {
   if (!canUpdate.value) {
     notify.forbidden();
     return;
   }
 
   try {
-    await api.post(`/tenants/${id}/restore`);
+    const tenantId = String(id);
+    await api.post(`/tenants/${tenantId}/restore`);
     notify.success(t('tenants.notifications.restored'));
     await refreshAfterMutation();
   } catch (error: any) {
@@ -533,7 +536,7 @@ async function toggleTenantStatus({
   id,
   active,
 }: {
-  id: number | string;
+  id: string | number;
   active: boolean;
 }) {
   if (!canUpdate.value) {
@@ -564,7 +567,7 @@ async function toggleTenantStatus({
   togglingStatusIds.value = [...togglingStatusIds.value, key];
 
   try {
-    await api.patch(`/tenants/${id}`, {
+    await api.patch(`/tenants/${key}`, {
       status: active ? 'active' : 'inactive',
     });
     notify.success(
@@ -576,32 +579,29 @@ async function toggleTenantStatus({
   } catch (error: any) {
     notify.error(error?.message || t('common.error'));
   } finally {
-    togglingStatusIds.value = togglingStatusIds.value.filter(
-      (value) => String(value) !== key,
-    );
+    togglingStatusIds.value = togglingStatusIds.value.filter((value) => value !== key);
   }
 }
 
-async function confirmArchiveSelected(ids: Array<number | string>) {
+async function confirmArchiveSelected(ids: Array<string | number>) {
   if (!ids.length) return;
   if (!canUpdate.value) {
     notify.forbidden();
     return;
   }
 
-  const numericIds = normalizeSelection(ids);
-  if (!numericIds.length) {
+  const normalizedIds = normalizeSelection(ids);
+  if (!normalizedIds.length) {
     return;
   }
 
-  const idSet = new Set(numericIds.map((value) => String(value)));
+  const idSet = new Set(normalizedIds);
   const archivableIds = all.value
     .filter(
       (tenant) =>
-        idSet.has(String(tenant.id)) && !tenant.deleted_at && !tenant.archived_at,
+        idSet.has(tenant.id) && !tenant.deleted_at && !tenant.archived_at,
     )
-    .map((tenant) => Number(tenant.id))
-    .filter((value) => Number.isFinite(value));
+    .map((tenant) => tenant.id);
 
   if (!archivableIds.length) {
     return;
@@ -629,7 +629,7 @@ async function confirmArchiveSelected(ids: Array<number | string>) {
   }
 }
 
-async function confirmDelete(id: number | string) {
+async function confirmDelete(id: string | number) {
   if (!canDelete.value) {
     notify.forbidden();
     return;
@@ -647,7 +647,7 @@ async function confirmDelete(id: number | string) {
   if (!result.isConfirmed) return;
 
   try {
-    await api.delete(`/tenants/${id}`);
+    await api.delete(`/tenants/${String(id)}`);
     notify.success(t('tenants.notifications.deleted'));
     await refreshAfterMutation();
   } catch (error: any) {
@@ -655,21 +655,21 @@ async function confirmDelete(id: number | string) {
   }
 }
 
-async function confirmDeleteSelected(ids: Array<number | string>) {
+async function confirmDeleteSelected(ids: Array<string | number>) {
   if (!ids.length) return;
   if (!canDelete.value) {
     notify.forbidden();
     return;
   }
 
-  const numericIds = normalizeSelection(ids);
-  if (!numericIds.length) {
+  const normalizedIds = normalizeSelection(ids);
+  if (!normalizedIds.length) {
     return;
   }
 
   const result = await Swal.fire({
     title: t('tenants.confirmDeleteSelected.title'),
-    text: t('tenants.confirmDeleteSelected.message', { count: numericIds.length }),
+    text: t('tenants.confirmDeleteSelected.message', { count: normalizedIds.length }),
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: t('tenants.confirmDeleteSelected.confirm'),
@@ -679,9 +679,9 @@ async function confirmDeleteSelected(ids: Array<number | string>) {
   if (!result.isConfirmed) return;
 
   try {
-    await api.post('/tenants/bulk-delete', { ids: numericIds });
+    await api.post('/tenants/bulk-delete', { ids: normalizedIds });
     notify.success(
-      t('tenants.notifications.bulkDeleted', { count: numericIds.length }),
+      t('tenants.notifications.bulkDeleted', { count: normalizedIds.length }),
     );
     await refreshAfterMutation();
   } catch (error: any) {
@@ -689,11 +689,11 @@ async function confirmDeleteSelected(ids: Array<number | string>) {
   }
 }
 
-async function resendOwnerInvite(id: number | string) {
+async function resendOwnerInvite(id: string | number) {
   if (!canManage.value) return;
 
   try {
-    await api.post(`/tenants/${id}/owner/invite-resend`);
+    await api.post(`/tenants/${String(id)}/owner/invite-resend`);
     notify.success(t('tenants.owner.inviteResent'));
     await refreshAfterMutation();
   } catch (error: any) {
@@ -701,11 +701,11 @@ async function resendOwnerInvite(id: number | string) {
   }
 }
 
-async function sendOwnerPasswordReset(id: number | string) {
+async function sendOwnerPasswordReset(id: string | number) {
   if (!canManage.value) return;
 
   try {
-    await api.post(`/tenants/${id}/owner/password-reset`);
+    await api.post(`/tenants/${String(id)}/owner/password-reset`);
     notify.success(t('tenants.owner.passwordReset.success'));
     await refreshAfterMutation();
   } catch (error: any) {
@@ -713,7 +713,7 @@ async function sendOwnerPasswordReset(id: number | string) {
   }
 }
 
-async function resetOwnerEmail(id: number | string) {
+async function resetOwnerEmail(id: string | number) {
   if (!canManage.value) return;
 
   const tenantId = String(id);

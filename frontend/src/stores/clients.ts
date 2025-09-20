@@ -36,17 +36,15 @@ function normalizeNumeric(value: string | number | null | undefined): number | u
   return Number.isFinite(numeric) ? numeric : undefined;
 }
 
-function normalizeTenantId(value: string | number | null | undefined): number | undefined {
-  if (value === SUPER_ADMIN_TENANT_ID) {
+function normalizeTenantId(value: string | number | null | undefined): string | undefined {
+  if (value === null || value === undefined || value === '' || value === SUPER_ADMIN_TENANT_ID) {
     return undefined;
   }
-  return normalizeNumeric(value);
-}
-
-function normalizeIds(ids: Array<number | string>): number[] {
-  return ids
-    .map((value) => (typeof value === 'number' ? value : Number(value)))
-    .filter((value): value is number => Number.isFinite(value));
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? String(value) : undefined;
+  }
+  const normalized = String(value).trim();
+  return normalized ? normalized : undefined;
 }
 
 export const useClientsStore = defineStore('clients', {
@@ -63,7 +61,7 @@ export const useClientsStore = defineStore('clients', {
     sort: 'name' as ClientListParams['sort'],
     direction: 'asc' as ClientListParams['dir'],
     filters: {
-      tenantId: null as string | number | null,
+      tenantId: null as string | null,
     },
     archiveFilter: {
       includeArchived: false,
@@ -88,7 +86,7 @@ export const useClientsStore = defineStore('clients', {
       this.sort = sort;
       this.direction = dir;
     },
-    setTenantFilter(tenantId: string | number | null) {
+    setTenantFilter(tenantId: string | null) {
       const auth = useAuthStore();
       if (!auth.isSuperAdmin) {
         this.filters.tenantId = null;
@@ -246,11 +244,11 @@ export const useClientsStore = defineStore('clients', {
         this.loading = false;
       }
     },
-    async get(id: number | string) {
-      const numericId = normalizeNumeric(id) ?? Number(id);
-      let client = this.clients.find((item) => item.id === numericId);
+    async get(id: string) {
+      const identifier = String(id);
+      let client = this.clients.find((item) => item.id === identifier);
       if (!client) {
-        const { data } = await clientsApi.get(id);
+        const { data } = await clientsApi.get(identifier);
         client = data;
         this.upsertClientInState(data);
       }
@@ -262,56 +260,55 @@ export const useClientsStore = defineStore('clients', {
       this.upsertClientInState(data);
       return data;
     },
-    async update(id: number | string, payload: UpdateClientPayload) {
+    async update(id: string, payload: UpdateClientPayload) {
       const body = this.coerceUpdatePayload(payload);
       const { data } = await clientsApi.update(id, body);
       this.upsertClientInState(data);
       return data;
     },
-    async remove(id: number | string) {
+    async remove(id: string) {
       await clientsApi.remove(id);
-      const numericId = normalizeNumeric(id) ?? Number(id);
-      this.clients = this.clients.filter((client) => client.id !== numericId);
+      this.clients = this.clients.filter((client) => client.id !== id);
     },
-    async restore(id: number | string) {
+    async restore(id: string) {
       const { data } = await clientsApi.restore(id);
       this.upsertClientInState(data);
       return data;
     },
-    async archive(id: number | string) {
+    async archive(id: string) {
       const { data } = await clientsApi.archive(id);
       this.upsertClientInState(data);
       return data;
     },
-    async unarchive(id: number | string) {
+    async unarchive(id: string) {
       const { data } = await clientsApi.unarchive(id);
       this.upsertClientInState(data);
       return data;
     },
-    async archiveMany(ids: Array<number | string>) {
-      const numericIds = normalizeIds(ids);
-      if (!numericIds.length) {
+    async archiveMany(ids: string[]) {
+      const validIds = ids.map(String).filter((value) => Boolean(value));
+      if (!validIds.length) {
         return [] as Client[];
       }
-      const response = await clientsApi.bulkArchive(numericIds);
+      const response = await clientsApi.bulkArchive(validIds);
       const archived = response.data?.data ?? [];
       archived.forEach((client: Client) => {
         this.upsertClientInState(client);
       });
       return archived;
     },
-    async toggleStatus(id: number | string) {
+    async toggleStatus(id: string) {
       const { data } = await clientsApi.toggleStatus(id);
       this.upsertClientInState(data);
       return data;
     },
-    async removeMany(ids: Array<number | string>) {
-      const numericIds = normalizeIds(ids);
-      if (!numericIds.length) {
+    async removeMany(ids: string[]) {
+      const validIds = ids.map(String).filter((value) => Boolean(value));
+      if (!validIds.length) {
         return;
       }
-      await clientsApi.bulkDelete(numericIds);
-      this.clients = this.clients.filter((client) => !numericIds.includes(client.id));
+      await clientsApi.bulkDelete(validIds);
+      this.clients = this.clients.filter((client) => !validIds.includes(client.id));
     },
   },
 });
