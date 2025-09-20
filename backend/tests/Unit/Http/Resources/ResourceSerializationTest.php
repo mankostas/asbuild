@@ -61,6 +61,34 @@ class ResourceSerializationTest extends TestCase
         $this->assertNotContains($role->getKey(), $roleIds);
     }
 
+    public function test_employee_resource_prefers_pivot_tenant_identifier(): void
+    {
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant'
+        ]);
+        $globalRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => null,
+            'name' => 'Global Manager',
+            'slug' => 'global_manager',
+            'level' => 1,
+            'abilities' => ['employees.manage'],
+        ]);
+        $employee = $this->createUser([
+            'tenant_id' => $tenant->getKey(),
+        ]);
+        $employee->roles()->attach($globalRole->getKey(), ['tenant_id' => $tenant->getKey()]);
+
+        $resource = new EmployeeResource($employee->fresh()->load('roles.tenant', 'tenant'));
+        $data = $resource->toArray(new Request());
+
+        $roleData = collect($data['roles'])->firstWhere('id', $globalRole->public_id);
+
+        $this->assertNotNull($roleData);
+        $this->assertSame($tenant->public_id, $roleData['tenant_id']);
+    }
+
     public function test_team_resource_uses_public_identifiers(): void
     {
         $tenant = Tenant::create([
