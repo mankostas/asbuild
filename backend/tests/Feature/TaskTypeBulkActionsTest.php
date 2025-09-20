@@ -148,4 +148,71 @@ class TaskTypeBulkActionsTest extends TestCase
         $this->assertDatabaseHas('task_types', ['name' => 'T1', 'tenant_id' => $targetTenant->id]);
         $this->assertDatabaseHas('task_types', ['name' => 'T2', 'tenant_id' => $targetTenant->id]);
     }
+
+    public function test_super_admin_copy_to_tenant_regenerates_public_id(): void
+    {
+        $sourceTenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Source', 'features' => ['tasks']
+        ]);
+        $targetTenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Target', 'features' => ['tasks']
+        ]);
+
+        $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'SuperAdmin',
+            'slug' => 'super_admin',
+            'tenant_id' => null,
+            'abilities' => ['task_types.manage'],
+            'level' => 0,
+        ]);
+
+        $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'U',
+            'email' => 'super@example.com',
+            'password' => Hash::make('secret'),
+            'tenant_id' => $sourceTenant->id,
+            'phone' => '123456',
+            'address' => 'Street 1',
+        ]);
+        $user->roles()->attach($role->id, ['tenant_id' => $sourceTenant->id]);
+        Sanctum::actingAs($user);
+
+        $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Example',
+            'tenant_id' => $sourceTenant->id,
+        ]);
+
+        $originalPublicId = $this->publicIdFor($type);
+
+        $response = $this->withHeader('X-Tenant-ID', $sourceTenant->id)
+            ->postJson(
+                "/api/task-types/{$originalPublicId}/copy-to-tenant",
+                ['tenant_id' => $targetTenant->id]
+            );
+
+        $response->assertCreated();
+        $response->assertJsonPath('data.name', 'Example');
+        $response->assertJsonPath('data.tenant_id', $this->publicIdFor($targetTenant));
+
+        $newPublicId = $response->json('data.id');
+
+        $this->assertIsString($newPublicId);
+        $this->assertNotSame($originalPublicId, $newPublicId);
+
+        $this->assertDatabaseHas('task_types', [
+            'id' => $this->idFromPublicId(TaskType::class, $newPublicId),
+            'tenant_id' => $targetTenant->id,
+            'name' => 'Example',
+        ]);
+
+        $this->assertDatabaseHas('task_types', [
+            'id' => $type->id,
+            'public_id' => $originalPublicId,
+        ]);
+    }
 }

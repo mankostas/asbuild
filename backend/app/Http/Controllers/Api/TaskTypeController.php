@@ -195,6 +195,7 @@ class TaskTypeController extends Controller
         }
 
         $copy = $taskType->replicate();
+        $copy->public_id = TaskType::generatePublicId();
         $copy->tenant_id = $tenantId;
         $copy->client_id = null;
         $copy->save();
@@ -237,6 +238,7 @@ class TaskTypeController extends Controller
             }
 
             $copy = $type->replicate();
+            $copy->public_id = TaskType::generatePublicId();
             $copy->tenant_id = $tenantId;
             $copy->client_id = null;
             $copy->save();

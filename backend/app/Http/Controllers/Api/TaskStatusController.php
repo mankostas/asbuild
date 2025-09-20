@@ -133,6 +133,7 @@ class TaskStatusController extends Controller
         }
 
         $copy = $taskStatus->replicate();
+        $copy->public_id = TaskStatus::generatePublicId();
         $copy->tenant_id = $tenantId;
         $copy->save();
         $copy->load('tenant');
