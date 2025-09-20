@@ -47,10 +47,10 @@ class TaskCommentAttachmentTest extends TestCase
         Sanctum::actingAs($user);
         app()->instance('tenant_id', $tenant->id);
 
-        $res = $this->withHeader('X-Tenant-ID', $tenant->id)
+        $res = $this->withHeader('X-Tenant-ID', $tenant->public_id)
             ->postJson("/api/tasks/{$task->public_id}/comments", [
                 'body' => 'Hi',
-                'files' => [$file->id],
+                'files' => [$file->public_id],
             ]);
 
         $res->assertCreated();

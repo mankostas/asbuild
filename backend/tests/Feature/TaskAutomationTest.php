@@ -78,8 +78,8 @@ class TaskAutomationTest extends TestCase
             ? TaskStatus::prefixSlug('completed', $tenant->id)
             : 'completed';
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/task-types/{$type->id}/automations", [
+        $this->withHeader('X-Tenant-ID', $tenant->public_id)
+            ->postJson("/api/task-types/{$type->public_id}/automations", [
                 'event' => 'status_changed',
                 'conditions_json' => ['status' => $status],
                 'actions_json' => [['type' => 'notify_team', 'team_id' => $team->public_id]],
@@ -95,7 +95,7 @@ class TaskAutomationTest extends TestCase
             'board_position' => 1,
         ]);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $tenant->public_id)
             ->patchJson('/api/task-board/move', [
                 'task_id' => $task->public_id,
                 'status_slug' => 'completed',

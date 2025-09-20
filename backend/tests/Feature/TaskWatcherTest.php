@@ -58,8 +58,8 @@ class TaskWatcherTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
         Sanctum::actingAs($user);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/tasks/{$task->id}/watch")
+        $this->withHeader('X-Tenant-ID', $tenant->public_id)
+            ->postJson("/api/tasks/{$task->public_id}/watch")
             ->assertStatus(201);
 
         $this->assertDatabaseHas('task_watchers', [
@@ -67,8 +67,8 @@ class TaskWatcherTest extends TestCase
             'user_id' => $user->id,
         ]);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->deleteJson("/api/tasks/{$task->id}/watch")
+        $this->withHeader('X-Tenant-ID', $tenant->public_id)
+            ->deleteJson("/api/tasks/{$task->public_id}/watch")
             ->assertStatus(200);
 
         $this->assertDatabaseMissing('task_watchers', [
@@ -122,8 +122,8 @@ class TaskWatcherTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => $tenant2->id]);
         Sanctum::actingAs($user);
 
-        $this->withHeader('X-Tenant-ID', $tenant2->id)
-            ->postJson("/api/tasks/{$task->id}/watch")
+        $this->withHeader('X-Tenant-ID', $tenant2->public_id)
+            ->postJson("/api/tasks/{$task->public_id}/watch")
             ->assertStatus(403);
 
         $this->assertDatabaseMissing('task_watchers', [
@@ -204,24 +204,27 @@ class TaskWatcherTest extends TestCase
         Sanctum::actingAs($reporter);
 
         $payload = [
-            'task_type_id' => $type->id,
-            'assignee' => ['id' => $assignee->id],
+            'task_type_id' => $type->public_id,
+            'assignee' => [
+                'id' => $assignee->id,
+                'public_id' => $assignee->public_id,
+            ],
         ];
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $tenant->public_id)
             ->postJson('/api/tasks', $payload)
             ->assertStatus(201);
-        $taskId = Task::first()->id;
+        $task = Task::query()->firstOrFail();
 
-        $this->assertDatabaseHas('task_watchers', ['task_id' => $taskId, 'user_id' => $reporter->id]);
-        $this->assertDatabaseHas('task_watchers', ['task_id' => $taskId, 'user_id' => $assignee->id]);
+        $this->assertDatabaseHas('task_watchers', ['task_id' => $task->id, 'user_id' => $reporter->id]);
+        $this->assertDatabaseHas('task_watchers', ['task_id' => $task->id, 'user_id' => $assignee->id]);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/tasks/{$taskId}/comments", [
+        $this->withHeader('X-Tenant-ID', $tenant->public_id)
+            ->postJson("/api/tasks/{$task->public_id}/comments", [
                 'body' => 'hello',
-                'mentions' => [$mentioned->id],
+                'mentions' => [$mentioned->public_id],
             ])
             ->assertStatus(201);
 
-        $this->assertDatabaseHas('task_watchers', ['task_id' => $taskId, 'user_id' => $mentioned->id]);
+        $this->assertDatabaseHas('task_watchers', ['task_id' => $task->id, 'user_id' => $mentioned->id]);
     }
 }

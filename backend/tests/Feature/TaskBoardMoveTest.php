@@ -18,13 +18,17 @@ class TaskBoardMoveTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected string $tenantPublicId;
+
     protected function setUp(): void
     {
         parent::setUp();
-        Tenant::create([
+        $tenant = Tenant::create([
             'public_id' => PublicIdGenerator::generate(),
             'id' => 1, 'name' => 'T', 'features' => ['tasks']
         ]);
+
+        $this->tenantPublicId = $tenant->public_id;
 
         TaskStatus::create([
             'public_id' => PublicIdGenerator::generate(),
@@ -101,22 +105,22 @@ class TaskBoardMoveTest extends TestCase
         $user = $this->user();
         $task = $this->makeTask($user);
 
-        $this->withHeader('X-Tenant-ID', 1)
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
             ->patchJson('/api/task-board/move', ['task_id' => $task->public_id, 'status_slug' => 'assigned', 'index' => 0])
             ->assertStatus(200);
 
-        $this->withHeader('X-Tenant-ID', 1)
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
             ->patchJson('/api/task-board/move', ['task_id' => $task->public_id, 'status_slug' => 'draft', 'index' => 0])
             ->assertStatus(200);
 
-        $this->withHeader('X-Tenant-ID', 1)
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
             ->patchJson('/api/task-board/move', ['task_id' => $task->public_id, 'status_slug' => 'assigned', 'index' => 0])
             ->assertStatus(200);
-        $this->withHeader('X-Tenant-ID', 1)
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
             ->patchJson('/api/task-board/move', ['task_id' => $task->public_id, 'status_slug' => 'in_progress', 'index' => 0])
             ->assertStatus(200);
 
-        $this->withHeader('X-Tenant-ID', 1)
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
             ->patchJson('/api/task-board/move', ['task_id' => $task->public_id, 'status_slug' => 'draft', 'index' => 0])
             ->assertStatus(422);
     }
@@ -126,7 +130,7 @@ class TaskBoardMoveTest extends TestCase
         $user = $this->user(true);
         $task = $this->makeTask($user);
 
-        $this->withHeader('X-Tenant-ID', 1)
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
             ->patchJson('/api/task-board/move', ['task_id' => $task->public_id, 'status_slug' => 'completed', 'index' => 0])
             ->assertStatus(200)
             ->assertJsonPath('data.status_slug', 'completed');
@@ -178,7 +182,7 @@ class TaskBoardMoveTest extends TestCase
             'board_position' => 3000,
         ]);
 
-        $this->withHeader('X-Tenant-ID', 1)
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
             ->patchJson('/api/task-board/move', [
                 'task_id' => $taskA->public_id,
                 'status_slug' => 'draft',
@@ -189,10 +193,10 @@ class TaskBoardMoveTest extends TestCase
         $order = Task::where('tenant_id', 1)
             ->where('status_slug', \App\Models\TaskStatus::prefixSlug('draft', 1))
             ->orderBy('board_position')
-            ->pluck('id')
+            ->pluck('public_id')
             ->toArray();
 
-        $this->assertSame([$taskB->id, $taskC->id, $taskA->id], $order);
+        $this->assertSame([$taskB->public_id, $taskC->public_id, $taskA->public_id], $order);
     }
 }
 

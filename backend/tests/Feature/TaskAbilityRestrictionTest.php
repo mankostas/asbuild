@@ -47,7 +47,7 @@ class TaskAbilityRestrictionTest extends TestCase
 
         $this->assertFalse(app(TaskPolicy::class)->create($user));
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $tenant->public_id)
             ->postJson('/api/tasks', [])
             ->assertStatus(403);
 
@@ -56,8 +56,8 @@ class TaskAbilityRestrictionTest extends TestCase
             'tenant_id' => $tenant->id, 'user_id' => $user->id
         ]);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->deleteJson("/api/tasks/{$task->id}")
+        $this->withHeader('X-Tenant-ID', $tenant->public_id)
+            ->deleteJson("/api/tasks/{$task->public_id}")
             ->assertStatus(403);
     }
 }
