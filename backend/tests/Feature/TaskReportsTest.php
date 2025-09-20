@@ -183,7 +183,7 @@ class TaskReportsTest extends TestCase
         Sanctum::actingAs($generalUser);
 
         $filteredResponse = $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->getJson('/api/reports/materials?client_ids[]=' . $clientA->id . '&client_ids[]=' . $clientB->id);
+            ->getJson('/api/reports/materials?client_ids[]=' . $clientA->public_id . '&client_ids[]=' . $clientB->public_id);
         $filteredResponse->assertStatus(200);
         $filteredResponse->assertJsonFragment([
             'category' => 'Safety',
@@ -195,7 +195,7 @@ class TaskReportsTest extends TestCase
         ]);
 
         $singleClientResponse = $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->getJson('/api/reports/materials?client_id=' . $clientB->id);
+            ->getJson('/api/reports/materials?client_id=' . $clientB->public_id);
         $singleClientResponse->assertStatus(200);
         $singleClientResponse->assertJsonCount(1);
         $singleClientResponse->assertJsonFragment([

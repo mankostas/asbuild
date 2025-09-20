@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Models\Client;
+use App\Support\PublicIdResolver;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -11,7 +13,7 @@ class ClientFilter
     {
         $hasClientId = $request->has('client_id');
         $hasClientIds = $request->has('client_ids');
-        $ids = [];
+        $identifiers = [];
 
         if ($hasClientId) {
             $value = $request->query('client_id');
@@ -22,10 +24,10 @@ class ClientFilter
                         continue;
                     }
 
-                    $ids[] = (int) $id;
+                    $identifiers[] = $id;
                 }
             } elseif ($value !== null && $value !== '') {
-                $ids[] = (int) $value;
+                $identifiers[] = $value;
             }
         }
 
@@ -42,10 +44,28 @@ class ClientFilter
                         continue;
                     }
 
-                    $ids[] = (int) $id;
+                    $identifiers[] = $id;
                 }
             } elseif ($value !== null && $value !== '') {
-                $ids[] = (int) $value;
+                $identifiers[] = $value;
+            }
+        }
+
+        $resolver = app(PublicIdResolver::class);
+        $ids = [];
+        foreach ($identifiers as $identifier) {
+            if (is_string($identifier)) {
+                $identifier = trim($identifier);
+
+                if ($identifier === '') {
+                    continue;
+                }
+            }
+
+            $resolved = $resolver->resolve(Client::class, $identifier);
+
+            if ($resolved !== null) {
+                $ids[] = $resolved;
             }
         }
 
@@ -53,7 +73,24 @@ class ClientFilter
         $hasFilterParams = $hasClientId || $hasClientIds;
 
         if ($permittedIds !== null) {
-            $permittedIds = array_values(array_unique(array_map('intval', $permittedIds)));
+            $permitted = [];
+            foreach ($permittedIds as $identifier) {
+                if (is_string($identifier)) {
+                    $identifier = trim($identifier);
+
+                    if ($identifier === '') {
+                        continue;
+                    }
+                }
+
+                $resolved = $resolver->resolve(Client::class, $identifier);
+
+                if ($resolved !== null) {
+                    $permitted[] = $resolved;
+                }
+            }
+
+            $permittedIds = array_values(array_unique($permitted));
 
             if ($hasFilterParams) {
                 $ids = array_values(array_intersect($ids, $permittedIds));

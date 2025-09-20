@@ -7,9 +7,11 @@ use App\Http\Requests\TaskTypeRequest;
 use App\Http\Resources\TaskTypeResource;
 use App\Models\Client;
 use App\Models\TaskType;
+use App\Models\Tenant;
 use App\Services\FormSchemaService;
 use App\Services\StatusFlowService;
 use App\Support\ListQuery;
+use App\Support\PublicIdResolver;
 use App\Support\TenantDefaults;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -31,13 +33,33 @@ class TaskTypeController extends Controller
 
         if ($request->user()->hasRole('SuperAdmin')) {
             $scope = $request->query('scope', 'all');
+            $resolver = app(PublicIdResolver::class);
+            $tenantIdentifier = $request->query('tenant_id');
+            $hasTenantFilter = $request->has('tenant_id');
+            $tenantId = null;
+            $invalidTenantFilter = false;
+
+            if ($hasTenantFilter) {
+                if ($tenantIdentifier !== null && $tenantIdentifier !== '') {
+                    $tenantId = $resolver->resolve(Tenant::class, $tenantIdentifier);
+                    $invalidTenantFilter = $tenantId === null;
+                }
+            }
 
             if ($scope === 'tenant') {
-                $query->where('tenant_id', $request->query('tenant_id'));
+                if ($invalidTenantFilter) {
+                    $query->whereRaw('1 = 0');
+                } else {
+                    $query->where('tenant_id', $tenantId);
+                }
             } elseif ($scope === 'global') {
                 $query->whereNull('tenant_id');
-            } elseif ($request->has('tenant_id')) {
-                $query->where('tenant_id', $request->query('tenant_id'));
+            } elseif ($hasTenantFilter) {
+                if ($invalidTenantFilter) {
+                    $query->whereRaw('1 = 0');
+                } else {
+                    $query->where('tenant_id', $tenantId);
+                }
             }
         } else {
             $query->where('tenant_id', $request->user()->tenant_id);
@@ -272,9 +294,35 @@ class TaskTypeController extends Controller
         $data = $request->validate([
             'name' => 'required|string',
             'schema_json' => 'array',
-            'tenant_id' => ['nullable', 'integer', 'exists:tenants,id'],
-            'client_id' => ['nullable', 'integer', Rule::exists('clients', 'id')],
+            'tenant_id' => ['nullable', 'string', 'ulid', Rule::exists('tenants', 'public_id')],
+            'client_id' => ['nullable', 'string', 'ulid', Rule::exists('clients', 'public_id')],
         ]);
+
+        $resolver = app(PublicIdResolver::class);
+
+        if (array_key_exists('tenant_id', $data) && $data['tenant_id'] !== null) {
+            $tenantId = $resolver->resolve(Tenant::class, $data['tenant_id']);
+
+            if ($tenantId === null) {
+                throw ValidationException::withMessages([
+                    'tenant_id' => ['The selected tenant is invalid.'],
+                ]);
+            }
+
+            $data['tenant_id'] = $tenantId;
+        }
+
+        if (array_key_exists('client_id', $data) && $data['client_id'] !== null) {
+            $clientId = $resolver->resolve(Client::class, $data['client_id']);
+
+            if ($clientId === null) {
+                throw ValidationException::withMessages([
+                    'client_id' => ['The selected client is invalid.'],
+                ]);
+            }
+
+            $data['client_id'] = $clientId;
+        }
 
         if (isset($data['schema_json'])) {
             $this->formSchemaService->validate($data['schema_json']);
