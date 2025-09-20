@@ -1,38 +1,40 @@
 <template>
   <div>
     <label
+      :for="checkboxId"
       class="flex items-center"
       :class="disabled ? ' cursor-not-allowed opacity-50' : 'cursor-pointer'"
     >
       <input
+        :id="checkboxId"
+        v-model="localValue"
         type="checkbox"
         class="hidden"
+        :value="value"
         :disabled="disabled"
         :name="name"
-        @change="onChange"
-        :value="value"
-        v-model="localValue"
         v-bind="$attrs"
+        @change="onChange"
       />
 
       <span
         class="h-4 w-4 border flex-none border-slate-100 dark:border-slate-800 rounded inline-flex ltr:mr-3 rtl:ml-3 relative transition-all duration-150"
         :class="
           ck
-            ? activeClass + ' ring-2 ring-offset-2 dark:ring-offset-slate-800 '
+            ? `${activeClass} ring-2 ring-offset-2 dark:ring-offset-slate-800`
             : 'bg-slate-100 dark:bg-slate-600 dark:border-slate-600'
         "
       >
         <img
+          v-if="ck"
           src="@/assets/images/icon/ck-white.svg"
           alt=""
           class="h-[10px] w-[10px] block m-auto"
-          v-if="ck"
         />
       </span>
       <span
-        class="text-slate-500 dark:text-slate-400 text-sm leading-6"
         v-if="label"
+        class="text-slate-500 dark:text-slate-400 text-sm leading-6"
       >
         {{ label }}
       </span>
@@ -42,12 +44,15 @@
 </template>
 <script>
 import { computed, defineComponent, ref } from "vue";
+
+let checkboxIdCounter = 0;
 export default defineComponent({
   name: "Checkbox",
   inheritAttrs: false,
   props: {
     label: {
       type: String,
+      default: "",
     },
     checked: {
       type: Boolean,
@@ -66,11 +71,17 @@ export default defineComponent({
       default:
         " ring-black-500  bg-slate-900 dark:bg-slate-700 dark:ring-slate-700 ",
     },
+    id: {
+      type: String,
+      default: "",
+    },
     value: {
       type: null,
+      default: null,
     },
     modelValue: {
       type: null,
+      default: null,
     },
   },
   emits: {
@@ -82,6 +93,8 @@ export default defineComponent({
   },
 
   setup(props, context) {
+    const instanceId = checkboxIdCounter += 1;
+    const checkboxId = computed(() => props.id || `checkbox-${instanceId}`);
     const ck = ref(props.checked);
 
     // on change event
@@ -94,7 +107,7 @@ export default defineComponent({
       set: (newValue) => context.emit("update:modelValue", newValue),
     });
 
-    return { localValue, ck, onChange };
+    return { localValue, ck, onChange, checkboxId };
   },
 });
 </script>

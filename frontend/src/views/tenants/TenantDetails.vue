@@ -83,7 +83,7 @@ import { can } from '@/stores/auth';
 import hasAbility from '@/utils/ability';
 import { useI18n } from 'vue-i18n';
 
-const props = defineProps<{ forceModal?: boolean; tenantId?: number | string | null }>();
+const props = defineProps<{ forceModal?: boolean; tenantId?: string | null }>();
 const emit = defineEmits<{ (event: 'close'): void }>();
 
 const route = useRoute();
@@ -108,16 +108,19 @@ const canEditTenant = computed(
 
 const effectiveId = computed(() => {
   if (props.tenantId !== undefined && props.tenantId !== null) {
-    return props.tenantId;
+    return props.tenantId || null;
   }
   const param = route.params.id;
   if (Array.isArray(param)) {
     return param[0] ?? null;
   }
-  return param ?? null;
+  if (typeof param === 'string') {
+    return param;
+  }
+  return param !== undefined && param !== null ? String(param) : null;
 });
 
-async function loadTenant(id: number | string | null) {
+async function loadTenant(id: string | null) {
   if (!id || !hasAccess.value) {
     tenant.value = null;
     return;
@@ -141,7 +144,7 @@ async function loadTenant(id: number | string | null) {
 watch(
   () => effectiveId.value,
   (id) => {
-    loadTenant(id as number | string | null);
+    loadTenant(id as string | null);
   },
   { immediate: true },
 );
@@ -150,7 +153,7 @@ watch(
   () => hasAccess.value,
   (canAccess) => {
     if (canAccess) {
-      loadTenant(effectiveId.value as number | string | null);
+      loadTenant(effectiveId.value as string | null);
     } else {
       tenant.value = null;
     }

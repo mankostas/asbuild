@@ -90,11 +90,11 @@ import { useNotify } from '@/plugins/notify';
 import type { Client, ClientListParams } from '@/services/api/clients';
 
 interface ClientTableRow {
-  id: number | string;
+  id: string;
   name: string;
   email: string | null;
   phone: string | null;
-  tenantId: number | string | null;
+  tenantId: string | null;
   tenantName: string | null;
   status: 'active' | 'inactive' | 'archived' | 'trashed';
   archivedAt: string | null;
@@ -120,13 +120,11 @@ const {
 } = storeToRefs(clientsStore);
 
 const searchTerm = ref(search.value || '');
-const selectedIds = ref<Array<number | string>>([]);
-const togglingStatusIds = ref<Array<number | string>>([]);
+const selectedIds = ref<string[]>([]);
+const togglingStatusIds = ref<string[]>([]);
 const tenantFilter = ref<string>(
-  auth.isSuperAdmin && clientsStore.filters.tenantId !== null && clientsStore.filters.tenantId !== undefined
-    ? String(clientsStore.filters.tenantId)
-    : auth.isSuperAdmin
-    ? String(tenantStore.currentTenantId || '')
+  auth.isSuperAdmin
+    ? clientsStore.filters.tenantId ?? tenantStore.currentTenantId ?? ''
     : '',
 );
 const sortSelection = ref(`${sort.value}:${direction.value}`);
@@ -140,10 +138,10 @@ const canManage = computed(() => can('clients.manage'));
 const canDelete = computed(() => can('clients.delete') || canManage.value);
 const canBulkManage = computed(() => canDelete.value);
 
-function normalizeSelection(ids: Array<number | string>): number[] {
+function normalizeSelection(ids: Array<string | number>): string[] {
   return ids
-    .map((value) => (typeof value === 'number' ? value : Number(value)))
-    .filter((value): value is number => Number.isFinite(value));
+    .map((value) => (value === null || value === undefined ? '' : String(value)))
+    .filter((value): value is string => Boolean(value));
 }
 
 const includeArchived = computed({
@@ -258,7 +256,7 @@ watch(
   () => clientsStore.filters.tenantId,
   (value) => {
     if (!auth.isSuperAdmin) return;
-    tenantFilter.value = value !== null && value !== undefined ? String(value) : '';
+    tenantFilter.value = value ?? '';
   },
 );
 
@@ -314,13 +312,13 @@ async function reloadClients(overrides: Partial<ClientListParams> = {}) {
   }
 }
 
-function handleSelectionChange(ids: Array<number | string>) {
-  selectedIds.value = ids;
+function handleSelectionChange(ids: Array<string | number>) {
+  selectedIds.value = normalizeSelection(ids);
 }
 
-async function handleToggleStatus(payload: { id: number | string; active: boolean }) {
-  const numericId = Number(payload.id);
-  const target = clients.value.find((clientItem) => clientItem.id === numericId);
+async function handleToggleStatus(payload: { id: string | number; active: boolean }) {
+  const identifier = String(payload.id);
+  const target = clients.value.find((clientItem) => clientItem.id === identifier);
   if (!target) {
     return;
   }
@@ -336,17 +334,17 @@ async function handleToggleStatus(payload: { id: number | string; active: boolea
   }
 
   const snapshot: Client = { ...target };
-  togglingStatusIds.value = [...togglingStatusIds.value.filter((id) => id !== payload.id), payload.id];
+  togglingStatusIds.value = [...togglingStatusIds.value.filter((id) => id !== identifier), identifier];
 
   clientsStore.upsertClientInState({ ...snapshot, status: nextStatus });
 
   try {
-    await clientsStore.toggleStatus(payload.id);
+    await clientsStore.toggleStatus(identifier);
   } catch (error: any) {
     clientsStore.upsertClientInState({ ...snapshot, status: previousStatus });
     notify.error(error?.message || t('common.error'));
   } finally {
-    togglingStatusIds.value = togglingStatusIds.value.filter((id) => id !== payload.id);
+    togglingStatusIds.value = togglingStatusIds.value.filter((id) => id !== identifier);
   }
 }
 
@@ -382,15 +380,15 @@ function handleSortChange(payload: { sort: string; direction: 'asc' | 'desc' }) 
   reloadClients({ sort: field, dir: directionValue });
 }
 
-function viewClient(id: number | string) {
-  router.push({ name: 'clients.edit', params: { id } });
+function viewClient(id: string | number) {
+  router.push({ name: 'clients.edit', params: { id: String(id) } });
 }
 
-function editClient(id: number | string) {
-  router.push({ name: 'clients.edit', params: { id } });
+function editClient(id: string | number) {
+  router.push({ name: 'clients.edit', params: { id: String(id) } });
 }
 
-async function confirmArchive(id: number | string) {
+async function confirmArchive(id: string | number) {
   if (!canManage.value) {
     notify.forbidden();
     return;
@@ -405,26 +403,26 @@ async function confirmArchive(id: number | string) {
   });
   if (!result.isConfirmed) return;
   try {
-    await clientsStore.archive(id);
+    await clientsStore.archive(String(id));
     await reloadClients();
   } catch (error: any) {
     notify.error(error?.message || t('common.error'));
   }
 }
 
-async function confirmArchiveSelected(ids: Array<number | string>) {
+async function confirmArchiveSelected(ids: Array<string | number>) {
   if (!ids.length) return;
   if (!canManage.value) {
     notify.forbidden();
     return;
   }
 
-  const numericIds = normalizeSelection(ids);
-  if (!numericIds.length) {
+  const normalizedIds = normalizeSelection(ids);
+  if (!normalizedIds.length) {
     return;
   }
 
-  const idSet = new Set(numericIds);
+  const idSet = new Set(normalizedIds);
   const archivableIds = clients.value
     .filter(
       (clientItem) =>
@@ -455,16 +453,16 @@ async function confirmArchiveSelected(ids: Array<number | string>) {
   }
 }
 
-async function handleRestore(payload: { id: number | string; type: 'archive' | 'trash' }) {
+async function handleRestore(payload: { id: string | number; type: 'archive' | 'trash' }) {
   if (!canDelete.value && !canManage.value) {
     notify.forbidden();
     return;
   }
   try {
     if (payload.type === 'trash') {
-      await clientsStore.restore(payload.id);
+      await clientsStore.restore(String(payload.id));
     } else {
-      await clientsStore.unarchive(payload.id);
+      await clientsStore.unarchive(String(payload.id));
     }
     await reloadClients();
   } catch (error: any) {
@@ -472,7 +470,7 @@ async function handleRestore(payload: { id: number | string; type: 'archive' | '
   }
 }
 
-async function confirmDelete(id: number | string) {
+async function confirmDelete(id: string | number) {
   if (!canDelete.value) {
     notify.forbidden();
     return;
@@ -487,26 +485,26 @@ async function confirmDelete(id: number | string) {
   });
   if (!result.isConfirmed) return;
   try {
-    await clientsStore.remove(id);
+    await clientsStore.remove(String(id));
     await reloadClients();
   } catch (error: any) {
     notify.error(error?.message || t('common.error'));
   }
 }
 
-async function confirmDeleteSelected(ids: Array<number | string>) {
+async function confirmDeleteSelected(ids: Array<string | number>) {
   if (!ids.length) return;
   if (!canDelete.value) {
     notify.forbidden();
     return;
   }
-  const numericIds = normalizeSelection(ids);
-  if (!numericIds.length) {
+  const normalizedIds = normalizeSelection(ids);
+  if (!normalizedIds.length) {
     return;
   }
   const result = await Swal.fire({
     title: t('clients.confirmDeleteSelected.title'),
-    text: t('clients.confirmDeleteSelected.message', { count: numericIds.length }),
+    text: t('clients.confirmDeleteSelected.message', { count: normalizedIds.length }),
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: t('clients.confirmDeleteSelected.confirm'),
@@ -514,7 +512,7 @@ async function confirmDeleteSelected(ids: Array<number | string>) {
   });
   if (!result.isConfirmed) return;
   try {
-    await clientsStore.removeMany(numericIds);
+    await clientsStore.removeMany(normalizedIds);
     await reloadClients();
   } catch (error: any) {
     notify.error(error?.message || t('common.error'));

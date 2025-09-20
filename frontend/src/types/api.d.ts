@@ -4,6 +4,42 @@
  */
 
 export interface paths {
+    "/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get authenticated user context */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Authenticated user context */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuthMeResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tasks": {
         parameters: {
             query?: never;
@@ -19,6 +55,7 @@ export interface paths {
                     status?: string;
                     assignee?: number;
                     priority?: number;
+                    client_id?: string;
                     due_from?: string;
                     due_to?: string;
                     has_photos?: boolean;
@@ -176,6 +213,369 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/clients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List clients */
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                    sort?: "name" | "created_at";
+                    dir?: "asc" | "desc";
+                    page?: number;
+                    per_page?: number;
+                    archived?: "all" | "only";
+                    trashed?: "with" | "only";
+                    tenant_id?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description List of clients */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data?: components["schemas"]["Client"][];
+                            meta?: components["schemas"]["ListMeta"];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Create client */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name?: string;
+                        /** Format: email */
+                        email?: string | null;
+                        phone?: string | null;
+                        notes?: string | null;
+                        /** @description Send a welcome email to the client (requires email) */
+                        notify_client?: boolean;
+                        tenant_id?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Created client */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Client"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clients/bulk-archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Archive multiple clients */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        ids: string[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Clients archived */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data?: components["schemas"]["Client"][];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clients/bulk-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete multiple clients */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        ids: string[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Clients deleted */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example deleted */
+                            message?: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clients/{client}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** View client */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    client: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Client details */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Client"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /** Delete client */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    client: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Deleted client */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message?: string;
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        /** Update client */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    client: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name?: string;
+                        /** Format: email */
+                        email?: string | null;
+                        phone?: string | null;
+                        notes?: string | null;
+                        tenant_id?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Updated client */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Client"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/clients/{client}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Archive client */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    client: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Archived client */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Client"];
+                    };
+                };
+            };
+        };
+        /** Unarchive client */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    client: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Unarchived client */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Client"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clients/{client}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore client */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    client: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Restored client */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Client"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tasks/{task}/watch": {
         parameters: {
             query?: never;
@@ -191,7 +591,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task: number;
+                    task: string;
                 };
                 cookie?: never;
             };
@@ -212,7 +612,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task: number;
+                    task: string;
                 };
                 cookie?: never;
             };
@@ -247,7 +647,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task: number;
+                    task: string;
                 };
                 cookie?: never;
             };
@@ -290,8 +690,8 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task: number;
-                    subtask: number;
+                    task: string;
+                    subtask: string;
                 };
                 cookie?: never;
             };
@@ -314,8 +714,8 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task: number;
-                    subtask: number;
+                    task: string;
+                    subtask: string;
                 };
                 cookie?: never;
             };
@@ -357,14 +757,14 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task: number;
+                    task: string;
                 };
                 cookie?: never;
             };
             requestBody: {
                 content: {
                     "application/json": {
-                        order?: number[];
+                        order?: string[];
                     };
                 };
             };
@@ -393,7 +793,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task: number;
+                    task: string;
                 };
                 cookie?: never;
             };
@@ -417,7 +817,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task: number;
+                    task: string;
                 };
                 cookie?: never;
             };
@@ -425,8 +825,8 @@ export interface paths {
                 content: {
                     "application/json": {
                         body?: string;
-                        mentions?: number[];
-                        files?: number[];
+                        mentions?: string[];
+                        files?: string[];
                     };
                 };
             };
@@ -460,7 +860,7 @@ export interface paths {
             parameters: {
                 query?: {
                     scope?: string;
-                    tenant_id?: number;
+                    tenant_id?: string;
                 };
                 header?: never;
                 path?: never;
@@ -527,7 +927,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -550,7 +950,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -596,7 +996,7 @@ export interface paths {
                 content: {
                     "application/json": {
                         filename: string;
-                        task_id: number;
+                        task_id: string;
                         field_key: string;
                         section_key: string;
                     };
@@ -610,7 +1010,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            file_id?: number;
+                            file_id?: string;
                             name?: string;
                             variants?: Record<string, never>;
                         };
@@ -639,7 +1039,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    roleId: number;
+                    roleId: string;
                 };
                 cookie?: never;
             };
@@ -742,7 +1142,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -765,7 +1165,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -803,14 +1203,14 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    teamId: number;
+                    teamId: string;
                 };
                 cookie?: never;
             };
             requestBody: {
                 content: {
                     "application/json": {
-                        employee_ids?: number[];
+                        employee_ids?: string[];
                     };
                 };
             };
@@ -886,7 +1286,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -939,7 +1339,7 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        ids?: number[];
+                        ids?: string[];
                         tenant_id?: string;
                     };
                 };
@@ -982,7 +1382,7 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        ids?: number[];
+                        ids?: string[];
                     };
                 };
             };
@@ -1021,7 +1421,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -1151,7 +1551,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -1199,7 +1599,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task_type: number;
+                    task_type: string;
                 };
                 cookie?: never;
             };
@@ -1225,7 +1625,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task_type: number;
+                    task_type: string;
                 };
                 cookie?: never;
             };
@@ -1268,8 +1668,8 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task_type: number;
-                    id: number;
+                    task_type: string;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -1299,8 +1699,8 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task_type: number;
-                    id: number;
+                    task_type: string;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -1337,7 +1737,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task_type: number;
+                    task_type: string;
                 };
                 cookie?: never;
             };
@@ -1363,7 +1763,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task_type: number;
+                    task_type: string;
                 };
                 cookie?: never;
             };
@@ -1406,8 +1806,8 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task_type: number;
-                    id: number;
+                    task_type: string;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -1437,8 +1837,8 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    task_type: number;
-                    id: number;
+                    task_type: string;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -1474,7 +1874,7 @@ export interface paths {
             parameters: {
                 query?: {
                     scope?: string;
-                    tenant_id?: number;
+                    tenant_id?: string;
                 };
                 header?: never;
                 path?: never;
@@ -1524,7 +1924,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -1604,7 +2004,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    id: string;
                 };
                 cookie?: never;
             };
@@ -1636,7 +2036,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    type_id?: number;
+                    type_id?: string;
                 };
                 header?: never;
                 path?: never;
@@ -1695,7 +2095,7 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        task_id: number;
+                        task_id: string;
                         status_slug: string;
                         index: number;
                     };
@@ -1733,7 +2133,7 @@ export interface paths {
         get: {
             parameters: {
                 query: {
-                    type_id: number;
+                    type_id: string;
                     range?: "7" | "30" | "90";
                 };
                 header?: never;
@@ -1791,6 +2191,7 @@ export interface components {
             /** Format: date-time */
             due_at?: string | null;
             priority?: number | null;
+            client_id?: string | null;
             assignee?: components["schemas"]["Employee"];
             counts?: {
                 comments?: number;
@@ -1801,9 +2202,10 @@ export interface components {
             /** @enum {string|null} */
             sla_chip?: "ok" | "dueSoon" | "breached" | null;
             is_watching?: boolean;
+            client?: components["schemas"]["ClientSummary"] | null;
         };
         TaskComment: {
-            id?: number;
+            id?: string;
             body?: string;
             user?: components["schemas"]["Employee"];
             mentions?: components["schemas"]["Employee"][];
@@ -1811,49 +2213,51 @@ export interface components {
             created_at?: string;
         };
         TaskSlaPolicy: {
-            id?: number;
+            id?: string;
             priority?: string;
             response_within_mins?: number | null;
             resolve_within_mins?: number | null;
             calendar_json?: Record<string, never> | null;
         };
         TaskAutomation: {
-            id?: number;
-            task_type_id?: number;
+            id?: string;
+            task_type_id?: string;
             event?: string;
             conditions_json?: Record<string, never> | null;
             actions_json?: Record<string, never>[];
             enabled?: boolean;
         };
         TaskSubtask: {
-            id?: number;
-            task_id?: number;
+            id?: string;
+            task_id?: string;
             title?: string;
             is_completed?: boolean;
-            assigned_user_id?: number | null;
+            assigned_user_id?: string | null;
             is_required?: boolean;
             position?: number;
         };
         Role: {
-            id?: number;
+            id?: string;
             name?: string;
             description?: string | null;
             level?: number;
+            /** Format: date-time */
             created_at?: string;
+            /** Format: date-time */
             updated_at?: string;
         };
         RoleAssignment: {
-            user_id: number;
+            user_id: string;
             tenant_id?: string | null;
         };
         Team: {
-            id?: number;
+            id?: string;
             name?: string;
             description?: string | null;
             employees?: components["schemas"]["Employee"][];
         };
         TaskType: {
-            id?: number;
+            id?: string;
             name?: string;
             /** @description Form schema. Text fields support string or {en,el} objects. */
             schema_json?: Record<string, never> | null;
@@ -1861,29 +2265,31 @@ export interface components {
                 [key: string]: string[];
             } | null;
             status_flow_json?: Record<string, never> | null;
-            tenant_id?: number | null;
+            tenant_id?: string | null;
+            client_id?: string | null;
             abilities_json?: Record<string, never> | null;
+            client?: components["schemas"]["ClientSummary"] | null;
         };
         TaskStatus: {
-            id?: number;
+            id?: string;
             slug?: string;
             name?: string;
             color?: string;
             position?: number;
             tasks_count?: number;
-            tenant_id?: number | null;
+            tenant_id?: string | null;
             /** Format: date-time */
             created_at?: string;
             /** Format: date-time */
             updated_at?: string;
         };
         Employee: {
-            id?: number;
+            id?: string;
             name?: string;
             department?: string;
         };
         Notification: {
-            id: number;
+            id: string;
             message: string;
             link?: string | null;
             /** Format: date-time */
@@ -1898,6 +2304,31 @@ export interface components {
         };
         Error: {
             message: string;
+        };
+        AuthMeResponse: {
+            /** @description Authenticated user with assigned roles and tenant context. */
+            user?: Record<string, never>;
+            abilities?: string[];
+            client_abilities?: string[];
+            features?: string[];
+            permitted_client_ids?: string[] | null;
+        };
+        Client: {
+            id?: string;
+            tenant_id?: string;
+            name?: string;
+            /** Format: email */
+            email?: string | null;
+            phone?: string | null;
+            notes?: string | null;
+            /** Format: date-time */
+            archived_at?: string | null;
+            /** Format: date-time */
+            deleted_at?: string | null;
+        };
+        ClientSummary: {
+            id?: string;
+            name?: string;
         };
     };
     responses: never;

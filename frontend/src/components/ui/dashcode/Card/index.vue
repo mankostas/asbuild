@@ -1,47 +1,53 @@
 <template>
   <div
+    v-if="!overlay"
     :class="
       cn('card rounded-md bg-white dark:bg-slate-800', props.class, {
-        ' border border-gray-5002 dark:border-slate-700':
-          themeSettingsStore.skin === 'bordered',
+        'border border-gray-5002 dark:border-slate-700': themeSettingsStore.skin === 'bordered',
         'shadow-base': themeSettingsStore.skin !== 'bordered',
       })
     "
-    v-if="!overlay"
   >
     <div :class="cn('card-body flex flex-col', bodyClass)">
       <header
         v-if="title || subtitle"
-        :class="cn('flex mb-5 items-center', {
-        'order-1': imgTop,
-        'border-b border-slate-100 dark:border-slate-700 pb-5 -mx-6 px-6': !noborder
-      })"
+        :class="
+          cn('flex mb-5 items-center', {
+            'order-1': imgTop,
+            'border-b border-slate-100 dark:border-slate-700 pb-5 -mx-6 px-6': !noborder,
+          })
+        "
       >
         <div class="flex-1">
           <div
-          v-if="title"
-           :class="cn('card-title text-slate-900 dark:text-white', titleClass)"
+            v-if="title"
+            :class="cn('card-title text-slate-900 dark:text-white', titleClass)"
           >
             {{ title }}
           </div>
-          <div v-if="subtitle" :class="cn('card-subtitle', subtitleClass)">
+          <div
+            v-if="subtitle"
+            :class="cn('card-subtitle', subtitleClass)"
+          >
             {{ subtitle }}
           </div>
         </div>
-        <div class="flex-0" v-if="$slots.header">
-          <slot name="header"></slot>
+        <div v-if="$slots.header" class="flex-0">
+          <slot name="header" />
         </div>
       </header>
       <div
-      v-if="img"
-       :class="cn('image-box', {
-        'order-0': imgTop,
-        '-mx-6': gapNull,
-        '-mt-6': gapNull && imgTop,
-        '-mb-6': gapNull && imgBottom,
-        'order-3 mt-6': imgBottom,
-        'mb-6': !imgBottom
-      })"
+        v-if="img"
+        :class="
+          cn('image-box', {
+            'order-0': imgTop,
+            '-mx-6': gapNull,
+            '-mt-6': gapNull && imgTop,
+            '-mb-6': gapNull && imgBottom,
+            'order-3 mt-6': imgBottom,
+            'mb-6': !imgBottom,
+          })
+        "
       >
         <img
           :src="img"
@@ -50,37 +56,37 @@
         />
       </div>
       <div :class="cn('card-text h-full', { 'order-2': imgTop })">
-        <slot></slot>
+        <slot />
       </div>
     </div>
   </div>
   <div
-   :class="cn('rounded-md overlay bg-no-repeat bg-center bg-cover card', customClass)"
-    v-if="overlay"
-    :style="{
-      backgroundImage: 'url(' + `${img}` + ')',
-    }"
+    v-else
+    :class="cn('rounded-md overlay bg-no-repeat bg-center bg-cover card', customClass)"
+    :style="{ backgroundImage: `url(${img})` }"
   >
-    <div
-     :class="cn('card-body h-full flex flex-col justify-center', bodyClass)"
-    >
-      <header class="mb-5">
+    <div :class="cn('card-body h-full flex flex-col justify-center', bodyClass)">
+      <header v-if="title || subtitle" class="mb-5">
         <div
-        v-if="title"
-         :class="cn('card-title text-slate-900 dark:text-white', titleClass)"
+          v-if="title"
+          :class="cn('card-title text-slate-900 dark:text-white', titleClass)"
         >
           {{ title }}
         </div>
-        <div v-if="subtitle" :class="cn('card-subtitle', subtitleClass)">
+        <div
+          v-if="subtitle"
+          :class="cn('card-subtitle', subtitleClass)"
+        >
           {{ subtitle }}
         </div>
       </header>
       <div class="card-text h-full">
-        <slot></slot>
+        <slot />
       </div>
     </div>
   </div>
 </template>
+
 <script setup>
 import { cn } from "@/lib/utils";
 import { useThemeSettingsStore } from "@/store/themeSettings";
@@ -138,7 +144,7 @@ const props = defineProps({
     type: String,
     default: "p-6",
   },
-    customClass: {
+  customClass: {
     type: String,
     default: "",
   },
@@ -146,15 +152,19 @@ const props = defineProps({
 
 const themeSettingsStore = useThemeSettingsStore();
 </script>
+
 <style lang="scss" scoped>
 .card-title {
-  @apply font-medium  capitalize md:text-xl md:leading-[28px] text-lg leading-[24px];
+  @apply font-medium capitalize md:text-xl md:leading-[28px] text-lg leading-[24px];
 }
+
 .card-subtitle {
   @apply text-sm leading-5 font-medium text-slate-600 dark:text-slate-300 mt-1;
 }
+
 .overlay {
   @apply relative z-[1] after:absolute after:inset-0 after:w-full after:h-full after:bg-slate-900 after:bg-opacity-40 after:rounded-md after:z-[-1];
+
   .card-title,
   .card-subtitle {
     @apply text-white;

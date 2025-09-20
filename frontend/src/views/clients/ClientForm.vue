@@ -349,13 +349,23 @@ function validateForm(): boolean {
   return !errors.name && !errors.tenant;
 }
 
+function resolveClientId(): string | null {
+  const raw = route.params.id;
+  if (!raw) {
+    return null;
+  }
+  if (Array.isArray(raw)) {
+    return raw[0] ?? null;
+  }
+  return raw;
+}
+
 async function loadClient() {
-  const idParam = route.params.id;
-  if (!isEdit.value || !idParam) {
+  if (!isEdit.value) {
     return;
   }
-  const numericId = Number(idParam);
-  if (!Number.isFinite(numericId)) {
+  const clientId = resolveClientId();
+  if (!clientId) {
     loadError.value = t('clients.form.loadError');
     return;
   }
@@ -363,7 +373,7 @@ async function loadClient() {
   loading.value = true;
   loadError.value = '';
   try {
-    const client = await clientsStore.get(numericId);
+    const client = await clientsStore.get(clientId);
     if (!client) {
       loadError.value = t('clients.form.loadError');
       return;
@@ -373,7 +383,7 @@ async function loadClient() {
     form.phone = client.phone || '';
     form.notes = client.notes || '';
     if (isSuperAdmin.value) {
-      form.tenantId = client.tenant_id !== null && client.tenant_id !== undefined ? String(client.tenant_id) : '';
+      form.tenantId = client.tenant_id ?? '';
     }
   } catch (error: any) {
     loadError.value = error?.message || t('clients.form.loadError');
@@ -407,7 +417,11 @@ async function submit() {
     }
 
     if (isEdit.value) {
-      await clientsStore.update(route.params.id as string | number, payload);
+      const clientId = resolveClientId();
+      if (!clientId) {
+        throw new Error('Missing client identifier');
+      }
+      await clientsStore.update(clientId, payload);
       notify.success(t('clients.form.success.updated'));
     } else {
       payload.notify_client = notifyClient.value;
