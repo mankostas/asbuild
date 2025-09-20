@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Requests\RoleUpsertRequest;
 use App\Http\Resources\RoleResource;
 use App\Support\ListQuery;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class RoleController extends Controller
 {
@@ -24,14 +27,15 @@ class RoleController extends Controller
         $tenantId = $request->query('tenant_id');
 
         if ($tenantId !== null) {
-            $tenantId = (int) $tenantId;
+            $tenantId = $this->resolveTenantId($tenantId);
             $scope = 'tenant';
         }
 
         if (! $request->user()->isSuperAdmin()) {
             $tenantId = $request->user()->tenant_id;
             $userLevel = $request->user()->roleLevel($tenantId);
-            $base = Role::withCount('users')
+            $base = Role::with('tenant:id,public_id')
+                ->withCount('users')
                 ->where('tenant_id', $tenantId)
                 ->where('level', '>=', $userLevel);
             $result = $this->listQuery($base, $request, ['name'], ['name']);
@@ -42,22 +46,22 @@ class RoleController extends Controller
 
         $scope = $scope ?? ($tenantId ? 'tenant' : 'all');
 
-        $query = Role::query()->withCount('users');
+        $query = Role::query()->with('tenant:id,public_id')->withCount('users');
 
         switch ($scope) {
             case 'global':
                 $query->whereNull('tenant_id');
                 break;
             case 'tenant':
-                $tenantId = $tenantId ?? app('tenant_id');
-                if (! $tenantId) {
+                $tenantId = $this->resolveTenantId($tenantId ?? app('tenant_id'));
+                if ($tenantId === null) {
                     abort(400, 'Tenant ID required');
                 }
                 $query->where('tenant_id', $tenantId);
                 break;
             case 'all':
             default:
-                if ($tenantId) {
+                if ($tenantId !== null) {
                     $query->where(function ($q) use ($tenantId) {
                         $q->whereNull('tenant_id')->orWhere('tenant_id', $tenantId);
                     });
@@ -100,6 +104,7 @@ class RoleController extends Controller
         }
 
         $role = Role::create($data);
+        $role->load('tenant');
         return (new RoleResource($role))->response()->setStatusCode(201);
     }
 
@@ -113,7 +118,7 @@ class RoleController extends Controller
             }
         }
 
-        return new RoleResource($role);
+        return new RoleResource($role->loadMissing('tenant'));
     }
 
     public function update(RoleUpsertRequest $request, Role $role)
@@ -155,7 +160,7 @@ class RoleController extends Controller
 
         $role->update($data);
 
-        return new RoleResource($role);
+        return new RoleResource($role->load('tenant'));
     }
 
     public function destroy(Request $request, Role $role)
@@ -182,8 +187,8 @@ class RoleController extends Controller
         $this->authorize('update', $role);
 
         $data = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
-            'tenant_id' => ['nullable', 'exists:tenants,id'],
+            'user_id' => ['required', 'string', 'ulid', Rule::exists('users', 'public_id')],
+            'tenant_id' => ['nullable', 'string', 'ulid', Rule::exists('tenants', 'public_id')],
         ]);
 
         if (! $request->user()->isSuperAdmin() && $role->level < $request->user()->roleLevel($request->user()->tenant_id)) {
@@ -195,8 +200,18 @@ class RoleController extends Controller
         } elseif (! $request->user()->isSuperAdmin()) {
             $data['tenant_id'] = $request->user()->tenant_id;
         } else {
-            $data['tenant_id'] = $data['tenant_id'] ?? null;
+            $data['tenant_id'] = $this->resolveTenantId($data['tenant_id'] ?? null);
         }
+
+        $userId = User::where('public_id', $data['user_id'])->value('id');
+
+        if ($userId === null) {
+            throw ValidationException::withMessages([
+                'user_id' => __('The selected user is invalid.'),
+            ]);
+        }
+
+        $data['user_id'] = $userId;
 
         DB::table('role_user')->updateOrInsert(
             [
@@ -211,6 +226,27 @@ class RoleController extends Controller
         );
 
         return response()->json(['message' => 'assigned']);
+    }
+
+    protected function resolveTenantId(mixed $identifier): ?int
+    {
+        if ($identifier === null || $identifier === '') {
+            return null;
+        }
+
+        if (is_string($identifier) && ! ctype_digit($identifier)) {
+            $resolved = Tenant::where('public_id', $identifier)->value('id');
+
+            if ($resolved === null) {
+                throw ValidationException::withMessages([
+                    'tenant_id' => __('The selected tenant is invalid.'),
+                ]);
+            }
+
+            return (int) $resolved;
+        }
+
+        return (int) $identifier;
     }
 }
 
