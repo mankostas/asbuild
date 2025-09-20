@@ -2,15 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Jobs\AutomationNotifyTeamJob;
+use App\Models\Concerns\HasPublicId;
 use App\Models\Task;
 use App\Models\TaskStatus;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TaskAutomation extends Model
 {
+    use HasPublicId;
+
     protected $fillable = [
+        'public_id',
         'task_type_id',
         'event',
         'conditions_json',
@@ -19,6 +23,7 @@ class TaskAutomation extends Model
     ];
 
     protected $casts = [
+        'public_id' => 'string',
         'conditions_json' => 'array',
         'actions_json' => 'array',
         'enabled' => 'boolean',

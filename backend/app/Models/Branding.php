@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPublicId;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Branding extends Model
 {
     use HasFactory;
+    use HasPublicId;
 
     protected $fillable = [
+        'public_id',
         'tenant_id',
         'name',
         'color',
@@ -21,5 +24,9 @@ class Branding extends Model
         'email_from',
         'footer_left',
         'footer_right',
+    ];
+
+    protected $casts = [
+        'public_id' => 'string',
     ];
 }

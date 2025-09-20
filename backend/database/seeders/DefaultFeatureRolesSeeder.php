@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Tenant;
+use App\Support\PublicIdGenerator;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -141,15 +142,21 @@ class DefaultFeatureRolesSeeder extends Seeder
                 $level = min($existing->level, $level);
             }
 
+            $payload = [
+                'name' => $role['name'],
+                'abilities' => json_encode($abilities),
+                'level' => $level,
+                'created_at' => $existing->created_at ?? now(),
+                'updated_at' => now(),
+            ];
+
+            if (! $existing) {
+                $payload['public_id'] = PublicIdGenerator::generate();
+            }
+
             DB::table('roles')->updateOrInsert(
                 ['tenant_id' => $tenant->id, 'slug' => $role['slug']],
-                [
-                    'name' => $role['name'],
-                    'abilities' => json_encode($abilities),
-                    'level' => $level,
-                    'created_at' => $existing->created_at ?? now(),
-                    'updated_at' => now(),
-                ]
+                $payload
             );
         }
 

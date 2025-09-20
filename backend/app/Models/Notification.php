@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPublicId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Notification extends Model
 {
+    use HasPublicId;
+
     protected $fillable = [
+        'public_id',
         'user_id',
         'category',
         'message',
@@ -16,6 +20,7 @@ class Notification extends Model
     ];
 
     protected $casts = [
+        'public_id' => 'string',
         'read_at' => 'datetime',
     ];
 

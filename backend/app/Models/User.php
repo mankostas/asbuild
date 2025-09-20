@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPublicId;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,9 +11,12 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable;
+    use HasApiTokens;
+    use HasPublicId;
+    use Notifiable;
 
     protected $fillable = [
+        'public_id',
         'name',
         'email',
         'password',
@@ -33,6 +37,7 @@ class User extends Authenticatable
     protected $with = ['roles'];
 
     protected $casts = [
+        'public_id' => 'string',
         'theme_settings' => 'array',
         'type' => 'string',
         'last_login_at' => 'datetime',
