@@ -91,7 +91,7 @@ class EmployeeAccountActionsTest extends TestCase
     }
 
     /**
-     * @return array{0: Tenant, 1: User}
+     * @return array{0: Tenant, 1: User, tenant_public_id: string, admin_public_id: string}
      */
     protected function createTenantAdmin(array $abilities): array
     {
@@ -117,7 +117,12 @@ class EmployeeAccountActionsTest extends TestCase
 
         $role->users()->attach($admin->id, ['tenant_id' => $tenant->id]);
 
-        return [$tenant, $admin];
+        return [
+            $tenant,
+            $admin,
+            'tenant_public_id' => $this->publicIdFor($tenant),
+            'admin_public_id' => $this->publicIdFor($admin),
+        ];
     }
 
     protected function createEmployee(Tenant $tenant, string $name, string $email): User

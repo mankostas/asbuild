@@ -100,7 +100,14 @@ class TenantOwnerAccountActionsTest extends TestCase
     }
 
     /**
-     * @return array{0: Tenant, 1: User, 2: User}
+     * @return array{
+     *     0: Tenant,
+     *     1: User,
+     *     2: User,
+     *     tenant_public_id: string,
+     *     owner_public_id: string,
+     *     admin_public_id: string,
+     * }
      */
     protected function createTenantWithOwner(array $adminAbilities): array
     {
@@ -152,6 +159,13 @@ class TenantOwnerAccountActionsTest extends TestCase
 
         $adminRole->users()->attach($admin->id, ['tenant_id' => $tenant->id]);
 
-        return [$tenant, $owner, $admin];
+        return [
+            $tenant,
+            $owner,
+            $admin,
+            'tenant_public_id' => $this->publicIdFor($tenant),
+            'owner_public_id' => $this->publicIdFor($owner),
+            'admin_public_id' => $this->publicIdFor($admin),
+        ];
     }
 }

@@ -17,6 +17,9 @@ class TenantManagementTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * @return array{0: User, 1: Tenant, user_public_id: string, tenant_public_id: string}
+     */
     private function actingAsSuperAdmin(): array
     {
         $homeTenant = Tenant::create([
@@ -48,7 +51,12 @@ class TenantManagementTest extends TestCase
 
         Sanctum::actingAs($user);
 
-        return [$user, $homeTenant];
+        return [
+            $user,
+            $homeTenant,
+            'user_public_id' => $this->publicIdFor($user),
+            'tenant_public_id' => $this->publicIdFor($homeTenant),
+        ];
     }
 
     public function test_super_admin_creating_tenant_sends_reset_link_when_notify_owner_enabled(): void

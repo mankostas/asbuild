@@ -54,7 +54,7 @@ class TeamsTest extends TestCase
     }
 
     /**
-     * @return array{0: Tenant, 1: User}
+     * @return array{0: Tenant, 1: User, tenant_public_id: string, admin_public_id: string}
      */
     protected function createTenantUser(array $abilities): array
     {
@@ -79,7 +79,12 @@ class TeamsTest extends TestCase
 
         $admin->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
 
-        return [$tenant, $admin];
+        return [
+            $tenant,
+            $admin,
+            'tenant_public_id' => $this->publicIdFor($tenant),
+            'admin_public_id' => $this->publicIdFor($admin),
+        ];
     }
 
     protected function createEmployee(Tenant $tenant, string $name, string $email): User
