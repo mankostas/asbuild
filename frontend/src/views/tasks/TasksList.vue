@@ -439,9 +439,10 @@ async function fetchTasks({ page, perPage, sort, search }: any) {
     rows = rows.filter((r) => r.photos && r.photos.length);
   }
   if (mine.value && auth.user) {
-    const currentUserId = String(auth.user.id ?? '');
+    const currentUserId = String(auth.user.public_id ?? auth.user.id ?? '');
     rows = rows.filter(
-      (r) => String(r.assignee?.id ?? '') === currentUserId,
+      (r) =>
+        String(r.assignee?.public_id ?? r.assignee?.id ?? '') === currentUserId,
     );
   }
   if (search) {
