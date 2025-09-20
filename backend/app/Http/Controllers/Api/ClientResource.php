@@ -11,9 +11,17 @@ class ClientResource extends JsonResource
 
     public function toArray($request): array
     {
+        $this->resource->loadMissing('tenant');
+
         return $this->formatDates([
-            'id' => $this->id,
-            'tenant_id' => $this->tenant_id,
+            'id' => $this->public_id,
+            'tenant_id' => $this->tenant?->public_id,
+            'tenant' => $this->when($this->tenant, function () {
+                return [
+                    'id' => $this->tenant->public_id,
+                    'name' => $this->tenant->name,
+                ];
+            }),
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
