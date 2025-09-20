@@ -17,7 +17,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
@@ -40,12 +40,12 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Type A\",\n  \"form_schema\": \"{\\\"type\\\": \\\"object\\\", \\\"properties\\\": {\\\"note\\\": {\\\"type\\\": \\\"string\\\"}}, \\\"required\\\": [\\\"note\\\"]}\",\n  \"fields_summary\": \"{\\\"note\\\": \\\"string\\\"}\",\n  \"client_id\": 1\n}",
+              "raw": "{\n  \"name\": \"Type A\",\n  \"form_schema\": \"{\\\"type\\\": \\\"object\\\", \\\"properties\\\": {\\\"note\\\": {\\\"type\\\": \\\"string\\\"}}, \\\"required\\\": [\\\"note\\\"]}\",\n  \"fields_summary\": \"{\\\"note\\\": \\\"string\\\"}\",\n  \"client_id\": \"HWZP5M7ZNCF1H7EQANV369E241\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -72,12 +72,12 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Detailed Type\",\n  \"form_schema\": \"{\\\"type\\\": \\\"object\\\", \\\"properties\\\": {\\\"title\\\": {\\\"type\\\": \\\"string\\\"}, \\\"priority\\\": {\\\"type\\\": \\\"integer\\\"}, \\\"done\\\": {\\\"type\\\": \\\"boolean\\\"}}, \\\"required\\\": [\\\"title\\\"]}\",\n  \"fields_summary\": \"{\\\"title\\\": \\\"string\\\", \\\"priority\\\": \\\"integer\\\", \\\"done\\\": \\\"boolean\\\"}\",\n  \"client_id\": 1\n}",
+              "raw": "{\n  \"name\": \"Detailed Type\",\n  \"form_schema\": \"{\\\"type\\\": \\\"object\\\", \\\"properties\\\": {\\\"title\\\": {\\\"type\\\": \\\"string\\\"}, \\\"priority\\\": {\\\"type\\\": \\\"integer\\\"}, \\\"done\\\": {\\\"type\\\": \\\"boolean\\\"}}, \\\"required\\\": [\\\"title\\\"]}\",\n  \"fields_summary\": \"{\\\"title\\\": \\\"string\\\", \\\"priority\\\": \\\"integer\\\", \\\"done\\\": \\\"boolean\\\"}\",\n  \"client_id\": \"HWZP5M7ZNCF1H7EQANV369E241\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -104,22 +104,32 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/task-types/{task_type}",
+              "raw": "{{base_url}}/api/task-types/{{task_type_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "task-types",
-                "{task_type}"
+                "{{task_type_public_id}}"
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Example 200 Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"data\": {\n    \"id\": \"{{task_type_public_id}}\",\n    \"public_id\": \"{{task_type_public_id}}\",\n    \"name\": \"Type A\",\n    \"client_id\": \"HWZP5M7ZNCF1H7EQANV369E241\",\n    \"form_schema\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"note\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"note\"\n      ]\n    },\n    \"fields_summary\": {\n      \"note\": \"string\"\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "update",
@@ -128,12 +138,12 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Type\",\n  \"form_schema\": \"{\\\"type\\\": \\\"object\\\", \\\"properties\\\": {\\\"note\\\": {\\\"type\\\": \\\"string\\\"}}, \\\"required\\\": [\\\"note\\\"]}\",\n  \"fields_summary\": \"{\\\"note\\\": \\\"string\\\"}\",\n  \"client_id\": 2\n}",
+              "raw": "{\n  \"name\": \"Updated Type\",\n  \"form_schema\": \"{\\\"type\\\": \\\"object\\\", \\\"properties\\\": {\\\"note\\\": {\\\"type\\\": \\\"string\\\"}}, \\\"required\\\": [\\\"note\\\"]}\",\n  \"fields_summary\": \"{\\\"note\\\": \\\"string\\\"}\",\n  \"client_id\": \"7C7S5Q721CB7YD31V6G4E4KPVB\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -141,14 +151,14 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/task-types/{task_type}",
+              "raw": "{{base_url}}/api/task-types/{{task_type_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "task-types",
-                "{task_type}"
+                "{{task_type_public_id}}"
               ]
             }
           },
@@ -161,18 +171,18 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/task-types/{task_type}",
+              "raw": "{{base_url}}/api/task-types/{{task_type_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "task-types",
-                "{task_type}"
+                "{{task_type_public_id}}"
               ]
             }
           },
@@ -190,7 +200,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
@@ -213,12 +223,12 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"scheduled_at\": \"2024-01-01T00:00:00Z\",\n  \"sla_start_at\": \"2024-01-01T08:00:00Z\",\n  \"sla_end_at\": \"2024-01-01T17:00:00Z\",\n  \"kau_notes\": \"Notes\",\n  \"task_type_id\": 1,\n  \"client_id\": 1,\n  \"form_data\": {\n    \"note\": \"Sample\"\n  }\n}",
+              "raw": "{\n  \"scheduled_at\": \"2024-01-01T00:00:00Z\",\n  \"sla_start_at\": \"2024-01-01T08:00:00Z\",\n  \"sla_end_at\": \"2024-01-01T17:00:00Z\",\n  \"kau_notes\": \"Notes\",\n  \"task_type_id\": \"YWG305S0ZNFM4CEF9W55MZ6KJ7\",\n  \"client_id\": \"HWZP5M7ZNCF1H7EQANV369E241\",\n  \"form_data\": {\n    \"note\": \"Sample\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -245,22 +255,32 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/tasks/{task}",
+              "raw": "{{base_url}}/api/tasks/{{task_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "tasks",
-                "{task}"
+                "{{task_public_id}}"
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Example 200 Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"data\": {\n    \"id\": \"{{task_public_id}}\",\n    \"public_id\": \"{{task_public_id}}\",\n    \"tenant_id\": \"{{tenant_public_id}}\",\n    \"task_type_id\": \"YWG305S0ZNFM4CEF9W55MZ6KJ7\",\n    \"client_id\": \"HWZP5M7ZNCF1H7EQANV369E241\",\n    \"status\": \"scheduled\",\n    \"assignee\": {\n      \"id\": \"{{employee_public_id}}\",\n      \"name\": \"John Doe\"\n    },\n    \"form_data\": {\n      \"note\": \"Sample\"\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "update type A",
@@ -269,12 +289,12 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"scheduled_at\": \"2024-01-02T00:00:00Z\",\n  \"sla_start_at\": \"2024-01-02T08:00:00Z\",\n  \"sla_end_at\": \"2024-01-02T17:00:00Z\",\n  \"kau_notes\": \"Updated notes\",\n  \"task_type_id\": 1,\n  \"client_id\": 2,\n  \"form_data\": {\n    \"note\": \"Updated\"\n  },\n  \"status\": \"completed\"\n}",
+              "raw": "{\n  \"scheduled_at\": \"2024-01-02T00:00:00Z\",\n  \"sla_start_at\": \"2024-01-02T08:00:00Z\",\n  \"sla_end_at\": \"2024-01-02T17:00:00Z\",\n  \"kau_notes\": \"Updated notes\",\n  \"task_type_id\": \"YWG305S0ZNFM4CEF9W55MZ6KJ7\",\n  \"client_id\": \"7C7S5Q721CB7YD31V6G4E4KPVB\",\n  \"form_data\": {\n    \"note\": \"Updated\"\n  },\n  \"status\": \"completed\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -282,14 +302,14 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/tasks/{task}",
+              "raw": "{{base_url}}/api/tasks/{{task_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "tasks",
-                "{task}"
+                "{{task_public_id}}"
               ]
             }
           },
@@ -302,18 +322,18 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/tasks/{task}",
+              "raw": "{{base_url}}/api/tasks/{{task_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "tasks",
-                "{task}"
+                "{{task_public_id}}"
               ]
             }
           },
@@ -326,18 +346,18 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/tasks/{task}/comments",
+              "raw": "{{base_url}}/api/tasks/{{task_public_id}}/comments",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "tasks",
-                "{task}",
+                "{{task_public_id}}",
                 "comments"
               ]
             }
@@ -351,7 +371,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
@@ -359,14 +379,14 @@
               "raw": "{\n  \"body\": \"Comment text\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/tasks/{task}/comments",
+              "raw": "{{base_url}}/api/tasks/{{task_public_id}}/comments",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "tasks",
-                "{task}",
+                "{{task_public_id}}",
                 "comments"
               ]
             }
@@ -380,12 +400,12 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"scheduled_at\": \"2024-01-03T00:00:00Z\",\n  \"sla_start_at\": \"2024-01-03T08:00:00Z\",\n  \"sla_end_at\": \"2024-01-03T17:00:00Z\",\n  \"kau_notes\": \"Notes\",\n  \"task_type_id\": 2,\n  \"client_id\": 3,\n  \"form_data\": {\n    \"title\": \"Install\",\n    \"priority\": 1,\n    \"done\": false\n  }\n}",
+              "raw": "{\n  \"scheduled_at\": \"2024-01-03T00:00:00Z\",\n  \"sla_start_at\": \"2024-01-03T08:00:00Z\",\n  \"sla_end_at\": \"2024-01-03T17:00:00Z\",\n  \"kau_notes\": \"Notes\",\n  \"task_type_id\": \"NDJW5RMFJBCB2GY458925SHFDT\",\n  \"client_id\": \"FSTBQQ5W6ASQZ1Y2KSAAE0CESP\",\n  \"form_data\": {\n    \"title\": \"Install\",\n    \"priority\": 1,\n    \"done\": false\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -412,12 +432,12 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"scheduled_at\": \"2024-01-03T00:00:00Z\",\n  \"sla_start_at\": \"2024-01-03T08:00:00Z\",\n  \"sla_end_at\": \"2024-01-03T17:00:00Z\",\n  \"kau_notes\": \"Updated notes\",\n  \"task_type_id\": 2,\n  \"client_id\": 3,\n  \"form_data\": {\n    \"title\": \"Install\",\n    \"priority\": 2,\n    \"done\": true\n  },\n  \"status\": \"completed\"\n}",
+              "raw": "{\n  \"scheduled_at\": \"2024-01-03T00:00:00Z\",\n  \"sla_start_at\": \"2024-01-03T08:00:00Z\",\n  \"sla_end_at\": \"2024-01-03T17:00:00Z\",\n  \"kau_notes\": \"Updated notes\",\n  \"task_type_id\": \"NDJW5RMFJBCB2GY458925SHFDT\",\n  \"client_id\": \"FSTBQQ5W6ASQZ1Y2KSAAE0CESP\",\n  \"form_data\": {\n    \"title\": \"Install\",\n    \"priority\": 2,\n    \"done\": true\n  },\n  \"status\": \"completed\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -425,14 +445,14 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/tasks/{task}",
+              "raw": "{{base_url}}/api/tasks/{{task_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "tasks",
-                "{task}"
+                "{{task_public_id}}"
               ]
             }
           },
@@ -450,7 +470,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
@@ -487,7 +507,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
@@ -519,22 +539,32 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/clients/{client}",
+              "raw": "{{base_url}}/api/clients/{{client_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "clients",
-                "{client}"
+                "{{client_public_id}}"
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Example 200 Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"data\": {\n    \"id\": \"{{client_public_id}}\",\n    \"public_id\": \"{{client_public_id}}\",\n    \"tenant_id\": \"{{tenant_public_id}}\",\n    \"name\": \"Acme Corp\",\n    \"email\": \"contact@example.com\"\n  }\n}"
+            }
+          ]
         },
         {
           "name": "update",
@@ -543,7 +573,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
@@ -556,14 +586,14 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/clients/{client}",
+              "raw": "{{base_url}}/api/clients/{{client_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "clients",
-                "{client}"
+                "{{client_public_id}}"
               ]
             }
           },
@@ -576,18 +606,18 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/clients/{client}",
+              "raw": "{{base_url}}/api/clients/{{client_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "clients",
-                "{client}"
+                "{{client_public_id}}"
               ]
             }
           },
@@ -600,18 +630,18 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/clients/{client}/archive",
+              "raw": "{{base_url}}/api/clients/{{client_public_id}}/archive",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "clients",
-                "{client}",
+                "{{client_public_id}}",
                 "archive"
               ]
             }
@@ -625,18 +655,18 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/clients/{client}/archive",
+              "raw": "{{base_url}}/api/clients/{{client_public_id}}/archive",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "clients",
-                "{client}",
+                "{{client_public_id}}",
                 "archive"
               ]
             }
@@ -650,24 +680,24 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/clients/{client}/restore",
+              "raw": "{{base_url}}/api/clients/{{client_public_id}}/restore",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "clients",
-                "{client}",
+                "{{client_public_id}}",
                 "restore"
               ]
             }
           },
           "response": []
-        },
+        }
       ]
     },
     {
@@ -680,18 +710,18 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/comments/{comment}",
+              "raw": "{{base_url}}/api/comments/{{comment_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "comments",
-                "{comment}"
+                "{{comment_public_id}}"
               ]
             }
           },
@@ -704,7 +734,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
@@ -712,14 +742,14 @@
               "raw": "{\n  \\\"body\\\": \\\"Updated comment\\\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/comments/{comment}",
+              "raw": "{{base_url}}/api/comments/{{comment_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "comments",
-                "{comment}"
+                "{{comment_public_id}}"
               ]
             }
           },
@@ -732,18 +762,18 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/comments/{comment}",
+              "raw": "{{base_url}}/api/comments/{{comment_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "comments",
-                "{comment}"
+                "{{comment_public_id}}"
               ]
             }
           },
@@ -761,7 +791,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
@@ -784,7 +814,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
@@ -811,18 +841,18 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/employees/{employee}",
+              "raw": "{{base_url}}/api/employees/{{employee_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "employees",
-                "{employee}"
+                "{{employee_public_id}}"
               ]
             }
           },
@@ -835,7 +865,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
@@ -843,14 +873,14 @@
               "raw": "{\n  \"name\": \"Updated Employee\",\n  \"phone\": \"987-654-3210\",\n  \"address\": \"456 Elm St\",\n  \"department\": \"Sales\",\n  \"roles\": [\"ClientAdmin\"]\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/employees/{employee}",
+              "raw": "{{base_url}}/api/employees/{{employee_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "employees",
-                "{employee}"
+                "{{employee_public_id}}"
               ]
             }
           },
@@ -863,18 +893,18 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/employees/{employee}",
+              "raw": "{{base_url}}/api/employees/{{employee_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "employees",
-                "{employee}"
+                "{{employee_public_id}}"
               ]
             }
           },
@@ -892,25 +922,19 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/files/{file}/{variant?}",
+              "raw": "{{base_url}}/api/files/{{file_public_id}}/thumbnail",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "files",
-                "{file}",
-                "{variant"
-              ],
-              "query": [
-                {
-                  "key": "}",
-                  "value": null
-                }
+                "{{file_public_id}}",
+                "thumbnail"
               ]
             }
           },
@@ -928,7 +952,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
@@ -951,7 +975,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
@@ -992,18 +1016,18 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/manuals/{manual}",
+              "raw": "{{base_url}}/api/manuals/{{manual_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "manuals",
-                "{manual}"
+                "{{manual_public_id}}"
               ]
             }
           },
@@ -1016,7 +1040,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
@@ -1024,14 +1048,14 @@
               "raw": "{\n  \"key\": \"value\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/manuals/{manual}",
+              "raw": "{{base_url}}/api/manuals/{{manual_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "manuals",
-                "{manual}"
+                "{{manual_public_id}}"
               ]
             }
           },
@@ -1044,18 +1068,18 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/manuals/{manual}",
+              "raw": "{{base_url}}/api/manuals/{{manual_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "manuals",
-                "{manual}"
+                "{{manual_public_id}}"
               ]
             }
           },
@@ -1073,7 +1097,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
@@ -1096,7 +1120,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
@@ -1128,18 +1152,18 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/tenants/{tenant}",
+              "raw": "{{base_url}}/api/tenants/{{tenant_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "tenants",
-                "{tenant}"
+                "{{tenant_public_id}}"
               ]
             }
           },
@@ -1152,7 +1176,7 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "body": {
@@ -1160,14 +1184,14 @@
               "raw": "{\n  \"name\": \"Updated Tenant\",\n  \"phone\": \"987-654-3210\",\n  \"address\": \"456 Elm St\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/tenants/{tenant}",
+              "raw": "{{base_url}}/api/tenants/{{tenant_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "tenants",
-                "{tenant}"
+                "{{tenant_public_id}}"
               ]
             }
           },
@@ -1180,18 +1204,18 @@
             "header": [
               {
                 "key": "X-Tenant-ID",
-                "value": "{{tenant_id}}"
+                "value": "{{tenant_public_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/tenants/{tenant}",
+              "raw": "{{base_url}}/api/tenants/{{tenant_public_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "tenants",
-                "{tenant}"
+                "{{tenant_public_id}}"
               ]
             }
           },
@@ -1220,7 +1244,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "body": {
@@ -1253,7 +1277,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "body": {
@@ -1281,7 +1305,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "body": {
@@ -1310,7 +1334,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "body": {
@@ -1339,7 +1363,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "body": {
@@ -1367,7 +1391,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "url": {
@@ -1391,7 +1415,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "body": {
@@ -1419,7 +1443,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "body": {
@@ -1447,7 +1471,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "url": {
@@ -1471,7 +1495,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "url": {
@@ -1494,18 +1518,18 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "url": {
-          "raw": "{{base_url}}/api/manuals/{manual}/download",
+          "raw": "{{base_url}}/api/manuals/{{manual_public_id}}/download",
           "host": [
             "{{base_url}}"
           ],
           "path": [
             "api",
             "manuals",
-            "{manual}",
+            "{{manual_public_id}}",
             "download"
           ]
         }
@@ -1519,7 +1543,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "body": {
@@ -1533,14 +1557,14 @@
           ]
         },
         "url": {
-          "raw": "{{base_url}}/api/manuals/{manual}/replace",
+          "raw": "{{base_url}}/api/manuals/{{manual_public_id}}/replace",
           "host": [
             "{{base_url}}"
           ],
           "path": [
             "api",
             "manuals",
-            "{manual}",
+            "{{manual_public_id}}",
             "replace"
           ]
         }
@@ -1554,7 +1578,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "url": {
@@ -1577,7 +1601,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "body": {
@@ -1604,7 +1628,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "url": {
@@ -1627,7 +1651,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "body": {
@@ -1635,14 +1659,14 @@
           "raw": "{\n  \"key\": \"value\"\n}"
         },
         "url": {
-          "raw": "{{base_url}}/api/notifications/{notification}/read",
+          "raw": "{{base_url}}/api/notifications/{{notification_public_id}}/read",
           "host": [
             "{{base_url}}"
           ],
           "path": [
             "api",
             "notifications",
-            "{notification}",
+            "{{notification_public_id}}",
             "read"
           ]
         }
@@ -1656,7 +1680,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "url": {
@@ -1680,7 +1704,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "url": {
@@ -1704,7 +1728,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "url": {
@@ -1728,7 +1752,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "url": {
@@ -1751,7 +1775,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "body": {
@@ -1778,7 +1802,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "body": {
@@ -1806,7 +1830,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "body": {
@@ -1814,14 +1838,14 @@
           "raw": "{\n  \"key\": \"value\"\n}"
         },
         "url": {
-          "raw": "{{base_url}}/api/tenants/{tenant}/impersonate",
+          "raw": "{{base_url}}/api/tenants/{{tenant_public_id}}/impersonate",
           "host": [
             "{{base_url}}"
           ],
           "path": [
             "api",
             "tenants",
-            "{tenant}",
+            "{{tenant_public_id}}",
             "impersonate"
           ]
         }
@@ -1835,7 +1859,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "body": {
@@ -1863,7 +1887,7 @@
         "header": [
           {
             "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
+            "value": "{{tenant_public_id}}"
           }
         ],
         "url": {
@@ -1937,6 +1961,51 @@
     {
       "key": "password",
       "value": "Swordfish01!@#",
+      "type": "string"
+    },
+    {
+      "key": "tenant_public_id",
+      "value": "RT2GZSKYPD8J86G9K64NY6PVMD",
+      "type": "string"
+    },
+    {
+      "key": "task_type_public_id",
+      "value": "YWG305S0ZNFM4CEF9W55MZ6KJ7",
+      "type": "string"
+    },
+    {
+      "key": "task_public_id",
+      "value": "3X26SCGPYAD3AANG7WB0YTKPRG",
+      "type": "string"
+    },
+    {
+      "key": "client_public_id",
+      "value": "HWZP5M7ZNCF1H7EQANV369E241",
+      "type": "string"
+    },
+    {
+      "key": "comment_public_id",
+      "value": "T2ST2AW4GAWZ02ZMKX3TC580ST",
+      "type": "string"
+    },
+    {
+      "key": "employee_public_id",
+      "value": "M0D006C7CKHB6YS51HW7G8P79H",
+      "type": "string"
+    },
+    {
+      "key": "file_public_id",
+      "value": "V1EWZEPEEXJ1T6BJ7NVCKJZS2Y",
+      "type": "string"
+    },
+    {
+      "key": "manual_public_id",
+      "value": "122DGMQ2ZXVQBDRJ089HNNQ5N2",
+      "type": "string"
+    },
+    {
+      "key": "notification_public_id",
+      "value": "PXH0R8DV3YQCTZPTP0NX1EBB5G",
       "type": "string"
     }
   ]
