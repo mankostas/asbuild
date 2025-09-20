@@ -4,7 +4,9 @@
 
 This demo application is multi-tenant. Requests include the tenant context via the `X-Tenant-ID` header. Roles with a `null` `tenant_id` are global and apply across all tenants. Tenant roles belong to a specific tenant and define an array of ability strings. Authorization—including super-admin detection—is enforced on the backend; any frontend flags are for UX only. The `super_admin` role uses the wildcard `"*"` ability to access everything.
 
-Teams group employees within a tenant. Users are attached to teams through the `team_employee` pivot table and gain role abilities via `role_user` records. When creating resources that support assignment, include an `assignee` field in the payload with `{ id: number }` (or an `assigned_user_id` field directly). The backend maps this to an `assigned_user_id` column.
+Teams group employees within a tenant. Users are attached to teams through the `team_employee` pivot table and gain role abilities via `role_user` records. When creating resources that support assignment, include an `assignee` field in the payload with `{ id: "<ULID public identifier>" }` (or an `assigned_user_id` field directly). The backend maps this hashed value to the `assigned_user_id` column via the `PublicIdResolver` concern.
+
+All relationship pointers—including `tenant_id`, `client_id`, `assigned_user_id`, and similar fields—now expect ULID-style `public_id` strings. Older integrations that still post integer primary keys will continue to resolve for now, but plan to migrate those clients to the hashed format to avoid a breaking change once numeric IDs are removed from the API surface.
 
 Run the database migrations with seeding to populate a super admin account:
 
