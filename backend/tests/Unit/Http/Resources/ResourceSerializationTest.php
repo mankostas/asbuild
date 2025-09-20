@@ -26,6 +26,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class ResourceSerializationTest extends TestCase
 {
@@ -33,8 +34,12 @@ class ResourceSerializationTest extends TestCase
 
     public function test_employee_resource_uses_public_identifiers(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant'
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'name' => 'Manager',
             'slug' => 'manager',
@@ -58,11 +63,15 @@ class ResourceSerializationTest extends TestCase
 
     public function test_team_resource_uses_public_identifiers(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant'
+        ]);
         $lead = $this->createUser(['tenant_id' => $tenant->id]);
         $member = $this->createUser(['tenant_id' => $tenant->id]);
 
         $team = Team::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'name' => 'Support',
             'description' => 'Support team',
@@ -85,15 +94,23 @@ class ResourceSerializationTest extends TestCase
 
     public function test_manual_resource_includes_public_identifiers(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant']);
-        $client = Client::create(['tenant_id' => $tenant->id, 'name' => 'ACME']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant'
+        ]);
+        $client = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'name' => 'ACME'
+        ]);
         $file = File::create([
+            'public_id' => PublicIdGenerator::generate(),
             'path' => 'manuals/file.pdf',
             'filename' => 'file.pdf',
             'mime_type' => 'application/pdf',
             'size' => 1024,
         ]);
         $manual = Manual::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'file_id' => $file->id,
             'client_id' => $client->id,
@@ -113,9 +130,13 @@ class ResourceSerializationTest extends TestCase
 
     public function test_notification_resource_uses_public_id(): void
     {
-        $tenant = Tenant::create(['name' => 'Notifications']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Notifications'
+        ]);
         $user = $this->createUser(['tenant_id' => $tenant->id]);
         $notification = Notification::create([
+            'public_id' => PublicIdGenerator::generate(),
             'user_id' => $user->id,
             'category' => 'general',
             'message' => 'Welcome',
@@ -130,9 +151,16 @@ class ResourceSerializationTest extends TestCase
 
     public function test_task_type_resource_converts_identifiers(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant']);
-        $client = Client::create(['tenant_id' => $tenant->id, 'name' => 'ACME']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant'
+        ]);
+        $client = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'name' => 'ACME'
+        ]);
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'client_id' => $client->id,
             'name' => 'Install',
@@ -152,16 +180,24 @@ class ResourceSerializationTest extends TestCase
 
     public function test_task_resource_rewrites_identifier_fields(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant'
+        ]);
         $creator = $this->createUser(['tenant_id' => $tenant->id]);
         $assignee = $this->createUser(['tenant_id' => $tenant->id]);
-        $client = Client::create(['tenant_id' => $tenant->id, 'name' => 'ACME']);
+        $client = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'name' => 'ACME'
+        ]);
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'client_id' => $client->id,
             'name' => 'Install',
         ]);
         $status = TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'name' => 'Open',
             'slug' => TaskStatus::prefixSlug('open', $tenant->id),
@@ -169,6 +205,7 @@ class ResourceSerializationTest extends TestCase
         ]);
 
         $task = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'user_id' => $creator->id,
             'reporter_user_id' => $creator->id,
@@ -180,6 +217,7 @@ class ResourceSerializationTest extends TestCase
             'assigned_user_id' => $assignee->id,
         ]);
         TaskWatcher::create([
+            'public_id' => PublicIdGenerator::generate(),
             'task_id' => $task->id,
             'user_id' => $creator->id,
         ]);
@@ -208,7 +246,10 @@ class ResourceSerializationTest extends TestCase
 
     public function test_tenant_owner_resource_converts_identifiers(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant'
+        ]);
         $role = $tenant->roles()->where('slug', 'tenant')->first();
         $owner = $this->createUser([
             'tenant_id' => $tenant->id,
@@ -226,8 +267,12 @@ class ResourceSerializationTest extends TestCase
 
     public function test_client_resource_surfaces_public_id(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant'
+        ]);
         $client = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'name' => 'ACME',
             'email' => 'client@example.com',
@@ -243,9 +288,13 @@ class ResourceSerializationTest extends TestCase
 
     private function createUser(array $attributes = []): User
     {
-        $tenantId = $attributes['tenant_id'] ?? Tenant::create(['name' => 'Tenant ' . uniqid()])->id;
+        $tenantId = $attributes['tenant_id'] ?? Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant ' . uniqid(),
+        ])->id;
 
         $defaults = [
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenantId,
             'name' => 'User ' . uniqid(),
             'email' => uniqid('user', true) . '@example.com',

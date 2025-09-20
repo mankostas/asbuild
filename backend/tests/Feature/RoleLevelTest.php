@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class RoleLevelTest extends TestCase
 {
@@ -19,14 +20,19 @@ class RoleLevelTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $tenant = Tenant::create(['name' => 'Test Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Test Tenant'
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'ClientAdmin',
             'slug' => 'client_admin',
             'tenant_id' => $tenant->id,
             'abilities' => ['roles.manage'],
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Test User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),
@@ -65,6 +71,7 @@ class RoleLevelTest extends TestCase
     public function test_can_update_role_level(): void
     {
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Agent',
             'slug' => 'agent',
             'tenant_id' => $this->tenant->id,

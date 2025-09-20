@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class FeatureAbilitiesTest extends TestCase
 {
@@ -19,8 +20,12 @@ class FeatureAbilitiesTest extends TestCase
      */
     public function test_feature_abilities_enforced(string $feature, string $route, string $ability): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => [$feature]]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => [$feature]
+        ]);
         $baseRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => $tenant->id,
@@ -28,6 +33,7 @@ class FeatureAbilitiesTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),
@@ -45,6 +51,7 @@ class FeatureAbilitiesTest extends TestCase
 
         // Grant ability via additional role
         $abilityRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Ability',
             'slug' => 'ability',
             'tenant_id' => $tenant->id,

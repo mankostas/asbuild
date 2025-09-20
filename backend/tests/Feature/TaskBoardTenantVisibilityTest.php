@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskBoardTenantVisibilityTest extends TestCase
 {
@@ -20,17 +21,36 @@ class TaskBoardTenantVisibilityTest extends TestCase
 
     public function test_super_admin_sees_tasks_for_selected_tenant(): void
     {
-        $tenant1 = Tenant::create(['id' => 1, 'name' => 'T1', 'features' => ['tasks']]);
-        $tenant2 = Tenant::create(['id' => 2, 'name' => 'T2', 'features' => ['tasks']]);
+        $tenant1 = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'id' => 1, 'name' => 'T1', 'features' => ['tasks']
+        ]);
+        $tenant2 = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'id' => 2, 'name' => 'T2', 'features' => ['tasks']
+        ]);
 
         $status = TenantDefaults::TASK_STATUSES[0];
-        $status1 = TaskStatus::create(['slug' => $status['slug'], 'name' => $status['name'], 'tenant_id' => $tenant1->id, 'position' => 1]);
-        $status2 = TaskStatus::create(['slug' => $status['slug'], 'name' => $status['name'], 'tenant_id' => $tenant2->id, 'position' => 1]);
+        $status1 = TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => $status['slug'], 'name' => $status['name'], 'tenant_id' => $tenant1->id, 'position' => 1
+        ]);
+        $status2 = TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => $status['slug'], 'name' => $status['name'], 'tenant_id' => $tenant2->id, 'position' => 1
+        ]);
 
-        $type1 = TaskType::create(['tenant_id' => $tenant1->id, 'name' => 'Type1', 'statuses' => [$status['slug'] => []]]);
-        $type2 = TaskType::create(['tenant_id' => $tenant2->id, 'name' => 'Type2', 'statuses' => [$status['slug'] => []]]);
+        $type1 = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant1->id, 'name' => 'Type1', 'statuses' => [$status['slug'] => []]
+        ]);
+        $type2 = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant2->id, 'name' => 'Type2', 'statuses' => [$status['slug'] => []]
+        ]);
 
         $u1 = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U1',
             'email' => 'u1@example.com',
             'password' => Hash::make('secret'),
@@ -39,6 +59,7 @@ class TaskBoardTenantVisibilityTest extends TestCase
             'address' => 'A',
         ]);
         $u2 = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U2',
             'email' => 'u2@example.com',
             'password' => Hash::make('secret'),
@@ -48,6 +69,7 @@ class TaskBoardTenantVisibilityTest extends TestCase
         ]);
 
         Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant1->id,
             'user_id' => $u1->id,
             'task_type_id' => $type1->id,
@@ -56,6 +78,7 @@ class TaskBoardTenantVisibilityTest extends TestCase
             'title' => 'T1 Task'
         ]);
         Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant2->id,
             'user_id' => $u2->id,
             'task_type_id' => $type2->id,
@@ -64,8 +87,12 @@ class TaskBoardTenantVisibilityTest extends TestCase
             'title' => 'T2 Task'
         ]);
 
-        $root = Tenant::create(['id' => 999, 'name' => 'Root']);
+        $root = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'id' => 999, 'name' => 'Root'
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => $root->id,
@@ -74,6 +101,7 @@ class TaskBoardTenantVisibilityTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('secret'),

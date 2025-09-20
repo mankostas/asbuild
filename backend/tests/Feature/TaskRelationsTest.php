@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskRelationsTest extends TestCase
 {
@@ -18,8 +19,12 @@ class TaskRelationsTest extends TestCase
 
     public function test_task_relations_work(): void
     {
-        $tenant = Tenant::create(['name' => 'T']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T'
+        ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -29,6 +34,7 @@ class TaskRelationsTest extends TestCase
         ]);
 
         $task = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'user_id' => $user->id,
             'title' => 'Task',
@@ -36,17 +42,20 @@ class TaskRelationsTest extends TestCase
         ]);
 
         $comment = TaskComment::create([
+            'public_id' => PublicIdGenerator::generate(),
             'task_id' => $task->id,
             'user_id' => $user->id,
             'body' => 'Note',
         ]);
 
         $watcher = TaskWatcher::create([
+            'public_id' => PublicIdGenerator::generate(),
             'task_id' => $task->id,
             'user_id' => $user->id,
         ]);
 
         $subtask = TaskSubtask::create([
+            'public_id' => PublicIdGenerator::generate(),
             'task_id' => $task->id,
             'title' => 'Sub',
         ]);

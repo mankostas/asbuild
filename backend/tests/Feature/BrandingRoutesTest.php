@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class BrandingRoutesTest extends TestCase
 {
@@ -19,13 +20,18 @@ class BrandingRoutesTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $tenant = Tenant::create(['name' => 'Test Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Test Tenant'
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'tenant_id' => $tenant->id,
             'abilities' => json_encode(['*']),
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('secret'),
@@ -70,13 +76,18 @@ class BrandingRoutesTest extends TestCase
 
     public function test_client_admin_cannot_update_branding(): void
     {
-        $tenant = Tenant::create(['name' => 'Another Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Another Tenant'
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'ClientAdmin',
             'tenant_id' => $tenant->id,
             'abilities' => json_encode([]),
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Client',
             'email' => 'client@example.com',
             'password' => Hash::make('secret'),

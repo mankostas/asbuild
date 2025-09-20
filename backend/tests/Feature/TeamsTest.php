@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TeamsTest extends TestCase
 {
@@ -18,7 +19,10 @@ class TeamsTest extends TestCase
     public function test_team_membership_sync_requires_manage_ability(): void
     {
         [$tenant, $admin] = $this->createTenantUser(['teams.update']);
-        $team = Team::create(['tenant_id' => $tenant->id, 'name' => 'Alpha', 'description' => '']);
+        $team = Team::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'name' => 'Alpha', 'description' => ''
+        ]);
         $member = $this->createEmployee($tenant, 'Member', 'member@example.com');
 
         Sanctum::actingAs($admin);
@@ -35,7 +39,10 @@ class TeamsTest extends TestCase
     public function test_team_membership_sync_allows_manage_ability(): void
     {
         [$tenant, $admin] = $this->createTenantUser(['teams.manage']);
-        $team = Team::create(['tenant_id' => $tenant->id, 'name' => 'Beta', 'description' => '']);
+        $team = Team::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'name' => 'Beta', 'description' => ''
+        ]);
         $memberOne = $this->createEmployee($tenant, 'Member One', 'member1@example.com');
         $memberTwo = $this->createEmployee($tenant, 'Member Two', 'member2@example.com');
 
@@ -58,8 +65,12 @@ class TeamsTest extends TestCase
      */
     protected function createTenantUser(array $abilities): array
     {
-        $tenant = Tenant::create(['name' => 'Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant'
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'ClientAdmin',
             'slug' => 'client_admin',
             'tenant_id' => $tenant->id,
@@ -67,6 +78,7 @@ class TeamsTest extends TestCase
         ]);
 
         $admin = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'email' => 'admin' . uniqid() . '@example.com',
             'password' => Hash::make('secret'),
@@ -90,6 +102,7 @@ class TeamsTest extends TestCase
     protected function createEmployee(Tenant $tenant, string $name, string $email): User
     {
         return User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => $name,
             'email' => $email,
             'password' => Hash::make('secret'),

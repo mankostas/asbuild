@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TenantArchiveTest extends TestCase
 {
@@ -19,9 +20,13 @@ class TenantArchiveTest extends TestCase
      */
     private function actingAsSuperAdmin(array $abilities = ['*']): array
     {
-        $homeTenant = Tenant::create(['name' => 'Home Tenant']);
+        $homeTenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Home Tenant'
+        ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => $homeTenant->id,
@@ -30,6 +35,7 @@ class TenantArchiveTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Root User',
             'email' => 'root@example.com',
             'password' => Hash::make('secret'),
@@ -53,6 +59,7 @@ class TenantArchiveTest extends TestCase
     private function actingAsRegularUser(Tenant $tenant): User
     {
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Regular User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),
@@ -70,7 +77,10 @@ class TenantArchiveTest extends TestCase
     {
         $this->actingAsSuperAdmin(['tenants.update', 'tenants.view']);
 
-        $tenant = Tenant::create(['name' => 'Archive Target']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Archive Target'
+        ]);
 
         $this->postJson("/api/tenants/{$tenant->id}/archive")
             ->assertStatus(200)
@@ -89,7 +99,10 @@ class TenantArchiveTest extends TestCase
     {
         $this->actingAsSuperAdmin(['tenants.update', 'tenants.delete']);
 
-        $tenant = Tenant::create(['name' => 'Delete Target']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Delete Target'
+        ]);
 
         $this->deleteJson("/api/tenants/{$tenant->id}")
             ->assertStatus(204);
@@ -112,9 +125,18 @@ class TenantArchiveTest extends TestCase
     {
         $this->actingAsSuperAdmin(['tenants.update']);
 
-        $tenantA = Tenant::create(['name' => 'Tenant A']);
-        $tenantB = Tenant::create(['name' => 'Tenant B']);
-        $tenantC = Tenant::create(['name' => 'Tenant C']);
+        $tenantA = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant A'
+        ]);
+        $tenantB = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant B'
+        ]);
+        $tenantC = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant C'
+        ]);
 
         $this->postJson('/api/tenants/bulk-archive', ['ids' => [$tenantA->id, $tenantB->id]])
             ->assertStatus(200)
@@ -142,8 +164,14 @@ class TenantArchiveTest extends TestCase
     {
         $this->actingAsSuperAdmin(['tenants.delete']);
 
-        $tenantA = Tenant::create(['name' => 'Tenant A']);
-        $tenantB = Tenant::create(['name' => 'Tenant B']);
+        $tenantA = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant A'
+        ]);
+        $tenantB = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant B'
+        ]);
 
         $this->postJson('/api/tenants/bulk-delete', ['ids' => [$tenantA->id, $tenantB->id]])
             ->assertStatus(200)
@@ -157,7 +185,10 @@ class TenantArchiveTest extends TestCase
     {
         [, $homeTenant] = $this->actingAsSuperAdmin(['tenants.update']);
 
-        $targetTenant = Tenant::create(['name' => 'Target Tenant']);
+        $targetTenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Target Tenant'
+        ]);
 
         // Switch to a regular user without SuperAdmin role
         $this->actingAsRegularUser($homeTenant);
@@ -172,9 +203,18 @@ class TenantArchiveTest extends TestCase
     {
         $this->actingAsSuperAdmin(['tenants.view']);
 
-        $active = Tenant::create(['name' => 'Active Tenant']);
-        $archived = Tenant::create(['name' => 'Archived Tenant', 'archived_at' => now()]);
-        $trashed = Tenant::create(['name' => 'Trashed Tenant']);
+        $active = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Active Tenant'
+        ]);
+        $archived = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Archived Tenant', 'archived_at' => now()
+        ]);
+        $trashed = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Trashed Tenant'
+        ]);
         $trashed->delete();
 
         $this->getJson('/api/tenants?archived=only')

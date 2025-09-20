@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 use Illuminate\Validation\ValidationException;
+use App\Support\PublicIdGenerator;
 
 class TaskFieldRolesTest extends TestCase
 {
@@ -32,8 +33,12 @@ class TaskFieldRolesTest extends TestCase
 
     private function makeViewer(): User
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Viewer',
             'slug' => 'viewer',
             'tenant_id' => $tenant->id,
@@ -41,6 +46,7 @@ class TaskFieldRolesTest extends TestCase
             'level' => 5,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),

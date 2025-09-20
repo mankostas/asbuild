@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskStatusCreateAbilityTest extends TestCase
 {
@@ -16,8 +17,12 @@ class TaskStatusCreateAbilityTest extends TestCase
 
     public function test_cannot_create_status_without_ability(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['task_statuses']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => ['task_statuses']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => $tenant->id,
@@ -25,6 +30,7 @@ class TaskStatusCreateAbilityTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),
@@ -43,8 +49,12 @@ class TaskStatusCreateAbilityTest extends TestCase
 
     public function test_can_create_status_with_ability(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['task_statuses']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => ['task_statuses']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Manager',
             'slug' => 'manager',
             'tenant_id' => $tenant->id,
@@ -52,6 +62,7 @@ class TaskStatusCreateAbilityTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'email' => 'user2@example.com',
             'password' => Hash::make('secret'),

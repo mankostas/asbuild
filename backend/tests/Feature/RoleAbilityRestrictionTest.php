@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class RoleAbilityRestrictionTest extends TestCase
 {
@@ -16,9 +17,13 @@ class RoleAbilityRestrictionTest extends TestCase
 
     public function test_user_with_roles_view_can_list_but_not_modify_roles(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant'
+        ]);
 
         $viewRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Viewer',
             'slug' => 'viewer',
             'tenant_id' => $tenant->id,
@@ -27,6 +32,7 @@ class RoleAbilityRestrictionTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),

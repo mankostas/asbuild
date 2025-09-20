@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class AssigneesExcludeTenantTest extends TestCase
 {
@@ -16,10 +17,14 @@ class AssigneesExcludeTenantTest extends TestCase
 
     public function test_tenant_user_not_returned_in_assignees(): void
     {
-        $tenant = Tenant::create(['id' => 1, 'name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'id' => 1, 'name' => 'T', 'features' => ['tasks']
+        ]);
         $tenantRole = $tenant->roles()->where('slug', 'tenant')->first();
 
         $tenantUser = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'TenantUser',
             'email' => 'tenant@example.com',
             'password' => Hash::make('secret'),
@@ -30,6 +35,7 @@ class AssigneesExcludeTenantTest extends TestCase
         $tenantUser->roles()->attach($tenantRole->id, ['tenant_id' => $tenant->id]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Agent',
             'slug' => 'agent',
             'tenant_id' => $tenant->id,
@@ -37,6 +43,7 @@ class AssigneesExcludeTenantTest extends TestCase
             'level' => 2,
         ]);
         $employee = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Employee',
             'email' => 'emp@example.com',
             'password' => Hash::make('secret'),

@@ -8,6 +8,7 @@ use App\Support\ClientFilter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class ClientFilterTest extends TestCase
 {
@@ -15,8 +16,14 @@ class ClientFilterTest extends TestCase
 
     public function test_resolve_returns_internal_ids_for_public_identifiers(): void
     {
-        $tenant = Tenant::create(['name' => 'Acme Inc.']);
-        $client = Client::create(['tenant_id' => $tenant->id, 'name' => 'Client A']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Acme Inc.'
+        ]);
+        $client = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'name' => 'Client A'
+        ]);
 
         $request = Request::create('/reports', 'GET', [
             'client_id' => $client->public_id,
@@ -29,9 +36,18 @@ class ClientFilterTest extends TestCase
 
     public function test_resolve_filters_with_permitted_public_identifiers(): void
     {
-        $tenant = Tenant::create(['name' => 'Acme Inc.']);
-        $clientA = Client::create(['tenant_id' => $tenant->id, 'name' => 'Client A']);
-        $clientB = Client::create(['tenant_id' => $tenant->id, 'name' => 'Client B']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Acme Inc.'
+        ]);
+        $clientA = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'name' => 'Client A'
+        ]);
+        $clientB = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'name' => 'Client B'
+        ]);
 
         $request = Request::create('/reports', 'GET', [
             'client_ids' => $clientA->public_id . ',' . $clientB->public_id,

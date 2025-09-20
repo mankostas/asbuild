@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 use App\Jobs\AutomationNotifyTeamJob;
+use App\Support\PublicIdGenerator;
 
 class TaskAutomationTest extends TestCase
 {
@@ -26,8 +27,12 @@ class TaskAutomationTest extends TestCase
     public function test_status_completed_notifies_team(bool $prefixed): void
     {
         Queue::fake();
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'slug' => 'admin',
             'tenant_id' => $tenant->id,
@@ -35,6 +40,7 @@ class TaskAutomationTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -45,10 +51,17 @@ class TaskAutomationTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
         Sanctum::actingAs($user);
 
-        TaskStatus::create(['slug' => 'draft', 'name' => 'Draft', 'tenant_id' => $tenant->id]);
-        TaskStatus::create(['slug' => 'completed', 'name' => 'Completed', 'tenant_id' => $tenant->id]);
+        TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 'draft', 'name' => 'Draft', 'tenant_id' => $tenant->id
+        ]);
+        TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 'completed', 'name' => 'Completed', 'tenant_id' => $tenant->id
+        ]);
 
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => $tenant->id,
             'schema_json' => ['sections' => []],
@@ -56,7 +69,10 @@ class TaskAutomationTest extends TestCase
             'status_flow_json' => [ ['draft', 'completed'] ],
         ]);
 
-        $team = Team::create(['tenant_id' => $tenant->id, 'name' => 'Team X']);
+        $team = Team::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'name' => 'Team X'
+        ]);
 
         $status = $prefixed
             ? TaskStatus::prefixSlug('completed', $tenant->id)
@@ -71,6 +87,7 @@ class TaskAutomationTest extends TestCase
             ])->assertCreated();
 
         $task = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'user_id' => $user->id,
             'task_type_id' => $type->id,

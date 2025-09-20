@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskSlaPolicyAbilityTest extends TestCase
 {
@@ -17,8 +18,12 @@ class TaskSlaPolicyAbilityTest extends TestCase
 
     public function test_manage_ability_required_for_sla_policy_routes(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => $tenant->id,
             'schema_json' => ['sections' => []],
@@ -26,6 +31,7 @@ class TaskSlaPolicyAbilityTest extends TestCase
         ]);
 
         $managerRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Manager',
             'slug' => 'manager',
             'tenant_id' => $tenant->id,
@@ -33,6 +39,7 @@ class TaskSlaPolicyAbilityTest extends TestCase
             'level' => 1,
         ]);
         $viewerRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Viewer',
             'slug' => 'viewer',
             'tenant_id' => $tenant->id,
@@ -41,6 +48,7 @@ class TaskSlaPolicyAbilityTest extends TestCase
         ]);
 
         $manager = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'M',
             'email' => 'm@example.com',
             'password' => Hash::make('secret'),
@@ -56,6 +64,7 @@ class TaskSlaPolicyAbilityTest extends TestCase
             ->assertOk();
 
         $viewer = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'V',
             'email' => 'v@example.com',
             'password' => Hash::make('secret'),

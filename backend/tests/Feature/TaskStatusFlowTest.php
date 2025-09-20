@@ -12,6 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskStatusFlowTest extends TestCase
 {
@@ -20,12 +21,16 @@ class TaskStatusFlowTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Tenant::create(['id' => 1, 'name' => 'T', 'features' => ['tasks']]);
+        Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'id' => 1, 'name' => 'T', 'features' => ['tasks']
+        ]);
     }
 
     protected function authUser(): User
     {
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => 1,
@@ -33,6 +38,7 @@ class TaskStatusFlowTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -49,6 +55,7 @@ class TaskStatusFlowTest extends TestCase
     protected function authManager(): User
     {
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Manager',
             'slug' => 'manager',
             'tenant_id' => 1,
@@ -56,6 +63,7 @@ class TaskStatusFlowTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'M',
             'email' => 'm@example.com',
             'password' => Hash::make('secret'),
@@ -72,6 +80,7 @@ class TaskStatusFlowTest extends TestCase
     protected function makeTask(User $user): Task
     {
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => 1,
             'statuses' => ['draft' => [], 'assigned' => [], 'in_progress' => [], 'completed' => []],
@@ -83,6 +92,7 @@ class TaskStatusFlowTest extends TestCase
         ]);
 
         return Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => 1,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
@@ -118,12 +128,14 @@ class TaskStatusFlowTest extends TestCase
     {
         $user = $this->authUser();
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => 1,
             'statuses' => ['draft' => [], 'assigned' => [], 'in_progress' => [], 'completed' => []],
             'status_flow_json' => null,
         ]);
         $task = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => 1,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
@@ -144,6 +156,7 @@ class TaskStatusFlowTest extends TestCase
     {
         $user = $this->authUser();
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => 1,
             'statuses' => [
@@ -159,6 +172,7 @@ class TaskStatusFlowTest extends TestCase
             ],
         ]);
         $task = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => 1,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
@@ -217,6 +231,7 @@ class TaskStatusFlowTest extends TestCase
     {
         $this->withoutMiddleware(Ability::class);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Limited',
             'slug' => 'limited',
             'tenant_id' => 1,
@@ -225,6 +240,7 @@ class TaskStatusFlowTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Limited User',
             'email' => 'limited@example.com',
             'password' => Hash::make('secret'),

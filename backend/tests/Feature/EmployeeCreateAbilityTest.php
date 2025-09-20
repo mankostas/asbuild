@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Password;
 use App\Services\AbilityService;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class EmployeeCreateAbilityTest extends TestCase
 {
@@ -18,9 +19,13 @@ class EmployeeCreateAbilityTest extends TestCase
 
     public function test_user_without_employees_create_cannot_create_employee(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['employees']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => ['employees']
+        ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Viewer',
             'slug' => 'viewer',
             'tenant_id' => $tenant->id,
@@ -29,6 +34,7 @@ class EmployeeCreateAbilityTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Viewer User',
             'email' => 'viewer@example.com',
             'password' => Hash::make('secret'),
@@ -55,9 +61,13 @@ class EmployeeCreateAbilityTest extends TestCase
 
     public function test_user_with_employees_create_can_create_employee(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['employees']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => ['employees']
+        ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Editor',
             'slug' => 'editor',
             'tenant_id' => $tenant->id,
@@ -66,6 +76,7 @@ class EmployeeCreateAbilityTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Editor User',
             'email' => 'editor@example.com',
             'password' => Hash::make('secret'),

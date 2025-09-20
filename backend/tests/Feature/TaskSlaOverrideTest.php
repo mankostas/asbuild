@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskSlaOverrideTest extends TestCase
 {
@@ -18,13 +19,17 @@ class TaskSlaOverrideTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Tenant::create(['id' => 1, 'name' => 'T', 'features' => ['tasks']]);
+        Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'id' => 1, 'name' => 'T', 'features' => ['tasks']
+        ]);
     }
 
     protected function makeType(): TaskType
     {
         if (! User::find(1)) {
             User::create([
+                'public_id' => PublicIdGenerator::generate(),
                 'id' => 1,
                 'name' => 'Seeder',
                 'email' => 'seed@example.com',
@@ -36,6 +41,7 @@ class TaskSlaOverrideTest extends TestCase
         }
 
         return TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => 1,
             'schema_json' => ['sections' => []],
@@ -47,6 +53,7 @@ class TaskSlaOverrideTest extends TestCase
     protected function makeUser(array $abilities): User
     {
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'R',
             'slug' => 'r',
             'tenant_id' => 1,
@@ -54,6 +61,7 @@ class TaskSlaOverrideTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => uniqid() . '@example.com',
             'password' => Hash::make('secret'),

@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskRouteAbilityTest extends TestCase
 {
@@ -20,9 +21,16 @@ class TaskRouteAbilityTest extends TestCase
      */
     public function test_task_routes_require_abilities(string $method, callable $resolver, string $ability): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
-        $role = Role::create(['name' => 'User', 'slug' => 'user', 'tenant_id' => $tenant->id, 'abilities' => [], 'level' => 1]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
+        $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'User', 'slug' => 'user', 'tenant_id' => $tenant->id, 'abilities' => [], 'level' => 1
+        ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -31,7 +39,10 @@ class TaskRouteAbilityTest extends TestCase
             'address' => 'Street 1',
         ]);
         $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
-        $task = Task::create(['tenant_id' => $tenant->id, 'user_id' => $user->id]);
+        $task = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'user_id' => $user->id
+        ]);
         Sanctum::actingAs($user);
 
         [$url, $payload] = $resolver($task, $user);
@@ -39,7 +50,10 @@ class TaskRouteAbilityTest extends TestCase
             ->json($method, $url, $payload)
             ->assertStatus(403);
 
-        $abilityRole = Role::create(['name' => 'Ability', 'slug' => 'ability', 'tenant_id' => $tenant->id, 'abilities' => [$ability, 'tasks.manage'], 'level' => 1]);
+        $abilityRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Ability', 'slug' => 'ability', 'tenant_id' => $tenant->id, 'abilities' => [$ability, 'tasks.manage'], 'level' => 1
+        ]);
         $user->roles()->attach($abilityRole->id, ['tenant_id' => $tenant->id]);
         $user->refresh();
 
@@ -62,11 +76,21 @@ class TaskRouteAbilityTest extends TestCase
 
     public function test_tenant_isolation_on_tasks(): void
     {
-        $tenant1 = Tenant::create(['name' => 'One', 'features' => ['tasks']]);
-        $tenant2 = Tenant::create(['name' => 'Two', 'features' => ['tasks']]);
+        $tenant1 = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'One', 'features' => ['tasks']
+        ]);
+        $tenant2 = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Two', 'features' => ['tasks']
+        ]);
 
-        $role = Role::create(['name' => 'User', 'slug' => 'user', 'tenant_id' => $tenant1->id, 'abilities' => ['tasks.view', 'tasks.manage'], 'level' => 1]);
+        $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'User', 'slug' => 'user', 'tenant_id' => $tenant1->id, 'abilities' => ['tasks.view', 'tasks.manage'], 'level' => 1
+        ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -77,8 +101,14 @@ class TaskRouteAbilityTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => $tenant1->id]);
         Sanctum::actingAs($user);
 
-        $task1 = Task::create(['tenant_id' => $tenant1->id, 'user_id' => $user->id]);
-        $task2 = Task::create(['tenant_id' => $tenant2->id, 'user_id' => $user->id]);
+        $task1 = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant1->id, 'user_id' => $user->id
+        ]);
+        $task2 = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant2->id, 'user_id' => $user->id
+        ]);
 
         $this->withHeader('X-Tenant-ID', $tenant1->id)
             ->getJson('/api/tasks')

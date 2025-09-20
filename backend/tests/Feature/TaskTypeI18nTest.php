@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskTypeI18nTest extends TestCase
 {
@@ -17,8 +18,12 @@ class TaskTypeI18nTest extends TestCase
 
     public function test_schema_labels_normalize_to_i18n(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'slug' => 'admin',
             'tenant_id' => $tenant->id,
@@ -26,6 +31,7 @@ class TaskTypeI18nTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -37,6 +43,7 @@ class TaskTypeI18nTest extends TestCase
         Sanctum::actingAs($user);
 
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => $tenant->id,
             'schema_json' => [

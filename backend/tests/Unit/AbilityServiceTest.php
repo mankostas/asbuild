@@ -9,6 +9,7 @@ use App\Services\AbilityService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class AbilityServiceTest extends TestCase
 {
@@ -25,9 +26,13 @@ class AbilityServiceTest extends TestCase
 
     public function test_user_with_wildcard_has_any_ability(): void
     {
-        $tenant = Tenant::create(['name' => 'Acme Inc.', 'features' => []]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Acme Inc.', 'features' => []
+        ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Owner',
             'email' => 'owner@example.com',
             'password' => Hash::make('secret'),
@@ -35,6 +40,7 @@ class AbilityServiceTest extends TestCase
         ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'name' => 'Owner',
             'slug' => 'owner',
@@ -50,9 +56,13 @@ class AbilityServiceTest extends TestCase
 
     public function test_manage_prefix_grants_related_permissions(): void
     {
-        $tenant = Tenant::create(['name' => 'Beta LLC', 'features' => []]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Beta LLC', 'features' => []
+        ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Manager',
             'email' => 'manager@example.com',
             'password' => Hash::make('secret'),
@@ -60,6 +70,7 @@ class AbilityServiceTest extends TestCase
         ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'name' => 'Manager',
             'slug' => 'manager',
@@ -75,9 +86,13 @@ class AbilityServiceTest extends TestCase
 
     public function test_client_scoped_abilities_match_core_checks(): void
     {
-        $tenant = Tenant::create(['name' => 'Client Tenant', 'features' => ['dashboard', 'tasks', 'reports']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Client Tenant', 'features' => ['dashboard', 'tasks', 'reports']
+        ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Client User',
             'email' => 'client@example.com',
             'password' => Hash::make('secret'),
@@ -110,10 +125,17 @@ class AbilityServiceTest extends TestCase
 
     public function test_tenant_specific_abilities_are_isolated(): void
     {
-        $tenantOne = Tenant::create(['name' => 'Tenant One', 'features' => []]);
-        $tenantTwo = Tenant::create(['name' => 'Tenant Two', 'features' => []]);
+        $tenantOne = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant One', 'features' => []
+        ]);
+        $tenantTwo = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant Two', 'features' => []
+        ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Employee',
             'email' => 'employee@example.com',
             'password' => Hash::make('secret'),
@@ -121,6 +143,7 @@ class AbilityServiceTest extends TestCase
         ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenantOne->id,
             'name' => 'Analyst',
             'slug' => 'analyst',
@@ -136,9 +159,13 @@ class AbilityServiceTest extends TestCase
 
     public function test_reports_view_alias_grants_dashboard_view(): void
     {
-        $tenant = Tenant::create(['name' => 'Gamma Corp', 'features' => ['dashboard']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Gamma Corp', 'features' => ['dashboard']
+        ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Analyst',
             'email' => 'analyst@example.com',
             'password' => Hash::make('secret'),
@@ -146,6 +173,7 @@ class AbilityServiceTest extends TestCase
         ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'name' => 'Viewer',
             'slug' => 'viewer',
@@ -162,9 +190,13 @@ class AbilityServiceTest extends TestCase
 
     public function test_tenants_manage_grants_sensitive_actions(): void
     {
-        $tenant = Tenant::create(['name' => 'Delta Group', 'features' => []]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Delta Group', 'features' => []
+        ]);
 
         $manager = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Manager',
             'email' => 'manager@example.com',
             'password' => Hash::make('secret'),
@@ -172,6 +204,7 @@ class AbilityServiceTest extends TestCase
         ]);
 
         $manageRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'name' => 'Tenant Manager',
             'slug' => 'tenant_manager',
@@ -186,6 +219,7 @@ class AbilityServiceTest extends TestCase
         $this->assertTrue($this->service->userHasAbility($manager, 'tenants.impersonate', $tenant->id));
 
         $viewer = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Viewer',
             'email' => 'viewer@example.com',
             'password' => Hash::make('secret'),
@@ -193,6 +227,7 @@ class AbilityServiceTest extends TestCase
         ]);
 
         $viewRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'name' => 'Tenant Viewer',
             'slug' => 'tenant_viewer',

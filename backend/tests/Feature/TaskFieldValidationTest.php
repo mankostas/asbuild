@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskFieldValidationTest extends TestCase
 {
@@ -21,8 +22,12 @@ class TaskFieldValidationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'slug' => 'admin',
             'tenant_id' => $tenant->id,
@@ -30,6 +35,7 @@ class TaskFieldValidationTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -46,6 +52,7 @@ class TaskFieldValidationTest extends TestCase
     public function test_unique_validation_enforced(): void
     {
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => $this->tenant->id,
             'schema_json' => [
@@ -80,6 +87,7 @@ class TaskFieldValidationTest extends TestCase
     public function test_regex_validation_fails(): void
     {
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => $this->tenant->id,
             'schema_json' => [

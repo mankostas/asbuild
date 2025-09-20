@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskTypeAbilityTest extends TestCase
 {
@@ -20,8 +21,12 @@ class TaskTypeAbilityTest extends TestCase
      */
     public function test_routes_require_abilities(string $method, callable $resolver, string $ability): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['task_types']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['task_types']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => $tenant->id,
@@ -29,6 +34,7 @@ class TaskTypeAbilityTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -40,6 +46,7 @@ class TaskTypeAbilityTest extends TestCase
         Sanctum::actingAs($user);
 
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => $tenant->id,
             'schema_json' => ['sections' => []],
@@ -52,6 +59,7 @@ class TaskTypeAbilityTest extends TestCase
             ->assertStatus(403);
 
         $abilityRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Ability',
             'slug' => 'ability',
             'tenant_id' => $tenant->id,

@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class SuperAdminTenantAccessTest extends TestCase
 {
@@ -16,16 +17,24 @@ class SuperAdminTenantAccessTest extends TestCase
 
     public function test_super_admin_can_view_roles_for_any_tenant(): void
     {
-        $tenantA = Tenant::create(['name' => 'A']);
-        $tenantB = Tenant::create(['name' => 'B']);
+        $tenantA = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'A'
+        ]);
+        $tenantB = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'B'
+        ]);
 
         $superRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => $tenantA->id,
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SA',
             'email' => 'sa@example.com',
             'password' => Hash::make('secret'),
@@ -35,7 +44,10 @@ class SuperAdminTenantAccessTest extends TestCase
         ]);
         $user->roles()->attach($superRole->id, ['tenant_id' => $tenantA->id]);
 
-        $roleB = Role::create(['name' => 'Viewer', 'slug' => 'viewer', 'tenant_id' => $tenantB->id]);
+        $roleB = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Viewer', 'slug' => 'viewer', 'tenant_id' => $tenantB->id
+        ]);
 
         Sanctum::actingAs($user);
 
@@ -47,16 +59,24 @@ class SuperAdminTenantAccessTest extends TestCase
 
     public function test_super_admin_can_update_role_for_any_tenant(): void
     {
-        $tenantA = Tenant::create(['name' => 'A']);
-        $tenantB = Tenant::create(['name' => 'B']);
+        $tenantA = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'A'
+        ]);
+        $tenantB = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'B'
+        ]);
 
         $superRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => $tenantA->id,
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SA',
             'email' => 'sa@example.com',
             'password' => Hash::make('secret'),
@@ -66,7 +86,10 @@ class SuperAdminTenantAccessTest extends TestCase
         ]);
         $user->roles()->attach($superRole->id, ['tenant_id' => $tenantA->id]);
 
-        $roleB = Role::create(['name' => 'Viewer', 'slug' => 'viewer', 'tenant_id' => $tenantB->id]);
+        $roleB = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Viewer', 'slug' => 'viewer', 'tenant_id' => $tenantB->id
+        ]);
 
         Sanctum::actingAs($user);
 

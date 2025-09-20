@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class RolesTest extends TestCase
 {
@@ -16,16 +17,24 @@ class RolesTest extends TestCase
 
     public function test_roles_index_returns_user_counts(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant'
+        ]);
         $viewerRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Viewer',
             'slug' => 'viewer',
             'tenant_id' => $tenant->id,
             'abilities' => ['roles.view'],
         ]);
-        $role = Role::create(['name' => 'Tester', 'slug' => 'tester', 'tenant_id' => $tenant->id]);
+        $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tester', 'slug' => 'tester', 'tenant_id' => $tenant->id
+        ]);
 
         $admin = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('secret'),
@@ -34,6 +43,7 @@ class RolesTest extends TestCase
             'address' => 'Street 1',
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),
@@ -62,16 +72,24 @@ class RolesTest extends TestCase
 
     public function test_role_assignment_persists(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant'
+        ]);
         $adminRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'ClientAdmin',
             'slug' => 'client_admin',
             'tenant_id' => $tenant->id,
             'abilities' => ['roles.manage'],
         ]);
-        $role = Role::create(['name' => 'Tester', 'slug' => 'tester', 'tenant_id' => $tenant->id]);
+        $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tester', 'slug' => 'tester', 'tenant_id' => $tenant->id
+        ]);
 
         $admin = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('secret'),
@@ -80,6 +98,7 @@ class RolesTest extends TestCase
             'address' => 'Street 1',
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),
@@ -101,8 +120,12 @@ class RolesTest extends TestCase
 
     public function test_super_admin_can_assign_any_ability(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => ['tasks']
+        ]);
         $superRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => null,
@@ -110,6 +133,7 @@ class RolesTest extends TestCase
             'abilities' => ['roles.manage'],
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Root',
             'email' => 'root@example.com',
             'password' => Hash::make('secret'),
@@ -135,8 +159,12 @@ class RolesTest extends TestCase
 
     public function test_features_limit_assignable_abilities(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => ['tasks']
+        ]);
         $adminRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Manager',
             'slug' => 'manager',
             'tenant_id' => $tenant->id,
@@ -144,6 +172,7 @@ class RolesTest extends TestCase
             'abilities' => ['roles.manage'],
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'email' => 'admin2@example.com',
             'password' => Hash::make('secret'),
