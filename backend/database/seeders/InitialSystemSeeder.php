@@ -15,7 +15,7 @@ class InitialSystemSeeder extends Seeder
     {
         $features = config('features', []);
 
-        $tenant = Tenant::query()->updateOrCreate(
+        $tenant = Tenant::query()->withTrashed()->updateOrCreate(
             ['id' => 1],
             [
                 'name' => 'Super Admin Tenant',
@@ -24,9 +24,12 @@ class InitialSystemSeeder extends Seeder
                 'phone' => '123-456-7890',
                 'address' => '123 Main St',
                 'archived_at' => null,
-                'deleted_at' => null,
             ]
         );
+
+        if ($tenant->trashed()) {
+            $tenant->restore();
+        }
 
         $selectedAbilities = $tenant->selectedFeatureAbilities();
         $tenant->forceFill(['feature_abilities' => $selectedAbilities])->save();
