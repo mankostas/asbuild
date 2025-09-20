@@ -20,13 +20,16 @@ class TaskSubtaskTest extends TestCase
 
     protected Task $task;
 
+    protected string $tenantPublicId;
+
     protected function setUp(): void
     {
         parent::setUp();
-        Tenant::create([
+        $tenant = Tenant::create([
             'public_id' => PublicIdGenerator::generate(),
             'id' => 1, 'name' => 'T', 'features' => ['tasks']
         ]);
+        $this->tenantPublicId = $tenant->public_id;
         $role = Role::create([
             'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
@@ -70,29 +73,29 @@ class TaskSubtaskTest extends TestCase
 
     public function test_crud_and_reorder_subtasks(): void
     {
-        $this->withHeader('X-Tenant-ID', 1)
-            ->postJson("/api/tasks/{$this->task->id}/subtasks", ['title' => 'A'])
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->postJson("/api/tasks/{$this->task->public_id}/subtasks", ['title' => 'A'])
             ->assertStatus(201)
             ->assertJsonPath('title', 'A');
-        $this->withHeader('X-Tenant-ID', 1)
-            ->postJson("/api/tasks/{$this->task->id}/subtasks", ['title' => 'B'])
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->postJson("/api/tasks/{$this->task->public_id}/subtasks", ['title' => 'B'])
             ->assertStatus(201);
         $s1 = TaskSubtask::where('title', 'A')->first();
         $s2 = TaskSubtask::where('title', 'B')->first();
 
-        $this->withHeader('X-Tenant-ID', 1)
-            ->patchJson("/api/tasks/{$this->task->id}/subtasks/{$s1->id}", ['title' => 'A1', 'is_completed' => true])
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->patchJson("/api/tasks/{$this->task->public_id}/subtasks/{$s1->public_id}", ['title' => 'A1', 'is_completed' => true])
             ->assertStatus(200)
             ->assertJsonPath('title', 'A1');
 
-        $this->withHeader('X-Tenant-ID', 1)
-            ->patchJson("/api/tasks/{$this->task->id}/subtasks/reorder", ['order' => [$s2->id, $s1->id]])
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->patchJson("/api/tasks/{$this->task->public_id}/subtasks/reorder", ['order' => [$s2->public_id, $s1->public_id]])
             ->assertStatus(200);
         $this->assertEquals(1, $s2->fresh()->position);
         $this->assertEquals(2, $s1->fresh()->position);
 
-        $this->withHeader('X-Tenant-ID', 1)
-            ->deleteJson("/api/tasks/{$this->task->id}/subtasks/{$s1->id}")
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->deleteJson("/api/tasks/{$this->task->public_id}/subtasks/{$s1->public_id}")
             ->assertStatus(200);
         $this->assertDatabaseMissing('task_subtasks', ['id' => $s1->id]);
     }
@@ -106,14 +109,14 @@ class TaskSubtaskTest extends TestCase
             'is_required' => true,
         ]);
 
-        $this->withHeader('X-Tenant-ID', 1)
-            ->postJson("/api/tasks/{$this->task->id}/status", ['status' => 'completed'])
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->postJson("/api/tasks/{$this->task->public_id}/status", ['status' => 'completed'])
             ->assertStatus(422)
             ->assertJson(['reason' => 'subtasks_incomplete']);
 
         $sub->update(['is_completed' => true]);
-        $this->withHeader('X-Tenant-ID', 1)
-            ->postJson("/api/tasks/{$this->task->id}/status", ['status' => 'completed'])
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->postJson("/api/tasks/{$this->task->public_id}/status", ['status' => 'completed'])
             ->assertStatus(200)
             ->assertJsonPath('data.status', 'completed');
     }

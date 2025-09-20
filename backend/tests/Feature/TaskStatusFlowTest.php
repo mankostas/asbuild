@@ -18,13 +18,16 @@ class TaskStatusFlowTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected string $tenantPublicId;
+
     protected function setUp(): void
     {
         parent::setUp();
-        Tenant::create([
+        $tenant = Tenant::create([
             'public_id' => PublicIdGenerator::generate(),
             'id' => 1, 'name' => 'T', 'features' => ['tasks']
         ]);
+        $this->tenantPublicId = $tenant->public_id;
     }
 
     protected function authUser(): User
@@ -107,8 +110,8 @@ class TaskStatusFlowTest extends TestCase
         $user = $this->authUser();
         $task = $this->makeTask($user);
 
-        $this->withHeader('X-Tenant-ID', 1)
-            ->postJson("/api/tasks/{$task->id}/status", ['status' => 'assigned'])
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->postJson("/api/tasks/{$task->public_id}/status", ['status' => 'assigned'])
             ->assertStatus(200)
             ->assertJsonPath('data.status', 'assigned');
     }
@@ -118,8 +121,8 @@ class TaskStatusFlowTest extends TestCase
         $user = $this->authUser();
         $task = $this->makeTask($user);
 
-        $this->withHeader('X-Tenant-ID', 1)
-            ->postJson("/api/tasks/{$task->id}/status", ['status' => 'completed'])
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->postJson("/api/tasks/{$task->public_id}/status", ['status' => 'completed'])
             ->assertStatus(422)
             ->assertJson(['message' => 'invalid_transition']);
     }
@@ -144,11 +147,11 @@ class TaskStatusFlowTest extends TestCase
             'assigned_user_id' => $user->id,
         ]);
 
-        $this->withHeader('X-Tenant-ID', 1)
-            ->postJson("/api/tasks/{$task->id}/status", ['status' => 'assigned'])
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->postJson("/api/tasks/{$task->public_id}/status", ['status' => 'assigned'])
             ->assertStatus(200);
-        $this->withHeader('X-Tenant-ID', 1)
-            ->postJson("/api/tasks/{$task->id}/status", ['status' => 'completed'])
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->postJson("/api/tasks/{$task->public_id}/status", ['status' => 'completed'])
             ->assertStatus(422);
     }
 
@@ -180,8 +183,8 @@ class TaskStatusFlowTest extends TestCase
             'assigned_user_id' => $user->id,
         ]);
 
-        $this->withHeader('X-Tenant-ID', 1)
-            ->postJson("/api/tasks/{$task->id}/status", ['status' => 'assigned'])
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->postJson("/api/tasks/{$task->public_id}/status", ['status' => 'assigned'])
             ->assertStatus(200)
             ->assertJsonPath('data.status', 'assigned');
     }
@@ -194,8 +197,8 @@ class TaskStatusFlowTest extends TestCase
 
         $this->assertTrue(app(\App\Services\AbilityService::class)->userHasAbility($user, 'tasks.update', 1));
 
-        $response = $this->withHeader('X-Tenant-ID', 1)
-            ->patchJson("/api/tasks/{$task->id}", [
+        $response = $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->patchJson("/api/tasks/{$task->public_id}", [
                 'title' => 'Updated Title',
                 'status' => 'assigned',
             ]);
@@ -214,8 +217,8 @@ class TaskStatusFlowTest extends TestCase
         $task = $this->makeTask($user);
         $task->update(['title' => 'Original Title']);
 
-        $this->withHeader('X-Tenant-ID', 1)
-            ->patchJson("/api/tasks/{$task->id}", [
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->patchJson("/api/tasks/{$task->public_id}", [
                 'title' => 'Changed Title',
                 'status' => 'completed',
             ])
@@ -254,14 +257,14 @@ class TaskStatusFlowTest extends TestCase
 
         $task = $this->makeTask($user);
 
-        $this->withHeader('X-Tenant-ID', 1)
-            ->patchJson("/api/tasks/{$task->id}", ['status' => 'assigned'])
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->patchJson("/api/tasks/{$task->public_id}", ['status' => 'assigned'])
             ->assertStatus(403);
 
         $this->assertSame('draft', $task->fresh()->status);
 
-        $this->withHeader('X-Tenant-ID', 1)
-            ->patchJson("/api/tasks/{$task->id}", ['title' => 'Only Title'])
+        $this->withHeader('X-Tenant-ID', $this->tenantPublicId)
+            ->patchJson("/api/tasks/{$task->public_id}", ['title' => 'Only Title'])
             ->assertStatus(200);
     }
 }

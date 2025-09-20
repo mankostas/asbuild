@@ -46,7 +46,7 @@ class TaskRouteAbilityTest extends TestCase
         Sanctum::actingAs($user);
 
         [$url, $payload] = $resolver($task, $user);
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $tenant->public_id)
             ->json($method, $url, $payload)
             ->assertStatus(403);
 
@@ -58,7 +58,7 @@ class TaskRouteAbilityTest extends TestCase
         $user->refresh();
 
         $expected = $method === 'POST' ? 201 : 200;
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $tenant->public_id)
             ->json($method, $url, $payload)
             ->assertStatus($expected);
 
@@ -70,7 +70,7 @@ class TaskRouteAbilityTest extends TestCase
     {
         return [
             'index' => ['GET', fn($task, $user) => ['/api/tasks', []], 'tasks.view'],
-            'show' => ['GET', fn($task, $user) => ["/api/tasks/{$task->id}", []], 'tasks.view'],
+            'show' => ['GET', fn($task, $user) => ["/api/tasks/{$task->public_id}", []], 'tasks.view'],
         ];
     }
 
@@ -110,12 +110,12 @@ class TaskRouteAbilityTest extends TestCase
             'tenant_id' => $tenant2->id, 'user_id' => $user->id
         ]);
 
-        $this->withHeader('X-Tenant-ID', $tenant1->id)
+        $this->withHeader('X-Tenant-ID', $tenant1->public_id)
             ->getJson('/api/tasks')
             ->assertJsonCount(1, 'data');
 
-        $this->withHeader('X-Tenant-ID', $tenant1->id)
-            ->getJson("/api/tasks/{$task2->id}")
+        $this->withHeader('X-Tenant-ID', $tenant1->public_id)
+            ->getJson("/api/tasks/{$task2->public_id}")
             ->assertStatus(403);
 
         \App\Models\Tenant::setCurrent(null);

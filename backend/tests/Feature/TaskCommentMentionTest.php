@@ -113,9 +113,9 @@ class TaskCommentMentionTest extends TestCase
         Sanctum::actingAs($author);
         app()->instance('tenant_id', $tenant1->id);
 
-        $this->withHeader('X-Tenant-ID', $tenant1->id)->postJson("/api/tasks/{$task->id}/comments", [
+        $this->withHeader('X-Tenant-ID', $tenant1->public_id)->postJson("/api/tasks/{$task->public_id}/comments", [
             'body' => 'Hi',
-            'mentions' => [$other->id],
+            'mentions' => [$other->public_id],
         ])->assertStatus(422);
         app()->forgetInstance('tenant_id');
     }
