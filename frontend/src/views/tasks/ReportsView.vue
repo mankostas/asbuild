@@ -8,7 +8,13 @@
           class="w-40"
           aria-label="Type"
         >
-          <option v-for="t in types" :key="t.id" :value="t.id">{{ t.name }}</option>
+          <option
+            v-for="t in types"
+            :key="String(t.public_id ?? t.id)"
+            :value="String(t.public_id ?? t.id)"
+          >
+            {{ t.name }}
+          </option>
         </Select>
         <Select
           v-model="range"
