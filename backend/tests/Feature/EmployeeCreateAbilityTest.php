@@ -54,7 +54,7 @@ class EmployeeCreateAbilityTest extends TestCase
             'email' => 'employee@example.com',
         ];
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/employees', $payload)
             ->assertStatus(403);
     }
@@ -102,7 +102,7 @@ class EmployeeCreateAbilityTest extends TestCase
             'email' => 'created@example.com',
         ];
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/employees', $payload)
             ->assertStatus(201);
 

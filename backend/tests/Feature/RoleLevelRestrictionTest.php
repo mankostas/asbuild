@@ -49,18 +49,18 @@ class RoleLevelRestrictionTest extends TestCase
         $user->roles()->attach($adminRole->id, ['tenant_id' => $tenant->id]);
         Sanctum::actingAs($user);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->getJson('/api/roles')
             ->assertStatus(200)
-            ->assertJsonMissing(['id' => $higherRole->id, 'name' => 'Supervisor']);
+            ->assertJsonMissing(['id' => $this->publicIdFor($higherRole), 'name' => 'Supervisor']);
 
         $payload = ['name' => 'Boss', 'slug' => 'boss', 'level' => 1];
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/roles', $payload)
             ->assertStatus(403);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->deleteJson("/api/roles/{$higherRole->id}")
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->deleteJson("/api/roles/{$this->publicIdFor($higherRole)}")
             ->assertStatus(403);
     }
 
@@ -117,16 +117,16 @@ class RoleLevelRestrictionTest extends TestCase
         $user->roles()->attach($managerRole->id, ['tenant_id' => $tenant1->id]);
         Sanctum::actingAs($user);
 
-        $response = $this->withHeader('X-Tenant-ID', $tenant1->id)
-            ->getJson("/api/roles?tenant_id={$tenant2->id}")
+        $response = $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant1))
+            ->getJson("/api/roles?tenant_id={$this->publicIdFor($tenant2)}")
             ->assertStatus(200);
 
         $ids = array_column($response->json('data'), 'id');
 
-        $this->assertContains($allowed1->id, $ids);
-        $this->assertContains($allowed2->id, $ids);
-        $this->assertNotContains($disallowed->id, $ids);
-        $this->assertNotContains($otherTenant->id, $ids);
-        $this->assertNotContains($global->id, $ids);
+        $this->assertContains($this->publicIdFor($allowed1), $ids);
+        $this->assertContains($this->publicIdFor($allowed2), $ids);
+        $this->assertNotContains($this->publicIdFor($disallowed), $ids);
+        $this->assertNotContains($this->publicIdFor($otherTenant), $ids);
+        $this->assertNotContains($this->publicIdFor($global), $ids);
     }
 }

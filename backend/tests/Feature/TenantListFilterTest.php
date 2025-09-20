@@ -56,14 +56,14 @@ class TenantListFilterTest extends TestCase
 
         $this->actAsSuperAdminForTenant($tenantA);
 
-        $this->getJson('/api/tenants?tenant_id=' . $tenantB->id)
+        $this->getJson('/api/tenants?tenant_id=' . $this->publicIdFor($tenantB))
             ->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertJsonFragment([
-                'id' => $tenantB->id,
+                'public_id' => $this->publicIdFor($tenantB),
                 'name' => 'Beta',
             ])
-            ->assertJsonMissing(['id' => $tenantA->id])
+            ->assertJsonMissing(['public_id' => $this->publicIdFor($tenantA)])
             ->assertJsonPath('meta.total', 1)
             ->assertJsonPath('meta.page', 1)
             ->assertJsonPath('meta.per_page', 15);
@@ -90,7 +90,7 @@ class TenantListFilterTest extends TestCase
             ->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertJsonFragment([
-                'id' => $tenantB->id,
+                'public_id' => $this->publicIdFor($tenantB),
                 'name' => 'Beta Logistics',
             ])
             ->assertJsonMissing(['name' => 'Alpha Manufacturing'])

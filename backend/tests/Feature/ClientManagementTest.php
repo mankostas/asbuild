@@ -67,7 +67,7 @@ class ClientManagementTest extends TestCase
             'clients.manage',
         ]);
 
-        $response = $this->withHeader('X-Tenant-ID', $tenant->id)
+        $response = $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/clients', [
                 'name' => 'Acme Corp',
                 'email' => 'welcome@example.com',
@@ -96,7 +96,7 @@ class ClientManagementTest extends TestCase
             'clients.manage',
         ]);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/clients', [
                 'name' => 'Silent Corp',
                 'email' => 'silent@example.com',
@@ -115,7 +115,7 @@ class ClientManagementTest extends TestCase
             'clients.manage',
         ]);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/clients', [
                 'name' => 'Acme Corp',
                 'notify_client' => true,
@@ -136,7 +136,7 @@ class ClientManagementTest extends TestCase
             'clients.manage',
         ]);
 
-        $response = $this->withHeader('X-Tenant-ID', $tenant->id)
+        $response = $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/clients', [
                 'name' => 'Acme Corp',
                 'email' => 'contact@acme.test',
@@ -161,48 +161,48 @@ class ClientManagementTest extends TestCase
             'archived_at' => null,
         ]);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->getJson('/api/clients')
             ->assertOk()
             ->assertJsonPath('meta.total', 1)
             ->assertJsonPath('data.0.name', 'Acme Corp')
             ->assertJsonPath('data.0.id', $clientPublicId);
 
-        $archive = $this->withHeader('X-Tenant-ID', $tenant->id)
+        $archive = $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson("/api/clients/{$clientPublicId}/archive")
             ->assertOk();
 
         $this->assertNotNull($archive->json('data.archived_at'));
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->getJson('/api/clients')
             ->assertOk()
             ->assertJsonMissing(['id' => $clientPublicId]);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->getJson('/api/clients?archived=only')
             ->assertOk()
             ->assertJsonPath('meta.total', 1)
             ->assertJsonPath('data.0.id', $clientPublicId);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->deleteJson("/api/clients/{$clientPublicId}/archive")
             ->assertOk()
             ->assertJsonPath('data.archived_at', null);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->deleteJson("/api/clients/{$clientPublicId}")
             ->assertOk();
 
         $this->assertSoftDeleted('clients', ['id' => $clientId]);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson("/api/clients/{$clientPublicId}/restore")
             ->assertOk();
 
         $this->assertDatabaseHas('clients', ['id' => $clientId, 'deleted_at' => null, 'user_id' => null]);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->getJson("/api/clients/{$clientPublicId}")
             ->assertOk()
             ->assertJsonMissingPath('data.owner');
@@ -228,14 +228,14 @@ class ClientManagementTest extends TestCase
             'email' => 'foreign@example.com',
         ]);
 
-        $this->withHeader('X-Tenant-ID', $tenantA->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenantA))
             ->postJson('/api/task-types', [
                 'name' => 'Type With Client',
                 'client_id' => $foreignClient->public_id,
             ])
             ->assertStatus(422);
 
-        $this->withHeader('X-Tenant-ID', $tenantA->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenantA))
             ->postJson('/api/tasks', [
                 'task_type_id' => null,
                 'client_id' => $foreignClient->public_id,
@@ -333,11 +333,11 @@ class ClientManagementTest extends TestCase
             'email' => 'tenant-b@example.com',
         ]);
 
-        $this->withHeader('X-Tenant-ID', $tenantB->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenantB))
             ->getJson('/api/clients')
             ->assertForbidden();
 
-        $this->withHeader('X-Tenant-ID', $tenantA->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenantA))
             ->getJson("/api/clients/{$clientB->public_id}")
             ->assertForbidden();
     }
@@ -382,7 +382,7 @@ class ClientManagementTest extends TestCase
 
         Sanctum::actingAs($super);
 
-        $taskType = $this->withHeader('X-Tenant-ID', $tenantB->id)
+        $taskType = $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenantB))
             ->postJson('/api/task-types', [
                 'name' => 'SA Type',
                 'client_id' => $clientB->public_id,
@@ -391,7 +391,7 @@ class ClientManagementTest extends TestCase
             ->assertCreated()
             ->json('data.id');
 
-        $task = $this->withHeader('X-Tenant-ID', $tenantB->id)
+        $task = $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenantB))
             ->postJson('/api/tasks', [
                 'task_type_id' => $taskType,
             ])
@@ -418,10 +418,10 @@ class ClientManagementTest extends TestCase
             ]);
         });
 
-        $ids = $clients->pluck('id')->all();
+        $clientPublicIds = $this->publicIdsFor($clients);
 
-        $response = $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson('/api/clients/bulk-archive', ['ids' => $ids])
+        $response = $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->postJson('/api/clients/bulk-archive', ['ids' => $clientPublicIds])
             ->assertOk();
 
         $response->assertJsonCount(3, 'data');
@@ -458,8 +458,13 @@ class ClientManagementTest extends TestCase
             'email' => 'foreign@example.com',
         ]);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson('/api/clients/bulk-archive', ['ids' => [$ownClient->id, $foreignClient->id]])
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->postJson('/api/clients/bulk-archive', [
+                'ids' => [
+                    $this->publicIdFor($ownClient),
+                    $this->publicIdFor($foreignClient),
+                ],
+            ])
             ->assertForbidden();
 
         $this->assertNull($ownClient->fresh()->archived_at);
@@ -483,9 +488,9 @@ class ClientManagementTest extends TestCase
             ]);
         });
 
-        $ids = $clients->pluck('id')->all();
+        $ids = $this->publicIdsFor($clients);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/clients/bulk-delete', ['ids' => $ids])
             ->assertOk()
             ->assertJson(['message' => 'deleted']);
@@ -522,8 +527,13 @@ class ClientManagementTest extends TestCase
             'email' => 'foreign@example.com',
         ]);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson('/api/clients/bulk-delete', ['ids' => [$ownClient->id, $foreignClient->id]])
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->postJson('/api/clients/bulk-delete', [
+                'ids' => [
+                    $this->publicIdFor($ownClient),
+                    $this->publicIdFor($foreignClient),
+                ],
+            ])
             ->assertForbidden();
 
         $this->assertDatabaseHas('clients', ['id' => $ownClient->id, 'deleted_at' => null]);

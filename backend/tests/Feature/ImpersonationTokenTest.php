@@ -54,7 +54,7 @@ class ImpersonationTokenTest extends TestCase
 
         $this->withHeaders([
             'Authorization' => 'Bearer ' . $token->plainTextToken,
-            'X-Tenant-ID' => $tenant->id,
+            'X-Tenant-ID' => $this->publicIdFor($tenant),
         ])->getJson('/api/lookups/features')
             ->assertStatus(200);
     }

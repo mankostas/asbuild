@@ -39,7 +39,7 @@ class ThemeSettingsRoutesTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
         Sanctum::actingAs($user);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->getJson('/api/settings/theme')
             ->assertStatus(200)
             ->assertExactJson([]);

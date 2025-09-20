@@ -27,9 +27,9 @@ class TeamsTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/teams/{$team->id}/employees", [
-                'employee_ids' => [$member->id],
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->postJson("/api/teams/{$team->public_id}/employees", [
+                'employee_ids' => [$this->publicIdFor($member)],
             ])
             ->assertStatus(403);
 
@@ -48,9 +48,12 @@ class TeamsTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/teams/{$team->id}/employees", [
-                'employee_ids' => [$memberOne->id, $memberTwo->id],
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->postJson("/api/teams/{$team->public_id}/employees", [
+                'employee_ids' => [
+                    $this->publicIdFor($memberOne),
+                    $this->publicIdFor($memberTwo),
+                ],
             ])
             ->assertStatus(200);
 

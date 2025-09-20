@@ -82,15 +82,15 @@ class TenantArchiveTest extends TestCase
             'name' => 'Archive Target'
         ]);
 
-        $this->postJson("/api/tenants/{$tenant->id}/archive")
+        $this->postJson("/api/tenants/{$tenant->public_id}/archive")
             ->assertStatus(200)
-            ->assertJsonFragment(['id' => $tenant->id]);
+            ->assertJsonFragment(['public_id' => $this->publicIdFor($tenant)]);
 
         $this->assertNotNull($tenant->refresh()->archived_at);
 
-        $this->deleteJson("/api/tenants/{$tenant->id}/archive")
+        $this->deleteJson("/api/tenants/{$tenant->public_id}/archive")
             ->assertStatus(200)
-            ->assertJsonFragment(['id' => $tenant->id]);
+            ->assertJsonFragment(['public_id' => $this->publicIdFor($tenant)]);
 
         $this->assertNull($tenant->refresh()->archived_at);
     }
@@ -104,16 +104,16 @@ class TenantArchiveTest extends TestCase
             'name' => 'Delete Target'
         ]);
 
-        $this->deleteJson("/api/tenants/{$tenant->id}")
+        $this->deleteJson("/api/tenants/{$tenant->public_id}")
             ->assertStatus(204);
 
         $trashed = Tenant::withTrashed()->find($tenant->id);
         $this->assertNotNull($trashed);
         $this->assertNotNull($trashed->deleted_at);
 
-        $this->postJson("/api/tenants/{$tenant->id}/restore")
+        $this->postJson("/api/tenants/{$tenant->public_id}/restore")
             ->assertStatus(200)
-            ->assertJsonFragment(['id' => $tenant->id]);
+            ->assertJsonFragment(['public_id' => $this->publicIdFor($tenant)]);
 
         $restored = Tenant::find($tenant->id);
         $this->assertNotNull($restored);
@@ -138,7 +138,12 @@ class TenantArchiveTest extends TestCase
             'name' => 'Tenant C'
         ]);
 
-        $this->postJson('/api/tenants/bulk-archive', ['ids' => [$tenantA->id, $tenantB->id]])
+        $this->postJson('/api/tenants/bulk-archive', [
+            'ids' => [
+                $this->publicIdFor($tenantA),
+                $this->publicIdFor($tenantB),
+            ],
+        ])
             ->assertStatus(200)
             ->assertJsonCount(2);
 
@@ -149,7 +154,12 @@ class TenantArchiveTest extends TestCase
         $tenantB->delete();
         $this->assertNotNull(Tenant::withTrashed()->find($tenantB->id)->deleted_at);
 
-        $this->postJson('/api/tenants/bulk-restore', ['ids' => [$tenantA->id, $tenantB->id]])
+        $this->postJson('/api/tenants/bulk-restore', [
+            'ids' => [
+                $this->publicIdFor($tenantA),
+                $this->publicIdFor($tenantB),
+            ],
+        ])
             ->assertStatus(200)
             ->assertJsonCount(2);
 
@@ -173,7 +183,12 @@ class TenantArchiveTest extends TestCase
             'name' => 'Tenant B'
         ]);
 
-        $this->postJson('/api/tenants/bulk-delete', ['ids' => [$tenantA->id, $tenantB->id]])
+        $this->postJson('/api/tenants/bulk-delete', [
+            'ids' => [
+                $this->publicIdFor($tenantA),
+                $this->publicIdFor($tenantB),
+            ],
+        ])
             ->assertStatus(200)
             ->assertJsonCount(2);
 
@@ -193,7 +208,7 @@ class TenantArchiveTest extends TestCase
         // Switch to a regular user without SuperAdmin role
         $this->actingAsRegularUser($homeTenant);
 
-        $this->postJson("/api/tenants/{$targetTenant->id}/archive")
+        $this->postJson("/api/tenants/{$targetTenant->public_id}/archive")
             ->assertStatus(403);
 
         $this->assertNull($targetTenant->refresh()->archived_at);
@@ -220,7 +235,7 @@ class TenantArchiveTest extends TestCase
         $this->getJson('/api/tenants?archived=only')
             ->assertStatus(200)
             ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['id' => $archived->id]);
+            ->assertJsonFragment(['public_id' => $this->publicIdFor($archived)]);
 
         $this->getJson('/api/tenants?archived=all')
             ->assertStatus(200)
@@ -229,6 +244,6 @@ class TenantArchiveTest extends TestCase
         $this->getJson('/api/tenants?trashed=only')
             ->assertStatus(200)
             ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['id' => $trashed->id]);
+            ->assertJsonFragment(['public_id' => $this->publicIdFor($trashed)]);
     }
 }

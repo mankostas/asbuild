@@ -25,8 +25,8 @@ class EmployeeAccountActionsTest extends TestCase
 
         Password::shouldReceive('sendResetLink')->never();
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/employees/{$employee->id}/password-reset")
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->postJson("/api/employees/{$employee->public_id}/password-reset")
             ->assertStatus(403);
     }
 
@@ -42,8 +42,8 @@ class EmployeeAccountActionsTest extends TestCase
             ->with(['email' => $employee->email])
             ->andReturn(Password::RESET_LINK_SENT);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/employees/{$employee->id}/password-reset")
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->postJson("/api/employees/{$employee->public_id}/password-reset")
             ->assertStatus(200)
             ->assertJson(['status' => 'ok']);
     }
@@ -60,8 +60,8 @@ class EmployeeAccountActionsTest extends TestCase
             ->with(['email' => $employee->email])
             ->andReturn(Password::RESET_LINK_SENT);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/employees/{$employee->id}/invite-resend")
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->postJson("/api/employees/{$employee->public_id}/invite-resend")
             ->assertStatus(200)
             ->assertJson(['status' => 'ok']);
     }
@@ -78,8 +78,8 @@ class EmployeeAccountActionsTest extends TestCase
             ->with(['email' => 'updated@example.com'])
             ->andReturn(Password::RESET_LINK_SENT);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/employees/{$employee->id}/email-reset", [
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->postJson("/api/employees/{$employee->public_id}/email-reset", [
                 'email' => 'updated@example.com',
             ])
             ->assertStatus(200)

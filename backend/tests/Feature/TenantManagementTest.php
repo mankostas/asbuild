@@ -99,7 +99,10 @@ class TenantManagementTest extends TestCase
                 'tasks.client.update',
             ]);
 
-        $tenantId = $response->json('id');
+        $tenantPublicId = $response->json('public_id');
+        $this->assertIsString($tenantPublicId);
+
+        $tenantId = $this->idFromPublicId(Tenant::class, $tenantPublicId);
 
         $this->assertDatabaseHas('roles', [
             'tenant_id' => $tenantId,
@@ -144,7 +147,10 @@ class TenantManagementTest extends TestCase
         ])->assertCreated()
             ->assertJsonPath('feature_abilities.reports', ['reports.manage']);
 
-        $tenantId = $response->json('id');
+        $tenantPublicId = $response->json('public_id');
+        $this->assertIsString($tenantPublicId);
+
+        $tenantId = $this->idFromPublicId(Tenant::class, $tenantPublicId);
 
         $this->assertDatabaseHas('roles', [
             'tenant_id' => $tenantId,
@@ -177,7 +183,7 @@ class TenantManagementTest extends TestCase
 
         DefaultFeatureRolesSeeder::syncDefaultRolesForFeatures($tenant, $tenant->selectedFeatureAbilities());
 
-        $this->putJson("/api/tenants/{$tenant->id}", [
+        $this->putJson("/api/tenants/{$this->publicIdFor($tenant)}", [
             'features' => ['tasks', 'clients'],
             'feature_abilities' => [
                 'tasks' => ['tasks.view', 'tasks.update'],

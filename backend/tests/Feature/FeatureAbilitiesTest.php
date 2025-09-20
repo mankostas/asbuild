@@ -45,7 +45,7 @@ class FeatureAbilitiesTest extends TestCase
         Sanctum::actingAs($user);
 
         // Missing ability
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->getJson($route)
             ->assertStatus(403);
 
@@ -61,7 +61,7 @@ class FeatureAbilitiesTest extends TestCase
         $user->roles()->attach($abilityRole->id, ['tenant_id' => $tenant->id]);
         $user->refresh();
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->getJson($route)
             ->assertStatus(200);
 

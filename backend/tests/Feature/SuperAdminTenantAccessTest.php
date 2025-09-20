@@ -51,10 +51,13 @@ class SuperAdminTenantAccessTest extends TestCase
 
         Sanctum::actingAs($user);
 
-        $this->withHeader('X-Tenant-ID', $tenantB->id)
-            ->getJson('/api/roles?tenant_id=' . $tenantB->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenantB))
+            ->getJson('/api/roles?tenant_id=' . $this->publicIdFor($tenantB))
             ->assertStatus(200)
-            ->assertJsonFragment(['id' => $roleB->id, 'tenant_id' => $tenantB->id]);
+            ->assertJsonFragment([
+                'id' => $this->publicIdFor($roleB),
+                'tenant_id' => $this->publicIdFor($tenantB),
+            ]);
     }
 
     public function test_super_admin_can_update_role_for_any_tenant(): void
@@ -93,13 +96,17 @@ class SuperAdminTenantAccessTest extends TestCase
 
         Sanctum::actingAs($user);
 
-        $this->withHeader('X-Tenant-ID', $tenantB->id)
-            ->putJson("/api/roles/{$roleB->id}", [
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenantB))
+            ->putJson("/api/roles/{$this->publicIdFor($roleB)}", [
                 'name' => 'Updated',
                 'slug' => 'updated',
             ])
             ->assertStatus(200)
-            ->assertJsonFragment(['id' => $roleB->id, 'name' => 'Updated', 'slug' => 'updated']);
+            ->assertJsonFragment([
+                'id' => $this->publicIdFor($roleB),
+                'name' => 'Updated',
+                'slug' => 'updated',
+            ]);
 
         $this->assertDatabaseHas('roles', [
             'id' => $roleB->id,

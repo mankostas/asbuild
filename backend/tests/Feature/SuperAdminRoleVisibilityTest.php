@@ -60,7 +60,7 @@ class SuperAdminRoleVisibilityTest extends TestCase
         $response = $this->getJson('/api/roles')
             ->assertStatus(200);
 
-        $response->assertJsonFragment(['tenant_id' => $tenantA->id, 'name' => 'ClientAdmin']);
-        $response->assertJsonFragment(['tenant_id' => $tenantB->id, 'name' => 'ClientAdmin']);
+        $response->assertJsonFragment(['tenant_id' => $this->publicIdFor($tenantA), 'name' => 'ClientAdmin']);
+        $response->assertJsonFragment(['tenant_id' => $this->publicIdFor($tenantB), 'name' => 'ClientAdmin']);
     }
 }
