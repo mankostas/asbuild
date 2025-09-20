@@ -55,4 +55,30 @@ trait CreatesApplication
 
         return $ids;
     }
+
+    /**
+     * Resolve a hashed public identifier back to its underlying numeric id.
+     *
+     * @template TModel of Model
+     *
+     * @param class-string<TModel> $modelClass
+     */
+    protected function idFromPublicId(string $modelClass, string $publicId): int
+    {
+        /** @var TModel|null $model */
+        $model = $modelClass::query()->where('public_id', $publicId)->first();
+
+        $this->assertNotNull(
+            $model,
+            sprintf('Failed to resolve public identifier [%s] for model [%s].', $publicId, $modelClass)
+        );
+
+        $this->assertSame(
+            $publicId,
+            $model->getAttribute('public_id'),
+            'Resolved model public identifier does not match the provided hash.'
+        );
+
+        return (int) $model->getKey();
+    }
 }

@@ -47,7 +47,7 @@ class RoleRoutesTest extends TestCase
             ->assertJsonPath('data.0.abilities.0', 'roles.manage');
 
         $payload = ['name' => 'Tester', 'slug' => 'tester', 'level' => 1, 'description' => 'Test role'];
-        $roleId = $this->withHeader('X-Tenant-ID', $this->tenant->id)
+        $rolePublicId = $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->postJson('/api/roles', $payload)
             ->assertStatus(201)
             ->assertJsonStructure([
@@ -55,13 +55,21 @@ class RoleRoutesTest extends TestCase
             ])
             ->assertJsonPath('data.level', 1)
             ->assertJsonPath('data.description', 'Test role')
-            ->assertJsonPath('data.tenant_id', $this->tenant->id)
+            ->assertJsonPath('data.tenant_id', $this->publicIdFor($this->tenant))
             ->assertJsonMissingPath('data.created_at')
             ->assertJsonMissingPath('data.updated_at')
             ->json('data.id');
 
+        $this->assertIsString($rolePublicId);
+
+        $roleId = $this->idFromPublicId(Role::class, $rolePublicId);
+        $role = Role::query()->find($roleId);
+        $this->assertNotNull($role);
+        $this->assertSame($roleId, $role->getKey());
+        $this->assertSame($rolePublicId, $role->public_id);
+
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
-            ->getJson("/api/roles/{$roleId}")
+            ->getJson("/api/roles/{$rolePublicId}")
             ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => ['id', 'name', 'description', 'slug', 'abilities', 'tenant_id', 'level'],
@@ -72,7 +80,7 @@ class RoleRoutesTest extends TestCase
 
         $update = ['name' => 'Updated', 'slug' => 'updated', 'level' => 2, 'description' => 'Updated role'];
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
-            ->putJson("/api/roles/{$roleId}", $update)
+            ->putJson("/api/roles/{$rolePublicId}", $update)
             ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => ['id', 'name', 'description', 'slug', 'abilities', 'tenant_id', 'level'],
@@ -85,7 +93,7 @@ class RoleRoutesTest extends TestCase
             ->assertJsonMissingPath('data.updated_at');
 
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
-            ->deleteJson("/api/roles/{$roleId}")
+            ->deleteJson("/api/roles/{$rolePublicId}")
             ->assertStatus(200);
     }
 
@@ -117,14 +125,17 @@ class RoleRoutesTest extends TestCase
         $user->roles()->attach($superRole->id, ['tenant_id' => $tenantA->id]);
         Sanctum::actingAs($user);
 
-        $response = $this->getJson("/api/roles?tenant_id={$tenantB->id}")
+        $response = $this->getJson("/api/roles?tenant_id={$this->publicIdFor($tenantB)}")
             ->assertStatus(200)
             ->assertJsonMissing(['name' => 'Global'])
             ->assertJsonMissing(['name' => 'Role A'])
-            ->assertJsonFragment(['id' => $roleB->id, 'tenant_id' => $tenantB->id]);
+            ->assertJsonFragment([
+                'id' => $this->publicIdFor($roleB),
+                'tenant_id' => $this->publicIdFor($tenantB),
+            ]);
 
         foreach ($response->json('data') as $role) {
-            $this->assertSame($tenantB->id, $role['tenant_id']);
+            $this->assertSame($this->publicIdFor($tenantB), $role['tenant_id']);
         }
     }
 }

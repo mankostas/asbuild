@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Role;
+use App\Models\TaskType;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -168,13 +169,21 @@ class TaskTypeBuilderTest extends TestCase
             ]),
         ];
 
-        $id = $this->withHeader('X-Tenant-ID', $tenant->id)
+        $taskTypePublicId = $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/task-types', $payload)
             ->assertCreated()
             ->json('data.id');
 
+        $this->assertIsString($taskTypePublicId);
+
+        $taskTypeId = $this->idFromPublicId(TaskType::class, $taskTypePublicId);
+        $taskType = TaskType::query()->find($taskTypeId);
+        $this->assertNotNull($taskType);
+        $this->assertSame($taskTypeId, $taskType->getKey());
+        $this->assertSame($taskTypePublicId, $taskType->public_id);
+
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->getJson("/api/task-types/{$id}")
+            ->getJson("/api/task-types/{$taskTypePublicId}")
             ->assertOk()
             ->assertJsonPath('data.abilities_json.admin.read', true)
             ->assertJsonPath('data.abilities_json.admin.edit', false);
@@ -192,12 +201,12 @@ class TaskTypeBuilderTest extends TestCase
         ];
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->patchJson("/api/task-types/{$id}", $update)
+            ->patchJson("/api/task-types/{$taskTypePublicId}", $update)
             ->assertOk()
             ->assertJsonPath('data.abilities_json.admin.edit', true);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->getJson("/api/task-types/{$id}")
+            ->getJson("/api/task-types/{$taskTypePublicId}")
             ->assertOk()
             ->assertJsonPath('data.abilities_json.admin.edit', true);
     }

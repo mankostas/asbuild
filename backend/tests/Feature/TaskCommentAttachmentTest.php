@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\File;
 use App\Models\Task;
+use App\Models\TaskComment;
 use App\Models\Tenant;
 use App\Models\User;
-use App\Models\File;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
@@ -40,13 +41,21 @@ class TaskCommentAttachmentTest extends TestCase
         app()->instance('tenant_id', $tenant->id);
 
         $res = $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/tasks/{$task->id}/comments", [
+            ->postJson("/api/tasks/{$task->public_id}/comments", [
                 'body' => 'Hi',
                 'files' => [$file->id],
             ]);
 
         $res->assertCreated();
-        $commentId = $res->json('data.id');
+        $commentPublicId = $res->json('data.id');
+        $this->assertIsString($commentPublicId);
+
+        $commentId = $this->idFromPublicId(TaskComment::class, $commentPublicId);
+        $comment = TaskComment::query()->find($commentId);
+        $this->assertNotNull($comment);
+        $this->assertSame($commentId, $comment->getKey());
+        $this->assertSame($commentPublicId, $comment->public_id);
+
         $this->assertDatabaseHas('task_comment_files', [
             'task_comment_id' => $commentId,
             'file_id' => $file->id,

@@ -42,11 +42,19 @@ class RoleLevelTest extends TestCase
     public function test_can_create_role_with_custom_level(): void
     {
         $payload = ['name' => 'Support', 'slug' => 'support', 'level' => 5];
-        $roleId = $this->withHeader('X-Tenant-ID', $this->tenant->id)
+        $rolePublicId = $this->withHeader('X-Tenant-ID', $this->tenant->id)
             ->postJson('/api/roles', $payload)
             ->assertStatus(201)
             ->assertJsonPath('data.level', 5)
             ->json('data.id');
+
+        $this->assertIsString($rolePublicId);
+
+        $roleId = $this->idFromPublicId(Role::class, $rolePublicId);
+        $role = Role::query()->find($roleId);
+        $this->assertNotNull($role);
+        $this->assertSame($roleId, $role->getKey());
+        $this->assertSame($rolePublicId, $role->public_id);
 
         $this->assertDatabaseHas('roles', [
             'id' => $roleId,
@@ -64,7 +72,7 @@ class RoleLevelTest extends TestCase
         ]);
 
         $this->withHeader('X-Tenant-ID', $this->tenant->id)
-            ->patchJson("/api/roles/{$role->id}", ['name' => 'Agent', 'slug' => 'agent', 'level' => 4])
+            ->patchJson("/api/roles/{$role->public_id}", ['name' => 'Agent', 'slug' => 'agent', 'level' => 4])
             ->assertStatus(200)
             ->assertJsonPath('data.level', 4);
 
