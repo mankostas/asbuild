@@ -17,6 +17,9 @@ class ClientManagementTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * @return array{0: Tenant, 1: User, tenant_public_id: string, user_public_id: string}
+     */
     protected function createTenantUserWithAbilities(array $abilities = []): array
     {
         $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['clients', 'tasks', 'task_types']]);
@@ -41,7 +44,12 @@ class ClientManagementTest extends TestCase
 
         Sanctum::actingAs($user);
 
-        return [$tenant, $user];
+        return [
+            $tenant,
+            $user,
+            'tenant_public_id' => $this->publicIdFor($tenant),
+            'user_public_id' => $this->publicIdFor($user),
+        ];
     }
 
     public function test_client_creation_can_send_welcome_email(): void

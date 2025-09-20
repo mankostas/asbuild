@@ -14,6 +14,9 @@ class TenantArchiveTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * @return array{0: User, 1: Tenant, user_public_id: string, tenant_public_id: string}
+     */
     private function actingAsSuperAdmin(array $abilities = ['*']): array
     {
         $homeTenant = Tenant::create(['name' => 'Home Tenant']);
@@ -39,7 +42,12 @@ class TenantArchiveTest extends TestCase
 
         Sanctum::actingAs($user);
 
-        return [$user, $homeTenant];
+        return [
+            $user,
+            $homeTenant,
+            'user_public_id' => $this->publicIdFor($user),
+            'tenant_public_id' => $this->publicIdFor($homeTenant),
+        ];
     }
 
     private function actingAsRegularUser(Tenant $tenant): User
