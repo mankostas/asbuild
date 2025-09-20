@@ -40,16 +40,16 @@ class ResourceSerializationTest extends TestCase
         ]);
         $role = Role::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
             'name' => 'Manager',
             'slug' => 'manager',
             'level' => 2,
             'abilities' => ['employees.view'],
         ]);
         $employee = $this->createUser([
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
         ]);
-        $employee->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
+        $employee->roles()->attach($role->getKey(), ['tenant_id' => $tenant->getKey()]);
 
         $resource = new EmployeeResource($employee->fresh()->load('roles.tenant', 'tenant'));
         $data = $resource->toArray(new Request());
@@ -58,7 +58,7 @@ class ResourceSerializationTest extends TestCase
         $this->assertSame($tenant->public_id, $data['tenant_id']);
         $roleIds = collect($data['roles'])->pluck('id')->all();
         $this->assertContains($role->public_id, $roleIds);
-        $this->assertNotContains($role->id, $roleIds);
+        $this->assertNotContains($role->getKey(), $roleIds);
     }
 
     public function test_team_resource_uses_public_identifiers(): void
@@ -67,17 +67,17 @@ class ResourceSerializationTest extends TestCase
             'public_id' => PublicIdGenerator::generate(),
             'name' => 'Tenant'
         ]);
-        $lead = $this->createUser(['tenant_id' => $tenant->id]);
-        $member = $this->createUser(['tenant_id' => $tenant->id]);
+        $lead = $this->createUser(['tenant_id' => $tenant->getKey()]);
+        $member = $this->createUser(['tenant_id' => $tenant->getKey()]);
 
         $team = Team::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
             'name' => 'Support',
             'description' => 'Support team',
-            'lead_id' => $lead->id,
+            'lead_id' => $lead->getKey(),
         ]);
-        $team->employees()->attach([$lead->id, $member->id]);
+        $team->employees()->attach([$lead->getKey(), $member->getKey()]);
 
         $resource = new TeamResource($team->load(['tenant', 'lead', 'employees']));
         $data = $resource->toArray(new Request());
@@ -100,7 +100,7 @@ class ResourceSerializationTest extends TestCase
         ]);
         $client = Client::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id, 'name' => 'ACME'
+            'tenant_id' => $tenant->getKey(), 'name' => 'ACME'
         ]);
         $file = File::create([
             'public_id' => PublicIdGenerator::generate(),
@@ -111,9 +111,9 @@ class ResourceSerializationTest extends TestCase
         ]);
         $manual = Manual::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id,
-            'file_id' => $file->id,
-            'client_id' => $client->id,
+            'tenant_id' => $tenant->getKey(),
+            'file_id' => $file->getKey(),
+            'client_id' => $client->getKey(),
             'category' => 'safety',
             'tags' => ['alpha'],
         ]);
@@ -134,10 +134,10 @@ class ResourceSerializationTest extends TestCase
             'public_id' => PublicIdGenerator::generate(),
             'name' => 'Notifications'
         ]);
-        $user = $this->createUser(['tenant_id' => $tenant->id]);
+        $user = $this->createUser(['tenant_id' => $tenant->getKey()]);
         $notification = Notification::create([
             'public_id' => PublicIdGenerator::generate(),
-            'user_id' => $user->id,
+            'user_id' => $user->getKey(),
             'category' => 'general',
             'message' => 'Welcome',
         ]);
@@ -157,17 +157,17 @@ class ResourceSerializationTest extends TestCase
         ]);
         $client = Client::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id, 'name' => 'ACME'
+            'tenant_id' => $tenant->getKey(), 'name' => 'ACME'
         ]);
         $type = TaskType::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id,
-            'client_id' => $client->id,
+            'tenant_id' => $tenant->getKey(),
+            'client_id' => $client->getKey(),
             'name' => 'Install',
         ]);
 
         $request = Request::create('/', 'GET');
-        $request->setUserResolver(fn () => $this->createUser(['tenant_id' => $tenant->id]));
+        $request->setUserResolver(fn () => $this->createUser(['tenant_id' => $tenant->getKey()]));
 
         $resource = new TaskTypeResource($type->load(['tenant', 'client']));
         $data = $resource->toArray($request);
@@ -184,42 +184,42 @@ class ResourceSerializationTest extends TestCase
             'public_id' => PublicIdGenerator::generate(),
             'name' => 'Tenant'
         ]);
-        $creator = $this->createUser(['tenant_id' => $tenant->id]);
-        $assignee = $this->createUser(['tenant_id' => $tenant->id]);
+        $creator = $this->createUser(['tenant_id' => $tenant->getKey()]);
+        $assignee = $this->createUser(['tenant_id' => $tenant->getKey()]);
         $client = Client::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id, 'name' => 'ACME'
+            'tenant_id' => $tenant->getKey(), 'name' => 'ACME'
         ]);
         $type = TaskType::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id,
-            'client_id' => $client->id,
+            'tenant_id' => $tenant->getKey(),
+            'client_id' => $client->getKey(),
             'name' => 'Install',
         ]);
         $status = TaskStatus::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
             'name' => 'Open',
-            'slug' => TaskStatus::prefixSlug('open', $tenant->id),
+            'slug' => TaskStatus::prefixSlug('open', $tenant->getKey()),
             'position' => 1,
         ]);
 
         $task = Task::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id,
-            'user_id' => $creator->id,
-            'reporter_user_id' => $creator->id,
+            'tenant_id' => $tenant->getKey(),
+            'user_id' => $creator->getKey(),
+            'reporter_user_id' => $creator->getKey(),
             'status' => 'open',
             'status_slug' => $status->slug,
             'title' => 'Install router',
-            'task_type_id' => $type->id,
-            'client_id' => $client->id,
-            'assigned_user_id' => $assignee->id,
+            'task_type_id' => $type->getKey(),
+            'client_id' => $client->getKey(),
+            'assigned_user_id' => $assignee->getKey(),
         ]);
         TaskWatcher::create([
             'public_id' => PublicIdGenerator::generate(),
-            'task_id' => $task->id,
-            'user_id' => $creator->id,
+            'task_id' => $task->getKey(),
+            'user_id' => $creator->getKey(),
         ]);
 
         $task->load(['tenant', 'type.tenant', 'type.client', 'client', 'assignee', 'user', 'reporter', 'watchers.user']);
@@ -252,10 +252,10 @@ class ResourceSerializationTest extends TestCase
         ]);
         $role = $tenant->roles()->where('slug', 'tenant')->first();
         $owner = $this->createUser([
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
             'type' => 'tenant',
         ]);
-        $owner->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
+        $owner->roles()->attach($role->getKey(), ['tenant_id' => $tenant->getKey()]);
 
         $resource = new TenantOwnerResource($owner->fresh()->load(['roles.tenant', 'tenant']));
         $data = $resource->toArray(new Request());
@@ -273,7 +273,7 @@ class ResourceSerializationTest extends TestCase
         ]);
         $client = Client::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
             'name' => 'ACME',
             'email' => 'client@example.com',
         ]);
@@ -288,10 +288,16 @@ class ResourceSerializationTest extends TestCase
 
     private function createUser(array $attributes = []): User
     {
-        $tenantId = $attributes['tenant_id'] ?? Tenant::create([
-            'public_id' => PublicIdGenerator::generate(),
-            'name' => 'Tenant ' . uniqid(),
-        ])->id;
+        $tenantId = $attributes['tenant_id'] ?? null;
+
+        if ($tenantId === null) {
+            $tenant = Tenant::create([
+                'public_id' => PublicIdGenerator::generate(),
+                'name' => 'Tenant ' . uniqid(),
+            ]);
+
+            $tenantId = $tenant->getKey();
+        }
 
         $defaults = [
             'public_id' => PublicIdGenerator::generate(),

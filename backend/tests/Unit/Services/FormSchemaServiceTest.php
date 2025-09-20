@@ -34,7 +34,7 @@ class FormSchemaServiceTest extends TestCase
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'password' => bcrypt('password'),
-            'tenant_id' => $this->tenant->id,
+            'tenant_id' => $this->tenant->getKey(),
             'phone' => '1234567890',
             'address' => '123 Main St',
             'type' => 'employee',
@@ -60,7 +60,7 @@ class FormSchemaServiceTest extends TestCase
         $service = app(FormSchemaService::class);
         $service->mapAssignee($schema, $payload);
 
-        $this->assertSame($user->id, $payload['assigned_user_id']);
+        $this->assertSame($user->getKey(), $payload['assigned_user_id']);
         $this->assertArrayNotHasKey('assignee_field', $payload['form_data']);
     }
 
@@ -69,7 +69,7 @@ class FormSchemaServiceTest extends TestCase
         $team = Team::create([
             'public_id' => PublicIdGenerator::generate(),
             'name' => 'Support',
-            'tenant_id' => $this->tenant->id,
+            'tenant_id' => $this->tenant->getKey(),
         ]);
 
         $schema = [
@@ -94,7 +94,7 @@ class FormSchemaServiceTest extends TestCase
         $service->mapReviewer($schema, $payload);
 
         $this->assertSame(Team::class, $payload['reviewer_type']);
-        $this->assertSame($team->id, $payload['reviewer_id']);
+        $this->assertSame($team->getKey(), $payload['reviewer_id']);
         $this->assertArrayNotHasKey('reviewer_field', $payload['form_data']);
     }
 
