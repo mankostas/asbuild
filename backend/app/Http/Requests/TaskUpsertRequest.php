@@ -67,7 +67,10 @@ class TaskUpsertRequest extends FormRequest
         ];
 
         if ($task = $this->route('task')) {
-            $typeId = $this->input('task_type_id', $task->task_type_id);
+            $typeIdentifier = $this->input('task_type_id');
+            $typeId = $typeIdentifier !== null
+                ? $this->resolvePublicId(TaskType::class, $typeIdentifier)
+                : $task->task_type_id;
             $type = $typeId ? TaskType::find($typeId) : null;
             $transitions = property_exists(Task::class, 'transitions') ? Task::$transitions : [];
             $allowed = collect($type->statuses ?? $transitions)
