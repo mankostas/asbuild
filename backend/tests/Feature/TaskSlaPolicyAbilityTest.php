@@ -60,7 +60,7 @@ class TaskSlaPolicyAbilityTest extends TestCase
 
         Sanctum::actingAs($manager);
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->getJson("/api/task-types/{$type->id}/sla-policies")
+            ->getJson("/api/task-types/{$type->public_id}/sla-policies")
             ->assertOk();
 
         $viewer = User::create([
@@ -76,7 +76,7 @@ class TaskSlaPolicyAbilityTest extends TestCase
 
         Sanctum::actingAs($viewer);
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->getJson("/api/task-types/{$type->id}/sla-policies")
+            ->getJson("/api/task-types/{$type->public_id}/sla-policies")
             ->assertForbidden();
     }
 }

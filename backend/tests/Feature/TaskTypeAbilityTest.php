@@ -80,7 +80,7 @@ class TaskTypeAbilityTest extends TestCase
         return [
             'automations store' => [
                 'POST',
-                fn($type) => ["/api/task-types/{$type->id}/automations", [
+                fn($type) => ["/api/task-types/{$type->public_id}/automations", [
                     'event' => 'status_changed',
                     'conditions_json' => null,
                     'actions_json' => [['type' => 'noop']],

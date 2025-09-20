@@ -132,12 +132,12 @@ class TaskTypeCreateAbilityTest extends TestCase
         ]);
 
         $this->withHeader('X-Tenant-ID', $tenantA->id)
-            ->getJson("/api/task-types/{$typeB->id}")
+            ->getJson("/api/task-types/{$typeB->public_id}")
             ->assertStatus(403);
 
         // ensure own type is accessible
         $this->withHeader('X-Tenant-ID', $tenantA->id)
-            ->getJson("/api/task-types/{$typeA->id}")
+            ->getJson("/api/task-types/{$typeA->public_id}")
             ->assertOk();
     }
 

@@ -48,7 +48,7 @@ class TaskTypeImportExportTest extends TestCase
         ]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/task-types/{$type->id}/export")
+            ->postJson("/api/task-types/{$type->public_id}/export")
             ->assertOk()
             ->assertJsonFragment(['name' => 'Type']);
 
@@ -101,7 +101,7 @@ class TaskTypeImportExportTest extends TestCase
         ]);
 
         $this->withHeader('X-Tenant-ID', $tenantA->id)
-            ->postJson("/api/task-types/{$otherType->id}/export")
+            ->postJson("/api/task-types/{$otherType->public_id}/export")
             ->assertStatus(403);
     }
 }

@@ -52,7 +52,7 @@ class TaskSlaPolicyTest extends TestCase
         ]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/task-types/{$type->id}/sla-policies", [
+            ->postJson("/api/task-types/{$type->public_id}/sla-policies", [
                 'priority' => 'high',
                 'resolve_within_mins' => 120,
                 'calendar_json' => [
@@ -68,7 +68,7 @@ class TaskSlaPolicyTest extends TestCase
 
         $task = $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/tasks', [
-                'task_type_id' => $type->id,
+                'task_type_id' => $type->public_id,
                 'priority' => 'high',
                 'sla_start_at' => '2024-01-01T08:00:00Z',
                 'sla_end_at' => '2024-01-01T17:00:00Z',
@@ -114,14 +114,14 @@ class TaskSlaPolicyTest extends TestCase
         ]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/task-types/{$type->id}/sla-policies", [
+            ->postJson("/api/task-types/{$type->public_id}/sla-policies", [
                 'priority' => 'high',
                 'resolve_within_mins' => 120,
             ])->assertCreated();
 
         $task = $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/tasks', [
-                'task_type_id' => $type->id,
+                'task_type_id' => $type->public_id,
                 'priority' => 'high',
                 'sla_start_at' => '2025-01-01T08:00:00Z',
                 'sla_end_at' => '2025-01-01T17:00:00Z',
@@ -167,13 +167,13 @@ class TaskSlaPolicyTest extends TestCase
         ]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/task-types/{$type->id}/sla-policies", [
+            ->postJson("/api/task-types/{$type->public_id}/sla-policies", [
                 'priority' => 'low',
                 'response_within_mins' => 60,
             ])->assertCreated();
 
         $list = $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->getJson("/api/task-types/{$type->id}/sla-policies")
+            ->getJson("/api/task-types/{$type->public_id}/sla-policies")
             ->assertOk()
             ->json('data');
 

@@ -76,12 +76,12 @@ class TaskSlaOverrideTest extends TestCase
 
     public function test_override_fields_ignored_without_ability_on_create(): void
     {
-        $this->makeType();
+        $type = $this->makeType();
         $this->makeUser(['tasks.create']);
 
         $response = $this->withHeader('X-Tenant-ID', 1)
             ->postJson('/api/tasks', [
-                'task_type_id' => 1,
+                'task_type_id' => $type->public_id,
                 'sla_start_at' => '2025-01-01T08:00:00Z',
                 'sla_end_at' => '2025-01-01T17:00:00Z',
             ]);
@@ -93,12 +93,12 @@ class TaskSlaOverrideTest extends TestCase
 
     public function test_override_fields_respected_with_ability_on_create(): void
     {
-        $this->makeType();
+        $type = $this->makeType();
         $this->makeUser(['tasks.create', 'tasks.sla.override']);
 
         $response = $this->withHeader('X-Tenant-ID', 1)
             ->postJson('/api/tasks', [
-                'task_type_id' => 1,
+                'task_type_id' => $type->public_id,
                 'sla_start_at' => '2025-01-01T08:00:00Z',
                 'sla_end_at' => '2025-01-01T17:00:00Z',
             ]);
