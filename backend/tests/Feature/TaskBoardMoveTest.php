@@ -82,22 +82,22 @@ class TaskBoardMoveTest extends TestCase
         $task = $this->makeTask($user);
 
         $this->withHeader('X-Tenant-ID', 1)
-            ->patchJson('/api/task-board/move', ['task_id' => $task->id, 'status_slug' => 'assigned', 'index' => 0])
+            ->patchJson('/api/task-board/move', ['task_id' => $task->public_id, 'status_slug' => 'assigned', 'index' => 0])
             ->assertStatus(200);
 
         $this->withHeader('X-Tenant-ID', 1)
-            ->patchJson('/api/task-board/move', ['task_id' => $task->id, 'status_slug' => 'draft', 'index' => 0])
+            ->patchJson('/api/task-board/move', ['task_id' => $task->public_id, 'status_slug' => 'draft', 'index' => 0])
             ->assertStatus(200);
 
         $this->withHeader('X-Tenant-ID', 1)
-            ->patchJson('/api/task-board/move', ['task_id' => $task->id, 'status_slug' => 'assigned', 'index' => 0])
+            ->patchJson('/api/task-board/move', ['task_id' => $task->public_id, 'status_slug' => 'assigned', 'index' => 0])
             ->assertStatus(200);
         $this->withHeader('X-Tenant-ID', 1)
-            ->patchJson('/api/task-board/move', ['task_id' => $task->id, 'status_slug' => 'in_progress', 'index' => 0])
+            ->patchJson('/api/task-board/move', ['task_id' => $task->public_id, 'status_slug' => 'in_progress', 'index' => 0])
             ->assertStatus(200);
 
         $this->withHeader('X-Tenant-ID', 1)
-            ->patchJson('/api/task-board/move', ['task_id' => $task->id, 'status_slug' => 'draft', 'index' => 0])
+            ->patchJson('/api/task-board/move', ['task_id' => $task->public_id, 'status_slug' => 'draft', 'index' => 0])
             ->assertStatus(422);
     }
 
@@ -107,7 +107,7 @@ class TaskBoardMoveTest extends TestCase
         $task = $this->makeTask($user);
 
         $this->withHeader('X-Tenant-ID', 1)
-            ->patchJson('/api/task-board/move', ['task_id' => $task->id, 'status_slug' => 'completed', 'index' => 0])
+            ->patchJson('/api/task-board/move', ['task_id' => $task->public_id, 'status_slug' => 'completed', 'index' => 0])
             ->assertStatus(200)
             ->assertJsonPath('data.status_slug', 'completed');
     }
@@ -156,7 +156,7 @@ class TaskBoardMoveTest extends TestCase
 
         $this->withHeader('X-Tenant-ID', 1)
             ->patchJson('/api/task-board/move', [
-                'task_id' => $taskA->id,
+                'task_id' => $taskA->public_id,
                 'status_slug' => 'draft',
                 'index' => 2,
             ])

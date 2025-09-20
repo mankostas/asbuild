@@ -80,7 +80,7 @@ class TaskAutomationTest extends TestCase
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->patchJson('/api/task-board/move', [
-                'task_id' => $task->id,
+                'task_id' => $task->public_id,
                 'status_slug' => 'completed',
                 'index' => 0,
             ])->assertOk();

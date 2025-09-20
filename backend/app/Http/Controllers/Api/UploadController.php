@@ -6,13 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Jobs\MergeChunks;
 use App\Services\FileStorageService;
 use App\Models\Task;
+use App\Support\PublicIdResolver;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class UploadController extends Controller
 {
+    public function __construct(private PublicIdResolver $publicIdResolver)
+    {
+    }
+
     public function chunk(Request $request)
     {
         $data = $request->validate([
@@ -67,12 +73,26 @@ class UploadController extends Controller
 
     public function finalize(Request $request, string $uploadId, FileStorageService $storage)
     {
-        $data = $request->validate([
+        $input = $request->all();
+
+        if (array_key_exists('task_id', $input) && $input['task_id'] !== null) {
+            $input['task_id'] = (string) $input['task_id'];
+        }
+
+        $data = validator($input, [
             'filename' => 'required|string',
-            'task_id' => 'required|exists:tasks,id',
+            'task_id' => ['required', 'string'],
             'field_key' => 'required|string',
             'section_key' => 'required|string',
-        ]);
+        ])->validate();
+
+        $taskId = $this->publicIdResolver->resolve(Task::class, $data['task_id']);
+
+        if ($taskId === null) {
+            throw ValidationException::withMessages([
+                'task_id' => __('The selected task is invalid.'),
+            ]);
+        }
 
         $tempPath = 'files/' . $data['filename'];
 
@@ -90,7 +110,7 @@ class UploadController extends Controller
 
         $file = $storage->store($uploaded);
 
-        $task = Task::findOrFail($data['task_id']);
+        $task = Task::findOrFail($taskId);
         $task->attachments()->attach($file->id, [
             'field_key' => $data['field_key'],
             'section_key' => $data['section_key'],
@@ -99,7 +119,7 @@ class UploadController extends Controller
         Storage::delete($tempPath);
 
         return response()->json([
-            'file_id' => $file->id,
+            'file_id' => $file->public_id,
             'name' => $file->filename,
             'variants' => $file->variants ?? [],
         ]);

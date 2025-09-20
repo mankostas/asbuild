@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\File;
 use App\Models\Role;
 use App\Models\Task;
 use App\Models\Tenant;
@@ -37,15 +38,20 @@ class UploadControllerTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg', 100, 100)->size(100);
         Storage::put('files/test.jpg', file_get_contents($file->getRealPath()));
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $response = $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/uploads/abc/finalize', [
                 'filename' => 'test.jpg',
-                'task_id' => $task->id,
+                'task_id' => $task->public_id,
                 'field_key' => 'photo',
                 'section_key' => 'sec1',
             ])
             ->assertStatus(200)
             ->assertJsonStructure(['file_id', 'name']);
+
+        $storedFile = File::first();
+
+        $this->assertNotNull($storedFile);
+        $this->assertSame($storedFile->public_id, $response->json('file_id'));
 
         $this->assertDatabaseHas('task_attachments', [
             'task_id' => $task->id,
