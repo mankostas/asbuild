@@ -22,7 +22,7 @@ class ClientFilterTest extends TestCase
         ]);
         $client = Client::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id, 'name' => 'Client A'
+            'tenant_id' => $tenant->getKey(), 'name' => 'Client A'
         ]);
 
         $request = Request::create('/reports', 'GET', [
@@ -31,7 +31,7 @@ class ClientFilterTest extends TestCase
 
         $ids = ClientFilter::resolve($request);
 
-        $this->assertSame([$client->id], $ids);
+        $this->assertSame([$client->getKey()], $ids);
     }
 
     public function test_resolve_filters_with_permitted_public_identifiers(): void
@@ -42,11 +42,11 @@ class ClientFilterTest extends TestCase
         ]);
         $clientA = Client::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id, 'name' => 'Client A'
+            'tenant_id' => $tenant->getKey(), 'name' => 'Client A'
         ]);
         $clientB = Client::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id, 'name' => 'Client B'
+            'tenant_id' => $tenant->getKey(), 'name' => 'Client B'
         ]);
 
         $request = Request::create('/reports', 'GET', [
@@ -55,6 +55,6 @@ class ClientFilterTest extends TestCase
 
         $ids = ClientFilter::resolve($request, [$clientB->public_id]);
 
-        $this->assertSame([$clientB->id], $ids);
+        $this->assertSame([$clientB->getKey()], $ids);
     }
 }

@@ -36,19 +36,19 @@ class AbilityServiceTest extends TestCase
             'name' => 'Owner',
             'email' => 'owner@example.com',
             'password' => Hash::make('secret'),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
         ]);
 
         $role = Role::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
             'name' => 'Owner',
             'slug' => 'owner',
             'level' => 1,
             'abilities' => ['*'],
         ]);
 
-        $role->users()->attach($user->id, ['tenant_id' => $tenant->id]);
+        $role->users()->attach($user->getKey(), ['tenant_id' => $tenant->getKey()]);
 
         $this->assertTrue($this->service->userHasAbility($user, 'tasks.update'));
         $this->assertTrue($this->service->userHasAnyAbility($user, ['foo.bar', 'baz.qux']));
@@ -66,19 +66,19 @@ class AbilityServiceTest extends TestCase
             'name' => 'Manager',
             'email' => 'manager@example.com',
             'password' => Hash::make('secret'),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
         ]);
 
         $role = Role::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
             'name' => 'Manager',
             'slug' => 'manager',
             'level' => 2,
             'abilities' => ['tasks.manage'],
         ]);
 
-        $role->users()->attach($user->id, ['tenant_id' => $tenant->id]);
+        $role->users()->attach($user->getKey(), ['tenant_id' => $tenant->getKey()]);
 
         $this->assertTrue($this->service->userHasAbility($user, 'tasks.update'));
         $this->assertFalse($this->service->userHasAbility($user, 'reports.view'));
@@ -96,10 +96,10 @@ class AbilityServiceTest extends TestCase
             'name' => 'Client User',
             'email' => 'client@example.com',
             'password' => Hash::make('secret'),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
         ]);
 
-        $role = Role::where('tenant_id', $tenant->id)
+        $role = Role::where('tenant_id', $tenant->getKey())
             ->where('slug', 'client_contributor')
             ->firstOrFail();
 
@@ -111,7 +111,7 @@ class AbilityServiceTest extends TestCase
             'reports.client.view',
         ], $role->abilities);
 
-        $role->users()->attach($user->id, ['tenant_id' => $tenant->id]);
+        $role->users()->attach($user->getKey(), ['tenant_id' => $tenant->getKey()]);
 
         $this->assertTrue($this->service->userHasAbility($user, 'dashboard.view'));
         $this->assertTrue($this->service->userHasAbility($user, 'tasks.view'));
@@ -139,22 +139,22 @@ class AbilityServiceTest extends TestCase
             'name' => 'Employee',
             'email' => 'employee@example.com',
             'password' => Hash::make('secret'),
-            'tenant_id' => $tenantOne->id,
+            'tenant_id' => $tenantOne->getKey(),
         ]);
 
         $role = Role::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenantOne->id,
+            'tenant_id' => $tenantOne->getKey(),
             'name' => 'Analyst',
             'slug' => 'analyst',
             'level' => 3,
             'abilities' => ['tasks.view'],
         ]);
 
-        $role->users()->attach($user->id, ['tenant_id' => $tenantOne->id]);
+        $role->users()->attach($user->getKey(), ['tenant_id' => $tenantOne->getKey()]);
 
-        $this->assertTrue($this->service->userHasAbility($user, 'tasks.view', $tenantOne->id));
-        $this->assertFalse($this->service->userHasAbility($user, 'tasks.view', $tenantTwo->id));
+        $this->assertTrue($this->service->userHasAbility($user, 'tasks.view', $tenantOne->getKey()));
+        $this->assertFalse($this->service->userHasAbility($user, 'tasks.view', $tenantTwo->getKey()));
     }
 
     public function test_reports_view_alias_grants_dashboard_view(): void
@@ -169,19 +169,19 @@ class AbilityServiceTest extends TestCase
             'name' => 'Analyst',
             'email' => 'analyst@example.com',
             'password' => Hash::make('secret'),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
         ]);
 
         $role = Role::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
             'name' => 'Viewer',
             'slug' => 'viewer',
             'level' => 3,
             'abilities' => ['reports.view'],
         ]);
 
-        $role->users()->attach($user->id, ['tenant_id' => $tenant->id]);
+        $role->users()->attach($user->getKey(), ['tenant_id' => $tenant->getKey()]);
 
         $this->assertTrue($this->service->userHasAbility($user, 'dashboard.view'));
         $this->assertTrue($this->service->userHasAbility($user, 'reports.view'));
@@ -200,44 +200,44 @@ class AbilityServiceTest extends TestCase
             'name' => 'Manager',
             'email' => 'manager@example.com',
             'password' => Hash::make('secret'),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
         ]);
 
         $manageRole = Role::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
             'name' => 'Tenant Manager',
             'slug' => 'tenant_manager',
             'level' => 1,
             'abilities' => ['tenants.manage'],
         ]);
 
-        $manageRole->users()->attach($manager->id, ['tenant_id' => $tenant->id]);
+        $manageRole->users()->attach($manager->getKey(), ['tenant_id' => $tenant->getKey()]);
 
-        $this->assertTrue($this->service->userHasAbility($manager, 'tenants.delete', $tenant->id));
-        $this->assertTrue($this->service->userHasAbility($manager, 'tenants.update', $tenant->id));
-        $this->assertTrue($this->service->userHasAbility($manager, 'tenants.impersonate', $tenant->id));
+        $this->assertTrue($this->service->userHasAbility($manager, 'tenants.delete', $tenant->getKey()));
+        $this->assertTrue($this->service->userHasAbility($manager, 'tenants.update', $tenant->getKey()));
+        $this->assertTrue($this->service->userHasAbility($manager, 'tenants.impersonate', $tenant->getKey()));
 
         $viewer = User::create([
             'public_id' => PublicIdGenerator::generate(),
             'name' => 'Viewer',
             'email' => 'viewer@example.com',
             'password' => Hash::make('secret'),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
         ]);
 
         $viewRole = Role::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant->getKey(),
             'name' => 'Tenant Viewer',
             'slug' => 'tenant_viewer',
             'level' => 2,
             'abilities' => ['tenants.view'],
         ]);
 
-        $viewRole->users()->attach($viewer->id, ['tenant_id' => $tenant->id]);
+        $viewRole->users()->attach($viewer->getKey(), ['tenant_id' => $tenant->getKey()]);
 
-        $this->assertFalse($this->service->userHasAbility($viewer, 'tenants.impersonate', $tenant->id));
-        $this->assertFalse($this->service->userHasAnyAbility($viewer, ['tenants.manage', 'tenants.impersonate'], $tenant->id));
+        $this->assertFalse($this->service->userHasAbility($viewer, 'tenants.impersonate', $tenant->getKey()));
+        $this->assertFalse($this->service->userHasAnyAbility($viewer, ['tenants.manage', 'tenants.impersonate'], $tenant->getKey()));
     }
 }

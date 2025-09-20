@@ -25,8 +25,14 @@ class TaskTypePolicyTest extends TestCase
     public function test_update_allows_specific_ability(): void
     {
         Gate::shouldReceive('allows')
-            ->withAnyArgs()
-            ->andReturnUsing(fn (string $ability) => $ability === 'task_types.update');
+            ->with('task_types.update')
+            ->andReturnTrue();
+        Gate::shouldReceive('allows')
+            ->with('task_types.manage')
+            ->andReturnFalse();
+        Gate::shouldReceive('allows')
+            ->with('task_types.view')
+            ->andReturnTrue();
 
         $policy = new TaskTypePolicy();
         $user = new User();
@@ -70,8 +76,14 @@ class TaskTypePolicyTest extends TestCase
     public function test_delete_allows_specific_ability(): void
     {
         Gate::shouldReceive('allows')
-            ->withAnyArgs()
-            ->andReturnUsing(fn (string $ability) => $ability === 'task_types.delete');
+            ->with('task_types.delete')
+            ->andReturnTrue();
+        Gate::shouldReceive('allows')
+            ->with('task_types.manage')
+            ->andReturnFalse();
+        Gate::shouldReceive('allows')
+            ->with('task_types.view')
+            ->andReturnTrue();
 
         $policy = new TaskTypePolicy();
         $user = new User();

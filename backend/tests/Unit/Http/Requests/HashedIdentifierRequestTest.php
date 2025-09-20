@@ -41,11 +41,11 @@ class HashedIdentifierRequestTest extends TestCase
         ]);
 
         $this->regularUser = $this->createUser([
-            'tenant_id' => $this->tenant->id,
+            'tenant_id' => $this->tenant->getKey(),
         ]);
 
         $this->superAdmin = $this->createUser([
-            'tenant_id' => $this->tenant->id,
+            'tenant_id' => $this->tenant->getKey(),
         ]);
 
         $superRole = Role::create([
@@ -70,12 +70,12 @@ class HashedIdentifierRequestTest extends TestCase
 
         $validated = $this->validateRequest($request, $this->superAdmin);
 
-        $this->assertSame($this->tenant->id, $validated['tenant_id']);
+        $this->assertSame($this->tenant->getKey(), $validated['tenant_id']);
     }
 
     public function test_team_upsert_request_translates_public_ids(): void
     {
-        $lead = $this->createUser(['tenant_id' => $this->tenant->id]);
+        $lead = $this->createUser(['tenant_id' => $this->tenant->getKey()]);
 
         $request = TeamUpsertRequest::create('/teams', 'POST', [
             'name' => 'Support',
@@ -85,15 +85,15 @@ class HashedIdentifierRequestTest extends TestCase
 
         $validated = $this->validateRequest($request, $this->superAdmin);
 
-        $this->assertSame($this->tenant->id, $validated['tenant_id']);
-        $this->assertSame($lead->id, $validated['lead_id']);
+        $this->assertSame($this->tenant->getKey(), $validated['tenant_id']);
+        $this->assertSame($lead->getKey(), $validated['lead_id']);
     }
 
     public function test_task_type_request_translates_public_ids(): void
     {
         $client = Client::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $this->tenant->id,
+            'tenant_id' => $this->tenant->getKey(),
             'name' => 'Globex',
             'email' => 'client@example.com',
             'phone' => '1234567890',
@@ -109,8 +109,8 @@ class HashedIdentifierRequestTest extends TestCase
 
         $validated = $this->validateRequest($request, $this->superAdmin);
 
-        $this->assertSame($this->tenant->id, $validated['tenant_id']);
-        $this->assertSame($client->id, $validated['client_id']);
+        $this->assertSame($this->tenant->getKey(), $validated['tenant_id']);
+        $this->assertSame($client->getKey(), $validated['client_id']);
         $this->assertIsArray($validated['statuses']);
     }
 
@@ -118,20 +118,20 @@ class HashedIdentifierRequestTest extends TestCase
     {
         $taskType = TaskType::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $this->tenant->id,
+            'tenant_id' => $this->tenant->getKey(),
             'name' => 'General',
             'statuses' => ['open'],
         ]);
 
-        $assignee = $this->createUser(['tenant_id' => $this->tenant->id]);
+        $assignee = $this->createUser(['tenant_id' => $this->tenant->getKey()]);
         $team = Team::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $this->tenant->id,
+            'tenant_id' => $this->tenant->getKey(),
             'name' => 'QA',
         ]);
         $client = Client::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => $this->tenant->id,
+            'tenant_id' => $this->tenant->getKey(),
             'name' => 'Wayne Enterprises',
             'email' => 'wayne@example.com',
             'phone' => '9876543210',
@@ -147,11 +147,11 @@ class HashedIdentifierRequestTest extends TestCase
 
         $validated = $this->validateRequest($request, $this->regularUser);
 
-        $this->assertSame($taskType->id, $validated['task_type_id']);
-        $this->assertSame($assignee->id, $validated['assigned_user_id']);
-        $this->assertSame($assignee->id, $validated['assignee']['id']);
-        $this->assertSame($team->id, $validated['reviewer']['id']);
-        $this->assertSame($client->id, $validated['client_id']);
+        $this->assertSame($taskType->getKey(), $validated['task_type_id']);
+        $this->assertSame($assignee->getKey(), $validated['assigned_user_id']);
+        $this->assertSame($assignee->getKey(), $validated['assignee']['id']);
+        $this->assertSame($team->getKey(), $validated['reviewer']['id']);
+        $this->assertSame($client->getKey(), $validated['client_id']);
     }
 
     public function test_task_status_upsert_request_translates_public_tenant_id(): void
@@ -163,8 +163,8 @@ class HashedIdentifierRequestTest extends TestCase
 
         $validated = $this->validateRequest($request, $this->superAdmin);
 
-        $this->assertSame($this->tenant->id, $validated['tenant_id']);
-        $this->assertStringContainsString((string) $this->tenant->id, $validated['slug']);
+        $this->assertSame($this->tenant->getKey(), $validated['tenant_id']);
+        $this->assertStringContainsString((string) $this->tenant->getKey(), $validated['slug']);
     }
 
     public function test_type_upsert_request_translates_public_tenant_id(): void
@@ -177,7 +177,7 @@ class HashedIdentifierRequestTest extends TestCase
 
         $validated = $this->validateRequest($request, $this->superAdmin);
 
-        $this->assertSame($this->tenant->id, $validated['tenant_id']);
+        $this->assertSame($this->tenant->getKey(), $validated['tenant_id']);
         $this->assertIsArray($validated['statuses']);
     }
 
@@ -209,7 +209,7 @@ class HashedIdentifierRequestTest extends TestCase
             'name' => 'User ' . Str::random(6),
             'email' => Str::random(10) . '@example.com',
             'password' => bcrypt('password'),
-            'tenant_id' => $this->tenant->id,
+            'tenant_id' => $this->tenant->getKey(),
             'phone' => '1234567890',
             'address' => '123 Main St',
             'type' => 'employee',
