@@ -80,6 +80,33 @@ class TaskUpsertRequest extends FormRequest
         return $rules;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $assignee = $this->input('assignee');
+
+        if (is_array($assignee)) {
+            $id = $assignee['id'] ?? null;
+            $publicId = $assignee['public_id'] ?? null;
+
+            if ($publicId && ($id === null || is_numeric($id))) {
+                $assignee['id'] = $publicId;
+                $this->merge(['assignee' => $assignee]);
+            }
+        }
+
+        if ($this->has('assigned_user_id') && is_numeric($this->input('assigned_user_id'))) {
+            $this->merge(['assigned_user_id' => (string) $this->input('assigned_user_id')]);
+        }
+
+        if ($this->has('client_id') && is_numeric($this->input('client_id'))) {
+            $this->merge(['client_id' => (string) $this->input('client_id')]);
+        }
+
+        if ($this->has('task_type_id') && is_numeric($this->input('task_type_id'))) {
+            $this->merge(['task_type_id' => (string) $this->input('task_type_id')]);
+        }
+    }
+
     public function attributes(): array
     {
         return [

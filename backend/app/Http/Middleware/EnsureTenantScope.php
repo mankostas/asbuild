@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Tenant;
+use App\Support\PublicIdResolver;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -10,17 +11,25 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureTenantScope
 {
+    public function __construct(private PublicIdResolver $publicIdResolver)
+    {
+    }
+
     /**
      * Enforce tenant scoping while allowing SuperAdmins to bypass checks.
      */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        $tenantId = $request->header('X-Tenant-ID');
+        $tenantIdentifier = $request->header('X-Tenant-ID');
+        $tenantProvided = ! ($tenantIdentifier === null || $tenantIdentifier === '');
+        $resolvedTenantId = $tenantProvided
+            ? $this->publicIdResolver->resolve(Tenant::class, $tenantIdentifier)
+            : null;
 
         if ($user->isSuperAdmin()) {
-            if ($tenantId) {
-                $this->bindTenant($request, (int) $tenantId);
+            if ($resolvedTenantId !== null) {
+                $this->bindTenant($request, $resolvedTenantId);
             } else {
                 Tenant::setCurrent(null);
                 app()->forgetInstance('tenant_id');
@@ -31,11 +40,11 @@ class EnsureTenantScope
             return $next($request);
         }
 
-        if (! $tenantId || $user->tenant_id !== (int) $tenantId) {
+        if (! $tenantProvided || $resolvedTenantId === null || $user->tenant_id !== $resolvedTenantId) {
             return response()->json(['message' => 'forbidden'], 403);
         }
 
-        $this->bindTenant($request, (int) $tenantId);
+        $this->bindTenant($request, $resolvedTenantId);
 
         return $next($request);
     }

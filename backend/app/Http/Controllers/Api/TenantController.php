@@ -16,12 +16,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Support\ListQuery;
 use App\Http\Resources\TenantOwnerResource;
+use App\Support\PublicIdResolver;
 use Database\Seeders\DefaultFeatureRolesSeeder;
+use Illuminate\Validation\ValidationException;
 
 class TenantController extends Controller
 {
     use ListQuery;
     use ManagesTenantUsers;
+
+    public function __construct(private PublicIdResolver $publicIdResolver)
+    {
+    }
 
     protected function ensureSuperAdmin(Request $request): void
     {
@@ -36,8 +42,14 @@ class TenantController extends Controller
         $query = Tenant::query();
 
         if ($request->filled('tenant_id')) {
-            $tenantId = $request->query('tenant_id');
-            $query->where('id', $tenantId);
+            $tenantIdentifier = $request->query('tenant_id');
+            $tenantId = $this->resolveTenantIdentifier($tenantIdentifier);
+
+            if ($tenantId === null && $tenantIdentifier !== null && $tenantIdentifier !== '') {
+                $query->whereRaw('1 = 0');
+            } elseif ($tenantId !== null) {
+                $query->where('id', $tenantId);
+            }
         }
 
         $trashed = $request->query('trashed');
@@ -160,11 +172,17 @@ class TenantController extends Controller
         return $this->transformTenant($tenant);
     }
 
-    public function restore(Request $request, int $tenant)
+    public function restore(Request $request, string $tenant)
     {
         $this->ensureSuperAdmin($request);
 
-        $model = Tenant::withTrashed()->findOrFail($tenant);
+        $tenantId = $this->resolveTenantIdentifier($tenant);
+
+        if ($tenantId === null) {
+            abort(404);
+        }
+
+        $model = Tenant::withTrashed()->findOrFail($tenantId);
         if ($model->trashed()) {
             $model->restore();
         }
@@ -181,12 +199,16 @@ class TenantController extends Controller
     {
         $this->ensureSuperAdmin($request);
 
-        $data = $request->validate([
-            'ids' => ['required', 'array'],
-            'ids.*' => ['integer'],
-        ]);
+        $identifiers = $this->validatedTenantIdentifiers($request);
+        $tenantIds = $this->resolveTenantIdentifiers($identifiers);
 
-        $tenants = Tenant::query()->whereIn('id', $data['ids'])->get();
+        if (count($tenantIds) !== count($identifiers)) {
+            throw ValidationException::withMessages([
+                'ids' => ['One or more tenants are invalid.'],
+            ]);
+        }
+
+        $tenants = Tenant::query()->whereIn('id', $tenantIds)->get();
 
         $now = now();
 
@@ -208,12 +230,16 @@ class TenantController extends Controller
     {
         $this->ensureSuperAdmin($request);
 
-        $data = $request->validate([
-            'ids' => ['required', 'array'],
-            'ids.*' => ['integer'],
-        ]);
+        $identifiers = $this->validatedTenantIdentifiers($request);
+        $tenantIds = $this->resolveTenantIdentifiers($identifiers);
 
-        $tenants = Tenant::query()->whereIn('id', $data['ids'])->get();
+        if (count($tenantIds) !== count($identifiers)) {
+            throw ValidationException::withMessages([
+                'ids' => ['One or more tenants are invalid.'],
+            ]);
+        }
+
+        $tenants = Tenant::query()->whereIn('id', $tenantIds)->get();
 
         if ($tenants->isNotEmpty()) {
             Tenant::query()->whereKey($tenants->modelKeys())->delete();
@@ -230,12 +256,16 @@ class TenantController extends Controller
     {
         $this->ensureSuperAdmin($request);
 
-        $data = $request->validate([
-            'ids' => ['required', 'array'],
-            'ids.*' => ['integer'],
-        ]);
+        $identifiers = $this->validatedTenantIdentifiers($request);
+        $tenantIds = $this->resolveTenantIdentifiers($identifiers);
 
-        $tenants = Tenant::withTrashed()->whereIn('id', $data['ids'])->get();
+        if (count($tenantIds) !== count($identifiers)) {
+            throw ValidationException::withMessages([
+                'ids' => ['One or more tenants are invalid.'],
+            ]);
+        }
+
+        $tenants = Tenant::withTrashed()->whereIn('id', $tenantIds)->get();
 
         foreach ($tenants as $tenant) {
             if ($tenant->trashed()) {
@@ -289,9 +319,12 @@ class TenantController extends Controller
             return;
         }
 
-        $tenantId = $request->attributes->get('tenant_id') ?? $request->header('X-Tenant-ID');
+        $tenantIdentifier = $request->attributes->get('tenant_id') ?? $request->header('X-Tenant-ID');
+        $resolvedId = is_int($tenantIdentifier)
+            ? $tenantIdentifier
+            : $this->resolveTenantIdentifier($tenantIdentifier);
 
-        if ((int) $tenant->id !== (int) $tenantId) {
+        if ($resolvedId === null || (int) $tenant->id !== (int) $resolvedId) {
             abort(404);
         }
     }
@@ -367,5 +400,91 @@ class TenantController extends Controller
         $this->resetUserEmail($owner, $data['email']);
 
         return new TenantOwnerResource($owner->fresh()->load('roles'));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function validatedTenantIdentifiers(Request $request): array
+    {
+        $input = $request->all();
+
+        if (isset($input['ids']) && is_array($input['ids'])) {
+            $input['ids'] = array_map(static fn ($value) => is_string($value) ? $value : (string) $value, $input['ids']);
+        }
+
+        $data = validator($input, [
+            'ids' => ['required', 'array'],
+            'ids.*' => ['string'],
+        ])->validate();
+
+        return $this->normalizeIdentifiers($data['ids']);
+    }
+
+    /**
+     * @param  array<int, string|int|null>  $identifiers
+     * @return array<int, int>
+     */
+    protected function resolveTenantIdentifiers(array $identifiers): array
+    {
+        $resolved = [];
+
+        foreach ($identifiers as $identifier) {
+            $tenantId = $this->resolveTenantIdentifier($identifier);
+
+            if ($tenantId !== null) {
+                $resolved[] = $tenantId;
+            }
+        }
+
+        return array_values(array_unique($resolved));
+    }
+
+    protected function resolveTenantIdentifier(mixed $identifier): ?int
+    {
+        if ($identifier instanceof Tenant) {
+            return (int) $identifier->getKey();
+        }
+
+        if (is_int($identifier)) {
+            return $identifier;
+        }
+
+        if (is_string($identifier)) {
+            $identifier = trim($identifier);
+
+            if ($identifier === '') {
+                return null;
+            }
+        }
+
+        if ($identifier === null || $identifier === '') {
+            return null;
+        }
+
+        return $this->publicIdResolver->resolve(Tenant::class, $identifier);
+    }
+
+    /**
+     * @param  array<int, string|null>  $identifiers
+     * @return array<int, string>
+     */
+    protected function normalizeIdentifiers(array $identifiers): array
+    {
+        $normalized = [];
+
+        foreach ($identifiers as $identifier) {
+            if (is_string($identifier)) {
+                $identifier = trim($identifier);
+            }
+
+            if ($identifier === null || $identifier === '') {
+                continue;
+            }
+
+            $normalized[] = is_string($identifier) ? $identifier : (string) $identifier;
+        }
+
+        return array_values(array_unique($normalized));
     }
 }
