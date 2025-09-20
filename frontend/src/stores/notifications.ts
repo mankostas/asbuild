@@ -31,9 +31,10 @@ export const useNotificationStore = defineStore('notifications', {
         (n: Notification) => !n.read_at,
       ).length;
     },
-    async markRead(id: number) {
-      await api.post(`/notifications/${id}/read`);
-      const notif = this.notifications.find((n) => n.id === id);
+    async markRead(id: string | number) {
+      const identifier = String(id);
+      await api.post(`/notifications/${identifier}/read`);
+      const notif = this.notifications.find((n) => String(n.id) === identifier);
       if (notif) {
         notif.read_at = new Date().toISOString();
       }

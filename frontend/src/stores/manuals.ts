@@ -32,9 +32,10 @@ export const useManualsStore = defineStore('manuals', {
         this.manuals = [];
       }
     },
-    async get(id: string) {
+    async get(id: string | number) {
       if (!this.manuals.length) await this.fetch();
-      return this.manuals.find((m: any) => m.id == id);
+      const identifier = String(id);
+      return this.manuals.find((m: any) => String(m.id) === identifier);
     },
     async downloadPdf(id: string) {
       const { data } = await api.get(`/manuals/${id}/download`, {

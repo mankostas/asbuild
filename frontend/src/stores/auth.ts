@@ -87,7 +87,7 @@ export const useAuthStore = defineStore('auth', {
     abilities: [] as string[],
     clientAbilities: [] as string[],
     features: [] as string[],
-    permittedClientIds: [] as Array<string | number>,
+    permittedClientIds: [] as string[],
   }),
   getters: {
     isAuthenticated: (state) => !!state.accessToken,
@@ -142,7 +142,7 @@ export const useAuthStore = defineStore('auth', {
         return {
           ...params,
           client_ids: [...state.permittedClientIds],
-        } as T & { client_ids: Array<string | number> };
+        } as T & { client_ids: string[] };
       };
     },
   },
@@ -166,7 +166,7 @@ export const useAuthStore = defineStore('auth', {
       this.clientAbilities = data.client_abilities || [];
       this.features = data.features || [];
       this.permittedClientIds = Array.isArray(data.permitted_client_ids)
-        ? data.permitted_client_ids
+        ? data.permitted_client_ids.map((id: string | number) => String(id))
         : [];
       const tenantStore = useTenantStore();
       const tenantId = data.user?.tenant_id || '';

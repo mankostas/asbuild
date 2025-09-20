@@ -28,23 +28,15 @@ interface TrashFilterState {
   trashedOnly: boolean;
 }
 
-function normalizeNumeric(value: string | number | null | undefined): number | undefined {
-  if (value === null || value === undefined || value === '') {
+function resolveTenantId(value: unknown): string | undefined {
+  if (value === null || value === undefined) {
     return undefined;
-  }
-  const numeric = typeof value === 'number' ? value : Number(value);
-  return Number.isFinite(numeric) ? numeric : undefined;
-}
-
-function normalizeTenantId(value: string | number | null | undefined): string | undefined {
-  if (value === null || value === undefined || value === '' || value === SUPER_ADMIN_TENANT_ID) {
-    return undefined;
-  }
-  if (typeof value === 'number') {
-    return Number.isFinite(value) ? String(value) : undefined;
   }
   const normalized = String(value).trim();
-  return normalized ? normalized : undefined;
+  if (!normalized || normalized === SUPER_ADMIN_TENANT_ID) {
+    return undefined;
+  }
+  return normalized;
 }
 
 export const useClientsStore = defineStore('clients', {
@@ -144,8 +136,14 @@ export const useClientsStore = defineStore('clients', {
       const auth = useAuthStore();
       const tenantStore = useTenantStore();
 
-      const page = normalizeNumeric(overrides.page) ?? this.pagination.page;
-      const perPage = normalizeNumeric(overrides.per_page) ?? this.pagination.perPage;
+      const page =
+        typeof overrides.page === 'number' && Number.isFinite(overrides.page)
+          ? overrides.page
+          : this.pagination.page;
+      const perPage =
+        typeof overrides.per_page === 'number' && Number.isFinite(overrides.per_page)
+          ? overrides.per_page
+          : this.pagination.perPage;
 
       const params: ClientListParams = {
         page,
@@ -160,7 +158,7 @@ export const useClientsStore = defineStore('clients', {
         (auth.isSuperAdmin
           ? this.filters.tenantId ?? tenantStore.currentTenantId
           : tenantStore.currentTenantId);
-      const tenantId = normalizeTenantId(tenantCandidate);
+      const tenantId = resolveTenantId(tenantCandidate);
       if (tenantId !== undefined) {
         params.tenant_id = tenantId;
       }
@@ -178,10 +176,22 @@ export const useClientsStore = defineStore('clients', {
       return params;
     },
     applyMeta(meta: ListMeta | undefined, params: ClientListParams) {
-      const total = normalizeNumeric(meta?.total) ?? this.pagination.total;
-      const perPage = normalizeNumeric(meta?.per_page) ?? params.per_page ?? this.pagination.perPage;
-      const currentPage = normalizeNumeric(meta?.current_page) ?? params.page ?? this.pagination.page;
-      const lastPageCandidate = normalizeNumeric((meta as any)?.last_page);
+      const total =
+        typeof meta?.total === 'number' && Number.isFinite(meta.total)
+          ? meta.total
+          : this.pagination.total;
+      const perPage =
+        typeof meta?.per_page === 'number' && Number.isFinite(meta.per_page)
+          ? meta.per_page
+          : params.per_page ?? this.pagination.perPage;
+      const currentPage =
+        typeof meta?.current_page === 'number' && Number.isFinite(meta.current_page)
+          ? meta.current_page
+          : params.page ?? this.pagination.page;
+      const lastPageCandidate =
+        typeof (meta as any)?.last_page === 'number' && Number.isFinite((meta as any)?.last_page)
+          ? (meta as any).last_page
+          : undefined;
       const computedLastPage = perPage ? Math.max(1, Math.ceil((total || 0) / perPage)) : 1;
 
       this.pagination.total = total;
@@ -203,17 +213,17 @@ export const useClientsStore = defineStore('clients', {
       const data: CreateClientPayload = { ...payload };
 
       if (!auth.isSuperAdmin) {
-        const tenantId = normalizeTenantId(tenantStore.currentTenantId);
+        const tenantId = resolveTenantId(tenantStore.currentTenantId);
         if (tenantId !== undefined) {
           data.tenant_id = tenantId;
         }
       } else if (data.tenant_id === undefined || data.tenant_id === null) {
-        const fallbackTenant = normalizeTenantId(this.filters.tenantId ?? tenantStore.currentTenantId);
+        const fallbackTenant = resolveTenantId(this.filters.tenantId ?? tenantStore.currentTenantId);
         if (fallbackTenant !== undefined) {
           data.tenant_id = fallbackTenant;
         }
       } else {
-        const normalized = normalizeTenantId(data.tenant_id);
+        const normalized = resolveTenantId(data.tenant_id);
         data.tenant_id = normalized === undefined ? null : normalized;
       }
 
@@ -226,7 +236,7 @@ export const useClientsStore = defineStore('clients', {
       if (!auth.isSuperAdmin) {
         delete data.tenant_id;
       } else if (data.tenant_id !== undefined) {
-        const normalizedTenant = normalizeTenantId(data.tenant_id);
+        const normalizedTenant = resolveTenantId(data.tenant_id);
         data.tenant_id = normalizedTenant === undefined ? null : normalizedTenant;
       }
 
@@ -260,32 +270,37 @@ export const useClientsStore = defineStore('clients', {
       this.upsertClientInState(data);
       return data;
     },
-    async update(id: string, payload: UpdateClientPayload) {
+    async update(id: string | number, payload: UpdateClientPayload) {
+      const identifier = String(id);
       const body = this.coerceUpdatePayload(payload);
-      const { data } = await clientsApi.update(id, body);
+      const { data } = await clientsApi.update(identifier, body);
       this.upsertClientInState(data);
       return data;
     },
-    async remove(id: string) {
-      await clientsApi.remove(id);
-      this.clients = this.clients.filter((client) => client.id !== id);
+    async remove(id: string | number) {
+      const identifier = String(id);
+      await clientsApi.remove(identifier);
+      this.clients = this.clients.filter((client) => client.id !== identifier);
     },
-    async restore(id: string) {
-      const { data } = await clientsApi.restore(id);
+    async restore(id: string | number) {
+      const identifier = String(id);
+      const { data } = await clientsApi.restore(identifier);
       this.upsertClientInState(data);
       return data;
     },
-    async archive(id: string) {
-      const { data } = await clientsApi.archive(id);
+    async archive(id: string | number) {
+      const identifier = String(id);
+      const { data } = await clientsApi.archive(identifier);
       this.upsertClientInState(data);
       return data;
     },
-    async unarchive(id: string) {
-      const { data } = await clientsApi.unarchive(id);
+    async unarchive(id: string | number) {
+      const identifier = String(id);
+      const { data } = await clientsApi.unarchive(identifier);
       this.upsertClientInState(data);
       return data;
     },
-    async archiveMany(ids: string[]) {
+    async archiveMany(ids: Array<string | number>) {
       const validIds = ids.map(String).filter((value) => Boolean(value));
       if (!validIds.length) {
         return [] as Client[];
@@ -297,12 +312,13 @@ export const useClientsStore = defineStore('clients', {
       });
       return archived;
     },
-    async toggleStatus(id: string) {
-      const { data } = await clientsApi.toggleStatus(id);
+    async toggleStatus(id: string | number) {
+      const identifier = String(id);
+      const { data } = await clientsApi.toggleStatus(identifier);
       this.upsertClientInState(data);
       return data;
     },
-    async removeMany(ids: string[]) {
+    async removeMany(ids: Array<string | number>) {
       const validIds = ids.map(String).filter((value) => Boolean(value));
       if (!validIds.length) {
         return;
