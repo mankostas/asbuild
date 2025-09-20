@@ -65,7 +65,13 @@ return new class extends Migration
                 continue;
             }
 
-            Schema::table($table, function (Blueprint $tableBlueprint) {
+            $isSqlite = Schema::getConnection()->getDriverName() === 'sqlite';
+
+            Schema::table($table, function (Blueprint $tableBlueprint) use ($isSqlite) {
+                if ($isSqlite) {
+                    return;
+                }
+
                 $tableBlueprint->dropColumn('public_id');
             });
         }
@@ -73,6 +79,10 @@ return new class extends Migration
 
     private function enforceNotNull(string $table): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         try {
             Schema::table($table, function (Blueprint $tableBlueprint) {
                 $tableBlueprint->ulid('public_id')->nullable(false)->change();
