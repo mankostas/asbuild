@@ -45,8 +45,8 @@ class SlaService
         }
 
         $message = match ($status) {
-            'approaching' => 'Task ' . $task->id . ' SLA due soon.',
-            'overdue' => 'Task ' . $task->id . ' SLA overdue.',
+            'approaching' => 'Task ' . $task->public_id . ' SLA due soon.',
+            'overdue' => 'Task ' . $task->public_id . ' SLA overdue.',
             default => null,
         };
 
@@ -54,7 +54,7 @@ class SlaService
             return;
         }
 
-        $link = '/tasks/' . $task->id;
+        $link = '/tasks/' . $task->public_id;
 
         $exists = Notification::where('user_id', $user->id)
             ->where('category', 'sla')

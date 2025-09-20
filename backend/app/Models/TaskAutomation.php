@@ -59,7 +59,7 @@ class TaskAutomation extends Model
 
             foreach ($rule->actions_json as $action) {
                 if (($action['type'] ?? null) === 'notify_team' && isset($action['team_id'])) {
-                    AutomationNotifyTeamJob::dispatch($task->id, $action['team_id']);
+                    AutomationNotifyTeamJob::dispatch($task->public_id, $action['team_id']);
                 }
             }
         }
