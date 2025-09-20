@@ -88,6 +88,7 @@
       },
       "features": "Features",
       "abilitiesPerFeature": "Abilities per feature",
+      "loadError": "Failed to load tenant.",
       "saveError": "Failed to save tenant",
       "success": {
         "created": "Tenant created",

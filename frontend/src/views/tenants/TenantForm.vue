@@ -6,7 +6,10 @@
     sizeClass="max-w-3xl"
     @close="closeModal"
   >
-    <div v-if="canAccess" class="max-w-md grid gap-4">
+    <div v-if="isLoading" class="py-10 flex justify-center">
+      <img src="@/assets/images/svg/loader.svg" alt="" class="h-12 w-12" />
+    </div>
+    <div v-else-if="canAccess" class="max-w-md grid gap-4">
       <form class="grid gap-4" @submit.prevent="onSubmit">
         <Textinput v-model="form.name" :label="t('tenants.form.name')" />
         <div v-if="errors.name" class="text-red-600 text-sm">{{ errors.name }}</div>
@@ -75,7 +78,10 @@
   </Modal>
 
   <div v-else class="p-4">
-    <div v-if="canAccess" class="max-w-md grid gap-4">
+    <div v-if="isLoading" class="py-10 flex justify-center">
+      <img src="@/assets/images/svg/loader.svg" alt="" class="h-12 w-12" />
+    </div>
+    <div v-else-if="canAccess" class="max-w-md grid gap-4">
       <form class="grid gap-4" @submit.prevent="onSubmit">
         <Textinput v-model="form.name" :label="t('tenants.form.name')" />
         <div v-if="errors.name" class="text-red-600 text-sm">{{ errors.name }}</div>
@@ -204,6 +210,7 @@ const serverError = ref('');
 const { handleSubmit, setErrors, errors } = useForm();
 const notifyOwner = ref(false);
 const notifyDisabled = computed(() => !form.value.user_email);
+const isLoading = ref(true);
 
 watch(
   () => form.value.user_email,
@@ -222,7 +229,10 @@ function closeModal() {
 }
 
 onMounted(async () => {
-  if (!canAccess.value) return;
+  if (!canAccess.value) {
+    isLoading.value = false;
+    return;
+  }
   try {
     const map = await featuresStore.load();
     featureOptions.value = Object.entries(map).map(([slug, data]) => ({
@@ -233,25 +243,36 @@ onMounted(async () => {
     featureOptions.value = [];
   }
   if (isEdit.value) {
-    const { data } = await api.get(`/tenants/${route.params.id}`);
-    form.value = {
-      name: data.name || '',
-      quota_storage_mb: data.quota_storage_mb || 0,
-      phone: data.phone || '',
-      address: data.address || '',
-      features: Array.isArray(data.features) ? data.features : [],
-      user_name: '',
-      user_email: '',
-    };
-    featureAbilities.value = { ...(data.feature_abilities || {}) };
-    notifyOwner.value = false;
-    form.value.features.forEach((f: string) => {
-      if (!featureAbilities.value[f]) {
-        featureAbilities.value[f] = [...featuresStore.abilitiesFor(f)];
-      }
-    });
-    tenantStore.setTenantFeatures(route.params.id as string, form.value.features);
-    tenantStore.setAllowedAbilities(route.params.id as string, featureAbilities.value);
+    try {
+      const { data } = await api.get(`/tenants/${route.params.id}`);
+      form.value = {
+        name: data.name || '',
+        quota_storage_mb: data.quota_storage_mb || 0,
+        phone: data.phone || '',
+        address: data.address || '',
+        features: Array.isArray(data.features) ? data.features : [],
+        user_name: '',
+        user_email: '',
+      };
+      featureAbilities.value = { ...(data.feature_abilities || {}) };
+      notifyOwner.value = false;
+      form.value.features.forEach((f: string) => {
+        if (!featureAbilities.value[f]) {
+          featureAbilities.value[f] = [...featuresStore.abilitiesFor(f)];
+        }
+      });
+      tenantStore.setTenantFeatures(route.params.id as string, form.value.features);
+      tenantStore.setAllowedAbilities(
+        route.params.id as string,
+        featureAbilities.value,
+      );
+    } catch (e: any) {
+      serverError.value = e?.message || t('tenants.form.loadError');
+    } finally {
+      isLoading.value = false;
+    }
+  } else {
+    isLoading.value = false;
   }
 });
 

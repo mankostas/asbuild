@@ -134,7 +134,6 @@ export const useAuthStore = defineStore('auth', {
       };
     },
     userId: (state) => state.user?.id,
-    permittedClientIds: (state) => state.permittedClientIds,
     allowedClientParams(state) {
       return <T extends Record<string, any>>(params: T = {} as T) => {
         if (!state.permittedClientIds?.length) {
