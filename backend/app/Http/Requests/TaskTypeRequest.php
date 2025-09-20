@@ -2,12 +2,16 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\ResolvesPublicIds;
 use App\Models\Client;
+use App\Models\Tenant;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class TaskTypeRequest extends FormRequest
 {
+    use ResolvesPublicIds;
+
     public function authorize(): bool
     {
         return true;
@@ -23,10 +27,10 @@ class TaskTypeRequest extends FormRequest
             'schema_json' => ['nullable', 'json'],
             'statuses' => ['sometimes', 'json'],
             'status_flow_json' => ['sometimes', 'json'],
-            'tenant_id' => ['sometimes', 'integer'],
+            'tenant_id' => ['sometimes', 'string', 'ulid', Rule::exists('tenants', 'public_id')],
             'abilities_json' => ['nullable', 'json'],
             'require_subtasks_complete' => ['sometimes', 'boolean'],
-            'client_id' => ['nullable', 'integer', Rule::exists('clients', 'id')],
+            'client_id' => ['nullable', 'string', 'ulid', Rule::exists('clients', 'public_id')],
         ];
     }
 
@@ -49,7 +53,7 @@ class TaskTypeRequest extends FormRequest
         return [
             'required' => 'Please provide a :attribute.',
             'json' => 'The :attribute must be valid JSON.',
-            'integer' => 'The :attribute must be an integer.',
+            'ulid' => 'The :attribute must be a valid identifier.',
             'max' => 'The :attribute may not be greater than :max characters.',
             'string' => 'The :attribute must be a string.',
         ];
@@ -63,7 +67,7 @@ class TaskTypeRequest extends FormRequest
                 return;
             }
 
-            $client = Client::query()->find($clientId);
+            $client = Client::query()->where('public_id', $clientId)->first();
             if (! $client) {
                 return;
             }
@@ -71,10 +75,19 @@ class TaskTypeRequest extends FormRequest
             $targetTenant = null;
 
             if ($this->user()->isSuperAdmin()) {
-                $targetTenant = $this->input('tenant_id');
+                $targetTenant = $this->resolvePublicId(Tenant::class, $this->input('tenant_id'));
+
                 if ($targetTenant === null) {
-                    $targetTenant = $this->attributes->get('tenant_id');
+                    $attributeTenant = $this->attributes->get('tenant_id');
+                    if (is_string($attributeTenant) && ! is_numeric($attributeTenant)) {
+                        $attributeTenant = $this->resolvePublicId(Tenant::class, $attributeTenant);
+                    }
+
+                    if ($attributeTenant !== null) {
+                        $targetTenant = (int) $attributeTenant;
+                    }
                 }
+
                 if ($targetTenant === null && ($type = $this->route('taskType'))) {
                     $targetTenant = $type->tenant_id;
                 }
@@ -91,6 +104,15 @@ class TaskTypeRequest extends FormRequest
     public function validated($key = null, $default = null)
     {
         $data = parent::validated($key, $default);
+
+        if (array_key_exists('tenant_id', $data)) {
+            $data['tenant_id'] = $this->resolvePublicId(Tenant::class, $data['tenant_id']);
+        }
+
+        if (array_key_exists('client_id', $data)) {
+            $data['client_id'] = $this->resolvePublicId(Client::class, $data['client_id']);
+        }
+
         foreach (['schema_json', 'statuses', 'status_flow_json'] as $field) {
             if (isset($data[$field])) {
                 $data[$field] = json_decode($data[$field], true);

@@ -2,15 +2,21 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\ResolvesPublicIds;
 use App\Models\Client;
 use App\Models\Task;
 use App\Models\TaskType;
+use App\Models\Team;
+use App\Models\Tenant;
+use App\Models\User;
 use App\Services\ComputeService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class TaskUpsertRequest extends FormRequest
 {
+    use ResolvesPublicIds;
+
     public function authorize(): bool
     {
         return true;
@@ -24,18 +30,39 @@ class TaskUpsertRequest extends FormRequest
             'sla_end_at' => ['nullable', 'date'],
             'priority' => ['nullable', 'string'],
             'kau_notes' => ['nullable', 'string'],
-            'task_type_id' => ['nullable', 'exists:task_types,id'],
+            'task_type_id' => ['nullable', 'string', 'ulid', Rule::exists('task_types', 'public_id')],
             'form_data' => ['nullable', 'array'],
             'assignee' => ['nullable', 'array'],
-            'assignee.id' => ['required_with:assignee', 'integer'],
-            'assigned_user_id' => ['nullable', 'integer'],
+            'assignee.id' => ['required_with:assignee', 'string', 'ulid', Rule::exists('users', 'public_id')],
+            'assigned_user_id' => ['nullable', 'string', 'ulid', Rule::exists('users', 'public_id')],
             'reviewer' => ['nullable', 'array'],
             'reviewer.kind' => ['required_with:reviewer', 'in:team,employee'],
-            'reviewer.id' => ['required_with:reviewer', 'integer'],
+            'reviewer.id' => [
+                'required_with:reviewer',
+                'string',
+                'ulid',
+                function ($attribute, $value, $fail) {
+                    $kind = $this->input('reviewer.kind');
+                    $modelClass = match ($kind) {
+                        'team' => Team::class,
+                        'employee' => User::class,
+                        default => null,
+                    };
+
+                    if ($modelClass === null) {
+                        return;
+                    }
+
+                    if (! $modelClass::query()->where('public_id', $value)->exists()) {
+                        $fail('The selected reviewer is invalid.');
+                    }
+                },
+            ],
             'client_id' => [
                 'nullable',
-                'integer',
-                Rule::exists('clients', 'id')->whereNull('deleted_at'),
+                'string',
+                'ulid',
+                Rule::exists('clients', 'public_id')->whereNull('deleted_at'),
             ],
         ];
 
@@ -79,7 +106,7 @@ class TaskUpsertRequest extends FormRequest
             'date' => 'The :attribute must be a valid date.',
             'in' => 'The selected :attribute is invalid.',
             'exists' => 'The selected :attribute is invalid.',
-            'integer' => 'The :attribute must be an integer.',
+            'ulid' => 'The :attribute must be a valid identifier.',
             'array' => 'The :attribute must be an array.',
             'string' => 'The :attribute must be a string.',
         ];
@@ -93,7 +120,7 @@ class TaskUpsertRequest extends FormRequest
                 return;
             }
 
-            $client = Client::query()->withTrashed()->find($clientId);
+            $client = Client::query()->withTrashed()->where('public_id', $clientId)->first();
             if (! $client || $client->trashed()) {
                 $validator->errors()->add('client_id', 'The selected client is invalid.');
 
@@ -103,10 +130,19 @@ class TaskUpsertRequest extends FormRequest
             $targetTenant = null;
 
             if ($this->user()->isSuperAdmin()) {
-                $targetTenant = $this->attributes->get('tenant_id');
-                if ($targetTenant === null) {
-                    $targetTenant = $this->input('tenant_id');
+                $attributeTenant = $this->attributes->get('tenant_id');
+                if (is_string($attributeTenant) && ! is_numeric($attributeTenant)) {
+                    $attributeTenant = $this->resolvePublicId(Tenant::class, $attributeTenant);
                 }
+
+                if ($attributeTenant !== null) {
+                    $targetTenant = (int) $attributeTenant;
+                }
+
+                if ($targetTenant === null) {
+                    $targetTenant = $this->resolvePublicId(Tenant::class, $this->input('tenant_id'));
+                }
+
                 if ($targetTenant === null && $task = $this->route('task')) {
                     $targetTenant = $task->tenant_id;
                 }
@@ -123,6 +159,38 @@ class TaskUpsertRequest extends FormRequest
     public function validated($key = null, $default = null)
     {
         $data = parent::validated($key, $default);
+
+        if (array_key_exists('task_type_id', $data)) {
+            $data['task_type_id'] = $this->resolvePublicId(TaskType::class, $data['task_type_id']);
+        }
+
+        if (array_key_exists('assigned_user_id', $data)) {
+            $data['assigned_user_id'] = $this->resolvePublicId(User::class, $data['assigned_user_id']);
+        }
+
+        if (isset($data['assignee']['id'])) {
+            $data['assignee']['id'] = $this->resolvePublicId(User::class, $data['assignee']['id']);
+            if ($data['assignee']['id']) {
+                $data['assigned_user_id'] = $data['assignee']['id'];
+            }
+        }
+
+        if (isset($data['reviewer']['id'])) {
+            $modelClass = match ($data['reviewer']['kind'] ?? null) {
+                'team' => Team::class,
+                'employee' => User::class,
+                default => null,
+            };
+
+            if ($modelClass !== null) {
+                $data['reviewer']['id'] = $this->resolvePublicId($modelClass, $data['reviewer']['id']);
+            }
+        }
+
+        if (array_key_exists('client_id', $data)) {
+            $data['client_id'] = $this->resolvePublicId(Client::class, $data['client_id']);
+        }
+
         $typeId = $data['task_type_id'] ?? $this->route('task')?->task_type_id;
         if (! $typeId || ! isset($data['form_data'])) {
             return $data;

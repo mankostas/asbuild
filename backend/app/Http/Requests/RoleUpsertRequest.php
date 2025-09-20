@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\ResolvesPublicIds;
 use App\Models\Tenant;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class RoleUpsertRequest extends FormRequest
 {
+    use ResolvesPublicIds;
+
     public function authorize(): bool
     {
         return true;
@@ -16,9 +19,14 @@ class RoleUpsertRequest extends FormRequest
     public function rules(): array
     {
         $roleId = $this->route('role')?->id;
-        $tenantId = $this->user() && $this->user()->hasRole('SuperAdmin')
-            ? $this->input('tenant_id')
-            : $this->user()->tenant_id;
+        $tenantId = null;
+
+        if ($this->user() && $this->user()->hasRole('SuperAdmin')) {
+            $tenantId = $this->resolvePublicId(Tenant::class, $this->input('tenant_id'))
+                ?? $this->route('role')?->tenant_id;
+        } else {
+            $tenantId = $this->user()?->tenant_id;
+        }
 
         $allowedAbilities = $this->user() && $this->user()->hasRole('SuperAdmin')
             ? config('abilities')
@@ -35,7 +43,7 @@ class RoleUpsertRequest extends FormRequest
             'abilities' => ['array'],
             'abilities.*' => ['string', Rule::in($allowedAbilities)],
             'level' => ['integer', 'min:0'],
-            'tenant_id' => ['nullable', 'exists:tenants,id'],
+            'tenant_id' => ['nullable', 'string', 'ulid', Rule::exists('tenants', 'public_id')],
         ];
     }
 
@@ -61,5 +69,16 @@ class RoleUpsertRequest extends FormRequest
             'unique' => 'The :attribute has already been taken.',
             'abilities.*.in' => 'One or more abilities are not allowed for this tenant.',
         ];
+    }
+
+    public function validated($key = null, $default = null)
+    {
+        $data = parent::validated($key, $default);
+
+        if (array_key_exists('tenant_id', $data)) {
+            $data['tenant_id'] = $this->resolvePublicId(Tenant::class, $data['tenant_id']);
+        }
+
+        return $data;
     }
 }
