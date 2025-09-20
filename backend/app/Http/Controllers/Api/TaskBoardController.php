@@ -12,11 +12,17 @@ use App\Services\BoardPositionService;
 use App\Services\StatusFlowService;
 use App\Services\PermittedClientResolver;
 use App\Services\TaskQueryFilters;
+use App\Support\PublicIdResolver;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class TaskBoardController extends Controller
 {
+    public function __construct(private PublicIdResolver $publicIdResolver)
+    {
+    }
+
     protected function tenantId(Request $request): int
     {
         return (int) $request->attributes->get('tenant_id', $request->user()->tenant_id);
@@ -158,16 +164,30 @@ class TaskBoardController extends Controller
 
     public function move(Request $request, BoardPositionService $positions, StatusFlowService $flow)
     {
-        $data = $request->validate([
-            'task_id' => ['required', 'integer', Rule::exists('tasks', 'id')],
+        $input = $request->all();
+
+        if (array_key_exists('task_id', $input) && $input['task_id'] !== null) {
+            $input['task_id'] = (string) $input['task_id'];
+        }
+
+        $data = validator($input, [
+            'task_id' => ['required', 'string'],
             'status_slug' => ['required', 'string'],
             'index' => ['required', 'integer', 'min:0'],
-        ]);
+        ])->validate();
+
+        $taskId = $this->publicIdResolver->resolve(Task::class, $data['task_id']);
+
+        if ($taskId === null) {
+            throw ValidationException::withMessages([
+                'task_id' => __('The selected task is invalid.'),
+            ]);
+        }
 
         $tenantId = $this->tenantId($request);
         $prefixed = TaskStatus::prefixSlug($data['status_slug'], $tenantId);
         $task = Task::where('tenant_id', $tenantId)
-            ->findOrFail($data['task_id']);
+            ->findOrFail($taskId);
         $status = TaskStatus::where('slug', $prefixed)->firstOrFail();
 
         if ($task->status_slug !== $status->slug) {

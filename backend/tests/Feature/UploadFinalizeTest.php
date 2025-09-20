@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\File;
 use App\Models\Role;
 use App\Models\Task;
 use App\Models\Tenant;
@@ -44,15 +45,20 @@ class UploadFinalizeTest extends TestCase
         $file = UploadedFile::fake()->image('final.jpg', 10, 10)->size(10);
         Storage::put('files/final.jpg', file_get_contents($file->getRealPath()));
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $response = $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/uploads/xyz/finalize', [
                 'filename' => 'final.jpg',
-                'task_id' => $task->id,
+                'task_id' => $task->public_id,
                 'field_key' => 'photo',
                 'section_key' => 'sec1',
             ])
             ->assertOk()
             ->assertJsonStructure(['file_id', 'name']);
+
+        $storedFile = File::first();
+
+        $this->assertNotNull($storedFile);
+        $this->assertSame($storedFile->public_id, $response->json('file_id'));
 
         $this->assertDatabaseHas('task_attachments', [
             'task_id' => $task->id,
