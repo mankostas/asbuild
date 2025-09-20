@@ -16,10 +16,12 @@ class ComputedFieldTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected Tenant $tenant;
+
     protected function setUp(): void
     {
         parent::setUp();
-        Tenant::create([
+        $this->tenant = Tenant::create([
             'public_id' => PublicIdGenerator::generate(),
             'id' => 1, 'name' => 'T', 'features' => ['tasks']
         ]);
@@ -27,7 +29,7 @@ class ComputedFieldTest extends TestCase
             'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => 'user',
-            'tenant_id' => 1,
+            'tenant_id' => $this->tenant->id,
             'abilities' => ['tasks.manage'],
             'level' => 1,
         ]);
@@ -36,11 +38,11 @@ class ComputedFieldTest extends TestCase
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
-            'tenant_id' => 1,
+            'tenant_id' => $this->tenant->id,
             'phone' => '123456',
             'address' => 'Street 1',
         ]);
-        $user->roles()->attach($role->id, ['tenant_id' => 1]);
+        $user->roles()->attach($role->id, ['tenant_id' => $this->tenant->id]);
         Sanctum::actingAs($user);
     }
 
@@ -62,16 +64,16 @@ class ComputedFieldTest extends TestCase
         $type = TaskType::create([
             'public_id' => PublicIdGenerator::generate(),
             'name' => 'T',
-            'tenant_id' => 1,
+            'tenant_id' => $this->tenant->id,
             'schema_json' => $schema,
             'statuses' => ['draft' => []],
             'status_flow_json' => [['draft']],
         ]);
         $payload = [
-            'task_type_id' => $type->id,
+            'task_type_id' => $type->public_id,
             'form_data' => ['a' => 2, 'b' => 3, 'total' => 99],
         ];
-        $this->withHeader('X-Tenant-ID', 1)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
             ->postJson('/api/tasks', $payload)
             ->assertStatus(201)
             ->assertJsonPath('data.form_data.total', 5);

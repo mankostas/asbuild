@@ -47,7 +47,7 @@ class LookupRoutesTest extends TestCase
 
     public function test_abilities_lookup_returns_list(): void
     {
-        $abilities = $this->withHeader('X-Tenant-ID', $this->tenant->id)
+        $abilities = $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
             ->getJson('/api/lookups/abilities')
             ->assertStatus(200)
             ->json();
@@ -59,7 +59,7 @@ class LookupRoutesTest extends TestCase
     {
         $this->tenant->update(['features' => ['roles', 'teams', 'employees']]);
 
-        $abilities = $this->withHeader('X-Tenant-ID', $this->tenant->id)
+        $abilities = $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
             ->getJson('/api/lookups/abilities?forTenant=1')
             ->assertStatus(200)
             ->json();
@@ -106,7 +106,7 @@ class LookupRoutesTest extends TestCase
         $superUser->roles()->attach($superRole->id, ['tenant_id' => $rootTenant->id]);
         Sanctum::actingAs($superUser);
 
-        $abilities = $this->withHeader('X-Tenant-ID', $this->tenant->id)
+        $abilities = $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
             ->getJson('/api/lookups/abilities?forTenant=1')
             ->assertStatus(200)
             ->json();
@@ -116,7 +116,7 @@ class LookupRoutesTest extends TestCase
 
     public function test_features_lookup_returns_list(): void
     {
-        $features = $this->withHeader('X-Tenant-ID', $this->tenant->id)
+        $features = $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
             ->getJson('/api/lookups/features')
             ->assertStatus(200)
             ->json();

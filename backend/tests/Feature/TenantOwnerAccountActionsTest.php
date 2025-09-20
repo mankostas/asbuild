@@ -22,11 +22,11 @@ class TenantOwnerAccountActionsTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->getJson("/api/tenants/{$tenant->id}/owner")
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->getJson("/api/tenants/{$tenant->public_id}/owner")
             ->assertStatus(200)
             ->assertJsonPath('data.email', $owner->email)
-            ->assertJsonPath('data.id', $owner->id);
+            ->assertJsonPath('data.id', $this->publicIdFor($owner));
     }
 
     public function test_owner_password_reset_requires_manage_ability(): void
@@ -37,8 +37,8 @@ class TenantOwnerAccountActionsTest extends TestCase
 
         Password::shouldReceive('sendResetLink')->never();
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/tenants/{$tenant->id}/owner/password-reset")
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->postJson("/api/tenants/{$tenant->public_id}/owner/password-reset")
             ->assertStatus(403);
     }
 
@@ -53,8 +53,8 @@ class TenantOwnerAccountActionsTest extends TestCase
             ->with(['email' => $owner->email])
             ->andReturn(Password::RESET_LINK_SENT);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/tenants/{$tenant->id}/owner/password-reset")
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->postJson("/api/tenants/{$tenant->public_id}/owner/password-reset")
             ->assertStatus(200)
             ->assertJson(['status' => 'ok']);
     }
@@ -70,8 +70,8 @@ class TenantOwnerAccountActionsTest extends TestCase
             ->with(['email' => $owner->email])
             ->andReturn(Password::RESET_LINK_SENT);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/tenants/{$tenant->id}/owner/invite-resend")
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->postJson("/api/tenants/{$tenant->public_id}/owner/invite-resend")
             ->assertStatus(200)
             ->assertJson(['status' => 'ok']);
     }
@@ -87,8 +87,8 @@ class TenantOwnerAccountActionsTest extends TestCase
             ->with(['email' => 'new-owner@example.com'])
             ->andReturn(Password::RESET_LINK_SENT);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/tenants/{$tenant->id}/owner/email-reset", [
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->postJson("/api/tenants/{$tenant->public_id}/owner/email-reset", [
                 'email' => 'new-owner@example.com',
             ])
             ->assertStatus(200)

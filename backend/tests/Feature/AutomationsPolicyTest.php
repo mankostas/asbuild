@@ -59,8 +59,8 @@ class AutomationsPolicyTest extends TestCase
         $manager->roles()->attach($managerRole->id, ['tenant_id' => $tenant->id]);
 
         Sanctum::actingAs($manager);
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->getJson("/api/task-types/{$type->id}/automations")
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->getJson("/api/task-types/{$type->public_id}/automations")
             ->assertOk();
 
         $viewer = User::create([
@@ -75,8 +75,8 @@ class AutomationsPolicyTest extends TestCase
         $viewer->roles()->attach($viewerRole->id, ['tenant_id' => $tenant->id]);
 
         Sanctum::actingAs($viewer);
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->getJson("/api/task-types/{$type->id}/automations")
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->getJson("/api/task-types/{$type->public_id}/automations")
             ->assertForbidden();
     }
 }

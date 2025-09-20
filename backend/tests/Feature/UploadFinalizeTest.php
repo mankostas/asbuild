@@ -54,7 +54,7 @@ class UploadFinalizeTest extends TestCase
         $file = UploadedFile::fake()->image('final.jpg', 10, 10)->size(10);
         Storage::put('files/final.jpg', file_get_contents($file->getRealPath()));
 
-        $response = $this->withHeader('X-Tenant-ID', $tenant->id)
+        $response = $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/uploads/xyz/finalize', [
                 'filename' => 'final.jpg',
                 'task_id' => $task->public_id,

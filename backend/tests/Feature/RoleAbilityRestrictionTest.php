@@ -44,12 +44,12 @@ class RoleAbilityRestrictionTest extends TestCase
         $user->roles()->attach($viewRole->id, ['tenant_id' => $tenant->id]);
         Sanctum::actingAs($user);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->getJson('/api/roles')
             ->assertStatus(200);
 
         $payload = ['name' => 'New', 'slug' => 'new', 'level' => 1];
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/roles', $payload)
             ->assertStatus(403);
     }

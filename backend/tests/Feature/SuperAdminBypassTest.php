@@ -35,7 +35,7 @@ class SuperAdminBypassTest extends TestCase
             'name' => 'Root',
             'email' => 'root@example.com',
             'password' => Hash::make('secret'),
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $this->publicIdFor($tenant),
             'phone' => '123456',
             'address' => 'Street 1',
         ]);

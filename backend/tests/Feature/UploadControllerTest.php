@@ -49,7 +49,7 @@ class UploadControllerTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg', 100, 100)->size(100);
         Storage::put('files/test.jpg', file_get_contents($file->getRealPath()));
 
-        $response = $this->withHeader('X-Tenant-ID', $tenant->id)
+        $response = $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/uploads/abc/finalize', [
                 'filename' => 'test.jpg',
                 'task_id' => $task->public_id,
@@ -95,7 +95,7 @@ class UploadControllerTest extends TestCase
         Sanctum::actingAs($user);
 
         $badMime = UploadedFile::fake()->create('bad.txt', 10, 'text/plain');
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->post('/api/uploads/chunk', [
                 'upload_id' => '1',
                 'index' => 0,
@@ -106,7 +106,7 @@ class UploadControllerTest extends TestCase
             ->assertStatus(422);
 
         $big = UploadedFile::fake()->create('big.jpg', config('security.max_upload_size') + 1000);
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->post('/api/uploads/chunk', [
                 'upload_id' => '2',
                 'index' => 0,

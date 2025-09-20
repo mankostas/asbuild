@@ -69,7 +69,7 @@ class TenantScopeTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => $tenant1->id]);
         Sanctum::actingAs($user);
 
-        $this->withHeader('X-Tenant-ID', $tenant2->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant2))
             ->getJson('/api/roles')
             ->assertStatus(403);
     }

@@ -57,13 +57,13 @@ class BrandingRoutesTest extends TestCase
             'footer_left' => 'Left',
             'footer_right' => 'Right',
         ];
-        $this->withHeader('X-Tenant-ID', $this->tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
             ->putJson('/api/branding', $payload)
             ->assertStatus(200)
             ->assertJsonPath('footer_left', 'Left')
             ->assertJsonPath('footer_right', 'Right');
 
-        $this->withHeader('X-Tenant-ID', $this->tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
             ->getJson('/api/branding')
             ->assertStatus(200)
             ->assertJsonPath('footer_left', 'Left')
@@ -98,7 +98,7 @@ class BrandingRoutesTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
         Sanctum::actingAs($user);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->putJson('/api/branding', ['footer_left' => 'Nope'])
             ->assertStatus(403);
     }

@@ -48,13 +48,13 @@ class RoleValidationTest extends TestCase
             'level' => 1,
         ];
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/roles', $payload)
             ->assertStatus(422);
 
         $tenant->update(['features' => ['tasks', 'task_statuses']]);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/roles', $payload)
             ->assertStatus(201)
             ->assertJsonFragment(['abilities' => ['task_statuses.manage']]);

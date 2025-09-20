@@ -45,10 +45,10 @@ class SuperAdminCreatesTaskForTenantTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => $tenantA->id]);
         Sanctum::actingAs($user);
 
-        $response = $this->withHeader('X-Tenant-ID', $tenantB->id)
+        $response = $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenantB))
             ->postJson('/api/tasks', [])
             ->assertStatus(201);
 
-        $this->assertEquals($tenantB->id, $response->json('data.tenant_id'));
+        $this->assertEquals($this->publicIdFor($tenantB), $response->json('data.tenant_id'));
     }
 }

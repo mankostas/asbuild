@@ -54,7 +54,7 @@ class AssigneesExcludeTenantTest extends TestCase
         $employee->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
         Sanctum::actingAs($employee);
 
-        $response = $this->withHeader('X-Tenant-ID', $tenant->id)
+        $response = $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->getJson('/api/lookups/assignees?type=employees');
 
         $response->assertStatus(200);

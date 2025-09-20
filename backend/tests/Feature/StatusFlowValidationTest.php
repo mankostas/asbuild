@@ -20,12 +20,13 @@ class StatusFlowValidationTest extends TestCase
 
     protected Task $task;
     protected TaskType $type;
+    protected Tenant $tenant;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        Tenant::create([
+        $this->tenant = Tenant::create([
             'public_id' => PublicIdGenerator::generate(),
             'id' => 1, 'name' => 'T', 'features' => ['tasks']
         ]);
@@ -34,7 +35,7 @@ class StatusFlowValidationTest extends TestCase
             'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => 'user',
-            'tenant_id' => 1,
+            'tenant_id' => $this->tenant->id,
             'abilities' => ['tasks.update', 'tasks.status.update'],
             'level' => 1,
         ]);
@@ -44,17 +45,17 @@ class StatusFlowValidationTest extends TestCase
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
-            'tenant_id' => 1,
+            'tenant_id' => $this->tenant->id,
             'phone' => '123456',
             'address' => 'Street 1',
         ]);
-        $user->roles()->attach($role->id, ['tenant_id' => 1]);
+        $user->roles()->attach($role->id, ['tenant_id' => $this->tenant->id]);
         Sanctum::actingAs($user);
 
         $this->type = TaskType::create([
             'public_id' => PublicIdGenerator::generate(),
             'name' => 'T',
-            'tenant_id' => 1,
+            'tenant_id' => $this->tenant->id,
             'statuses' => [
                 'draft' => [],
                 'in_progress' => [],
@@ -76,7 +77,7 @@ class StatusFlowValidationTest extends TestCase
 
         $this->task = Task::create([
             'public_id' => PublicIdGenerator::generate(),
-            'tenant_id' => 1,
+            'tenant_id' => $this->tenant->id,
             'user_id' => $user->id,
             'task_type_id' => $this->type->id,
             'status' => 'review',
@@ -93,15 +94,15 @@ class StatusFlowValidationTest extends TestCase
             'is_required' => true,
         ]);
 
-        $this->withHeader('X-Tenant-ID', 1)
-            ->postJson("/api/tasks/{$this->task->id}/status", ['status' => 'completed'])
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
+            ->postJson("/api/tasks/{$this->task->public_id}/status", ['status' => 'completed'])
             ->assertStatus(422)
             ->assertJson(['code' => 'subtasks_incomplete']);
 
         $sub->update(['is_completed' => true]);
 
-        $this->withHeader('X-Tenant-ID', 1)
-            ->postJson("/api/tasks/{$this->task->id}/status", ['status' => 'completed'])
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
+            ->postJson("/api/tasks/{$this->task->public_id}/status", ['status' => 'completed'])
             ->assertStatus(200)
             ->assertJsonPath('data.status', 'completed');
     }
@@ -115,8 +116,8 @@ class StatusFlowValidationTest extends TestCase
             'is_required' => true,
         ]);
 
-        $this->withHeader('X-Tenant-ID', 1)
-            ->postJson("/api/tasks/{$this->task->id}/status", ['status' => 'redo'])
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
+            ->postJson("/api/tasks/{$this->task->public_id}/status", ['status' => 'redo'])
             ->assertStatus(200)
             ->assertJsonPath('data.status', 'redo');
     }

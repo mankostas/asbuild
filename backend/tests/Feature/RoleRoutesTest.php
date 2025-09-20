@@ -47,13 +47,13 @@ class RoleRoutesTest extends TestCase
 
     public function test_crud_routes_work(): void
     {
-        $this->withHeader('X-Tenant-ID', $this->tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
             ->getJson('/api/roles')
             ->assertStatus(200)
             ->assertJsonPath('data.0.abilities.0', 'roles.manage');
 
         $payload = ['name' => 'Tester', 'slug' => 'tester', 'level' => 1, 'description' => 'Test role'];
-        $rolePublicId = $this->withHeader('X-Tenant-ID', $this->tenant->id)
+        $rolePublicId = $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
             ->postJson('/api/roles', $payload)
             ->assertStatus(201)
             ->assertJsonStructure([
@@ -74,7 +74,7 @@ class RoleRoutesTest extends TestCase
         $this->assertSame($roleId, $role->getKey());
         $this->assertSame($rolePublicId, $role->public_id);
 
-        $this->withHeader('X-Tenant-ID', $this->tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
             ->getJson("/api/roles/{$rolePublicId}")
             ->assertStatus(200)
             ->assertJsonStructure([
@@ -85,7 +85,7 @@ class RoleRoutesTest extends TestCase
             ->assertJsonMissingPath('data.updated_at');
 
         $update = ['name' => 'Updated', 'slug' => 'updated', 'level' => 2, 'description' => 'Updated role'];
-        $this->withHeader('X-Tenant-ID', $this->tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
             ->putJson("/api/roles/{$rolePublicId}", $update)
             ->assertStatus(200)
             ->assertJsonStructure([
@@ -98,7 +98,7 @@ class RoleRoutesTest extends TestCase
             ->assertJsonMissingPath('data.created_at')
             ->assertJsonMissingPath('data.updated_at');
 
-        $this->withHeader('X-Tenant-ID', $this->tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($this->tenant))
             ->deleteJson("/api/roles/{$rolePublicId}")
             ->assertStatus(200);
     }

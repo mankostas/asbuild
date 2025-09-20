@@ -55,11 +55,11 @@ class RolesTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
         Sanctum::actingAs($admin);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->getJson('/api/roles')
             ->assertStatus(200)
             ->assertJsonFragment([
-                'id' => $role->id,
+                'id' => $this->publicIdFor($role),
                 'users_count' => 1,
             ])
             ->assertJsonStructure([
@@ -109,8 +109,11 @@ class RolesTest extends TestCase
         $admin->roles()->attach($adminRole->id, ['tenant_id' => $tenant->id]);
         Sanctum::actingAs($admin);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/roles/{$role->id}/assign", ['user_id' => $user->id])
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
+            ->postJson(
+                "/api/roles/{$this->publicIdFor($role)}/assign",
+                ['user_id' => $this->publicIdFor($user)]
+            )
             ->assertStatus(200);
 
         $this->assertTrue(
@@ -148,7 +151,7 @@ class RolesTest extends TestCase
             'name' => 'Types Manager',
             'slug' => 'task_types.manager',
             'abilities' => ['task_types.manage'],
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $this->publicIdFor($tenant),
             'level' => 1,
         ];
 
@@ -190,13 +193,13 @@ class RolesTest extends TestCase
             'level' => 1,
         ];
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/roles', $payload)
             ->assertStatus(422);
 
         $tenant->update(['features' => ['tasks', 'task_types']]);
 
-        $this->withHeader('X-Tenant-ID', $tenant->id)
+        $this->withHeader('X-Tenant-ID', $this->publicIdFor($tenant))
             ->postJson('/api/roles', $payload)
             ->assertStatus(201)
             ->assertJsonFragment(['abilities' => ['task_types.manage']]);
