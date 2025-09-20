@@ -63,7 +63,7 @@ class TaskTypeBulkActionsTest extends TestCase
         ]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson('/api/task-types/bulk-delete', ['ids' => [$type1->id, $type2->id]])
+            ->postJson('/api/task-types/bulk-delete', ['ids' => [$type1->public_id, $type2->public_id]])
             ->assertOk();
 
         $this->assertDatabaseMissing('task_types', ['id' => $type1->id]);
@@ -88,7 +88,7 @@ class TaskTypeBulkActionsTest extends TestCase
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/task-types/bulk-copy-to-tenant', [
-                'ids' => [$type1->id, $type2->id],
+                'ids' => [$type1->public_id, $type2->public_id],
                 'tenant_id' => $targetTenant->id,
             ])
             ->assertStatus(403);
@@ -140,7 +140,7 @@ class TaskTypeBulkActionsTest extends TestCase
 
         $this->withHeader('X-Tenant-ID', $sourceTenant->id)
             ->postJson('/api/task-types/bulk-copy-to-tenant', [
-                'ids' => [$type1->id, $type2->id],
+                'ids' => [$type1->public_id, $type2->public_id],
                 'tenant_id' => $targetTenant->id,
             ])
             ->assertCreated();

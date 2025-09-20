@@ -61,14 +61,14 @@ class TaskTypePreviewValidationTest extends TestCase
         ];
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/task-types/{$type->id}/validate", [
+            ->postJson("/api/task-types/{$type->public_id}/validate", [
                 'schema_json' => $schema,
                 'form_data' => ['f1' => 'ok'],
             ])
             ->assertOk();
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/task-types/{$type->id}/validate", [
+            ->postJson("/api/task-types/{$type->public_id}/validate", [
                 'schema_json' => $schema,
                 'form_data' => [],
             ])

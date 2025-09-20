@@ -98,9 +98,9 @@ class TaskTypeOptionsTest extends TestCase
         $type = TaskType::first();
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson('/api/tasks', ['task_type_id' => $type->id])
+            ->postJson('/api/tasks', ['task_type_id' => $type->public_id])
             ->assertCreated()
-            ->assertJsonPath('data.task_type_id', $type->id);
+            ->assertJsonPath('data.task_type_id', $type->public_id);
     }
 
     public function test_missing_ability_cannot_fetch_options(): void
