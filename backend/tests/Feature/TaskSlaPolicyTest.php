@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskSlaPolicyTest extends TestCase
 {
@@ -18,8 +19,12 @@ class TaskSlaPolicyTest extends TestCase
 
     public function test_policy_applies_sla_end_at_for_non_override_user(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'slug' => 'admin',
             'tenant_id' => $tenant->id,
@@ -27,6 +32,7 @@ class TaskSlaPolicyTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -38,6 +44,7 @@ class TaskSlaPolicyTest extends TestCase
         Sanctum::actingAs($user);
 
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => $tenant->id,
             'schema_json' => ['sections' => []],
@@ -74,8 +81,12 @@ class TaskSlaPolicyTest extends TestCase
 
     public function test_override_user_can_set_sla_fields(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'slug' => 'admin',
             'tenant_id' => $tenant->id,
@@ -83,6 +94,7 @@ class TaskSlaPolicyTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -94,6 +106,7 @@ class TaskSlaPolicyTest extends TestCase
         Sanctum::actingAs($user);
 
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => $tenant->id,
             'schema_json' => ['sections' => []],
@@ -121,8 +134,12 @@ class TaskSlaPolicyTest extends TestCase
 
     public function test_can_create_and_list_policies(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'slug' => 'admin',
             'tenant_id' => $tenant->id,
@@ -130,6 +147,7 @@ class TaskSlaPolicyTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -141,6 +159,7 @@ class TaskSlaPolicyTest extends TestCase
         Sanctum::actingAs($user);
 
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => $tenant->id,
             'schema_json' => ['sections' => []],

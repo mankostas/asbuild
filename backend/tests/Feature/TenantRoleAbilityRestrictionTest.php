@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TenantRoleAbilityRestrictionTest extends TestCase
 {
@@ -16,9 +17,13 @@ class TenantRoleAbilityRestrictionTest extends TestCase
 
     public function test_tenant_features_limit_role_creation(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => ['tasks']
+        ]);
 
         $adminRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Manager',
             'slug' => 'manager',
             'tenant_id' => $tenant->id,
@@ -27,6 +32,7 @@ class TenantRoleAbilityRestrictionTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('secret'),

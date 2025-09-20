@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskStatusTenantVisibilityTest extends TestCase
 {
@@ -17,14 +18,30 @@ class TaskStatusTenantVisibilityTest extends TestCase
 
     public function test_index_returns_global_and_tenant_statuses_for_tenant_scope(): void
     {
-        Tenant::create(['id' => 1, 'name' => 'T1', 'features' => ['tasks']]);
-        Tenant::create(['id' => 2, 'name' => 'T2', 'features' => ['tasks']]);
+        Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'id' => 1, 'name' => 'T1', 'features' => ['tasks']
+        ]);
+        Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'id' => 2, 'name' => 'T2', 'features' => ['tasks']
+        ]);
 
-        TaskStatus::create(['slug' => 'global', 'name' => 'Global', 'tenant_id' => null]);
-        TaskStatus::create(['slug' => 't1', 'name' => 'Tenant One', 'tenant_id' => 1]);
-        TaskStatus::create(['slug' => 't2', 'name' => 'Tenant Two', 'tenant_id' => 2]);
+        TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 'global', 'name' => 'Global', 'tenant_id' => null
+        ]);
+        TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 't1', 'name' => 'Tenant One', 'tenant_id' => 1
+        ]);
+        TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 't2', 'name' => 'Tenant Two', 'tenant_id' => 2
+        ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'slug' => 'admin',
             'tenant_id' => 1,
@@ -33,6 +50,7 @@ class TaskStatusTenantVisibilityTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),
@@ -59,15 +77,34 @@ class TaskStatusTenantVisibilityTest extends TestCase
 
     public function test_super_admin_sees_global_and_tenant_statuses_with_header(): void
     {
-        Tenant::create(['id' => 1, 'name' => 'T1', 'features' => ['tasks']]);
-        Tenant::create(['id' => 2, 'name' => 'T2', 'features' => ['tasks']]);
+        Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'id' => 1, 'name' => 'T1', 'features' => ['tasks']
+        ]);
+        Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'id' => 2, 'name' => 'T2', 'features' => ['tasks']
+        ]);
 
-        TaskStatus::create(['slug' => 'global', 'name' => 'Global', 'tenant_id' => null]);
-        TaskStatus::create(['slug' => 't1', 'name' => 'Tenant One', 'tenant_id' => 1]);
-        TaskStatus::create(['slug' => 't2', 'name' => 'Tenant Two', 'tenant_id' => 2]);
+        TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 'global', 'name' => 'Global', 'tenant_id' => null
+        ]);
+        TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 't1', 'name' => 'Tenant One', 'tenant_id' => 1
+        ]);
+        TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 't2', 'name' => 'Tenant Two', 'tenant_id' => 2
+        ]);
 
-        $root = Tenant::create(['id' => 999, 'name' => 'Root']);
+        $root = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'id' => 999, 'name' => 'Root'
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => $root->id,
@@ -76,6 +113,7 @@ class TaskStatusTenantVisibilityTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Super',
             'email' => 'super@example.com',
             'password' => Hash::make('secret'),

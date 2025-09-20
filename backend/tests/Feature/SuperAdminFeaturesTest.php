@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class SuperAdminFeaturesTest extends TestCase
 {
@@ -16,9 +17,13 @@ class SuperAdminFeaturesTest extends TestCase
 
     public function test_super_admin_has_all_features_even_when_tenant_does_not(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => []]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => []
+        ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => $tenant->id,
@@ -27,6 +32,7 @@ class SuperAdminFeaturesTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Super',
             'email' => 'super@example.com',
             'password' => Hash::make('secret'),

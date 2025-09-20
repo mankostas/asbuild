@@ -11,6 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskCommentAttachmentTest extends TestCase
 {
@@ -18,19 +19,25 @@ class TaskCommentAttachmentTest extends TestCase
 
     public function test_comment_with_attachment_saves_file_relation(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'A',
             'email' => 'a@example.com',
             'password' => Hash::make('secret'),
             'tenant_id' => $tenant->id,
         ]);
         $task = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'user_id' => $user->id,
             'title' => 'T1',
         ]);
         $file = File::create([
+            'public_id' => PublicIdGenerator::generate(),
             'path' => 'f.jpg',
             'filename' => 'f.jpg',
             'mime_type' => 'image/jpeg',

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class UploadFinalizeTest extends TestCase
 {
@@ -21,8 +22,12 @@ class UploadFinalizeTest extends TestCase
     public function test_finalize_stores_file_and_binds_task_metadata(): void
     {
         Storage::fake('local');
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => $tenant->id,
@@ -30,6 +35,7 @@ class UploadFinalizeTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -40,7 +46,10 @@ class UploadFinalizeTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
         Sanctum::actingAs($user);
 
-        $task = Task::create(['tenant_id' => $tenant->id, 'user_id' => $user->id]);
+        $task = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'user_id' => $user->id
+        ]);
 
         $file = UploadedFile::fake()->image('final.jpg', 10, 10)->size(10);
         Storage::put('files/final.jpg', file_get_contents($file->getRealPath()));

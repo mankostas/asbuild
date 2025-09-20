@@ -19,6 +19,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Str;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class HashedIdentifierRequestTest extends TestCase
 {
@@ -34,7 +35,10 @@ class HashedIdentifierRequestTest extends TestCase
     {
         parent::setUp();
 
-        $this->tenant = Tenant::create(['name' => 'Acme Inc.']);
+        $this->tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Acme Inc.'
+        ]);
 
         $this->regularUser = $this->createUser([
             'tenant_id' => $this->tenant->id,
@@ -45,6 +49,7 @@ class HashedIdentifierRequestTest extends TestCase
         ]);
 
         $superRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'level' => 0,
@@ -87,6 +92,7 @@ class HashedIdentifierRequestTest extends TestCase
     public function test_task_type_request_translates_public_ids(): void
     {
         $client = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $this->tenant->id,
             'name' => 'Globex',
             'email' => 'client@example.com',
@@ -111,6 +117,7 @@ class HashedIdentifierRequestTest extends TestCase
     public function test_task_upsert_request_translates_nested_public_ids(): void
     {
         $taskType = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $this->tenant->id,
             'name' => 'General',
             'statuses' => ['open'],
@@ -118,10 +125,12 @@ class HashedIdentifierRequestTest extends TestCase
 
         $assignee = $this->createUser(['tenant_id' => $this->tenant->id]);
         $team = Team::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $this->tenant->id,
             'name' => 'QA',
         ]);
         $client = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $this->tenant->id,
             'name' => 'Wayne Enterprises',
             'email' => 'wayne@example.com',

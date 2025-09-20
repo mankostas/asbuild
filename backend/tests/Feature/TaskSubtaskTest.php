@@ -12,6 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskSubtaskTest extends TestCase
 {
@@ -22,8 +23,12 @@ class TaskSubtaskTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Tenant::create(['id' => 1, 'name' => 'T', 'features' => ['tasks']]);
+        Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'id' => 1, 'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => 1,
@@ -31,6 +36,7 @@ class TaskSubtaskTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -41,6 +47,7 @@ class TaskSubtaskTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => 1]);
         Sanctum::actingAs($user);
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'T',
             'tenant_id' => 1,
             'statuses' => ['draft' => [], 'assigned' => [], 'in_progress' => [], 'completed' => []],
@@ -52,6 +59,7 @@ class TaskSubtaskTest extends TestCase
             'require_subtasks_complete' => true,
         ]);
         $this->task = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => 1,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
@@ -92,6 +100,7 @@ class TaskSubtaskTest extends TestCase
     public function test_status_constraint_blocks_incomplete_subtasks(): void
     {
         $sub = TaskSubtask::create([
+            'public_id' => PublicIdGenerator::generate(),
             'task_id' => $this->task->id,
             'title' => 'Req',
             'is_required' => true,

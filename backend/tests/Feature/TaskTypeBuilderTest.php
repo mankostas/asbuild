@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskTypeBuilderTest extends TestCase
 {
@@ -17,8 +18,12 @@ class TaskTypeBuilderTest extends TestCase
 
     public function test_create_task_type_with_sections(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'slug' => 'admin',
             'tenant_id' => $tenant->id,
@@ -26,6 +31,7 @@ class TaskTypeBuilderTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -63,9 +69,16 @@ class TaskTypeBuilderTest extends TestCase
 
     public function test_store_task_type_with_abilities(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
-        $role = Role::create(['name' => 'Admin', 'slug' => 'admin', 'tenant_id' => $tenant->id, 'abilities' => ['task_types.create'], 'level' => 1]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
+        $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Admin', 'slug' => 'admin', 'tenant_id' => $tenant->id, 'abilities' => ['task_types.create'], 'level' => 1
+        ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u2@example.com',
             'password' => Hash::make('secret'),
@@ -92,8 +105,12 @@ class TaskTypeBuilderTest extends TestCase
 
     public function test_store_task_type_with_role_permissions(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'slug' => 'admin',
             'tenant_id' => $tenant->id,
@@ -101,6 +118,7 @@ class TaskTypeBuilderTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u3@example.com',
             'password' => Hash::make('secret'),
@@ -135,8 +153,12 @@ class TaskTypeBuilderTest extends TestCase
 
     public function test_permissions_persist_on_edit(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'slug' => 'admin',
             'tenant_id' => $tenant->id,
@@ -144,6 +166,7 @@ class TaskTypeBuilderTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u4@example.com',
             'password' => Hash::make('secret'),

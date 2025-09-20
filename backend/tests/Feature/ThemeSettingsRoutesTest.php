@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class ThemeSettingsRoutesTest extends TestCase
 {
@@ -16,8 +17,12 @@ class ThemeSettingsRoutesTest extends TestCase
 
     public function test_user_can_get_theme_settings(): void
     {
-        $tenant = Tenant::create(['name' => 'Test Tenant', 'features' => ['themes']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Test Tenant', 'features' => ['themes']
+        ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),
@@ -26,6 +31,7 @@ class ThemeSettingsRoutesTest extends TestCase
             'address' => 'Street 1',
         ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'abilities' => ['*'],

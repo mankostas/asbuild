@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TenantOwnerAccountActionsTest extends TestCase
 {
@@ -111,7 +112,10 @@ class TenantOwnerAccountActionsTest extends TestCase
      */
     protected function createTenantWithOwner(array $adminAbilities): array
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['employees']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => ['employees']
+        ]);
 
         $ownerRole = $tenant->roles()->where('slug', 'tenant')->first();
 
@@ -119,6 +123,7 @@ class TenantOwnerAccountActionsTest extends TestCase
             $ownerRole->update(['abilities' => ['tenants.manage']]);
         } else {
             $ownerRole = Role::create([
+                'public_id' => PublicIdGenerator::generate(),
                 'name' => 'Tenant Owner',
                 'slug' => 'tenant',
                 'tenant_id' => $tenant->id,
@@ -127,6 +132,7 @@ class TenantOwnerAccountActionsTest extends TestCase
         }
 
         $owner = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Owner',
             'email' => 'owner@example.com',
             'password' => Hash::make('secret'),
@@ -140,6 +146,7 @@ class TenantOwnerAccountActionsTest extends TestCase
         $ownerRole->users()->attach($owner->id, ['tenant_id' => $tenant->id]);
 
         $adminRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Tenant Admin',
             'slug' => 'tenant_admin',
             'tenant_id' => $tenant->id,
@@ -147,6 +154,7 @@ class TenantOwnerAccountActionsTest extends TestCase
         ]);
 
         $admin = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('secret'),

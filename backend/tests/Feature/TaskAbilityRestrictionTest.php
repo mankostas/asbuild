@@ -11,6 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskAbilityRestrictionTest extends TestCase
 {
@@ -18,9 +19,13 @@ class TaskAbilityRestrictionTest extends TestCase
 
     public function test_role_without_create_delete_cannot_create_or_delete_tasks(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Contributor',
             'slug' => 'contributor',
             'tenant_id' => $tenant->id,
@@ -29,6 +34,7 @@ class TaskAbilityRestrictionTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -45,7 +51,10 @@ class TaskAbilityRestrictionTest extends TestCase
             ->postJson('/api/tasks', [])
             ->assertStatus(403);
 
-        $task = Task::create(['tenant_id' => $tenant->id, 'user_id' => $user->id]);
+        $task = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'user_id' => $user->id
+        ]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->deleteJson("/api/tasks/{$task->id}")

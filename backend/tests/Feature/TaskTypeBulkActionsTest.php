@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskTypeBulkActionsTest extends TestCase
 {
@@ -22,8 +23,12 @@ class TaskTypeBulkActionsTest extends TestCase
 
     protected function createUserWithAbilities(array $abilities)
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'slug' => 'admin',
             'tenant_id' => $tenant->id,
@@ -31,6 +36,7 @@ class TaskTypeBulkActionsTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -47,8 +53,14 @@ class TaskTypeBulkActionsTest extends TestCase
     public function test_bulk_delete_task_types(): void
     {
         [$tenant, $user] = $this->createUserWithAbilities(['task_types.delete']);
-        $type1 = TaskType::create(['name' => 'T1', 'tenant_id' => $tenant->id]);
-        $type2 = TaskType::create(['name' => 'T2', 'tenant_id' => $tenant->id]);
+        $type1 = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T1', 'tenant_id' => $tenant->id
+        ]);
+        $type2 = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T2', 'tenant_id' => $tenant->id
+        ]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/task-types/bulk-delete', ['ids' => [$type1->id, $type2->id]])
@@ -61,9 +73,18 @@ class TaskTypeBulkActionsTest extends TestCase
     public function test_tenant_admin_cannot_bulk_copy_task_types_to_other_tenant(): void
     {
         [$tenant, $user] = $this->createUserWithAbilities(['task_types.manage']);
-        $targetTenant = Tenant::create(['name' => 'T2', 'features' => ['tasks']]);
-        $type1 = TaskType::create(['name' => 'T1', 'tenant_id' => $tenant->id]);
-        $type2 = TaskType::create(['name' => 'T2', 'tenant_id' => $tenant->id]);
+        $targetTenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T2', 'features' => ['tasks']
+        ]);
+        $type1 = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T1', 'tenant_id' => $tenant->id
+        ]);
+        $type2 = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T2', 'tenant_id' => $tenant->id
+        ]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/task-types/bulk-copy-to-tenant', [
@@ -78,10 +99,17 @@ class TaskTypeBulkActionsTest extends TestCase
 
     public function test_super_admin_can_bulk_copy_task_types_to_any_tenant(): void
     {
-        $sourceTenant = Tenant::create(['name' => 'T1', 'features' => ['tasks']]);
-        $targetTenant = Tenant::create(['name' => 'T2', 'features' => ['tasks']]);
+        $sourceTenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T1', 'features' => ['tasks']
+        ]);
+        $targetTenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T2', 'features' => ['tasks']
+        ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => null,
@@ -90,6 +118,7 @@ class TaskTypeBulkActionsTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'super@example.com',
             'password' => Hash::make('secret'),
@@ -100,8 +129,14 @@ class TaskTypeBulkActionsTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => $sourceTenant->id]);
         Sanctum::actingAs($user);
 
-        $type1 = TaskType::create(['name' => 'T1', 'tenant_id' => $sourceTenant->id]);
-        $type2 = TaskType::create(['name' => 'T2', 'tenant_id' => $sourceTenant->id]);
+        $type1 = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T1', 'tenant_id' => $sourceTenant->id
+        ]);
+        $type2 = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T2', 'tenant_id' => $sourceTenant->id
+        ]);
 
         $this->withHeader('X-Tenant-ID', $sourceTenant->id)
             ->postJson('/api/task-types/bulk-copy-to-tenant', [

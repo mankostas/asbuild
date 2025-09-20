@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class AuthMeClientAbilitiesTest extends TestCase
 {
@@ -17,6 +18,7 @@ class AuthMeClientAbilitiesTest extends TestCase
     public function test_client_scoped_abilities_are_partitioned(): void
     {
         $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Client Tenant',
             'features' => ['dashboard', 'tasks', 'reports'],
             'quota_storage_mb' => 0,
@@ -25,6 +27,7 @@ class AuthMeClientAbilitiesTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Client User',
             'email' => 'client@example.com',
             'password' => Hash::make('secret'),

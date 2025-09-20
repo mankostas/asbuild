@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskAutomationRunTest extends TestCase
 {
@@ -22,19 +23,30 @@ class TaskAutomationRunTest extends TestCase
     {
         Queue::fake();
 
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
             'tenant_id' => $tenant->id,
         ]);
 
-        TaskStatus::create(['slug' => 'draft', 'name' => 'Draft', 'tenant_id' => $tenant->id]);
-        TaskStatus::create(['slug' => 'completed', 'name' => 'Completed', 'tenant_id' => $tenant->id]);
+        TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 'draft', 'name' => 'Draft', 'tenant_id' => $tenant->id
+        ]);
+        TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 'completed', 'name' => 'Completed', 'tenant_id' => $tenant->id
+        ]);
 
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => $tenant->id,
             'schema_json' => ['sections' => []],
@@ -42,9 +54,13 @@ class TaskAutomationRunTest extends TestCase
             'status_flow_json' => [['draft', 'completed']],
         ]);
 
-        $team = Team::create(['tenant_id' => $tenant->id, 'name' => 'Team X']);
+        $team = Team::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'name' => 'Team X'
+        ]);
 
         TaskAutomation::create([
+            'public_id' => PublicIdGenerator::generate(),
             'task_type_id' => $type->id,
             'event' => 'status_changed',
             'conditions_json' => ['status' => 123],
@@ -53,6 +69,7 @@ class TaskAutomationRunTest extends TestCase
         ]);
 
         $task = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'user_id' => $user->id,
             'task_type_id' => $type->id,

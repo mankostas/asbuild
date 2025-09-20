@@ -16,6 +16,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskReportsTest extends TestCase
 {
@@ -25,8 +26,12 @@ class TaskReportsTest extends TestCase
     {
         Carbon::setTestNow('2025-01-10');
 
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks', 'reports']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks', 'reports']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => $tenant->id,
@@ -34,6 +39,7 @@ class TaskReportsTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -44,10 +50,17 @@ class TaskReportsTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
         Sanctum::actingAs($user);
 
-        $type = TaskType::create(['name' => 'Type', 'tenant_id' => $tenant->id]);
-        $status = TaskStatus::create(['slug' => 'completed', 'name' => 'Completed', 'tenant_id' => $tenant->id]);
+        $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Type', 'tenant_id' => $tenant->id
+        ]);
+        $status = TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 'completed', 'name' => 'Completed', 'tenant_id' => $tenant->id
+        ]);
 
         Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
@@ -59,6 +72,7 @@ class TaskReportsTest extends TestCase
         ]);
 
         Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
@@ -89,9 +103,13 @@ class TaskReportsTest extends TestCase
     {
         Carbon::setTestNow('2025-01-10 12:00:00');
 
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['reports']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['reports']
+        ]);
 
         $restrictedRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Restricted Reporter',
             'slug' => 'restricted_reporter',
             'tenant_id' => $tenant->id,
@@ -100,6 +118,7 @@ class TaskReportsTest extends TestCase
         ]);
 
         $generalRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Reporter',
             'slug' => 'reporter',
             'tenant_id' => $tenant->id,
@@ -108,6 +127,7 @@ class TaskReportsTest extends TestCase
         ]);
 
         $restrictedUser = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Restricted',
             'email' => 'restricted@example.com',
             'password' => Hash::make('secret'),
@@ -118,6 +138,7 @@ class TaskReportsTest extends TestCase
         $restrictedUser->roles()->attach($restrictedRole->id, ['tenant_id' => $tenant->id]);
 
         $generalUser = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'General',
             'email' => 'general@example.com',
             'password' => Hash::make('secret'),
@@ -128,6 +149,7 @@ class TaskReportsTest extends TestCase
         $generalUser->roles()->attach($generalRole->id, ['tenant_id' => $tenant->id]);
 
         $clientA = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'name' => 'Client A',
         ]);
@@ -135,11 +157,13 @@ class TaskReportsTest extends TestCase
         $clientA->save();
 
         $clientB = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'name' => 'Client B',
         ]);
 
         $fileA = File::create([
+            'public_id' => PublicIdGenerator::generate(),
             'path' => 'manuals/a.pdf',
             'filename' => 'a.pdf',
             'mime_type' => 'application/pdf',
@@ -147,6 +171,7 @@ class TaskReportsTest extends TestCase
         ]);
 
         $fileB = File::create([
+            'public_id' => PublicIdGenerator::generate(),
             'path' => 'manuals/b.pdf',
             'filename' => 'b.pdf',
             'mime_type' => 'application/pdf',
@@ -154,6 +179,7 @@ class TaskReportsTest extends TestCase
         ]);
 
         Manual::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'file_id' => $fileA->id,
             'category' => 'Safety',
@@ -162,6 +188,7 @@ class TaskReportsTest extends TestCase
         ]);
 
         Manual::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'file_id' => $fileB->id,
             'category' => 'Compliance',

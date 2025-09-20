@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskListFiltersTest extends TestCase
 {
@@ -20,8 +21,12 @@ class TaskListFiltersTest extends TestCase
 
     public function test_multi_filter_query_returns_expected(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => $tenant->id,
@@ -29,6 +34,7 @@ class TaskListFiltersTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -39,10 +45,17 @@ class TaskListFiltersTest extends TestCase
         $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
         Sanctum::actingAs($user);
 
-        $type = TaskType::create(['name' => 'Type', 'tenant_id' => $tenant->id]);
-        $status = TaskStatus::create(['slug' => 'open', 'name' => 'Open', 'tenant_id' => $tenant->id]);
+        $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Type', 'tenant_id' => $tenant->id
+        ]);
+        $status = TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 'open', 'name' => 'Open', 'tenant_id' => $tenant->id
+        ]);
 
         $matching = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
@@ -52,6 +65,7 @@ class TaskListFiltersTest extends TestCase
             'due_at' => '2025-01-10',
         ]);
         $file = File::create([
+            'public_id' => PublicIdGenerator::generate(),
             'path' => 'a',
             'filename' => 'a',
             'mime_type' => 'image/png',
@@ -60,6 +74,7 @@ class TaskListFiltersTest extends TestCase
         $matching->attachments()->attach($file->id);
 
         Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'user_id' => $user->id,
             'task_type_id' => $type->id,

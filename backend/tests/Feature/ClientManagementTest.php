@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class ClientManagementTest extends TestCase
 {
@@ -22,9 +23,13 @@ class ClientManagementTest extends TestCase
      */
     protected function createTenantUserWithAbilities(array $abilities = []): array
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['clients', 'tasks', 'task_types']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => ['clients', 'tasks', 'task_types']
+        ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Manager',
             'slug' => 'manager',
             'tenant_id' => $tenant->id,
@@ -33,6 +38,7 @@ class ClientManagementTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),
@@ -211,8 +217,12 @@ class ClientManagementTest extends TestCase
             'clients.view',
         ]);
 
-        $tenantB = Tenant::create(['name' => 'Tenant B', 'features' => ['clients', 'tasks', 'task_types']]);
+        $tenantB = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant B', 'features' => ['clients', 'tasks', 'task_types']
+        ]);
         $foreignClient = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenantB->id,
             'name' => 'Foreign',
             'email' => 'foreign@example.com',
@@ -235,28 +245,38 @@ class ClientManagementTest extends TestCase
 
     public function test_super_admin_can_list_clients_for_specific_tenant(): void
     {
-        $tenantA = Tenant::create(['name' => 'Tenant A', 'features' => ['clients', 'tasks', 'task_types']]);
-        $tenantB = Tenant::create(['name' => 'Tenant B', 'features' => ['clients', 'tasks', 'task_types']]);
+        $tenantA = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant A', 'features' => ['clients', 'tasks', 'task_types']
+        ]);
+        $tenantB = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant B', 'features' => ['clients', 'tasks', 'task_types']
+        ]);
 
         $clientA = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenantA->id,
             'name' => 'Tenant A Client',
             'email' => 'a@example.com',
         ]);
 
         $clientB1 = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenantB->id,
             'name' => 'Tenant B One',
             'email' => 'b1@example.com',
         ]);
 
         $clientB2 = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenantB->id,
             'name' => 'Tenant B Two',
             'email' => 'b2@example.com',
         ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => $tenantA->id,
@@ -265,6 +285,7 @@ class ClientManagementTest extends TestCase
         ]);
 
         $super = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Super',
             'email' => 'super@example.com',
             'password' => Hash::make('secret'),
@@ -301,8 +322,12 @@ class ClientManagementTest extends TestCase
             'clients.manage',
         ]);
 
-        $tenantB = Tenant::create(['name' => 'Tenant B', 'features' => ['clients', 'tasks', 'task_types']]);
+        $tenantB = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant B', 'features' => ['clients', 'tasks', 'task_types']
+        ]);
         $clientB = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenantB->id,
             'name' => 'Tenant B Client',
             'email' => 'tenant-b@example.com',
@@ -319,16 +344,24 @@ class ClientManagementTest extends TestCase
 
     public function test_super_admin_can_target_any_tenant_client(): void
     {
-        $tenantA = Tenant::create(['name' => 'A', 'features' => ['clients', 'task_types', 'tasks']]);
-        $tenantB = Tenant::create(['name' => 'B', 'features' => ['clients', 'task_types', 'tasks']]);
+        $tenantA = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'A', 'features' => ['clients', 'task_types', 'tasks']
+        ]);
+        $tenantB = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'B', 'features' => ['clients', 'task_types', 'tasks']
+        ]);
 
         $clientB = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenantB->id,
             'name' => 'Target',
             'email' => 'target@example.com',
         ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => $tenantA->id,
@@ -337,6 +370,7 @@ class ClientManagementTest extends TestCase
         ]);
 
         $super = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Super',
             'email' => 'super@example.com',
             'password' => Hash::make('secret'),
@@ -377,6 +411,7 @@ class ClientManagementTest extends TestCase
 
         $clients = collect(range(1, 3))->map(function (int $i) use ($tenant) {
             return Client::create([
+                'public_id' => PublicIdGenerator::generate(),
                 'tenant_id' => $tenant->id,
                 'name' => "Client {$i}",
                 'email' => "client{$i}@example.com",
@@ -404,15 +439,20 @@ class ClientManagementTest extends TestCase
             'clients.manage',
         ]);
 
-        $tenantB = Tenant::create(['name' => 'Tenant B', 'features' => ['clients', 'tasks', 'task_types']]);
+        $tenantB = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant B', 'features' => ['clients', 'tasks', 'task_types']
+        ]);
 
         $ownClient = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'name' => 'Local',
             'email' => 'local@example.com',
         ]);
 
         $foreignClient = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenantB->id,
             'name' => 'Foreign',
             'email' => 'foreign@example.com',
@@ -436,6 +476,7 @@ class ClientManagementTest extends TestCase
 
         $clients = collect(range(1, 2))->map(function (int $i) use ($tenant) {
             return Client::create([
+                'public_id' => PublicIdGenerator::generate(),
                 'tenant_id' => $tenant->id,
                 'name' => "Client {$i}",
                 'email' => "client{$i}@example.com",
@@ -462,15 +503,20 @@ class ClientManagementTest extends TestCase
             'clients.manage',
         ]);
 
-        $tenantB = Tenant::create(['name' => 'Tenant B', 'features' => ['clients', 'tasks', 'task_types']]);
+        $tenantB = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant B', 'features' => ['clients', 'tasks', 'task_types']
+        ]);
 
         $ownClient = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenant->id,
             'name' => 'Local',
             'email' => 'local@example.com',
         ]);
 
         $foreignClient = Client::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => $tenantB->id,
             'name' => 'Foreign',
             'email' => 'foreign@example.com',

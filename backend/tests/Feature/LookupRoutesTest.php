@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class LookupRoutesTest extends TestCase
 {
@@ -19,14 +20,19 @@ class LookupRoutesTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $tenant = Tenant::create(['name' => 'Test Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Test Tenant'
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'ClientAdmin',
             'slug' => 'client_admin',
             'tenant_id' => $tenant->id,
             'abilities' => ['roles.manage'],
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Test User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),
@@ -78,13 +84,18 @@ class LookupRoutesTest extends TestCase
     {
         $this->tenant->update(['features' => ['tasks']]);
 
-        $rootTenant = Tenant::create(['name' => 'Root']);
+        $rootTenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Root'
+        ]);
         $superRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'tenant_id' => $rootTenant->id,
             'level' => 0,
         ]);
         $superUser = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Super',
             'email' => 'super@example.com',
             'password' => Hash::make('secret'),

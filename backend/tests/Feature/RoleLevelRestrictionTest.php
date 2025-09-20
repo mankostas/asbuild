@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class RoleLevelRestrictionTest extends TestCase
 {
@@ -16,8 +17,12 @@ class RoleLevelRestrictionTest extends TestCase
 
     public function test_cannot_manage_role_above_level(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant'
+        ]);
         $adminRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Manager',
             'slug' => 'manager',
             'tenant_id' => $tenant->id,
@@ -25,6 +30,7 @@ class RoleLevelRestrictionTest extends TestCase
             'abilities' => ['roles.manage'],
         ]);
         $higherRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Supervisor',
             'slug' => 'supervisor',
             'tenant_id' => $tenant->id,
@@ -32,6 +38,7 @@ class RoleLevelRestrictionTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('secret'),
@@ -59,10 +66,17 @@ class RoleLevelRestrictionTest extends TestCase
 
     public function test_index_scopes_roles_to_tenant_and_level(): void
     {
-        $tenant1 = Tenant::create(['name' => 'Tenant1']);
-        $tenant2 = Tenant::create(['name' => 'Tenant2']);
+        $tenant1 = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant1'
+        ]);
+        $tenant2 = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant2'
+        ]);
 
         $managerRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Manager',
             'slug' => 'manager',
             'tenant_id' => $tenant1->id,
@@ -70,13 +84,29 @@ class RoleLevelRestrictionTest extends TestCase
             'abilities' => ['roles.manage'],
         ]);
 
-        $allowed1 = Role::create(['name' => 'Assistant', 'slug' => 'assistant', 'tenant_id' => $tenant1->id, 'level' => 2]);
-        $allowed2 = Role::create(['name' => 'Helper', 'slug' => 'helper', 'tenant_id' => $tenant1->id, 'level' => 3]);
-        $disallowed = Role::create(['name' => 'Supervisor', 'slug' => 'supervisor', 'tenant_id' => $tenant1->id, 'level' => 1]);
-        $otherTenant = Role::create(['name' => 'Other', 'slug' => 'other', 'tenant_id' => $tenant2->id, 'level' => 2]);
-        $global = Role::create(['name' => 'Global', 'slug' => 'global']);
+        $allowed1 = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Assistant', 'slug' => 'assistant', 'tenant_id' => $tenant1->id, 'level' => 2
+        ]);
+        $allowed2 = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Helper', 'slug' => 'helper', 'tenant_id' => $tenant1->id, 'level' => 3
+        ]);
+        $disallowed = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Supervisor', 'slug' => 'supervisor', 'tenant_id' => $tenant1->id, 'level' => 1
+        ]);
+        $otherTenant = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Other', 'slug' => 'other', 'tenant_id' => $tenant2->id, 'level' => 2
+        ]);
+        $global = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Global', 'slug' => 'global'
+        ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('secret'),

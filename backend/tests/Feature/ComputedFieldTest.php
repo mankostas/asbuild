@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class ComputedFieldTest extends TestCase
 {
@@ -18,8 +19,12 @@ class ComputedFieldTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Tenant::create(['id' => 1, 'name' => 'T', 'features' => ['tasks']]);
+        Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'id' => 1, 'name' => 'T', 'features' => ['tasks']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => 1,
@@ -27,6 +32,7 @@ class ComputedFieldTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -54,6 +60,7 @@ class ComputedFieldTest extends TestCase
             ],
         ];
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'T',
             'tenant_id' => 1,
             'schema_json' => $schema,

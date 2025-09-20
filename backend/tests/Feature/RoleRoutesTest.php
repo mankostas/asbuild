@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class RoleRoutesTest extends TestCase
 {
@@ -19,14 +20,19 @@ class RoleRoutesTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $tenant = Tenant::create(['name' => 'Test Tenant']);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Test Tenant'
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'ClientAdmin',
             'slug' => 'client_admin',
             'tenant_id' => $tenant->id,
             'abilities' => ['roles.manage'],
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Test User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),
@@ -99,14 +105,30 @@ class RoleRoutesTest extends TestCase
 
     public function test_super_admin_filters_roles_by_tenant(): void
     {
-        $tenantA = Tenant::create(['name' => 'Tenant A']);
-        $tenantB = Tenant::create(['name' => 'Tenant B']);
+        $tenantA = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant A'
+        ]);
+        $tenantB = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant B'
+        ]);
 
-        Role::create(['name' => 'Global', 'slug' => 'global']);
-        Role::create(['name' => 'Role A', 'slug' => 'role_a', 'tenant_id' => $tenantA->id]);
-        $roleB = Role::create(['name' => 'Role B', 'slug' => 'role_b', 'tenant_id' => $tenantB->id]);
+        Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Global', 'slug' => 'global'
+        ]);
+        Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Role A', 'slug' => 'role_a', 'tenant_id' => $tenantA->id
+        ]);
+        $roleB = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Role B', 'slug' => 'role_b', 'tenant_id' => $tenantB->id
+        ]);
 
         $superRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => $tenantA->id,
@@ -115,6 +137,7 @@ class RoleRoutesTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Super',
             'email' => 'super@example.com',
             'password' => Hash::make('secret'),

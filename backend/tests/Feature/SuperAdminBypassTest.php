@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class SuperAdminBypassTest extends TestCase
 {
@@ -16,8 +17,12 @@ class SuperAdminBypassTest extends TestCase
 
     public function test_super_admin_can_assign_any_ability(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => ['tasks']
+        ]);
         $superRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => null,
@@ -26,6 +31,7 @@ class SuperAdminBypassTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Root',
             'email' => 'root@example.com',
             'password' => Hash::make('secret'),

@@ -12,6 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskBoardMoveTest extends TestCase
 {
@@ -20,12 +21,27 @@ class TaskBoardMoveTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Tenant::create(['id' => 1, 'name' => 'T', 'features' => ['tasks']]);
+        Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'id' => 1, 'name' => 'T', 'features' => ['tasks']
+        ]);
 
-        TaskStatus::create(['slug' => 'draft', 'name' => 'Draft', 'tenant_id' => 1]);
-        TaskStatus::create(['slug' => 'assigned', 'name' => 'Assigned', 'tenant_id' => 1]);
-        TaskStatus::create(['slug' => 'in_progress', 'name' => 'In Progress', 'tenant_id' => 1]);
-        TaskStatus::create(['slug' => 'completed', 'name' => 'Completed', 'tenant_id' => 1]);
+        TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 'draft', 'name' => 'Draft', 'tenant_id' => 1
+        ]);
+        TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 'assigned', 'name' => 'Assigned', 'tenant_id' => 1
+        ]);
+        TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 'in_progress', 'name' => 'In Progress', 'tenant_id' => 1
+        ]);
+        TaskStatus::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'slug' => 'completed', 'name' => 'Completed', 'tenant_id' => 1
+        ]);
     }
 
     protected function user(bool $manage = false): User
@@ -35,6 +51,7 @@ class TaskBoardMoveTest extends TestCase
             $abilities[] = 'tasks.manage';
         }
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => $manage ? 'manager' : 'user',
             'tenant_id' => 1,
@@ -42,6 +59,7 @@ class TaskBoardMoveTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => ($manage ? 'm' : 'u') . '@example.com',
             'password' => Hash::make('secret'),
@@ -57,6 +75,7 @@ class TaskBoardMoveTest extends TestCase
     protected function makeTask(User $user): Task
     {
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => 1,
             'statuses' => ['draft' => [], 'assigned' => [], 'in_progress' => [], 'completed' => []],
@@ -68,6 +87,7 @@ class TaskBoardMoveTest extends TestCase
         ]);
 
         return Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => 1,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
@@ -117,6 +137,7 @@ class TaskBoardMoveTest extends TestCase
         $user = $this->user();
 
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => 1,
             'statuses' => ['draft' => [], 'assigned' => [], 'in_progress' => [], 'completed' => []],
@@ -128,6 +149,7 @@ class TaskBoardMoveTest extends TestCase
         ]);
 
         $taskA = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => 1,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
@@ -137,6 +159,7 @@ class TaskBoardMoveTest extends TestCase
         ]);
 
         $taskB = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => 1,
             'user_id' => $user->id,
             'task_type_id' => $type->id,
@@ -146,6 +169,7 @@ class TaskBoardMoveTest extends TestCase
         ]);
 
         $taskC = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
             'tenant_id' => 1,
             'user_id' => $user->id,
             'task_type_id' => $type->id,

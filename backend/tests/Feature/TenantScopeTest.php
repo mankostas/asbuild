@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TenantScopeTest extends TestCase
 {
@@ -16,9 +17,16 @@ class TenantScopeTest extends TestCase
 
     public function test_super_admin_bypasses_tenant_scope(): void
     {
-        $tenant = Tenant::create(['name' => 'One']);
-        $role = Role::create(['name' => 'SuperAdmin', 'slug' => 'super_admin', 'tenant_id' => $tenant->id]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'One'
+        ]);
+        $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'SuperAdmin', 'slug' => 'super_admin', 'tenant_id' => $tenant->id
+        ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SA',
             'email' => 'sa@example.com',
             'password' => Hash::make('secret'),
@@ -34,15 +42,23 @@ class TenantScopeTest extends TestCase
 
     public function test_tenant_isolation_enforced(): void
     {
-        $tenant1 = Tenant::create(['name' => 'One']);
-        $tenant2 = Tenant::create(['name' => 'Two']);
+        $tenant1 = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'One'
+        ]);
+        $tenant2 = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Two'
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'ClientAdmin',
             'slug' => 'client_admin',
             'tenant_id' => $tenant1->id,
             'abilities' => ['roles.manage'],
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),

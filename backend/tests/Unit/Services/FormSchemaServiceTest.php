@@ -5,6 +5,7 @@ namespace Tests\Unit\Services;
 use App\Models\Team;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\PublicIdGenerator;
 use App\Services\FormSchemaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
@@ -20,12 +21,16 @@ class FormSchemaServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->tenant = Tenant::create(['name' => 'Acme Inc.']);
+        $this->tenant = Tenant::create([
+            'name' => 'Acme Inc.',
+            'public_id' => PublicIdGenerator::generate(),
+        ]);
     }
 
     public function test_map_assignee_resolves_public_id_from_form_data(): void
     {
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'password' => bcrypt('password'),
@@ -62,6 +67,7 @@ class FormSchemaServiceTest extends TestCase
     public function test_map_reviewer_resolves_public_id_from_form_data(): void
     {
         $team = Team::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Support',
             'tenant_id' => $this->tenant->id,
         ]);

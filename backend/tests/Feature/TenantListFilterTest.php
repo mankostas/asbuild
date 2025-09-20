@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TenantListFilterTest extends TestCase
 {
@@ -17,6 +18,7 @@ class TenantListFilterTest extends TestCase
     private function actAsSuperAdminForTenant(Tenant $homeTenant, array $abilities = ['tenants.view']): User
     {
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => $homeTenant->id,
@@ -25,6 +27,7 @@ class TenantListFilterTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Root',
             'email' => 'root@example.com',
             'password' => Hash::make('secret'),
@@ -42,8 +45,14 @@ class TenantListFilterTest extends TestCase
 
     public function test_super_admin_can_filter_tenants_by_id(): void
     {
-        $tenantA = Tenant::create(['name' => 'Alpha']);
-        $tenantB = Tenant::create(['name' => 'Beta']);
+        $tenantA = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Alpha'
+        ]);
+        $tenantB = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Beta'
+        ]);
 
         $this->actAsSuperAdminForTenant($tenantA);
 
@@ -62,9 +71,18 @@ class TenantListFilterTest extends TestCase
 
     public function test_super_admin_can_search_tenants_by_partial_name(): void
     {
-        $tenantA = Tenant::create(['name' => 'Alpha Manufacturing']);
-        $tenantB = Tenant::create(['name' => 'Beta Logistics']);
-        $tenantC = Tenant::create(['name' => 'Gamma Research']);
+        $tenantA = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Alpha Manufacturing'
+        ]);
+        $tenantB = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Beta Logistics'
+        ]);
+        $tenantC = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Gamma Research'
+        ]);
 
         $this->actAsSuperAdminForTenant($tenantA);
 

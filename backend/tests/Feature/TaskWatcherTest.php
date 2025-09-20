@@ -11,6 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskWatcherTest extends TestCase
 {
@@ -18,8 +19,12 @@ class TaskWatcherTest extends TestCase
 
     public function test_user_can_follow_and_unfollow_task(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $reporter = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Reporter',
             'email' => 'r@example.com',
             'password' => Hash::make('secret'),
@@ -27,9 +32,13 @@ class TaskWatcherTest extends TestCase
             'phone' => '123456',
             'address' => 'Street 1',
         ]);
-        $task = Task::create(['tenant_id' => $tenant->id, 'user_id' => $reporter->id]);
+        $task = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'user_id' => $reporter->id
+        ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Watcher',
             'slug' => 'watcher',
             'tenant_id' => $tenant->id,
@@ -38,6 +47,7 @@ class TaskWatcherTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -69,10 +79,17 @@ class TaskWatcherTest extends TestCase
 
     public function test_cross_tenant_watch_fails(): void
     {
-        $tenant1 = Tenant::create(['name' => 'One', 'features' => ['tasks']]);
-        $tenant2 = Tenant::create(['name' => 'Two', 'features' => ['tasks']]);
+        $tenant1 = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'One', 'features' => ['tasks']
+        ]);
+        $tenant2 = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Two', 'features' => ['tasks']
+        ]);
 
         $reporter = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Reporter',
             'email' => 'r@example.com',
             'password' => Hash::make('secret'),
@@ -80,9 +97,13 @@ class TaskWatcherTest extends TestCase
             'phone' => '123456',
             'address' => 'Street 1',
         ]);
-        $task = Task::create(['tenant_id' => $tenant1->id, 'user_id' => $reporter->id]);
+        $task = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant1->id, 'user_id' => $reporter->id
+        ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Watcher',
             'slug' => 'watcher',
             'tenant_id' => $tenant2->id,
@@ -90,6 +111,7 @@ class TaskWatcherTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -112,8 +134,12 @@ class TaskWatcherTest extends TestCase
 
     public function test_default_watchers_added(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
         $reporter = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Reporter',
             'email' => 'r@example.com',
             'password' => Hash::make('secret'),
@@ -122,6 +148,7 @@ class TaskWatcherTest extends TestCase
             'address' => 'Street 1',
         ]);
         $assignee = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Assignee',
             'email' => 'a@example.com',
             'password' => Hash::make('secret'),
@@ -130,6 +157,7 @@ class TaskWatcherTest extends TestCase
             'address' => 'Street 1',
         ]);
         $mentioned = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Mention',
             'email' => 'm@example.com',
             'password' => Hash::make('secret'),
@@ -138,6 +166,7 @@ class TaskWatcherTest extends TestCase
             'address' => 'Street 1',
         ]);
         $mentionRole = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Viewer',
             'slug' => 'viewer',
             'tenant_id' => $tenant->id,
@@ -147,6 +176,7 @@ class TaskWatcherTest extends TestCase
         $mentioned->roles()->attach($mentionRole->id, ['tenant_id' => $tenant->id]);
 
         $type = TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'schema_json' => [
                 'sections' => [
@@ -163,6 +193,7 @@ class TaskWatcherTest extends TestCase
         ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Creator',
             'slug' => 'creator',
             'tenant_id' => $tenant->id,

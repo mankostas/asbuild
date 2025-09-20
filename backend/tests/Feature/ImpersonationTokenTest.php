@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class ImpersonationTokenTest extends TestCase
 {
@@ -14,9 +15,13 @@ class ImpersonationTokenTest extends TestCase
 
     public function test_impersonation_token_cannot_access_super_admin_routes(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => ['tasks']
+        ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),
@@ -32,9 +37,13 @@ class ImpersonationTokenTest extends TestCase
 
     public function test_impersonation_token_has_tenant_access(): void
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['tasks']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => ['tasks']
+        ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'email' => 'user@example.com',
             'password' => Hash::make('secret'),

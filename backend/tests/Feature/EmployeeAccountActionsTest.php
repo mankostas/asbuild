@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class EmployeeAccountActionsTest extends TestCase
 {
@@ -95,9 +96,13 @@ class EmployeeAccountActionsTest extends TestCase
      */
     protected function createTenantAdmin(array $abilities): array
     {
-        $tenant = Tenant::create(['name' => 'Tenant', 'features' => ['employees']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'Tenant', 'features' => ['employees']
+        ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'slug' => 'admin',
             'tenant_id' => $tenant->id,
@@ -105,6 +110,7 @@ class EmployeeAccountActionsTest extends TestCase
         ]);
 
         $admin = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('secret'),
@@ -128,6 +134,7 @@ class EmployeeAccountActionsTest extends TestCase
     protected function createEmployee(Tenant $tenant, string $name, string $email): User
     {
         return User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => $name,
             'email' => $email,
             'password' => Hash::make('secret'),

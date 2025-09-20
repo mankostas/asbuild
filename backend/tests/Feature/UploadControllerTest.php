@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class UploadControllerTest extends TestCase
 {
@@ -21,9 +22,16 @@ class UploadControllerTest extends TestCase
     public function test_finalize_attaches_file_to_task_with_field_and_section(): void
     {
         Storage::fake('local');
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
-        $role = Role::create(['name' => 'User', 'slug' => 'user', 'tenant_id' => $tenant->id, 'abilities' => ['tasks.attach.upload'], 'level' => 1]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
+        $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'User', 'slug' => 'user', 'tenant_id' => $tenant->id, 'abilities' => ['tasks.attach.upload'], 'level' => 1
+        ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -32,7 +40,10 @@ class UploadControllerTest extends TestCase
             'address' => 'Street 1',
         ]);
         $user->roles()->attach($role->id, ['tenant_id' => $tenant->id]);
-        $task = Task::create(['tenant_id' => $tenant->id, 'user_id' => $user->id]);
+        $task = Task::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'tenant_id' => $tenant->id, 'user_id' => $user->id
+        ]);
         Sanctum::actingAs($user);
 
         $file = UploadedFile::fake()->image('test.jpg', 100, 100)->size(100);
@@ -63,9 +74,16 @@ class UploadControllerTest extends TestCase
     public function test_chunk_validates_mime_and_size(): void
     {
         Storage::fake('local');
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks']]);
-        $role = Role::create(['name' => 'User', 'slug' => 'user', 'tenant_id' => $tenant->id, 'abilities' => ['tasks.attach.upload'], 'level' => 1]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks']
+        ]);
+        $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'User', 'slug' => 'user', 'tenant_id' => $tenant->id, 'abilities' => ['tasks.attach.upload'], 'level' => 1
+        ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u2@example.com',
             'password' => Hash::make('secret'),

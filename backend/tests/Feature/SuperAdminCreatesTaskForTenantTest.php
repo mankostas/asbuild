@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class SuperAdminCreatesTaskForTenantTest extends TestCase
 {
@@ -16,16 +17,24 @@ class SuperAdminCreatesTaskForTenantTest extends TestCase
 
     public function test_super_admin_can_create_task_for_selected_tenant(): void
     {
-        $tenantA = Tenant::create(['name' => 'A', 'features' => ['tasks']]);
-        $tenantB = Tenant::create(['name' => 'B', 'features' => ['tasks']]);
+        $tenantA = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'A', 'features' => ['tasks']
+        ]);
+        $tenantB = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'B', 'features' => ['tasks']
+        ]);
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => $tenantA->id,
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SA',
             'email' => 'sa@example.com',
             'password' => Hash::make('secret'),

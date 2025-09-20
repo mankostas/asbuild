@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TenantManagementTest extends TestCase
 {
@@ -23,6 +24,7 @@ class TenantManagementTest extends TestCase
     private function actingAsSuperAdmin(): array
     {
         $homeTenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Home Tenant',
             'features' => ['tenants'],
             'feature_abilities' => ['tenants' => ['tenants.manage']],
@@ -31,6 +33,7 @@ class TenantManagementTest extends TestCase
         DefaultFeatureRolesSeeder::syncDefaultRolesForFeatures($homeTenant, $homeTenant->selectedFeatureAbilities());
 
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'SuperAdmin',
             'slug' => 'super_admin',
             'tenant_id' => $homeTenant->id,
@@ -39,6 +42,7 @@ class TenantManagementTest extends TestCase
         ]);
 
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Root User',
             'email' => 'root@example.com',
             'password' => Hash::make('secret'),
@@ -162,6 +166,7 @@ class TenantManagementTest extends TestCase
         Password::shouldReceive('sendResetLink')->never();
 
         $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Gamma Inc',
             'features' => ['tasks'],
             'feature_abilities' => [

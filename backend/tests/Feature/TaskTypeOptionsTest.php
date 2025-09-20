@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Support\PublicIdGenerator;
 
 class TaskTypeOptionsTest extends TestCase
 {
@@ -24,6 +25,7 @@ class TaskTypeOptionsTest extends TestCase
     private function seedType(Tenant $tenant, User $user): void
     {
         TaskType::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'Type',
             'tenant_id' => $tenant->id,
             'schema_json' => ['sections' => []],
@@ -34,8 +36,12 @@ class TaskTypeOptionsTest extends TestCase
 
     public function test_tasks_create_user_can_fetch_options(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks', 'task_types']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks', 'task_types']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => $tenant->id,
@@ -43,6 +49,7 @@ class TaskTypeOptionsTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -63,8 +70,12 @@ class TaskTypeOptionsTest extends TestCase
 
     public function test_tasks_create_user_can_create_task(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks', 'task_types']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks', 'task_types']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => $tenant->id,
@@ -72,6 +83,7 @@ class TaskTypeOptionsTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U',
             'email' => 'u@example.com',
             'password' => Hash::make('secret'),
@@ -93,8 +105,12 @@ class TaskTypeOptionsTest extends TestCase
 
     public function test_missing_ability_cannot_fetch_options(): void
     {
-        $tenant = Tenant::create(['name' => 'T', 'features' => ['tasks', 'task_types']]);
+        $tenant = Tenant::create([
+            'public_id' => PublicIdGenerator::generate(),
+            'name' => 'T', 'features' => ['tasks', 'task_types']
+        ]);
         $role = Role::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'User',
             'slug' => 'user',
             'tenant_id' => $tenant->id,
@@ -102,6 +118,7 @@ class TaskTypeOptionsTest extends TestCase
             'level' => 1,
         ]);
         $user = User::create([
+            'public_id' => PublicIdGenerator::generate(),
             'name' => 'U2',
             'email' => 'u2@example.com',
             'password' => Hash::make('secret'),
