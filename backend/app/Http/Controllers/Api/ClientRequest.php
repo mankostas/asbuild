@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\Concerns\ResolvesPublicIds;
 use App\Models\Client;
+use App\Models\Tenant;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ClientRequest extends FormRequest
 {
+    use ResolvesPublicIds;
+
     public function authorize(): bool
     {
         return true;
@@ -18,7 +23,9 @@ class ClientRequest extends FormRequest
         $tenantRules = [];
 
         if ($this->user()?->isSuperAdmin()) {
-            $tenantRules = $isCreate ? ['required', 'integer', 'exists:tenants,id'] : ['sometimes', 'integer', 'exists:tenants,id'];
+            $tenantRules = $isCreate
+                ? ['required', 'string', 'ulid', Rule::exists('tenants', 'public_id')]
+                : ['sometimes', 'string', 'ulid', Rule::exists('tenants', 'public_id')];
         } else {
             $tenantRules = ['prohibited'];
         }
@@ -58,6 +65,16 @@ class ClientRequest extends FormRequest
     {
         $data = parent::validated($key, $default);
 
+        if ($this->user()->isSuperAdmin() && array_key_exists('tenant_id', $data)) {
+            $tenantId = $this->resolvePublicId(Tenant::class, $data['tenant_id']);
+
+            if ($tenantId === null && $data['tenant_id'] !== null) {
+                $data['tenant_id'] = null;
+            } else {
+                $data['tenant_id'] = $tenantId;
+            }
+        }
+
         if (! $this->user()->isSuperAdmin()) {
             unset($data['tenant_id']);
         }
@@ -71,7 +88,7 @@ class ClientRequest extends FormRequest
     {
         if ($this->user()?->isSuperAdmin()) {
             if ($this->has('tenant_id')) {
-                return (int) $this->input('tenant_id');
+                return $this->resolvePublicId(Tenant::class, $this->input('tenant_id'));
             }
 
             if ($this->route('client') instanceof Client) {
@@ -80,7 +97,15 @@ class ClientRequest extends FormRequest
 
             $attributeTenant = $this->attributes->get('tenant_id');
 
-            return $attributeTenant !== null ? (int) $attributeTenant : null;
+            if ($attributeTenant instanceof Tenant) {
+                return (int) $attributeTenant->getKey();
+            }
+
+            if (is_string($attributeTenant) || is_int($attributeTenant)) {
+                return $this->resolvePublicId(Tenant::class, $attributeTenant);
+            }
+
+            return null;
         }
 
         return $this->user()?->tenant_id;

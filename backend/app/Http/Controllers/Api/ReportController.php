@@ -23,9 +23,9 @@ class ReportController extends Controller
     protected function clientFilterRules(): array
     {
         return [
-            'client_id' => ['sometimes', 'integer', Rule::exists('clients', 'id')],
+            'client_id' => ['sometimes', 'string', 'ulid', Rule::exists('clients', 'public_id')],
             'client_ids' => ['sometimes', 'array'],
-            'client_ids.*' => ['integer', Rule::exists('clients', 'id')],
+            'client_ids.*' => ['string', 'ulid', Rule::exists('clients', 'public_id')],
         ];
     }
 

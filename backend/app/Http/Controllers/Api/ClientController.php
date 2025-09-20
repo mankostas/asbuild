@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Mail\ClientWelcomeMail;
 use App\Models\Client;
+use App\Models\Tenant;
 use App\Support\ListQuery;
+use App\Support\PublicIdResolver;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Mail;
@@ -13,6 +15,10 @@ use Illuminate\Support\Facades\Mail;
 class ClientController extends Controller
 {
     use ListQuery;
+
+    public function __construct(private PublicIdResolver $publicIdResolver)
+    {
+    }
 
     public function index(Request $request)
     {
@@ -22,12 +28,28 @@ class ClientController extends Controller
 
         if ($request->user()->isSuperAdmin()) {
             if ($request->filled('tenant_id')) {
-                $query->where('tenant_id', (int) $request->input('tenant_id'));
+                $tenantId = $this->resolveTenantIdentifier($request->input('tenant_id'));
+
+                if ($tenantId === null && $request->input('tenant_id') !== null && $request->input('tenant_id') !== '') {
+                    $query->whereRaw('1 = 0');
+                } elseif ($tenantId !== null) {
+                    $query->where('tenant_id', $tenantId);
+                }
             } elseif ($request->attributes->get('tenant_id')) {
-                $query->where('tenant_id', (int) $request->attributes->get('tenant_id'));
+                $tenantId = $this->resolveTenantIdentifier($request->attributes->get('tenant_id'));
+
+                if ($tenantId !== null) {
+                    $query->where('tenant_id', $tenantId);
+                }
             }
         } else {
-            $query->where('tenant_id', (int) $request->attributes->get('tenant_id'));
+            $tenantId = $this->resolveTenantIdentifier($request->attributes->get('tenant_id'));
+
+            if ($tenantId !== null) {
+                $query->where('tenant_id', $tenantId);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         }
 
         $archived = $request->query('archived');
@@ -114,9 +136,15 @@ class ClientController extends Controller
         return response()->json(['message' => 'deleted']);
     }
 
-    public function restore(int $client)
+    public function restore(string $client)
     {
-        $model = Client::withTrashed()->findOrFail($client);
+        $clientId = $this->publicIdResolver->resolve(Client::class, $client);
+
+        if ($clientId === null) {
+            abort(404);
+        }
+
+        $model = Client::withTrashed()->findOrFail($clientId);
         $this->authorize('restore', $model);
 
         $model->restore();
@@ -146,12 +174,25 @@ class ClientController extends Controller
 
     public function bulkArchive(Request $request)
     {
-        $data = $request->validate([
-            'ids' => ['required', 'array'],
-            'ids.*' => ['integer'],
-        ]);
+        $input = $request->all();
+        if (isset($input['ids']) && is_array($input['ids'])) {
+            $input['ids'] = array_map(static fn ($value) => is_string($value) ? $value : (string) $value, $input['ids']);
+        }
 
-        $clients = Client::query()->whereIn('id', $data['ids'])->get();
+        $data = validator($input, [
+            'ids' => ['required', 'array'],
+            'ids.*' => ['string'],
+        ])->validate();
+
+        $normalized = $this->normalizeIdentifiers($data['ids']);
+        $ids = $this->resolveClientIdentifiers($normalized);
+
+        if (count($ids) !== count($normalized)) {
+            throw ValidationException::withMessages([
+                'ids' => ['One or more clients are invalid.'],
+            ]);
+        }
+        $clients = Client::query()->whereIn('id', $ids)->get();
 
         $clients->each(function (Client $client) {
             $this->authorize('archive', $client);
@@ -173,12 +214,25 @@ class ClientController extends Controller
 
     public function bulkDestroy(Request $request)
     {
-        $data = $request->validate([
-            'ids' => ['required', 'array'],
-            'ids.*' => ['integer'],
-        ]);
+        $input = $request->all();
+        if (isset($input['ids']) && is_array($input['ids'])) {
+            $input['ids'] = array_map(static fn ($value) => is_string($value) ? $value : (string) $value, $input['ids']);
+        }
 
-        $clients = Client::query()->whereIn('id', $data['ids'])->get();
+        $data = validator($input, [
+            'ids' => ['required', 'array'],
+            'ids.*' => ['string'],
+        ])->validate();
+
+        $normalized = $this->normalizeIdentifiers($data['ids']);
+        $ids = $this->resolveClientIdentifiers($normalized);
+
+        if (count($ids) !== count($normalized)) {
+            throw ValidationException::withMessages([
+                'ids' => ['One or more clients are invalid.'],
+            ]);
+        }
+        $clients = Client::query()->whereIn('id', $ids)->get();
 
         $clients->each(function (Client $client) {
             $this->authorize('delete', $client);
@@ -199,5 +253,60 @@ class ClientController extends Controller
         $client->save();
 
         return new ClientResource($client);
+    }
+
+    private function resolveTenantIdentifier(mixed $identifier): ?int
+    {
+        if ($identifier instanceof Tenant) {
+            return (int) $identifier->getKey();
+        }
+
+        if ($identifier === null || $identifier === '') {
+            return null;
+        }
+
+        return $this->publicIdResolver->resolve(Tenant::class, $identifier);
+    }
+
+    private function resolveClientIdentifiers(array $identifiers): array
+    {
+        $resolved = [];
+
+        foreach ($identifiers as $identifier) {
+            if (is_string($identifier)) {
+                $identifier = trim($identifier);
+
+                if ($identifier === '') {
+                    continue;
+                }
+            }
+
+            $id = $this->publicIdResolver->resolve(Client::class, $identifier);
+
+            if ($id !== null) {
+                $resolved[] = $id;
+            }
+        }
+
+        return array_values(array_unique($resolved));
+    }
+
+    private function normalizeIdentifiers(array $identifiers): array
+    {
+        $normalized = [];
+
+        foreach ($identifiers as $identifier) {
+            if (is_string($identifier)) {
+                $identifier = trim($identifier);
+            }
+
+            if ($identifier === null || $identifier === '') {
+                continue;
+            }
+
+            $normalized[] = is_string($identifier) ? $identifier : (string) $identifier;
+        }
+
+        return array_values(array_unique($normalized));
     }
 }
