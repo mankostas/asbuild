@@ -14,6 +14,7 @@ class TaskResource extends JsonResource
     public function toArray($request): array
     {
         $data = parent::toArray($request);
+        $data['id'] = $this->public_id;
         $data['status_slug'] = TaskStatus::stripPrefix($data['status_slug'] ?? '');
         $data['previous_status_slug'] = isset($data['previous_status_slug'])
             ? TaskStatus::stripPrefix($data['previous_status_slug'])
@@ -21,7 +22,7 @@ class TaskResource extends JsonResource
 
         if ($this->assignee) {
             $data['assignee'] = [
-                'id' => $this->assignee->id,
+                'id' => $this->assignee->public_id,
                 'name' => $this->assignee->name,
             ];
         } else {
@@ -33,7 +34,7 @@ class TaskResource extends JsonResource
         if ($this->relationLoaded('client') || $this->client) {
             $data['client'] = $this->client
                 ? [
-                    'id' => $this->client->id,
+                    'id' => $this->client->public_id,
                     'name' => $this->client->name,
                 ]
                 : null;

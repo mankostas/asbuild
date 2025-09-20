@@ -12,14 +12,14 @@ class TaskCommentResource extends JsonResource
     public function toArray($request): array
     {
         return $this->formatDates([
-            'id' => $this->id,
+            'id' => $this->public_id,
             'body' => $this->body,
             'user' => [
-                'id' => $this->user->id,
+                'id' => $this->user->public_id,
                 'name' => $this->user->name,
             ],
             'mentions' => $this->mentions->map(fn ($u) => [
-                'id' => $u->id,
+                'id' => $u->public_id,
                 'name' => $u->name,
             ])->values(),
             'created_at' => $this->created_at,

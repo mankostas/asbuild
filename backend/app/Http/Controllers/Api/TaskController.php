@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Client;
 use App\Models\Task;
 use App\Models\TaskType;
 use App\Models\TaskStatus;
+use App\Models\User;
 use App\Services\AbilityService;
 use App\Services\FormSchemaService;
 use App\Services\StatusFlowService;
 use App\Http\Resources\TaskResource;
+use App\Support\PublicIdResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -22,7 +25,8 @@ class TaskController extends Controller
 
     public function __construct(
         private FormSchemaService $formSchemaService,
-        private StatusFlowService $statusFlow
+        private StatusFlowService $statusFlow,
+        private PublicIdResolver $publicIdResolver
     ) {
     }
 
@@ -35,7 +39,10 @@ class TaskController extends Controller
             ->withCount(['comments', 'attachments', 'watchers', 'subtasks']);
 
         if ($type = $request->query('type')) {
-            $base->where('task_type_id', $type);
+            $resolvedType = $this->publicIdResolver->resolve(TaskType::class, $type);
+            if ($resolvedType !== null) {
+                $base->where('task_type_id', $resolvedType);
+            }
         }
 
         if ($status = $request->query('status')) {
@@ -43,7 +50,10 @@ class TaskController extends Controller
         }
 
         if ($assignee = $request->query('assignee')) {
-            $base->where('assigned_user_id', $assignee);
+            $resolvedAssignee = $this->publicIdResolver->resolve(User::class, $assignee);
+            if ($resolvedAssignee !== null) {
+                $base->where('assigned_user_id', $resolvedAssignee);
+            }
         }
 
         if ($priority = $request->query('priority')) {
@@ -51,7 +61,10 @@ class TaskController extends Controller
         }
 
         if ($clientId = $request->query('client_id')) {
-            $base->where('client_id', $clientId);
+            $resolvedClient = $this->publicIdResolver->resolve(Client::class, $clientId);
+            if ($resolvedClient !== null) {
+                $base->where('client_id', $resolvedClient);
+            }
         }
 
         if ($dueFrom = $request->query('due_from')) {
@@ -200,11 +213,27 @@ class TaskController extends Controller
     {
         $this->authorize('assign', $task);
 
-        $data = $request->validate([
-            'assigned_user_id' => ['nullable', 'integer'],
-        ]);
+        $input = $request->all();
+        if (array_key_exists('assigned_user_id', $input) && $input['assigned_user_id'] !== null) {
+            $input['assigned_user_id'] = (string) $input['assigned_user_id'];
+        }
 
-        $task->assigned_user_id = $data['assigned_user_id'] ?? null;
+        $data = validator($input, [
+            'assigned_user_id' => ['nullable', 'string'],
+        ])->validate();
+
+        $assignedId = null;
+        if (array_key_exists('assigned_user_id', $data) && $data['assigned_user_id'] !== null) {
+            $assignedId = $this->publicIdResolver->resolve(User::class, $data['assigned_user_id']);
+
+            if ($assignedId === null) {
+                throw ValidationException::withMessages([
+                    'assigned_user_id' => __('The selected assignee is invalid.'),
+                ]);
+            }
+        }
+
+        $task->assigned_user_id = $assignedId;
         $task->save();
 
         if ($task->assigned_user_id) {

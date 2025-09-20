@@ -2,35 +2,26 @@
 
 namespace App\Http\Requests\Concerns;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Support\PublicIdResolver;
 
 trait ResolvesPublicIds
 {
-    /**
-     * Cache for resolved public IDs.
-     *
-     * @var array<string, int|null>
-     */
-    protected array $resolvedPublicIds = [];
+    protected ?PublicIdResolver $publicIdResolverInstance = null;
 
     /**
-     * Resolve a model's public identifier to its internal numeric id.
+     * Resolve a model identifier (hashed public id or numeric id) to its internal primary key.
      */
-    protected function resolvePublicId(string $modelClass, ?string $publicId): ?int
+    protected function resolvePublicId(string $modelClass, string|int|null $identifier): ?int
     {
-        if ($publicId === null || $publicId === '') {
+        if ($identifier === null || $identifier === '') {
             return null;
         }
 
-        $cacheKey = $modelClass.'|'.$publicId;
+        return $this->publicIdResolver()->resolve($modelClass, $identifier);
+    }
 
-        if (array_key_exists($cacheKey, $this->resolvedPublicIds)) {
-            return $this->resolvedPublicIds[$cacheKey];
-        }
-
-        /** @var Model $modelClass */
-        return $this->resolvedPublicIds[$cacheKey] = $modelClass::query()
-            ->where('public_id', $publicId)
-            ->value('id');
+    protected function publicIdResolver(): PublicIdResolver
+    {
+        return $this->publicIdResolverInstance ??= app(PublicIdResolver::class);
     }
 }

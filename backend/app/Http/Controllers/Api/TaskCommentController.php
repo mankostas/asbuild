@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\File;
 use App\Models\Task;
 use App\Models\TaskComment;
 use App\Models\User;
@@ -11,10 +12,16 @@ use Illuminate\Support\Facades\Gate;
 use App\Services\Notifier;
 use App\Support\ListQuery;
 use App\Http\Resources\TaskCommentResource;
+use App\Support\PublicIdResolver;
+use Illuminate\Validation\ValidationException;
 
 class TaskCommentController extends Controller
 {
     use ListQuery;
+
+    public function __construct(private PublicIdResolver $publicIdResolver)
+    {
+    }
 
     public function index(Request $request, Task $task)
     {
@@ -30,15 +37,12 @@ class TaskCommentController extends Controller
     {
         $this->authorize('update', $task);
 
-        $data = $request->validate([
-            'body' => 'required|string',
-            'files' => 'array',
-            'files.*' => 'integer|exists:files,id',
-            'mentions' => 'array',
-            'mentions.*' => 'integer|exists:users,id',
-        ]);
+        $data = $this->validatePayload($request);
 
-        $mentions = User::whereIn('id', $data['mentions'] ?? [])->get();
+        $fileIds = $this->resolveIdentifiers($data['files'] ?? [], File::class, 'files', __('The selected file is invalid.'));
+        $mentionIds = $this->resolveIdentifiers($data['mentions'] ?? [], User::class, 'mentions', __('The selected mention is invalid.'));
+
+        $mentions = User::whereIn('id', $mentionIds)->get();
         foreach ($mentions as $user) {
             if ($user->tenant_id !== $request->user()->tenant_id || Gate::forUser($user)->denies('tasks.view')) {
                 return response()->json(['message' => 'invalid mentions'], 422);
@@ -50,8 +54,8 @@ class TaskCommentController extends Controller
             'body' => $data['body'],
         ]);
 
-        if (!empty($data['files'])) {
-            $comment->files()->attach($data['files']);
+        if (! empty($fileIds)) {
+            $comment->files()->attach($fileIds);
         }
 
         if ($mentions->isNotEmpty()) {
@@ -82,15 +86,15 @@ class TaskCommentController extends Controller
     {
         $this->authorize('update', $comment->task);
 
-        $data = $request->validate([
-            'body' => 'required|string',
-            'files' => 'array',
-            'files.*' => 'integer|exists:files,id',
-            'mentions' => 'array',
-            'mentions.*' => 'integer|exists:users,id',
-        ]);
+        $data = $this->validatePayload($request);
 
-        $mentions = User::whereIn('id', $data['mentions'] ?? [])->get();
+        $fileIds = null;
+        if (array_key_exists('files', $data)) {
+            $fileIds = $this->resolveIdentifiers($data['files'], File::class, 'files', __('The selected file is invalid.'));
+        }
+
+        $mentionIds = $this->resolveIdentifiers($data['mentions'] ?? [], User::class, 'mentions', __('The selected mention is invalid.'));
+        $mentions = User::whereIn('id', $mentionIds)->get();
         foreach ($mentions as $user) {
             if ($user->tenant_id !== $request->user()->tenant_id || Gate::forUser($user)->denies('tasks.view')) {
                 return response()->json(['message' => 'invalid mentions'], 422);
@@ -100,8 +104,8 @@ class TaskCommentController extends Controller
         $comment->body = $data['body'];
         $comment->save();
 
-        if (array_key_exists('files', $data)) {
-            $comment->files()->sync($data['files']);
+        if ($fileIds !== null) {
+            $comment->files()->sync($fileIds);
         }
 
         $comment->mentions()->sync($mentions->pluck('id'));
@@ -125,5 +129,56 @@ class TaskCommentController extends Controller
         $this->authorize('delete', $comment->task);
         $comment->delete();
         return response()->json(['message' => 'deleted']);
+    }
+
+    protected function validatePayload(Request $request): array
+    {
+        $input = $request->all();
+
+        foreach (['files', 'mentions'] as $key) {
+            if (array_key_exists($key, $input) && is_array($input[$key])) {
+                $input[$key] = array_values(array_map(
+                    static fn ($value) => $value === null ? null : (string) $value,
+                    $input[$key]
+                ));
+            }
+        }
+
+        return validator($input, [
+            'body' => 'required|string',
+            'files' => 'array',
+            'files.*' => 'string',
+            'mentions' => 'array',
+            'mentions.*' => 'string',
+        ])->validate();
+    }
+
+    /**
+     * @param array<int, string|null> $identifiers
+     * @return array<int, int>
+     */
+    protected function resolveIdentifiers(array $identifiers, string $modelClass, string $attribute, string $message): array
+    {
+        $resolved = [];
+
+        foreach (array_values($identifiers) as $index => $identifier) {
+            if ($identifier === null || $identifier === '') {
+                throw ValidationException::withMessages([
+                    "{$attribute}.{$index}" => $message,
+                ]);
+            }
+
+            $id = $this->publicIdResolver->resolve($modelClass, $identifier);
+
+            if ($id === null) {
+                throw ValidationException::withMessages([
+                    "{$attribute}.{$index}" => $message,
+                ]);
+            }
+
+            $resolved[] = $id;
+        }
+
+        return $resolved;
     }
 }
