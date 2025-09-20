@@ -34,4 +34,9 @@ class Manual extends Model
     {
         return $this->belongsTo(Client::class);
     }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
 }

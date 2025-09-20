@@ -11,22 +11,24 @@ class TenantOwnerResource extends JsonResource
 
     public function toArray($request): array
     {
-        $data = [
-            'id' => $this->id,
+        $this->resource->loadMissing(['tenant', 'roles.tenant']);
+
+        return $this->formatDates([
+            'id' => $this->public_id,
+            'tenant_id' => $this->tenant?->public_id,
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
             'address' => $this->address,
             'last_login_at' => $this->last_login_at,
-            'roles' => $this->whenLoaded('roles', function () {
-                return $this->roles->map(fn ($role) => [
-                    'id' => $role->id,
+            'roles' => $this->roles->map(function ($role) {
+                return [
+                    'id' => $role->public_id,
                     'name' => $role->name,
                     'slug' => $role->slug,
-                ]);
-            }),
-        ];
-
-        return $this->formatDates($data);
+                    'tenant_id' => $role->tenant?->public_id,
+                ];
+            })->values(),
+        ]);
     }
 }
