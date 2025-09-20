@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Role;
+use App\Models\Task;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -42,7 +43,14 @@ class TaskCreationTest extends TestCase
             ->assertJsonPath('data.status', 'draft')
             ->assertJsonPath('data.status_slug', 'draft');
 
-        $taskId = $response->json('data.id');
+        $taskPublicId = $response->json('data.id');
+        $this->assertIsString($taskPublicId);
+
+        $taskId = $this->idFromPublicId(Task::class, $taskPublicId);
+        $task = Task::query()->find($taskId);
+        $this->assertNotNull($task);
+        $this->assertSame($taskId, $task->getKey());
+        $this->assertSame($taskPublicId, $task->public_id);
 
         $this->assertDatabaseHas('tasks', [
             'id' => $taskId,

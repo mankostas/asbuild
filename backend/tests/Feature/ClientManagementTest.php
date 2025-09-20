@@ -69,8 +69,12 @@ class ClientManagementTest extends TestCase
             ])
             ->assertCreated();
 
-        $clientId = $response->json('data.id');
-        $this->assertNotNull($clientId);
+        $clientPublicId = $response->json('data.id');
+        $this->assertIsString($clientPublicId);
+
+        $client = Client::query()->where('public_id', $clientPublicId)->first();
+        $this->assertNotNull($client);
+        $this->assertSame($clientPublicId, $client->public_id);
 
         Mail::assertSent(ClientWelcomeMail::class, function (ClientWelcomeMail $mail) {
             return $mail->hasTo('welcome@example.com');
@@ -135,7 +139,15 @@ class ClientManagementTest extends TestCase
             ])
             ->assertCreated();
 
-        $clientId = $response->json('data.id');
+        $clientPublicId = $response->json('data.id');
+        $this->assertIsString($clientPublicId);
+
+        $clientId = $this->idFromPublicId(Client::class, $clientPublicId);
+        $client = Client::query()->find($clientId);
+        $this->assertNotNull($client);
+        $this->assertSame($clientId, $client->getKey());
+        $this->assertSame($clientPublicId, $client->public_id);
+
         $this->assertDatabaseHas('clients', [
             'id' => $clientId,
             'tenant_id' => $tenant->id,
@@ -147,10 +159,11 @@ class ClientManagementTest extends TestCase
             ->getJson('/api/clients')
             ->assertOk()
             ->assertJsonPath('meta.total', 1)
-            ->assertJsonPath('data.0.name', 'Acme Corp');
+            ->assertJsonPath('data.0.name', 'Acme Corp')
+            ->assertJsonPath('data.0.id', $clientPublicId);
 
         $archive = $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/clients/{$clientId}/archive")
+            ->postJson("/api/clients/{$clientPublicId}/archive")
             ->assertOk();
 
         $this->assertNotNull($archive->json('data.archived_at'));
@@ -158,33 +171,33 @@ class ClientManagementTest extends TestCase
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->getJson('/api/clients')
             ->assertOk()
-            ->assertJsonMissing(['id' => $clientId]);
+            ->assertJsonMissing(['id' => $clientPublicId]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
             ->getJson('/api/clients?archived=only')
             ->assertOk()
             ->assertJsonPath('meta.total', 1)
-            ->assertJsonPath('data.0.id', $clientId);
+            ->assertJsonPath('data.0.id', $clientPublicId);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->deleteJson("/api/clients/{$clientId}/archive")
+            ->deleteJson("/api/clients/{$clientPublicId}/archive")
             ->assertOk()
             ->assertJsonPath('data.archived_at', null);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->deleteJson("/api/clients/{$clientId}")
+            ->deleteJson("/api/clients/{$clientPublicId}")
             ->assertOk();
 
         $this->assertSoftDeleted('clients', ['id' => $clientId]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->postJson("/api/clients/{$clientId}/restore")
+            ->postJson("/api/clients/{$clientPublicId}/restore")
             ->assertOk();
 
         $this->assertDatabaseHas('clients', ['id' => $clientId, 'deleted_at' => null, 'user_id' => null]);
 
         $this->withHeader('X-Tenant-ID', $tenant->id)
-            ->getJson("/api/clients/{$clientId}")
+            ->getJson("/api/clients/{$clientPublicId}")
             ->assertOk()
             ->assertJsonMissingPath('data.owner');
     }
@@ -208,14 +221,14 @@ class ClientManagementTest extends TestCase
         $this->withHeader('X-Tenant-ID', $tenantA->id)
             ->postJson('/api/task-types', [
                 'name' => 'Type With Client',
-                'client_id' => $foreignClient->id,
+                'client_id' => $foreignClient->public_id,
             ])
             ->assertStatus(422);
 
         $this->withHeader('X-Tenant-ID', $tenantA->id)
             ->postJson('/api/tasks', [
                 'task_type_id' => null,
-                'client_id' => $foreignClient->id,
+                'client_id' => $foreignClient->public_id,
             ])
             ->assertStatus(422);
     }
@@ -263,22 +276,22 @@ class ClientManagementTest extends TestCase
 
         Sanctum::actingAs($super);
 
-        $response = $this->getJson('/api/clients?tenant_id=' . $tenantB->id)
+        $response = $this->getJson('/api/clients?tenant_id=' . $this->publicIdFor($tenantB))
             ->assertOk()
             ->assertJsonCount(2, 'data')
             ->assertJsonPath('meta.total', 2)
             ->json('data');
 
         $this->assertEqualsCanonicalizing([
-            $clientB1->id,
-            $clientB2->id,
+            $this->publicIdFor($clientB1),
+            $this->publicIdFor($clientB2),
         ], collect($response)->pluck('id')->all());
 
         $this->assertTrue(
-            collect($response)->every(fn ($client) => (int) $client['tenant_id'] === $tenantB->id)
+            collect($response)->every(fn ($client) => $client['tenant_id'] === $this->publicIdFor($tenantB))
         );
 
-        $this->assertNotContains($clientA->id, collect($response)->pluck('id')->all());
+        $this->assertNotContains($this->publicIdFor($clientA), collect($response)->pluck('id')->all());
     }
 
     public function test_tenant_user_cannot_override_tenant_scope_or_view_foreign_clients(): void
@@ -300,7 +313,7 @@ class ClientManagementTest extends TestCase
             ->assertForbidden();
 
         $this->withHeader('X-Tenant-ID', $tenantA->id)
-            ->getJson("/api/clients/{$clientB->id}")
+            ->getJson("/api/clients/{$clientB->public_id}")
             ->assertForbidden();
     }
 
@@ -338,8 +351,8 @@ class ClientManagementTest extends TestCase
         $taskType = $this->withHeader('X-Tenant-ID', $tenantB->id)
             ->postJson('/api/task-types', [
                 'name' => 'SA Type',
-                'client_id' => $clientB->id,
-                'tenant_id' => $tenantB->id,
+                'client_id' => $clientB->public_id,
+                'tenant_id' => $tenantB->public_id,
             ])
             ->assertCreated()
             ->json('data.id');
@@ -351,7 +364,7 @@ class ClientManagementTest extends TestCase
             ->assertCreated()
             ->json('data');
 
-        $this->assertEquals($clientB->id, $task['client']['id']);
+        $this->assertEquals($clientB->public_id, $task['client']['id']);
     }
 
     public function test_tenant_manager_can_bulk_archive_clients(): void

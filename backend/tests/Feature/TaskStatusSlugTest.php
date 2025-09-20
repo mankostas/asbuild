@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Role;
+use App\Models\TaskStatus;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -37,14 +38,22 @@ class TaskStatusSlugTest extends TestCase
 
         $payload = ['name' => 'In Progress'];
 
-        $id = $this->withHeader('X-Tenant-ID', $tenant->id)
+        $statusPublicId = $this->withHeader('X-Tenant-ID', $tenant->id)
             ->postJson('/api/task-statuses', $payload)
             ->assertStatus(201)
             ->assertJsonPath('data.slug', 'in_progress')
             ->json('data.id');
 
+        $this->assertIsString($statusPublicId);
+
+        $statusId = $this->idFromPublicId(TaskStatus::class, $statusPublicId);
+        $status = TaskStatus::query()->find($statusId);
+        $this->assertNotNull($status);
+        $this->assertSame($statusId, $status->getKey());
+        $this->assertSame($statusPublicId, $status->public_id);
+
         $this->assertDatabaseHas('task_statuses', [
-            'id' => $id,
+            'id' => $statusId,
             'name' => 'In Progress',
             'slug' => 'in_progress',
             'tenant_id' => $tenant->id,
