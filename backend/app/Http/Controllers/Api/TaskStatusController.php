@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\TaskStatus;
 use App\Models\Tenant;
+use App\Support\PublicIdResolver;
 use Illuminate\Http\Request;
 use App\Http\Resources\TaskStatusResource;
 use App\Services\StatusFlowService;
@@ -15,6 +16,10 @@ use Illuminate\Validation\ValidationException;
 class TaskStatusController extends Controller
 {
     use ListQuery;
+
+    public function __construct(private PublicIdResolver $publicIdResolver)
+    {
+    }
 
     public function index(Request $request)
     {
@@ -160,26 +165,14 @@ class TaskStatusController extends Controller
             return null;
         }
 
-        if (is_int($identifier)) {
-            return $identifier;
+        $resolved = $this->publicIdResolver->resolve(Tenant::class, $identifier);
+
+        if ($resolved === null) {
+            throw ValidationException::withMessages([
+                'tenant_id' => __('The selected tenant is invalid.'),
+            ]);
         }
 
-        if (is_string($identifier) && ctype_digit($identifier)) {
-            return (int) $identifier;
-        }
-
-        if (is_string($identifier)) {
-            $tenantId = Tenant::query()->where('public_id', $identifier)->value('id');
-
-            if ($tenantId === null) {
-                throw ValidationException::withMessages([
-                    'tenant_id' => __('The selected tenant is invalid.'),
-                ]);
-            }
-
-            return (int) $tenantId;
-        }
-
-        return null;
+        return $resolved;
     }
 }

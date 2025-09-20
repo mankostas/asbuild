@@ -6,18 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\PublicIdResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Requests\RoleUpsertRequest;
 use App\Http\Resources\RoleResource;
 use App\Support\ListQuery;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class RoleController extends Controller
 {
     use ListQuery;
+
+    public function __construct(private PublicIdResolver $publicIdResolver)
+    {
+    }
 
     public function index(Request $request)
     {
@@ -186,10 +190,20 @@ class RoleController extends Controller
     {
         $this->authorize('update', $role);
 
-        $data = $request->validate([
-            'user_id' => ['required', 'string', 'ulid', Rule::exists('users', 'public_id')],
-            'tenant_id' => ['nullable', 'string', 'ulid', Rule::exists('tenants', 'public_id')],
-        ]);
+        $input = $request->all();
+
+        if (array_key_exists('user_id', $input)) {
+            $input['user_id'] = $input['user_id'] === null ? null : (string) $input['user_id'];
+        }
+
+        if (array_key_exists('tenant_id', $input)) {
+            $input['tenant_id'] = $input['tenant_id'] === null ? null : (string) $input['tenant_id'];
+        }
+
+        $data = validator($input, [
+            'user_id' => ['required', 'string'],
+            'tenant_id' => ['nullable', 'string'],
+        ])->validate();
 
         if (! $request->user()->isSuperAdmin() && $role->level < $request->user()->roleLevel($request->user()->tenant_id)) {
             abort(403);
@@ -203,7 +217,7 @@ class RoleController extends Controller
             $data['tenant_id'] = $this->resolveTenantId($data['tenant_id'] ?? null);
         }
 
-        $userId = User::where('public_id', $data['user_id'])->value('id');
+        $userId = $this->publicIdResolver->resolve(User::class, $data['user_id']);
 
         if ($userId === null) {
             throw ValidationException::withMessages([
@@ -234,19 +248,15 @@ class RoleController extends Controller
             return null;
         }
 
-        if (is_string($identifier) && ! ctype_digit($identifier)) {
-            $resolved = Tenant::where('public_id', $identifier)->value('id');
+        $resolved = $this->publicIdResolver->resolve(Tenant::class, $identifier);
 
-            if ($resolved === null) {
-                throw ValidationException::withMessages([
-                    'tenant_id' => __('The selected tenant is invalid.'),
-                ]);
-            }
-
-            return (int) $resolved;
+        if ($resolved === null) {
+            throw ValidationException::withMessages([
+                'tenant_id' => __('The selected tenant is invalid.'),
+            ]);
         }
 
-        return (int) $identifier;
+        return $resolved;
     }
 }
 

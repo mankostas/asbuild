@@ -2,12 +2,16 @@
 
 namespace App\Services;
 
+use App\Http\Requests\Concerns\ResolvesPublicIds;
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class FormSchemaService
 {
+    use ResolvesPublicIds;
+
     protected function isI18nString($val): bool
     {
         return is_string($val) || (is_array($val) && (isset($val['en']) || isset($val['el'])));
@@ -461,21 +465,30 @@ class FormSchemaService
         }
 
         $key = $assigneeField['key'];
-        if (! isset($payload[$key])) {
+        [$value, $source] = $this->pullSchemaValue($payload, $key);
+
+        if ($source === null) {
             return;
         }
 
-        $value = $payload[$key];
         $id = is_array($value) ? ($value['id'] ?? null) : $value;
+        $errorKey = $source === 'form_data' ? "form_data.$key" : 'assignee';
 
-        if (! $id) {
+        if ($id === null || $id === '') {
             throw ValidationException::withMessages([
-                'assignee.id' => 'required',
+                is_array($value) ? "$errorKey.id" : $errorKey => 'required',
             ]);
         }
 
-        $payload['assigned_user_id'] = $id;
-        unset($payload[$key]);
+        $resolvedId = $this->resolvePublicId(User::class, $id);
+
+        if ($resolvedId === null) {
+            throw ValidationException::withMessages([
+                is_array($value) ? "$errorKey.id" : $errorKey => 'invalid',
+            ]);
+        }
+
+        $payload['assigned_user_id'] = $resolvedId;
     }
 
     /**
@@ -492,31 +505,68 @@ class FormSchemaService
         }
 
         $key = $reviewerField['key'];
-        if (! isset($payload[$key])) {
+        [$value, $source] = $this->pullSchemaValue($payload, $key);
+
+        if ($source === null) {
             return;
         }
 
-        $kind = $payload[$key]['kind'] ?? null;
-        $id = $payload[$key]['id'] ?? null;
+        $kind = is_array($value) ? ($value['kind'] ?? null) : null;
+        $identifier = is_array($value) ? ($value['id'] ?? null) : $value;
+        $errorBase = $source === 'form_data' ? "form_data.$key" : 'reviewer';
 
-        if ($kind === 'team') {
-            $payload['reviewer_type'] = \App\Models\Team::class;
-        } elseif ($kind === 'employee') {
-            $payload['reviewer_type'] = \App\Models\User::class;
-        } else {
+        $modelClass = match ($kind) {
+            'team' => Team::class,
+            'employee' => User::class,
+            default => null,
+        };
+
+        if ($modelClass === null) {
             throw ValidationException::withMessages([
-                'reviewer.kind' => 'invalid',
+                is_array($value) ? "$errorBase.kind" : $errorBase => 'invalid',
             ]);
         }
 
-        if (! $id) {
+        if ($identifier === null || $identifier === '') {
             throw ValidationException::withMessages([
-                'reviewer.id' => 'required',
+                is_array($value) ? "$errorBase.id" : $errorBase => 'required',
             ]);
         }
 
-        $payload['reviewer_id'] = $id;
-        unset($payload[$key]);
+        $resolvedId = $this->resolvePublicId($modelClass, $identifier);
+
+        if ($resolvedId === null) {
+            throw ValidationException::withMessages([
+                is_array($value) ? "$errorBase.id" : $errorBase => 'invalid',
+            ]);
+        }
+
+        $payload['reviewer_type'] = $modelClass;
+        $payload['reviewer_id'] = $resolvedId;
+    }
+
+    /**
+     * Extract a schema field value from the payload.
+     *
+     * @return array{0:mixed,1:string|null}
+     */
+    protected function pullSchemaValue(array &$payload, string $fieldKey): array
+    {
+        if (isset($payload[$fieldKey])) {
+            $value = $payload[$fieldKey];
+            unset($payload[$fieldKey]);
+
+            return [$value, 'root'];
+        }
+
+        if (isset($payload['form_data']) && is_array($payload['form_data']) && isset($payload['form_data'][$fieldKey])) {
+            $value = $payload['form_data'][$fieldKey];
+            unset($payload['form_data'][$fieldKey]);
+
+            return [$value, 'form_data'];
+        }
+
+        return [null, null];
     }
 
     /**

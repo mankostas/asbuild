@@ -6,23 +6,42 @@ use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\TaskSubtask;
 use App\Models\User;
+use App\Support\PublicIdResolver;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class TaskSubtaskController extends Controller
 {
+    public function __construct(private PublicIdResolver $publicIdResolver)
+    {
+    }
+
     public function store(Request $request, Task $task)
     {
         $this->authorize('update', $task);
 
-        $data = $request->validate([
+        $input = $request->all();
+
+        if (array_key_exists('assigned_user_id', $input) && $input['assigned_user_id'] !== null) {
+            $input['assigned_user_id'] = (string) $input['assigned_user_id'];
+        }
+
+        $data = validator($input, [
             'title' => 'required|string',
             'is_completed' => 'boolean',
-            'assigned_user_id' => ['nullable', 'string', 'ulid', Rule::exists('users', 'public_id')],
+            'assigned_user_id' => ['nullable', 'string'],
             'is_required' => 'boolean',
-        ]);
+        ])->validate();
         if (! empty($data['assigned_user_id'])) {
-            $data['assigned_user_id'] = User::where('public_id', $data['assigned_user_id'])->value('id');
+            $resolved = $this->publicIdResolver->resolve(User::class, $data['assigned_user_id']);
+
+            if ($resolved === null) {
+                throw ValidationException::withMessages([
+                    'assigned_user_id' => __('The selected assignee is invalid.'),
+                ]);
+            }
+
+            $data['assigned_user_id'] = $resolved;
         }
         $data['position'] = ($task->subtasks()->max('position') ?? 0) + 1;
         $subtask = $task->subtasks()->create($data);
@@ -35,16 +54,32 @@ class TaskSubtaskController extends Controller
         if ($subtask->task_id !== $task->id) {
             abort(404);
         }
-        $data = $request->validate([
+        $input = $request->all();
+
+        if (array_key_exists('assigned_user_id', $input) && $input['assigned_user_id'] !== null) {
+            $input['assigned_user_id'] = (string) $input['assigned_user_id'];
+        }
+
+        $data = validator($input, [
             'title' => 'sometimes|required|string',
             'is_completed' => 'sometimes|boolean',
-            'assigned_user_id' => ['nullable', 'string', 'ulid', Rule::exists('users', 'public_id')],
+            'assigned_user_id' => ['nullable', 'string'],
             'is_required' => 'sometimes|boolean',
-        ]);
+        ])->validate();
         if (array_key_exists('assigned_user_id', $data)) {
-            $data['assigned_user_id'] = $data['assigned_user_id']
-                ? User::where('public_id', $data['assigned_user_id'])->value('id')
-                : null;
+            if ($data['assigned_user_id']) {
+                $resolved = $this->publicIdResolver->resolve(User::class, $data['assigned_user_id']);
+
+                if ($resolved === null) {
+                    throw ValidationException::withMessages([
+                        'assigned_user_id' => __('The selected assignee is invalid.'),
+                    ]);
+                }
+
+                $data['assigned_user_id'] = $resolved;
+            } else {
+                $data['assigned_user_id'] = null;
+            }
         }
         $subtask->update($data);
         return response()->json($subtask);
@@ -63,13 +98,30 @@ class TaskSubtaskController extends Controller
     public function reorder(Request $request, Task $task)
     {
         $this->authorize('update', $task);
-        $data = $request->validate([
+        $input = $request->all();
+
+        if (isset($input['order']) && is_array($input['order'])) {
+            $input['order'] = array_values(array_map(
+                static fn ($value) => $value === null ? null : (string) $value,
+                $input['order']
+            ));
+        }
+
+        $data = validator($input, [
             'order' => 'required|array',
-            'order.*' => ['string', 'ulid', Rule::exists('task_subtasks', 'public_id')],
-        ]);
-        foreach ($data['order'] as $index => $id) {
+            'order.*' => ['required', 'string'],
+        ])->validate();
+        foreach ($data['order'] as $index => $identifier) {
+            $subtaskId = $this->publicIdResolver->resolve(TaskSubtask::class, $identifier);
+
+            if ($subtaskId === null) {
+                throw ValidationException::withMessages([
+                    "order.$index" => __('The selected subtask is invalid.'),
+                ]);
+            }
+
             $task->subtasks()
-                ->where('public_id', $id)
+                ->where('id', $subtaskId)
                 ->update(['position' => $index + 1]);
         }
         return response()->json(['message' => 'reordered']);
