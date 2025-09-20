@@ -95,10 +95,10 @@ const form = ref({
   description: '',
 });
 
-const tenantId = ref<string | number | ''>('');
+const tenantId = ref<string>('');
 
 const employeeOptions = ref<any[]>([]);
-const selectedEmployees = ref<number[]>([]);
+const selectedEmployees = ref<string[]>([]);
 const featureGrants = ref<Record<string, string[]>>({});
 const hiddenRoles = ref<Record<string, any>>({});
 
@@ -139,7 +139,7 @@ async function loadTeam(preserveTenant = false) {
   if (!preserveTenant) {
     tenantId.value = team.tenant_id ? String(team.tenant_id) : '';
   }
-  selectedEmployees.value = (team.employees || []).map((e: any) => e.id);
+  selectedEmployees.value = (team.employees || []).map((e: any) => String(e.id));
   hiddenRoles.value = {};
   featureGrants.value = {} as Record<string, string[]>;
   (team.roles || []).forEach((r: any) => {
@@ -160,21 +160,21 @@ const submit = handleSubmit(async () => {
     description: form.value.description,
   };
   if (auth.isSuperAdmin) {
-    payload.tenant_id = tenantId.value === '' ? undefined : Number(tenantId.value);
+    payload.tenant_id = tenantId.value === '' ? undefined : tenantId.value;
   }
   const selectedTenant = auth.isSuperAdmin
     ? String(tenantId.value)
-    : tenant.tenantId;
+    : String(tenant.tenantId ?? '');
   const previousTenant = tenant.tenantId;
   tenant.setTenant(selectedTenant);
-  let teamId: number;
+  let teamId: string;
   try {
     if (isEdit.value) {
-      const updated = await teamsStore.update(Number(route.params.id), payload);
-      teamId = updated.id;
+      const updated = await teamsStore.update(String(route.params.id), payload);
+      teamId = String(updated.id);
     } else {
       const created = await teamsStore.create(payload);
-      teamId = created.id;
+      teamId = String(created.id);
     }
     await teamsStore.syncEmployees(teamId, selectedEmployees.value);
     await reconcileFeatureGrants(teamId, selectedTenant);
@@ -199,8 +199,8 @@ onMounted(async () => {
 });
 
 async function reconcileFeatureGrants(
-  teamId: number,
-  selectedTenant: string | number,
+  teamId: string,
+  selectedTenant: string,
 ) {
   for (const feature of availableFeatures.value) {
     const selected = featureGrants.value[feature] || [];

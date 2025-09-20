@@ -100,7 +100,7 @@ const form = ref({
   roles: [] as string[],
 });
 
-const tenantId = ref<string | number | ''>('');
+const tenantId = ref<string>('');
 const featureGrants = ref<Record<string, string[]>>({});
 const hiddenRoles = ref<Record<string, any>>({});
 
@@ -159,10 +159,10 @@ async function submit() {
     address: form.value.address,
     roles: form.value.roles.filter((r) => r !== 'SuperAdmin'),
   };
-  let userId: number;
+  let userId: string;
   const selectedTenant = auth.isSuperAdmin
     ? String(tenantId.value)
-    : tenantStore.tenantId;
+    : String(tenantStore.tenantId ?? tenantId.value ?? '');
   const previousTenant = tenantStore.tenantId;
   if (auth.isSuperAdmin) {
     tenantStore.setTenant(selectedTenant);
@@ -170,10 +170,10 @@ async function submit() {
   try {
     if (isEdit.value) {
       await api.post(`/employees/${route.params.id}`, payload);
-      userId = Number(route.params.id);
+      userId = String(route.params.id);
     } else {
       const { data } = await api.post('/employees', payload);
-      userId = data.id;
+      userId = String(data.id);
     }
     await reconcileFeatureGrants(userId, selectedTenant);
     router.push({ name: 'employees.list' });
@@ -213,8 +213,8 @@ onMounted(async () => {
 });
 
 async function reconcileFeatureGrants(
-  userId: number,
-  selectedTenant: string | number,
+  userId: string,
+  selectedTenant: string,
 ) {
   for (const feature of availableFeatures.value) {
     const selected = featureGrants.value[feature] || [];

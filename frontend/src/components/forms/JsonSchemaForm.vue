@@ -22,7 +22,7 @@ import { reactive, watch } from 'vue';
 import SectionCard from '@/components/tasks/SectionCard.vue';
 import { evaluateLogic } from '@/utils/logic';
 
-const props = defineProps<{ schema: any; modelValue: any; taskId: number; readonly?: boolean }>();
+const props = defineProps<{ schema: any; modelValue: any; taskId: string; readonly?: boolean }>();
 const emit = defineEmits<{ (e: 'update:modelValue', value: any): void }>();
 
 const form = reactive<any>({ ...props.modelValue });

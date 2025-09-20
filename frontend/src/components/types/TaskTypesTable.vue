@@ -125,9 +125,9 @@ import { useAuthStore } from '@/stores/auth';
 import { formatDisplay } from '@/utils/datetime';
 
 interface TaskType {
-  id: number;
+  id: string;
   name: string;
-  tenant?: { id: number; name: string } | null;
+  tenant?: { id: string; name: string } | null;
   statuses?: Record<string, string[]>;
   tasks_count?: number;
   updated_at?: string;
@@ -136,11 +136,11 @@ interface TaskType {
 
 const props = defineProps<{ rows: TaskType[] }>();
 const emit = defineEmits<{
-  (e: 'edit', id: number): void;
-  (e: 'delete', id: number): void;
-  (e: 'copy', id: number): void;
-  (e: 'delete-selected', ids: number[]): void;
-  (e: 'copy-selected', ids: number[]): void;
+  (e: 'edit', id: string): void;
+  (e: 'delete', id: string): void;
+  (e: 'copy', id: string): void;
+  (e: 'delete-selected', ids: string[]): void;
+  (e: 'copy-selected', ids: string[]): void;
 }>();
 
 const { t } = useI18n();
@@ -182,7 +182,7 @@ const columns = computed(() => {
   return base;
 });
 
-const selectedIds = ref<number[]>([]);
+const selectedIds = ref<string[]>([]);
 
 const filteredRows = computed(() => {
   const rows = !searchTerm.value
@@ -202,6 +202,6 @@ function onSelectedRowsChange(params: any) {
     selectedIds.value = [];
     return;
   }
-  selectedIds.value = params.selectedRows.map((r: any) => r.id);
+  selectedIds.value = params.selectedRows.map((r: any) => String(r.id));
 }
 </script>

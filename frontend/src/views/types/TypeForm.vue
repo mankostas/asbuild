@@ -232,7 +232,7 @@
                     ref="formRef"
                     v-model="previewData"
                     :schema="previewSchema"
-                    :task-id="0"
+                    :task-id="'0'"
                   />
                 </div>
               </div>
@@ -335,7 +335,7 @@
                     </Button>
                   </div>
                   <div :class="[{ dark: previewTheme === 'dark' }, viewportClass]" class="border p-2 overflow-auto">
-                    <JsonSchemaForm ref="formRef" v-model="previewData" :schema="previewSchema" :task-id="0" />
+                    <JsonSchemaForm ref="formRef" v-model="previewData" :schema="previewSchema" :task-id="'0'" />
                   </div>
                 </div>
               </TabPanel>
@@ -416,7 +416,13 @@ const router = useRouter();
 const tenantStore = useTenantStore();
 const auth = useAuthStore();
 const featuresStore = useFeaturesStore();
-const taskTypeId = computed(() => Number(route.params.id ?? route.query.id ?? 0));
+const taskTypeId = computed(() => {
+  const candidate = route.params.id ?? route.query.id ?? '';
+  if (Array.isArray(candidate)) {
+    return candidate[0] ?? '';
+  }
+  return typeof candidate === 'string' ? candidate : '';
+});
 const loading = ref(true);
 
 interface Field {
@@ -493,10 +499,10 @@ const normalizePermission = (value: Partial<Record<string, unknown>> | undefined
 };
 
 const name = ref('');
-const tenantId = ref<number | ''>('');
-const clientId = ref<number | ''>('');
+const tenantId = ref<string>('');
+const clientId = ref<string>('');
 const clientsLoading = ref(false);
-const clientOptions = ref<{ value: number; label: string }[]>([]);
+const clientOptions = ref<{ value: string; label: string }[]>([]);
 const requireSubtasksComplete = ref(false);
 const tenantFeatures = computed(() => {
   const tenant = tenantStore.tenants.find(
@@ -539,7 +545,7 @@ const currentVersion = ref<any | null>(null);
 const statuses = ref<string[]>([]);
 const statusFlow = ref<[string, string][]>([]);
 const permissions = ref<Record<string, Permission>>({});
-const tenantRoles = ref<{ id: number; slug: string }[]>([]);
+const tenantRoles = ref<{ id: string; slug: string }[]>([]);
 const canViewRoles = computed(
   () => auth.isSuperAdmin || can('roles.view') || can('roles.manage'),
 );
@@ -634,7 +640,7 @@ const viewportClass = computed(() => {
 });
 
 async function refreshClientsForTenant(
-  id: number | '',
+  id: string,
   { resetSelection = false }: { resetSelection?: boolean } = {},
 ) {
   if (!canAccess.value) {
@@ -656,26 +662,28 @@ async function refreshClientsForTenant(
     clientOptions.value = (payload as any[])
       .filter((item) => item && item.id !== undefined)
       .map((client: any) => ({
-        value: Number(client.id),
+        value: String(client.id),
         label: client.name || `#${client.id}`,
       }));
 
-    const numericClientId = clientId.value === '' ? null : Number(clientId.value);
-    if (numericClientId !== null) {
-      const exists = clientOptions.value.some((option) => option.value === numericClientId);
+    const selectedClientId = clientId.value || null;
+    if (selectedClientId !== null) {
+      const exists = clientOptions.value.some(
+        (option) => option.value === selectedClientId,
+      );
       if (!exists) {
         if (resetSelection) {
           clientId.value = '';
         } else {
           const fallbackName =
-            (currentVersion.value?.client?.id === numericClientId
+            (String(currentVersion.value?.client?.id) === selectedClientId
               ? currentVersion.value?.client?.name
               : undefined) ||
             (payload as any[]).find(
-              (client: any) => Number(client?.id) === numericClientId,
+              (client: any) => String(client?.id) === selectedClientId,
             )?.name ||
-            `#${numericClientId}`;
-          clientOptions.value.push({ value: numericClientId, label: fallbackName });
+            `#${selectedClientId}`;
+          clientOptions.value.push({ value: selectedClientId, label: fallbackName });
         }
       }
     } else if (resetSelection) {
@@ -691,7 +699,7 @@ async function refreshClientsForTenant(
   }
 }
 
-async function refreshTenant(id: number | '', oldId?: number | '') {
+async function refreshTenant(id: string, oldId?: string) {
   if (!canAccess.value) return;
   const normalized = id ? String(id) : '';
   const prev = oldId ? String(oldId) : '';
@@ -732,7 +740,7 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
     if (canViewRoles.value) {
       try {
         const tenantParams: Record<string, any> = {
-          tenant_id: Number(id),
+          tenant_id: id,
           per_page: 100,
         };
         const requests = [api.get('/roles', { params: tenantParams })];
@@ -743,12 +751,18 @@ async function refreshTenant(id: number | '', oldId?: number | '') {
         }
         const [tenantRes, globalRes] = await Promise.all(requests);
         const tenantData = tenantRes.data.data ?? tenantRes.data;
-        tenantRoles.value = tenantData as { id: number; slug: string }[];
+        tenantRoles.value = (tenantData as any[]).map((role: any) => ({
+          ...role,
+          id: String(role.id),
+        }));
         if (globalRes) {
           const globalData = (globalRes as any).data.data ?? (globalRes as any).data;
           const merged = [
             ...tenantRoles.value,
-            ...(globalData as { id: number; slug: string }[]),
+            ...(globalData as any[]).map((role: any) => ({
+              ...role,
+              id: String(role.id),
+            })),
           ];
           tenantRoles.value = merged.filter(
             (r, i, arr) => arr.findIndex((x) => x.slug === r.slug) === i,
@@ -804,7 +818,8 @@ onMounted(async () => {
       typeRes = await typePromise;
     } else {
       skipTenantWatch.value = true;
-      tenantId.value = (auth.user as any)?.tenant_id ?? '';
+      const userTenantId = (auth.user as any)?.tenant_id;
+      tenantId.value = userTenantId != null ? String(userTenantId) : '';
       typeRes = await typePromise;
     }
 
@@ -816,11 +831,11 @@ onMounted(async () => {
       name.value = typeData.name || '';
       tenantId.value =
         typeData.tenant_id !== null && typeData.tenant_id !== undefined
-          ? Number(typeData.tenant_id)
+          ? String(typeData.tenant_id)
           : '';
       clientId.value =
         typeData.client_id !== null && typeData.client_id !== undefined
-          ? Number(typeData.client_id)
+          ? String(typeData.client_id)
           : '';
       requireSubtasksComplete.value = !!typeData.require_subtasks_complete;
       await refreshTenant(tenantId.value);

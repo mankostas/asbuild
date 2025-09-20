@@ -66,9 +66,10 @@
 
 const router = useRouter();
 interface TaskType {
-  id: number;
+  id: string;
+  public_id?: string;
   name: string;
-  tenant?: { id: number; name: string } | null;
+  tenant?: { id: string; name: string } | null;
   statuses?: Record<string, string[]>;
   tasks_count?: number;
   updated_at?: string;
@@ -83,16 +84,16 @@ const loading = ref(true);
 const { t } = useI18n();
 
 const scope: 'tenant' | 'all' = auth.isSuperAdmin ? 'all' : 'tenant';
-const tenantFilter = ref<string | number | ''>('');
+const tenantFilter = ref<string>('');
 
 const tenantOptions = computed(() => [
   { value: '', label: 'All tenants' },
-  ...tenantStore.tenants.map((t: any) => ({ value: t.id, label: t.name })),
+  ...tenantStore.tenants.map((t: any) => ({ value: String(t.id), label: t.name })),
 ]);
 
 async function load() {
   await tenantStore.loadTenants({ per_page: 100 });
-  let tenantId: string | number | undefined;
+  let tenantId: string | undefined;
   let scopeParam: 'tenant' | 'all' = scope;
   if (auth.isSuperAdmin) {
     scopeParam = tenantFilter.value ? 'all' : 'all';
@@ -103,6 +104,11 @@ async function load() {
   const { data } = await typesStore.fetch(scopeParam, tenantId);
   all.value = data.map((t: any) => ({
     ...t,
+    id: String(t.public_id ?? t.id),
+    public_id: t.public_id ?? String(t.id),
+    tenant: t.tenant
+      ? { id: String(t.tenant.id), name: t.tenant.name }
+      : t.tenant,
     statuses: t.statuses,
     tasks_count: t.tasks_count,
     updated_at: t.updated_at,
@@ -121,11 +127,11 @@ function reload() {
 
 watch(tenantFilter, reload);
 
-function edit(id: number) {
+function edit(id: string) {
   router.push({ name: 'taskTypes.edit', params: { id } });
 }
 
-async function remove(id: number) {
+async function remove(id: string) {
   if (!can('task_types.manage')) return;
   const res = await Swal.fire({
     title: 'Delete type?',
@@ -133,18 +139,18 @@ async function remove(id: number) {
     showCancelButton: true,
   });
   if (res.isConfirmed) {
-      await api.delete(`/task-types/${id}`);
-      reload();
-    }
+    await api.delete(`/task-types/${id}`);
+    reload();
   }
+}
 
-async function copy(id: number) {
+async function copy(id: string) {
   if (!can('task_types.manage')) return;
-  let tenantId: string | number | undefined;
+  let tenantId: string | undefined;
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
     const inputOptions = tenantStore.tenants.reduce(
-      (acc: any, t: any) => ({ ...acc, [t.id]: t.name }),
+      (acc: any, t: any) => ({ ...acc, [String(t.id)]: t.name }),
       {},
     );
     const res = await Swal.fire({
@@ -156,11 +162,11 @@ async function copy(id: number) {
     if (!res.isConfirmed || !res.value) return;
     tenantId = res.value;
   }
-    await typesStore.copyToTenant(id, tenantId);
+  await typesStore.copyToTenant(id, tenantId);
   reload();
 }
 
-async function removeMany(ids: number[]) {
+async function removeMany(ids: string[]) {
   if (!can('task_types.manage')) return;
   const res = await Swal.fire({
     title: 'Delete selected types?',
@@ -173,13 +179,13 @@ async function removeMany(ids: number[]) {
   }
 }
 
-async function copyMany(ids: number[]) {
+async function copyMany(ids: string[]) {
   if (!can('task_types.manage')) return;
-  let tenantId: string | number | undefined;
+  let tenantId: string | undefined;
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
     const inputOptions = tenantStore.tenants.reduce(
-      (acc: any, t: any) => ({ ...acc, [t.id]: t.name }),
+      (acc: any, t: any) => ({ ...acc, [String(t.id)]: t.name }),
       {},
     );
     const res = await Swal.fire({

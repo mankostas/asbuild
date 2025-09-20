@@ -172,7 +172,7 @@ import api from '@/services/api';
 import { useNotify } from '@/plugins/notify';
 
 interface EmployeeRow {
-  id: number;
+  id: string;
   name: string;
   email: string;
   roles: string;
@@ -180,20 +180,20 @@ interface EmployeeRow {
   phone?: string | null;
   status?: string | null;
   last_login_at?: string | null;
-  tenant?: { id: number; name: string } | null;
-  tenant_id?: number | null;
+  tenant?: { id: string; name: string } | null;
+  tenant_id?: string | null;
   avatar?: string | null;
 }
 
 const props = defineProps<{ rows: EmployeeRow[] }>();
 const emit = defineEmits<{
-  (e: 'edit', id: number): void;
-  (e: 'delete', id: number): void;
-  (e: 'delete-selected', ids: number[]): void;
-  (e: 'impersonate', id: number): void;
-  (e: 'resend-invite', id: number): void;
-  (e: 'reset-email', id: number): void;
-  (e: 'send-password-reset', id: number): void;
+  (e: 'edit', id: string): void;
+  (e: 'delete', id: string): void;
+  (e: 'delete-selected', ids: string[]): void;
+  (e: 'impersonate', id: string): void;
+  (e: 'resend-invite', id: string): void;
+  (e: 'reset-email', id: string): void;
+  (e: 'send-password-reset', id: string): void;
 }>();
 
 const { t } = useI18n();
@@ -228,7 +228,7 @@ const columns = [
   { label: 'Actions', field: 'actions' },
 ];
 
-const selectedIds = ref<number[]>([]);
+const selectedIds = ref<string[]>([]);
 
 const filteredRows = computed(() => {
   const term = searchTerm.value.toLowerCase();
@@ -247,14 +247,15 @@ const filteredRows = computed(() => {
 });
 
 function onSelectedRowsChange(params: any) {
-  selectedIds.value = params.selectedRows.map((r: any) => r.id);
+  selectedIds.value = params.selectedRows.map((r: any) => String(r.id));
 }
 
 async function toggleStatus(row: EmployeeRow, val: boolean) {
   const previous = row.status;
   row.status = val ? 'active' : 'inactive';
   try {
-    const { data } = await api.patch(`/employees/${row.id}/toggle-status`);
+    const id = String(row.id);
+    const { data } = await api.patch(`/employees/${id}/toggle-status`);
     row.status = data.data?.status ?? row.status;
   } catch (e) {
     row.status = previous;

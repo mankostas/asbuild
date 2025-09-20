@@ -51,7 +51,7 @@ import { useI18n } from 'vue-i18n';
 import { useNotify } from '@/plugins/notify';
 
 interface TaskStatus {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   color: string;
@@ -59,15 +59,15 @@ interface TaskStatus {
   tasks_count: number;
   created_at: string;
   updated_at: string;
-  tenant?: { id: number; name: string } | null;
-  tenant_id?: number | null;
+  tenant?: { id: string; name: string } | null;
+  tenant_id?: string | null;
 }
 
 const router = useRouter();
 const all = ref<TaskStatus[]>([]);
 const loading = ref(true);
 const scope = ref<'tenant' | 'global' | 'all'>('tenant');
-const tenantFilter = ref<string | number | ''>('');
+const tenantFilter = ref<string>('');
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
 const statusesStore = useTaskStatusesStore();
@@ -80,7 +80,7 @@ if (auth.isSuperAdmin) {
 
 const tenantOptions = computed(() => [
   { value: '', label: t('allTenants') },
-  ...tenantStore.tenants.map((t: any) => ({ value: t.id, label: t.name })),
+  ...tenantStore.tenants.map((t: any) => ({ value: String(t.id), label: t.name })),
 ]);
 
 async function load() {
@@ -88,7 +88,7 @@ async function load() {
   const scopeParam: 'tenant' | 'global' | 'all' = isFilteringByTenant
     ? 'tenant'
     : scope.value;
-  const tenantId: string | number | undefined = isFilteringByTenant
+  const tenantId: string | undefined = isFilteringByTenant
     ? tenantFilter.value
     : undefined;
 
@@ -98,11 +98,11 @@ async function load() {
   });
   await tenantStore.loadTenants({ per_page: 100 });
   const tenantMap = tenantStore.tenants.reduce(
-    (acc: Record<number, any>, t: any) => ({ ...acc, [t.id]: t }),
+    (acc: Record<string, any>, t: any) => ({ ...acc, [String(t.id)]: t }),
     {},
   );
   all.value = data.map((s: any) => ({
-    id: s.id,
+    id: String(s.public_id ?? s.id),
     name: s.name,
     slug: s.slug,
     color: s.color,
@@ -110,8 +110,8 @@ async function load() {
     tasks_count: s.tasks_count,
     created_at: s.created_at,
     updated_at: s.updated_at,
-    tenant: s.tenant || tenantMap[s.tenant_id] || null,
-    tenant_id: s.tenant_id,
+    tenant: s.tenant || tenantMap[String(s.tenant_id)] || null,
+    tenant_id: s.tenant_id != null ? String(s.tenant_id) : null,
   }));
   loading.value = false;
 }
@@ -136,7 +136,7 @@ watch(
   },
 );
 
-function edit(id: number) {
+function edit(id: string) {
   router.push({ name: 'taskStatuses.edit', params: { id } });
 }
 
@@ -148,7 +148,7 @@ function ensureCanManage(): boolean {
   return false;
 }
 
-async function remove(id: number) {
+async function remove(id: string) {
   if (!ensureCanManage()) return;
   const res = await Swal.fire({
     title: 'Delete status?',
@@ -161,13 +161,13 @@ async function remove(id: number) {
   }
 }
 
-async function copy(id: number) {
+async function copy(id: string) {
   if (!ensureCanManage()) return;
-  let tenantId: string | number | undefined;
+  let tenantId: string | undefined;
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
     const inputOptions = tenantStore.tenants.reduce(
-      (acc: any, t: any) => ({ ...acc, [t.id]: t.name }),
+      (acc: any, t: any) => ({ ...acc, [String(t.id)]: t.name }),
       {},
     );
     const res = await Swal.fire({
@@ -177,13 +177,13 @@ async function copy(id: number) {
       showCancelButton: true,
     });
     if (!res.isConfirmed || !res.value) return;
-    tenantId = res.value;
+    tenantId = String(res.value);
   }
   await statusesStore.copyToTenant(id, tenantId);
   reload();
 }
 
-async function removeMany(ids: number[]) {
+async function removeMany(ids: string[]) {
   if (!ensureCanManage()) return;
   const res = await Swal.fire({
     title: 'Delete selected statuses?',
@@ -196,13 +196,13 @@ async function removeMany(ids: number[]) {
   }
 }
 
-async function copyMany(ids: number[]) {
+async function copyMany(ids: string[]) {
   if (!ensureCanManage()) return;
-  let tenantId: string | number | undefined;
+  let tenantId: string | undefined;
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
     const inputOptions = tenantStore.tenants.reduce(
-      (acc: any, t: any) => ({ ...acc, [t.id]: t.name }),
+      (acc: any, t: any) => ({ ...acc, [String(t.id)]: t.name }),
       {},
     );
     const res = await Swal.fire({
@@ -212,7 +212,7 @@ async function copyMany(ids: number[]) {
       showCancelButton: true,
     });
     if (!res.isConfirmed || !res.value) return;
-    tenantId = res.value;
+    tenantId = String(res.value);
   }
   await statusesStore.copyManyToTenant(ids, tenantId);
   reload();

@@ -11,7 +11,7 @@
         {{ t('tenants.table.loading') }}
       </div>
       <div v-else-if="tenant" class="grid gap-2">
-        <div><strong>{{ t('tenants.details.id') }}:</strong> {{ tenant.id }}</div>
+        <div><strong>{{ t('tenants.details.id') }}:</strong> {{ tenant.public_id || tenant.id }}</div>
         <div><strong>{{ t('tenants.details.name') }}:</strong> {{ tenant.name }}</div>
         <div><strong>{{ t('tenants.details.phone') }}:</strong> {{ tenant.phone || '—' }}</div>
         <div><strong>{{ t('tenants.details.address') }}:</strong> {{ tenant.address || '—' }}</div>
@@ -20,7 +20,7 @@
             v-if="canEditTenant"
             btnClass="btn-primary btn-sm"
             :text="t('actions.edit')"
-            :to="{ name: 'tenants.edit', params: { id: tenant.id } }"
+            :to="tenantEditParams(tenant)"
           />
           <Button
             btnClass="btn-secondary btn-sm"
@@ -45,7 +45,7 @@
         {{ t('tenants.table.loading') }}
       </div>
       <div v-else-if="tenant" class="grid gap-2">
-        <div><strong>{{ t('tenants.details.id') }}:</strong> {{ tenant.id }}</div>
+        <div><strong>{{ t('tenants.details.id') }}:</strong> {{ tenant.public_id || tenant.id }}</div>
         <div><strong>{{ t('tenants.details.name') }}:</strong> {{ tenant.name }}</div>
         <div><strong>{{ t('tenants.details.phone') }}:</strong> {{ tenant.phone || '—' }}</div>
         <div><strong>{{ t('tenants.details.address') }}:</strong> {{ tenant.address || '—' }}</div>
@@ -54,7 +54,7 @@
             v-if="canEditTenant"
             btnClass="btn-primary btn-sm"
             :text="t('actions.edit')"
-            :to="{ name: 'tenants.edit', params: { id: tenant.id } }"
+            :to="tenantEditParams(tenant)"
           />
           <Button
             btnClass="btn-secondary btn-sm"
@@ -166,5 +166,10 @@ function handleClose() {
   } else {
     router.push({ name: 'tenants.list' });
   }
+}
+
+function tenantEditParams(target: Record<string, any> | null) {
+  const id = target ? String(target.public_id ?? target.id ?? '') : '';
+  return { name: 'tenants.edit', params: { id } };
 }
 </script>

@@ -40,7 +40,13 @@
             id="filter-type"
             v-model="typeFilter"
             :label="t('tasks.filters.type')"
-            :options="[{ value: '', label: t('tasks.filters.allTypes') }, ...typeOptions.map((type) => ({ value: type.id, label: type.name }))]"
+            :options="[
+              { value: '', label: t('tasks.filters.allTypes') },
+              ...typeOptions.map((type) => ({
+                value: String(type.public_id ?? type.id),
+                label: type.name,
+              })),
+            ]"
           />
           <Select
             id="filter-client"
@@ -110,17 +116,17 @@
         <div class="flex gap-2 items-center">
           <input
             v-model="selected"
-            :value="row.id"
+            :value="taskKey(row)"
             type="checkbox"
-            :aria-label="`Select task ${row.id}`"
-            @keyup.enter="toggleSelect(row.id)"
+            :aria-label="`Select task ${taskKey(row)}`"
+            @keyup.enter="toggleSelect(row)"
           />
           <button
             class="text-blue-600"
             title="View"
             aria-label="View"
-            @click="view(row.id)"
-            @keyup.enter="view(row.id)"
+            @click="view(row)"
+            @keyup.enter="view(row)"
           >
             <Icon icon="heroicons-outline:eye" class="w-5 h-5" />
           </button>
@@ -129,8 +135,8 @@
             class="text-blue-600"
             title="Edit"
             aria-label="Edit"
-            @click="edit(row.id)"
-            @keyup.enter="edit(row.id)"
+            @click="edit(row)"
+            @keyup.enter="edit(row)"
           >
             <Icon icon="heroicons-outline:pencil-square" class="w-5 h-5" />
           </button>
@@ -139,8 +145,8 @@
             class="text-red-600"
             title="Delete"
             aria-label="Delete"
-            @click="remove(row.id)"
-            @keyup.enter="remove(row.id)"
+            @click="remove(row)"
+            @keyup.enter="remove(row)"
           >
             <Icon icon="heroicons-outline:trash" class="w-5 h-5" />
           </button>
@@ -284,16 +290,20 @@ const statusIcons: Record<string, string> = {
   review: 'heroicons-outline:eye',
 };
 
-const selected = ref<number[]>([]);
+function taskKey(task: any): string {
+  return String(task?.public_id ?? task?.id ?? '');
+}
+
+const selected = ref<string[]>([]);
 const bulkStatus = ref('');
 const all = ref<any[]>([]);
 
 const bulkStatusOptions = computed(() => {
   if (!selected.value.length) return [] as string[];
-  const first = all.value.find((r) => r.id === selected.value[0]);
+  const first = all.value.find((r) => taskKey(r) === selected.value[0]);
   let allowed = first ? getChangeActions(first) : [];
   for (const id of selected.value.slice(1)) {
-    const row = all.value.find((r) => r.id === id);
+    const row = all.value.find((r) => taskKey(r) === id);
     const actions = row ? getChangeActions(row) : [];
     allowed = allowed.filter((a: string) => actions.includes(a));
   }
@@ -355,7 +365,8 @@ function saveView() {
   prefs.value = newPrefs;
 }
 
-function toggleSelect(id: number) {
+function toggleSelect(task: any) {
+  const id = taskKey(task);
   const i = selected.value.indexOf(id);
   if (i >= 0) selected.value.splice(i, 1);
   else selected.value.push(id);
@@ -363,7 +374,7 @@ function toggleSelect(id: number) {
 
 async function applyBulkStatus() {
   for (const id of selected.value) {
-    const row = all.value.find((r) => r.id === id);
+    const row = all.value.find((r) => taskKey(r) === id);
     if (!row) continue;
     if (!hasAny(['tasks.update', 'tasks.manage', 'tasks.status.update']))
       continue;
@@ -382,7 +393,7 @@ async function fetchTasks({ page, perPage, sort, search }: any) {
   if (!all.value.length) {
     const params: Record<string, any> = { include: 'client' };
     if (clientFilter.value) {
-      params.client_id = Number(clientFilter.value);
+      params.client_id = clientFilter.value;
     }
     const { data } = await api.get('/tasks', { params });
     all.value = data?.data ?? data;
@@ -390,14 +401,18 @@ async function fetchTasks({ page, perPage, sort, search }: any) {
   let rows = all.value.slice();
 
   if (clientFilter.value) {
-    const clientId = Number(clientFilter.value);
-    rows = rows.filter((r) => r.client && Number(r.client.id) === clientId);
+    const clientId = clientFilter.value;
+    rows = rows.filter(
+      (r) => String(r.client?.public_id ?? r.client?.id ?? '') === clientId,
+    );
   }
   if (statusFilter.value) {
     rows = rows.filter((r) => r.status === statusFilter.value);
   }
   if (typeFilter.value) {
-    rows = rows.filter((r) => r.type && r.type.id === Number(typeFilter.value));
+    rows = rows.filter(
+      (r) => String(r.type?.public_id ?? r.type?.id ?? '') === typeFilter.value,
+    );
   }
   if (assigneeFilter.value) {
     rows = rows.filter(
@@ -449,7 +464,7 @@ async function fetchTasks({ page, perPage, sort, search }: any) {
     const statusLabel =
       typeof r.status === 'string' ? r.status : r.status?.name || '';
     return {
-      id: r.id,
+      id: taskKey(r),
       type: r.type?.name || '—',
       priority: r.priority
         ? `<span class="badge ${priorityClasses[r.priority] || ''}">${t(`tasks.priority.${r.priority}`)}</span>`
@@ -491,15 +506,21 @@ watch(clientFilter, () => {
   reload();
 });
 
-function view(id: number) {
+function view(task: any) {
+  const id = taskKey(task);
+  if (!id) return;
   router.push({ name: 'tasks.details', params: { id } });
 }
 
-function edit(id: number) {
+function edit(task: any) {
+  const id = taskKey(task);
+  if (!id) return;
   router.push({ name: 'tasks.edit', params: { id } });
 }
 
-async function remove(id: number) {
+async function remove(task: any) {
+  const id = taskKey(task);
+  if (!id) return;
   const res = await Swal.fire({
     title: 'Delete task?',
     icon: 'warning',
@@ -507,15 +528,16 @@ async function remove(id: number) {
   });
   if (res.isConfirmed) {
     await api.delete(`/tasks/${id}`);
-    all.value = all.value.filter((r) => r.id !== id);
+    all.value = all.value.filter((r) => taskKey(r) !== id);
     reload();
   }
 }
 
 async function updateStatus(row: any, status: string) {
   try {
-    await api.post(`/tasks/${row.id}/status`, { status });
-    const target = all.value.find((r) => r.id === row.id);
+    const id = taskKey(row);
+    await api.post(`/tasks/${id}/status`, { status });
+    const target = all.value.find((r) => taskKey(r) === id);
     if (target) target.status = status;
     reload();
   } catch (e: any) {
@@ -526,7 +548,7 @@ async function updateStatus(row: any, status: string) {
 }
 
 function getChangeActions(row: any) {
-  const target = all.value.find((r) => r.id === row.id);
+  const target = all.value.find((r) => taskKey(r) === taskKey(row));
   if (!target) return [];
   const map = target.type?.statuses || {};
   return map[target.status] || [];

@@ -131,7 +131,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore, can } from '@/stores/auth';
 
 interface TaskStatus {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   color: string;
@@ -139,17 +139,17 @@ interface TaskStatus {
   tasks_count: number;
   created_at: string;
   updated_at: string;
-  tenant?: { id: number; name: string } | null;
-  tenant_id?: number | null;
+  tenant?: { id: string; name: string } | null;
+  tenant_id?: string | null;
 }
 
 const props = defineProps<{ rows: TaskStatus[] }>();
 const emit = defineEmits<{
-  (e: 'edit', id: number): void;
-  (e: 'delete', id: number): void;
-  (e: 'copy', id: number): void;
-  (e: 'delete-selected', ids: number[]): void;
-  (e: 'copy-selected', ids: number[]): void;
+  (e: 'edit', id: string): void;
+  (e: 'delete', id: string): void;
+  (e: 'copy', id: string): void;
+  (e: 'delete-selected', ids: string[]): void;
+  (e: 'copy-selected', ids: string[]): void;
 }>();
 
 const { t } = useI18n();
@@ -186,7 +186,7 @@ const columns = [
   { label: 'Actions', field: 'actions' },
 ];
 
-const selectedIds = ref<number[]>([]);
+const selectedIds = ref<string[]>([]);
 
 const filteredRows = computed(() => {
   const rows = !searchTerm.value
@@ -198,7 +198,7 @@ const filteredRows = computed(() => {
 });
 
 function onSelectedRowsChange(params: any) {
-  selectedIds.value = params.selectedRows.map((r: any) => r.id);
+  selectedIds.value = params.selectedRows.map((r: any) => String(r.id));
 }
 
 function formatDate(d: string) {

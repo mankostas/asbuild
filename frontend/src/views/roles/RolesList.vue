@@ -78,12 +78,12 @@ const tenantStore = useTenantStore();
 
 const all = ref<RoleRow[]>([]);
 const loading = ref(true);
-const tenantFilter = ref<string | number | ''>('');
-const assignRoleId = ref<number | null>(null);
+const tenantFilter = ref<string>('');
+const assignRoleId = ref<string | null>(null);
 
 const tenantOptions = computed(() => [
   { value: '', label: t('allTenants') },
-  ...tenantStore.tenants.map((ten: any) => ({ value: ten.id, label: ten.name })),
+  ...tenantStore.tenants.map((ten: any) => ({ value: String(ten.id), label: ten.name })),
 ]);
 
 async function load() {
@@ -96,7 +96,7 @@ async function load() {
       ? 'tenant'
       : 'all'
     : 'tenant';
-  const tenantId: string | number | undefined = auth.isSuperAdmin
+  const tenantId: string | undefined = auth.isSuperAdmin
     ? isFilteringByTenant
       ? tenantFilter.value
       : undefined
@@ -105,17 +105,17 @@ async function load() {
   await rolesStore.fetch({ scope, tenant_id: tenantId });
   await tenantStore.loadTenants({ per_page: 100 });
   const tenantMap = tenantStore.tenants.reduce(
-    (acc: Record<number, any>, t) => ({ ...acc, [t.id]: t }),
+    (acc: Record<string, any>, t) => ({ ...acc, [String(t.id)]: t }),
     {},
   );
   all.value = rolesStore.roles.map((r: any) => ({
-    id: r.id,
+    id: String(r.public_id ?? r.id),
     name: r.name,
     description: r.description,
     level: r.level,
     abilities: r.abilities || [],
-    tenant: r.tenant || tenantMap[r.tenant_id] || null,
-    tenant_id: r.tenant_id,
+    tenant: r.tenant || tenantMap[String(r.tenant_id)] || null,
+    tenant_id: r.tenant_id != null ? String(r.tenant_id) : null,
     created_at: r.created_at,
     updated_at: r.updated_at,
     users_count: r.users_count,
@@ -140,11 +140,11 @@ watch(
   },
 );
 
-function edit(id: number) {
+function edit(id: string) {
   router.push({ name: 'roles.edit', params: { id } });
 }
 
-async function remove(id: number) {
+async function remove(id: string) {
   const res = await Swal.fire({
     title: 'Delete role?',
     icon: 'warning',
@@ -156,16 +156,16 @@ async function remove(id: number) {
   }
 }
 
-function openAssign(id: number) {
+function openAssign(id: string) {
   assignRoleId.value = id;
 }
 
-async function copy(id: number) {
-  let tenantId: string | number | undefined;
+async function copy(id: string) {
+  let tenantId: string | undefined;
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
     const inputOptions = tenantStore.tenants.reduce(
-      (acc: any, t: any) => ({ ...acc, [t.id]: t.name }),
+      (acc: any, t: any) => ({ ...acc, [String(t.id)]: t.name }),
       {},
     );
     const res = await Swal.fire({
@@ -181,7 +181,7 @@ async function copy(id: number) {
   reload();
 }
 
-async function removeMany(ids: number[]) {
+async function removeMany(ids: string[]) {
   const res = await Swal.fire({
     title: 'Delete selected roles?',
     icon: 'warning',
@@ -193,12 +193,12 @@ async function removeMany(ids: number[]) {
   }
 }
 
-async function copyMany(ids: number[]) {
-  let tenantId: string | number | undefined;
+async function copyMany(ids: string[]) {
+  let tenantId: string | undefined;
   if (auth.isSuperAdmin) {
     await tenantStore.loadTenants();
     const inputOptions = tenantStore.tenants.reduce(
-      (acc: any, t: any) => ({ ...acc, [t.id]: t.name }),
+      (acc: any, t: any) => ({ ...acc, [String(t.id)]: t.name }),
       {},
     );
     const res = await Swal.fire({
