@@ -97,28 +97,40 @@ class TenantUpsertRequest extends FormRequest
 
     protected function passedValidation(): void
     {
-        $features = $this->input('features', []);
         $featureMap = config('feature_map');
-        $sanitizedFeatures = array_values(array_intersect($features, config('features')));
+        $sanitizedFeatures = null;
+        $mergePayload = [];
 
-        $sanitizedAbilities = [];
-        $featureAbilities = $this->input('feature_abilities', []);
-        foreach ($featureAbilities as $feature => $abilities) {
-            if (! in_array($feature, $sanitizedFeatures, true)) {
-                continue;
-            }
-            $allowed = $featureMap[$feature]['abilities'] ?? [];
-            $normalizedAbilities = AbilityNormalizer::normalizeList((array) $abilities);
-            $sanitized = array_values(array_intersect($normalizedAbilities, $allowed));
-            if ($sanitized) {
-                $sanitizedAbilities[$feature] = $sanitized;
-            }
+        if ($this->exists('features')) {
+            $features = $this->input('features', []);
+            $sanitizedFeatures = array_values(array_intersect($features, config('features')));
+            $mergePayload['features'] = $sanitizedFeatures;
         }
 
-        $this->merge([
-            'features' => $sanitizedFeatures,
-            'feature_abilities' => $sanitizedAbilities,
-        ]);
+        if ($this->exists('feature_abilities')) {
+            $sanitizedAbilities = [];
+            $featureAbilities = $this->input('feature_abilities', []);
+
+            foreach ($featureAbilities as $feature => $abilities) {
+                if ($sanitizedFeatures !== null && ! in_array($feature, $sanitizedFeatures, true)) {
+                    continue;
+                }
+
+                $allowed = $featureMap[$feature]['abilities'] ?? [];
+                $normalizedAbilities = AbilityNormalizer::normalizeList((array) $abilities);
+                $sanitized = array_values(array_intersect($normalizedAbilities, $allowed));
+
+                if ($sanitized) {
+                    $sanitizedAbilities[$feature] = $sanitized;
+                }
+            }
+
+            $mergePayload['feature_abilities'] = $sanitizedAbilities;
+        }
+
+        if (! empty($mergePayload)) {
+            $this->merge($mergePayload);
+        }
     }
 }
 
