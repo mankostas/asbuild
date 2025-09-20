@@ -21,7 +21,7 @@ import { useLookupsStore } from '@/stores/lookups';
 import { useAuthStore } from '@/stores/auth';
 
 interface AssigneeValue {
-  id: number;
+  id: string;
 }
 
 const props = defineProps<{
@@ -43,14 +43,15 @@ onMounted(async () => {
   }
   if (props.modelValue) {
     const list = lookups.assignees.employees;
-    selected.value = list.find((a: any) => a.id === props.modelValue?.id) || null;
+    selected.value =
+      list.find((a: any) => String(a.id) === String(props.modelValue?.id)) || null;
   }
 });
 
 watch(
   selected,
   (val) => {
-    if (val) emit('update:modelValue', { id: val.id });
+    if (val) emit('update:modelValue', { id: String(val.id) });
     else emit('update:modelValue', null);
   },
   { deep: true },
@@ -64,7 +65,8 @@ watch(
       return;
     }
     const list = lookups.assignees.employees;
-    selected.value = list.find((a: any) => a.id === val.id) || null;
+    selected.value =
+      list.find((a: any) => String(a.id) === String(val.id)) || null;
   },
   { deep: true },
 );

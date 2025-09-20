@@ -70,7 +70,7 @@ interface Point {
 }
 
 const types = ref<any[]>([]);
-const typeId = ref<number | null>(null);
+const typeId = ref<string | null>(null);
 const range = ref('7');
 const throughput = ref<Point[]>([]);
 const cycle = ref<Point[]>([]);
@@ -85,10 +85,15 @@ onMounted(async () => {
   const { data } = await api.get('/task-types');
   types.value = data.data || data;
   const savedType = localStorage.getItem(TYPE_KEY);
-  if (savedType && types.value.find((t: any) => t.id === Number(savedType))) {
-    typeId.value = Number(savedType);
+  if (
+    savedType &&
+    types.value.find(
+      (t: any) => String(t.public_id ?? t.id) === savedType,
+    )
+  ) {
+    typeId.value = savedType;
   } else if (types.value.length) {
-    typeId.value = types.value[0].id;
+    typeId.value = String(types.value[0].public_id ?? types.value[0].id);
   }
   await fetchData();
 });

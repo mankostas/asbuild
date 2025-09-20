@@ -28,7 +28,7 @@ import { ref, watch } from 'vue';
 import { uploadFile } from '@/services/uploader';
 import { useI18n } from 'vue-i18n';
 
-const props = defineProps<{ photo: any; sectionKey: string; taskId: number; modelValue: any }>();
+const props = defineProps<{ photo: any; sectionKey: string; taskId: string; modelValue: any }>();
 const emit = defineEmits<{ (e: 'update:modelValue', v: any): void }>();
 const { t } = useI18n();
 

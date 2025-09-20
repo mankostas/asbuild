@@ -53,7 +53,7 @@ import { useI18n } from 'vue-i18n';
 import { setTokens } from '@/services/authStorage';
 
 interface EmployeeRow {
-  id: number;
+  id: string;
   name: string;
   email: string;
   roles: string;
@@ -61,8 +61,8 @@ interface EmployeeRow {
   phone?: string | null;
   status?: string | null;
   last_login_at?: string | null;
-  tenant?: { id: number; name: string } | null;
-  tenant_id?: number | null;
+  tenant?: { id: string; name: string } | null;
+  tenant_id?: string | null;
   avatar?: string | null;
 }
 
@@ -74,11 +74,11 @@ const { t } = useI18n();
 
 const all = ref<EmployeeRow[]>([]);
 const loading = ref(true);
-const tenantFilter = ref<string | number | ''>('');
+const tenantFilter = ref<string>('');
 
 const tenantOptions = computed(() => [
   { value: '', label: t('allTenants') },
-  ...tenantStore.tenants.map((ten: any) => ({ value: ten.id, label: ten.name })),
+  ...tenantStore.tenants.map((ten: any) => ({ value: String(ten.id), label: ten.name })),
 ]);
 
 function formatRoles(roles: any[]) {
@@ -98,11 +98,11 @@ async function load() {
   const { data } = await api.get('/employees', { params });
   const employees = extractData(data);
   const tenantMap = tenantStore.tenants.reduce(
-    (acc: Record<number, any>, t: any) => ({ ...acc, [t.id]: t }),
+    (acc: Record<string, any>, t: any) => ({ ...acc, [String(t.id)]: t }),
     {},
   );
   all.value = employees.map((e: any) => ({
-    id: e.id,
+    id: String(e.public_id ?? e.id),
     name: e.name,
     email: e.email,
     roles: formatRoles(e.roles || []),
@@ -110,8 +110,8 @@ async function load() {
     phone: e.phone,
     status: e.status,
     last_login_at: e.last_login_at,
-    tenant: tenantMap[e.tenant_id] || null,
-    tenant_id: e.tenant_id,
+    tenant: tenantMap[String(e.tenant_id)] || null,
+    tenant_id: e.tenant_id != null ? String(e.tenant_id) : null,
     avatar: e.avatar,
   }));
   loading.value = false;
@@ -134,11 +134,11 @@ watch(
   },
 );
 
-function edit(id: number) {
+function edit(id: string) {
   router.push({ name: 'employees.edit', params: { id } });
 }
 
-async function remove(id: number) {
+async function remove(id: string) {
   if (auth.isSuperAdmin && !tenantFilter.value) {
     notify.error('Please select a tenant first');
     return;
@@ -163,7 +163,7 @@ async function remove(id: number) {
   }
 }
 
-async function removeMany(ids: number[]) {
+async function removeMany(ids: string[]) {
   if (auth.isSuperAdmin && !tenantFilter.value) {
     notify.error('Please select a tenant first');
     return;
@@ -191,7 +191,7 @@ async function removeMany(ids: number[]) {
   }
 }
 
-async function impersonate(id: number) {
+async function impersonate(id: string) {
   if (!can('employees.manage')) return;
   if (auth.isSuperAdmin && !tenantFilter.value) {
     notify.error('Please select a tenant first');
@@ -212,7 +212,7 @@ async function impersonate(id: number) {
   }
 }
 
-async function resendInvite(id: number) {
+async function resendInvite(id: string) {
   if (!can('employees.manage')) return;
   if (auth.isSuperAdmin && !tenantFilter.value) {
     notify.error('Please select a tenant first');
@@ -229,7 +229,7 @@ async function resendInvite(id: number) {
   }
 }
 
-async function resetEmail(id: number) {
+async function resetEmail(id: string) {
   if (!can('employees.manage')) return;
   if (auth.isSuperAdmin && !tenantFilter.value) {
     notify.error('Please select a tenant first');
@@ -271,7 +271,7 @@ async function resetEmail(id: number) {
   }
 }
 
-async function sendPasswordReset(id: number) {
+async function sendPasswordReset(id: string) {
   if (!can('employees.manage')) return;
   if (auth.isSuperAdmin && !tenantFilter.value) {
     notify.error('Please select a tenant first');

@@ -248,7 +248,7 @@ const statusOptions = computed(() => {
 const canMoveLeft = computed(() => {
   const from = props.task.status_slug;
   const colIndex = props.columns.findIndex((c) =>
-    c.tasks.some((t) => t.id === props.task.id),
+    c.tasks.some((t) => cardTaskKey(t) === taskId.value),
   );
   const targetIndex = colIndex - 1;
   if (targetIndex < 0) return false;
@@ -260,7 +260,7 @@ const canMoveLeft = computed(() => {
 const canMoveRight = computed(() => {
   const from = props.task.status_slug;
   const colIndex = props.columns.findIndex((c) =>
-    c.tasks.some((t) => t.id === props.task.id),
+    c.tasks.some((t) => cardTaskKey(t) === taskId.value),
   );
   const targetIndex = colIndex + 1;
   if (targetIndex >= props.columns.length) return false;
@@ -306,9 +306,14 @@ function formatDate(d: string) {
   return new Date(d).toLocaleDateString();
 }
 
+const taskId = computed(() => String(props.task.public_id ?? props.task.id ?? ''));
+const cardTaskKey = (task: any) => String(task?.public_id ?? task?.id ?? '');
+
 async function assignMe() {
+  const id = taskId.value;
+  if (!id) return;
   try {
-    await api.patch(`/tasks/${props.task.id}/assign`, {
+    await api.patch(`/tasks/${id}/assign`, {
       assigned_user_id: auth.user.id,
     });
     emit('assigned', {
@@ -329,7 +334,7 @@ function changeStatus(slug: string) {
 function move(dir: number) {
   if (!canMoveTasks.value) return;
   const colIndex = props.columns.findIndex((c) =>
-    c.tasks.some((t) => t.id === props.task.id),
+    c.tasks.some((t) => cardTaskKey(t) === taskId.value),
   );
   const targetIndex = colIndex + dir;
   if (targetIndex < 0 || targetIndex >= props.columns.length) return;
@@ -344,7 +349,9 @@ function move(dir: number) {
 }
 
 function editTask() {
-  router.push({ name: 'tasks.edit', params: { id: props.task.id } });
+  const id = taskId.value;
+  if (!id) return;
+  router.push({ name: 'tasks.edit', params: { id } });
 }
 
 function menuClass(active: boolean) {

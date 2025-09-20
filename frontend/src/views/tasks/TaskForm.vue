@@ -104,7 +104,7 @@
           :key="taskTypeId"
           v-model="formData"
           :schema="currentSchemaNoDefaults"
-          :task-id="0"
+          :task-id="schemaTaskId"
         />
 
         <div class="pt-2">
@@ -176,7 +176,7 @@ const { t } = useI18n();
 
 const auth = useAuthStore();
 const tenantStore = useTenantStore();
-const tenantId = ref<string | number | null>(tenantStore.currentTenantId || null);
+const tenantId = ref<string | null>(tenantStore.currentTenantId || null);
 const tenantOptions = computed(() =>
   tenantStore.tenants.map((t: any) => ({ value: String(t.id), label: t.name })),
 );
@@ -192,25 +192,32 @@ const status = ref<string | null>(null);
 const serverError = ref('');
 const showError = ref(false);
 const originalStatus = ref<string | null>(null);
-const assignee = ref<{ id: number } | null>(null);
+const assignee = ref<{ id: string } | null>(null);
 const priority = ref('');
 const dueAt = ref<string | null>(null);
 
-const typeOptions = computed(() => types.value.map((t: any) => ({ value: t.id, label: t.name })));
+const typeOptions = computed(() =>
+  types.value.map((t: any) => ({
+    value: String(t.public_id ?? t.id),
+    label: t.name,
+  })),
+);
 const statusOptions = ref<{ label: string; value: string }[]>([]);
 const statusBySlug: Record<string, any> = {};
 const priorityOptions = ref<{ label: string; value: string }[]>([]);
 
-async function loadTypes(tid: string | number | null): Promise<any[]> {
+async function loadTypes(tid: string | null): Promise<any[]> {
+  const tenantHeader = tid ? String(tid) : '';
   const headers =
-    auth.isSuperAdmin && tid ? { [TENANT_HEADER]: tid } : undefined;
+    auth.isSuperAdmin && tenantHeader ? { [TENANT_HEADER]: tenantHeader } : undefined;
   const { data } = await api.get('/task-types/options', { headers });
   return data;
 }
 
-async function loadStatuses(tid: string | number | null): Promise<any[]> {
+async function loadStatuses(tid: string | null): Promise<any[]> {
+  const tenantHeader = tid ? String(tid) : '';
   const headers =
-    auth.isSuperAdmin && tid ? { [TENANT_HEADER]: tid } : undefined;
+    auth.isSuperAdmin && tenantHeader ? { [TENANT_HEADER]: tenantHeader } : undefined;
   const { data } = await api.get('/task-statuses', { headers });
   return data.data || data;
 }
@@ -243,11 +250,14 @@ const schema = yup.object({
 const { handleSubmit, meta, setErrors, errors, setFieldValue } = useForm({
   validationSchema: schema,
 });
-const { value: taskTypeId, errorMessage: taskTypeError } = useField<string | number>(
+const { value: taskTypeId, errorMessage: taskTypeError } = useField<string>(
   'task_type_id',
 );
 
 const isEdit = computed(() => route.name === 'tasks.edit');
+const schemaTaskId = computed(() =>
+  isEdit.value ? String(route.params.id ?? '') : '0',
+);
 const canAccess = computed(() =>
   isEdit.value
     ? can('tasks.update') || can('tasks.manage')
@@ -276,10 +286,27 @@ onMounted(async () => {
     if (isEdit.value) {
       const res = await api.get(`/tasks/${route.params.id}`);
       const task = res.data.data || res.data;
-      taskTypeId.value = task.type?.id || task.task_type_id;
-      if (!types.value.some((t: any) => t.id === taskTypeId.value)) {
+      const typeIdentifier =
+        task.type?.public_id ??
+        task.task_type_public_id ??
+        task.type?.id ??
+        task.task_type_id ??
+        '';
+      taskTypeId.value = typeIdentifier ? String(typeIdentifier) : '';
+      if (
+        taskTypeId.value &&
+        !types.value.some(
+          (t: any) =>
+            String(t.public_id ?? t.id) === taskTypeId.value,
+        )
+      ) {
         if (task.type) {
-          types.value.push(task.type);
+          const typeEntry = {
+            ...task.type,
+            id: task.type.public_id ?? task.type.id,
+            public_id: task.type.public_id ?? task.type.id,
+          };
+          types.value.push(typeEntry);
         } else {
           const { data } = await api.get(`/task-types/${taskTypeId.value}`);
           types.value.push(data.data ?? data);
@@ -297,7 +324,9 @@ onMounted(async () => {
       status.value = task.status_slug || null;
       originalStatus.value = status.value;
       if (task.assignee) {
-        assignee.value = { id: task.assignee.id };
+        assignee.value = {
+          id: String(task.assignee.public_id ?? task.assignee.id),
+        };
       }
       updateStatusOptions(status.value);
     }
@@ -468,7 +497,7 @@ watch(
 const submitForm = handleSubmit(async () => {
   serverError.value = '';
   const payload: any = {
-    task_type_id: Number(taskTypeId.value),
+    task_type_id: taskTypeId.value,
     form_data: formData.value,
   };
   if (title.value) payload.title = title.value;
@@ -479,7 +508,7 @@ const submitForm = handleSubmit(async () => {
   if (priority.value) payload.priority = priority.value;
   if (can('tasks.assign')) {
     payload.assigned_user_id = assignee.value
-      ? Number(assignee.value.id)
+      ? String(assignee.value.id)
       : null;
   }
   if (isEdit.value) {
@@ -516,10 +545,10 @@ const submitForm = handleSubmit(async () => {
           : undefined;
       const res = await api.post('/tasks', payload, { headers });
       notify.success(t('tasks.messages.created'));
-      const taskId = res.data?.data?.id ?? res.data?.id;
+      const taskId = res.data?.data?.public_id ?? res.data?.data?.id ?? res.data?.public_id ?? res.data?.id;
       router.push({
         name: 'tasks.details',
-        params: { id: taskId },
+        params: { id: String(taskId) },
       });
     }
   } catch (e: any) {

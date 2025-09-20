@@ -26,29 +26,35 @@ import { useTaskStatusesStore } from '@/stores/taskStatuses';
 import api from '@/services/api';
 import { useNotify } from '@/plugins/notify';
 
-const props = defineProps<{ taskId: number; statusId: number }>();
-const emit = defineEmits<{ (e: 'updated', statusId: number): void }>();
+const props = defineProps<{ taskId: string; statusId: string }>();
+const emit = defineEmits<{ (e: 'updated', statusId: string): void }>();
 
 const store = useTaskStatusesStore();
 const notify = useNotify();
 
 const transitions = ref<any[]>([]);
-const selected = ref<number | null>(null);
+const selected = ref<string | null>(null);
 
 onMounted(async () => {
-  transitions.value = await store.fetchTransitions(props.statusId);
+  const response = await store.fetchTransitions(props.statusId);
+  const list = response?.data ?? response;
+  transitions.value = Array.isArray(list)
+    ? list.map((s: any) => ({ ...s, id: String(s.public_id ?? s.id) }))
+    : [];
 });
 
 const options = computed(() =>
-  transitions.value.map((s: any) => ({ value: s.id, label: s.name }))
+  transitions.value.map((s: any) => ({ value: String(s.id), label: s.name }))
 );
 
 async function apply() {
-  const target = transitions.value.find((s: any) => s.id === selected.value);
+  const target = transitions.value.find(
+    (s: any) => String(s.id) === selected.value,
+  );
   if (!target) return;
   try {
     await api.post(`/tasks/${props.taskId}/status`, { status: target.name });
-    emit('updated', target.id);
+    emit('updated', String(target.id));
     notify.success('Status updated');
   } catch (e: any) {
     if (e.status === 422) {

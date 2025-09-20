@@ -60,7 +60,7 @@ import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import draggable from 'vuedraggable';
 
-const props = defineProps<{ taskId: number }>();
+const props = defineProps<{ taskId: string }>();
 const { t } = useI18n();
 const items = ref<any[]>([]);
 const newTitle = ref('');

@@ -155,7 +155,7 @@ const onSubmit = handleSubmit(async () => {
     position: position.value,
   };
   if (auth.isSuperAdmin) {
-    payload.tenant_id = tenantId.value === '' ? null : Number(tenantId.value);
+    payload.tenant_id = tenantId.value === '' ? null : tenantId.value;
   }
   try {
     if (isEdit.value) {

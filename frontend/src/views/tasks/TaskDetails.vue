@@ -179,9 +179,13 @@ async function load() {
   const { data } = await api.get(`/tasks/${route.params.id}`, {
     params: { include: 'client' },
   });
-  task.value = data;
+  const taskData = data.data ?? data;
+  task.value = { ...taskData, id: String(taskData.public_id ?? taskData.id) };
   const res = await statusesStore.fetch('all');
-  statuses.value = res.data;
+  const list = res.data ?? res;
+  statuses.value = Array.isArray(list)
+    ? list.map((s: any) => ({ ...s, id: String(s.public_id ?? s.id) }))
+    : [];
 }
 
 onMounted(load);
@@ -193,11 +197,11 @@ function onCommentAdded(c: any) {
 const currentStatusId = computed(() => {
   const current = task.value?.status;
   const found = statuses.value.find((s: any) => s.name === current);
-  return found?.id;
+  return found ? String(found.id) : null;
 });
 
-function onStatusChanged(id: number) {
-  const found = statuses.value.find((s: any) => s.id === id);
+function onStatusChanged(id: string) {
+  const found = statuses.value.find((s: any) => String(s.id) === id);
   if (found && task.value) {
     task.value.status = found.name;
   }

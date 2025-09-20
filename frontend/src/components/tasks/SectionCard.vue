@@ -481,7 +481,16 @@ import { resolveI18n } from '@/utils/i18n';
 import UiTabs from '@/components/ui/Tabs/index.vue';
 import { Tab, TabPanel } from '@headlessui/vue';
 
-const props = defineProps<{ section: any; form: any; errors: Record<string, string>; taskId: number; readonly?: boolean; visible: Set<string>; required: Set<string>; showTargets: Set<string> }>();
+const props = defineProps<{
+  section: any;
+  form: any;
+  errors: Record<string, string>;
+  taskId: string;
+  readonly?: boolean;
+  visible: Set<string>;
+  required: Set<string>;
+  showTargets: Set<string>;
+}>();
 const emit = defineEmits<{ (e: 'update', payload: { key: string; value: any }): void; (e: 'error', payload: { key: string; msg: string }): void }>();
 
 const { t, locale } = useI18n();

@@ -80,15 +80,15 @@ import Switch from '@/components/ui/Switch/index.vue';
 import { useTenantStore } from '@/stores/tenant';
 
 interface Option {
-  value: number | null;
+  value: string | null;
   label: string;
 }
 
 const props = withDefaults(
   defineProps<{
     name: string;
-    tenantId: number | '';
-    clientId?: number | '';
+    tenantId: string;
+    clientId?: string;
     showTenantSelect?: boolean;
     requireSubtasksComplete: boolean;
     clientOptions?: Option[];
@@ -98,6 +98,7 @@ const props = withDefaults(
   {
     showTenantSelect: true,
     requireSubtasksComplete: false,
+    tenantId: '',
     clientId: '',
     clientOptions: () => [],
     loadingClients: false,
@@ -106,8 +107,8 @@ const props = withDefaults(
 );
 const emit = defineEmits<{
   (e: 'update:name', value: string): void;
-  (e: 'update:tenantId', value: number | ''): void;
-  (e: 'update:clientId', value: number | ''): void;
+  (e: 'update:tenantId', value: string): void;
+  (e: 'update:clientId', value: string): void;
   (e: 'update:requireSubtasksComplete', value: boolean): void;
 }>();
 
@@ -119,7 +120,7 @@ watchEffect(() => {
   const tenants = tenantStore.tenants;
   tenantOptions.value = [
     { value: null, label: t('types.form.global') },
-    ...tenants.map((tenant: any) => ({ value: tenant.id, label: tenant.name })),
+    ...tenants.map((tenant: any) => ({ value: String(tenant.id), label: tenant.name })),
   ];
 });
 
@@ -130,12 +131,12 @@ const localName = computed({
 
 const localTenantId = computed<any>({
   get: () => (props.tenantId === '' ? null : props.tenantId),
-  set: (v: number | null) => emit('update:tenantId', v === null ? '' : Number(v)),
+  set: (v: string | null) => emit('update:tenantId', v === null ? '' : String(v)),
 });
 
 const localClientId = computed<any>({
   get: () => (props.clientId === '' ? null : props.clientId),
-  set: (v: number | null) => emit('update:clientId', v === null ? '' : Number(v)),
+  set: (v: string | null) => emit('update:clientId', v === null ? '' : String(v)),
 });
 
 const localRequireSubtasksComplete = computed({
@@ -150,7 +151,7 @@ const tenantDisplayName = computed(() => {
     return t('types.form.global');
   }
   const option = tenantOptions.value.find(
-    (item) => item.value !== null && Number(item.value) === Number(localTenantId.value),
+    (item) => item.value !== null && String(item.value) === String(localTenantId.value),
   );
   if (option) {
     return option.label;

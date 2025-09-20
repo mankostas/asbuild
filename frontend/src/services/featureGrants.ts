@@ -13,7 +13,7 @@ function abilityHash(abilities: string[]): string {
 }
 
 export async function ensureHiddenRole(
-  tenantId: string | number,
+  tenantId: string,
   feature: string,
   abilities: string[],
 ): Promise<components['schemas']['Role']> {
@@ -36,28 +36,28 @@ export async function ensureHiddenRole(
 }
 
 export async function assignHiddenRoleToUser(
-  userId: number,
+  userId: string,
   roleId: number,
 ): Promise<void> {
   await api.post(`/roles/${roleId}/assign`, { user_id: userId });
 }
 
 export async function removeHiddenRoleFromUser(
-  userId: number,
+  userId: string,
   roleId: number,
 ): Promise<void> {
   await api.delete(`/roles/${roleId}/assign`, { data: { user_id: userId } });
 }
 
 export async function assignHiddenRoleToTeam(
-  teamId: number,
+  teamId: string,
   roleId: number,
 ): Promise<void> {
   await api.post(`/roles/${roleId}/assign`, { team_id: teamId });
 }
 
 export async function removeHiddenRoleFromTeam(
-  teamId: number,
+  teamId: string,
   roleId: number,
 ): Promise<void> {
   await api.delete(`/roles/${roleId}/assign`, { data: { team_id: teamId } });

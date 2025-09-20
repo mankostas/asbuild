@@ -48,15 +48,15 @@ import { useTenantStore } from '@/stores/tenant';
 import { useI18n } from 'vue-i18n';
 
 interface TeamRow {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   members: { name: string; avatar?: string | null }[];
-  lead?: { id: number; name: string; avatar?: string | null } | null;
+  lead?: { id: string; name: string; avatar?: string | null } | null;
   created_at: string;
   updated_at: string;
-  tenant?: { id: number; name: string } | null;
-  tenant_id?: number | null;
+  tenant?: { id: string; name: string } | null;
+  tenant_id?: string | null;
 }
 
 const router = useRouter();
@@ -67,11 +67,11 @@ const { t } = useI18n();
 
 const all = ref<TeamRow[]>([]);
 const loading = ref(true);
-const tenantFilter = ref<string | number | ''>('');
+const tenantFilter = ref<string>('');
 
 const tenantOptions = computed(() => [
   { value: '', label: t('allTenants') },
-  ...tenantStore.tenants.map((t: any) => ({ value: t.id, label: t.name })),
+  ...tenantStore.tenants.map((t: any) => ({ value: String(t.id), label: t.name })),
 ]);
 
 async function load() {
@@ -82,19 +82,25 @@ async function load() {
   await tenantStore.loadTenants({ per_page: 100 });
   await teamsStore.fetch(params);
   const tenantMap = tenantStore.tenants.reduce(
-    (acc: Record<number, any>, t: any) => ({ ...acc, [t.id]: t }),
+    (acc: Record<string, any>, t: any) => ({ ...acc, [String(t.id)]: t }),
     {},
   );
   all.value = teamsStore.teams.map((t: any) => ({
-    id: t.id,
+    id: String(t.public_id ?? t.id),
     name: t.name,
     description: t.description,
     members: (t.employees || []).map((e: any) => ({ name: e.name, avatar: e.avatar })),
-    lead: t.lead ? { id: t.lead.id, name: t.lead.name, avatar: t.lead.avatar } : null,
+    lead: t.lead
+      ? {
+          id: String(t.lead.public_id ?? t.lead.id),
+          name: t.lead.name,
+          avatar: t.lead.avatar,
+        }
+      : null,
     created_at: t.created_at,
     updated_at: t.updated_at,
-    tenant: t.tenant || tenantMap[t.tenant_id] || null,
-    tenant_id: t.tenant_id,
+    tenant: t.tenant || tenantMap[String(t.tenant_id)] || null,
+    tenant_id: t.tenant_id != null ? String(t.tenant_id) : null,
   }));
   loading.value = false;
 }
@@ -119,11 +125,11 @@ watch(
   },
 );
 
-function edit(id: number) {
+function edit(id: string) {
   router.push({ name: 'teams.edit', params: { id } });
 }
 
-async function remove(id: number) {
+async function remove(id: string) {
   const res = await Swal.fire({
     title: 'Delete team?',
     icon: 'warning',
@@ -135,7 +141,7 @@ async function remove(id: number) {
   }
 }
 
-async function removeMany(ids: number[]) {
+async function removeMany(ids: string[]) {
   const res = await Swal.fire({
     title: 'Delete selected teams?',
     icon: 'warning',

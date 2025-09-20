@@ -53,7 +53,7 @@ import InputGroup from '@dc/components/InputGroup';
 import Icon from '@dc/components/Icon';
 import { resolveI18n } from '@/utils/i18n';
 
-const props = defineProps<{ photo: any; sectionKey: string; taskId: number; modelValue: any[] }>();
+const props = defineProps<{ photo: any; sectionKey: string; taskId: string; modelValue: any[] }>();
 const emit = defineEmits<{ (e: 'update:modelValue', v: any[]): void }>();
 const { t, locale } = useI18n();
 

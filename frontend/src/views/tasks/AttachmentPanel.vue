@@ -23,7 +23,7 @@ import api from '@/services/api';
 import { uploadFile } from '@/services/uploader';
 import Card from '@/components/ui/Card/index.vue';
 
-const props = defineProps<{ taskId: number }>();
+const props = defineProps<{ taskId: string }>();
 const attachments = ref<any[]>([]);
 
 async function load() {
