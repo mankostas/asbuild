@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PublicIdResolver
 {
@@ -41,7 +42,13 @@ class PublicIdResolver
         }
 
         /** @var class-string<Model> $modelClass */
-        return $this->cache[$cacheKey] = $modelClass::query()
+        $query = $modelClass::query();
+
+        if (in_array(SoftDeletes::class, class_uses_recursive($modelClass), true)) {
+            $query->withTrashed();
+        }
+
+        return $this->cache[$cacheKey] = $query
             ->where('public_id', $identifier)
             ->value('id');
     }
