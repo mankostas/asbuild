@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\TaskStatus;
+use App\Models\Tenant;
 use Illuminate\Http\Request;
 use App\Http\Resources\TaskStatusResource;
 use App\Services\StatusFlowService;
 use App\Support\ListQuery;
 use App\Http\Requests\TaskStatusUpsertRequest;
+use Illuminate\Validation\ValidationException;
 
 class TaskStatusController extends Controller
 {
@@ -22,7 +24,16 @@ class TaskStatusController extends Controller
         $query = TaskStatus::query()->withCount('tasks');
 
         if ($scope === 'tenant') {
-            $tenantId = $request->query('tenant_id', $request->header('X-Tenant-ID', $request->user()->tenant_id));
+            $tenantIdentifier = $request->query(
+                'tenant_id',
+                $request->header('X-Tenant-ID', $request->user()->tenant_id)
+            );
+            $tenantId = $this->resolveTenantId($tenantIdentifier);
+
+            if ($tenantId === null) {
+                abort(400, 'tenant_id required');
+            }
+
             $query->where(function ($q) use ($tenantId) {
                 $q->whereNull('tenant_id')->orWhere('tenant_id', $tenantId);
             });
@@ -30,15 +41,18 @@ class TaskStatusController extends Controller
             $query->whereNull('tenant_id');
         } else {
             if ($request->has('tenant_id')) {
-                $tenantId = $request->query('tenant_id');
+                $tenantIdentifier = $request->query('tenant_id');
 
-                if ($tenantId === 'super_admin') {
+                if ($tenantIdentifier === 'super_admin') {
                     $query->whereNull('tenant_id');
                 } else {
+                    $tenantId = $this->resolveTenantId($tenantIdentifier);
                     $query->where('tenant_id', $tenantId);
                 }
             }
         }
+
+        $query->with('tenant:id,public_id');
 
         $result = $this->listQuery($query, $request, ['name'], ['name']);
 
@@ -60,6 +74,8 @@ class TaskStatusController extends Controller
         }
 
         $status = TaskStatus::create($data);
+        $status->load('tenant');
+
         return (new TaskStatusResource($status))->response()->setStatusCode(201);
     }
 
@@ -67,7 +83,7 @@ class TaskStatusController extends Controller
     {
         $this->authorize('view', $taskStatus);
 
-        return new TaskStatusResource($taskStatus);
+        return new TaskStatusResource($taskStatus->loadMissing('tenant'));
     }
 
     public function update(TaskStatusUpsertRequest $request, TaskStatus $taskStatus)
@@ -85,7 +101,8 @@ class TaskStatusController extends Controller
         }
 
         $taskStatus->update($data);
-        return new TaskStatusResource($taskStatus);
+
+        return new TaskStatusResource($taskStatus->load('tenant'));
     }
 
     public function destroy(Request $request, TaskStatus $taskStatus)
@@ -100,9 +117,11 @@ class TaskStatusController extends Controller
     {
         $this->authorize('view', $taskStatus);
 
-        $tenantId = $request->user()->hasRole('SuperAdmin')
+        $tenantIdentifier = $request->user()->hasRole('SuperAdmin')
             ? $request->input('tenant_id')
             : $request->user()->tenant_id;
+
+        $tenantId = $this->resolveTenantId($tenantIdentifier);
 
         if (! $tenantId) {
             abort(400, 'tenant_id required');
@@ -111,6 +130,7 @@ class TaskStatusController extends Controller
         $copy = $taskStatus->replicate();
         $copy->tenant_id = $tenantId;
         $copy->save();
+        $copy->load('tenant');
 
         return (new TaskStatusResource($copy))
             ->response()
@@ -131,6 +151,35 @@ class TaskStatusController extends Controller
         }
 
         $statuses = $query->get();
-        return TaskStatusResource::collection($statuses);
+        return TaskStatusResource::collection($statuses->load('tenant'));
+    }
+
+    protected function resolveTenantId(mixed $identifier): ?int
+    {
+        if ($identifier === null || $identifier === '') {
+            return null;
+        }
+
+        if (is_int($identifier)) {
+            return $identifier;
+        }
+
+        if (is_string($identifier) && ctype_digit($identifier)) {
+            return (int) $identifier;
+        }
+
+        if (is_string($identifier)) {
+            $tenantId = Tenant::query()->where('public_id', $identifier)->value('id');
+
+            if ($tenantId === null) {
+                throw ValidationException::withMessages([
+                    'tenant_id' => __('The selected tenant is invalid.'),
+                ]);
+            }
+
+            return (int) $tenantId;
+        }
+
+        return null;
     }
 }

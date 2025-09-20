@@ -12,9 +12,18 @@ class TaskStatusResource extends JsonResource
 
     public function toArray($request): array
     {
-        $data = parent::toArray($request);
-        $data['slug'] = TaskStatus::stripPrefix($data['slug']);
+        $this->resource->loadMissing('tenant');
 
-        return $this->formatDates($data);
+        return $this->formatDates([
+            'id' => $this->public_id,
+            'name' => $this->name,
+            'slug' => TaskStatus::stripPrefix($this->slug),
+            'color' => $this->color,
+            'position' => $this->position,
+            'tenant_id' => $this->tenant?->public_id,
+            'tasks_count' => $this->tasks_count ?? 0,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ]);
     }
 }

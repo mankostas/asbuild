@@ -11,13 +11,15 @@ class RoleResource extends JsonResource
 
     public function toArray($request): array
     {
+        $this->resource->loadMissing('tenant');
+
         return $this->formatDates([
-            'id' => $this->id,
+            'id' => $this->public_id,
             'name' => $this->name,
             'description' => $this->description,
             'slug' => $this->slug,
             'abilities' => $this->abilities,
-            'tenant_id' => $this->tenant_id,
+            'tenant_id' => $this->tenant?->public_id,
             'level' => $this->level,
             'users_count' => $this->users_count ?? 0,
             'created_at' => $this->created_at,
