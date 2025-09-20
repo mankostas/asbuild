@@ -1,6 +1,7 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
+import { fakeUserId } from '../utils/publicIds';
 
 const { notifySuccess, notifyError, swalFire, swalShowValidationMessage } = vi.hoisted(() => ({
   notifySuccess: vi.fn(),
@@ -39,6 +40,9 @@ function createSetup() {
   return (EmployeesList as any).setup?.(undefined, ctx) as any;
 }
 
+const firstEmployeeId = fakeUserId('employees-first');
+const secondEmployeeId = fakeUserId('employees-second');
+
 describe('EmployeesList user actions', () => {
   let getSpy: ReturnType<typeof vi.spyOn>;
   let postSpy: ReturnType<typeof vi.spyOn>;
@@ -73,13 +77,13 @@ describe('EmployeesList user actions', () => {
     swalFire.mockResolvedValue({ isConfirmed: true, value: 'new@example.com' });
 
     const setup = createSetup();
-    setup.all.value = [{ id: 7, email: 'old@example.com' }];
+    setup.all.value = [{ id: firstEmployeeId, email: 'old@example.com' }];
 
-    await setup.resetEmail(7);
+    await setup.resetEmail(firstEmployeeId);
 
     expect(swalFire).toHaveBeenCalled();
     expect(postSpy).toHaveBeenCalledWith(
-      '/employees/7/email-reset',
+      `/employees/${firstEmployeeId}/email-reset`,
       { email: 'new@example.com' },
       { params: {} },
     );
@@ -89,10 +93,10 @@ describe('EmployeesList user actions', () => {
   it('sends password reset request', async () => {
     const setup = createSetup();
 
-    await setup.sendPasswordReset(5);
+    await setup.sendPasswordReset(secondEmployeeId);
 
     expect(postSpy).toHaveBeenCalledWith(
-      '/employees/5/password-reset',
+      `/employees/${secondEmployeeId}/password-reset`,
       {},
       { params: {} },
     );

@@ -1,6 +1,7 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
+import { fakeTenantId, fakeUserId } from '../utils/publicIds';
 
 const { notifySuccess, notifyError, swalFire, swalShowValidationMessage } = vi.hoisted(() => ({
   notifySuccess: vi.fn(),
@@ -9,9 +10,24 @@ const { notifySuccess, notifyError, swalFire, swalShowValidationMessage } = vi.h
   swalShowValidationMessage: vi.fn(),
 }));
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({ push: vi.fn() }),
-}));
+vi.mock('vue-router', async () => {
+  const actual = await vi.importActual<typeof import('vue-router')>('vue-router');
+  return {
+    ...actual,
+    useRouter: () => ({ push: vi.fn() }),
+    createRouter: vi.fn(() => ({
+      beforeEach: vi.fn(),
+      afterEach: vi.fn(),
+      addRoute: vi.fn(),
+      push: vi.fn(),
+      replace: vi.fn(),
+      currentRoute: { value: {} },
+      isReady: () => Promise.resolve(),
+      onError: vi.fn(),
+    })),
+    createWebHistory: vi.fn(),
+  };
+});
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: (key: string) => key }),
@@ -38,6 +54,12 @@ function createSetup() {
   const ctx = { attrs: {}, slots: {}, emit: () => {}, expose: () => {} };
   return (TenantsList as any).setup?.(undefined, ctx) as any;
 }
+
+const listTenantId = fakeTenantId('tenants-list');
+const resendTenantId = fakeTenantId('tenants-resend');
+const passwordTenantId = fakeTenantId('tenants-password');
+const resetTenantId = fakeTenantId('tenants-reset');
+const ownerUserId = fakeUserId('tenants-owner');
 
 describe('TenantsList owner management actions', () => {
   let getSpy: ReturnType<typeof vi.spyOn>;
@@ -67,7 +89,7 @@ describe('TenantsList owner management actions', () => {
           data: {
             data: [
               {
-                id: 1,
+                id: listTenantId,
                 name: 'Tenant One',
                 feature_count: null,
                 features_count: null,
@@ -82,8 +104,8 @@ describe('TenantsList owner management actions', () => {
           },
         } as any);
       }
-      if (url === '/tenants/1/owner') {
-        return Promise.resolve({ data: { data: { id: 99, email: 'owner@example.com' } } } as any);
+      if (url === `/tenants/${listTenantId}/owner`) {
+        return Promise.resolve({ data: { data: { id: ownerUserId, email: 'owner@example.com' } } } as any);
       }
       return Promise.resolve({ data: { data: [] } } as any);
     });
@@ -99,18 +121,20 @@ describe('TenantsList owner management actions', () => {
   it('resends tenant owner invite', async () => {
     const setup = createSetup();
 
-    await setup.resendOwnerInvite(3);
+    await setup.resendOwnerInvite(resendTenantId);
 
-    expect(postSpy).toHaveBeenCalledWith('/tenants/3/owner/invite-resend');
+    expect(postSpy).toHaveBeenCalledWith(
+      `/tenants/${resendTenantId}/owner/invite-resend`,
+    );
     expect(notifySuccess).toHaveBeenCalledWith('tenants.owner.inviteResent');
   });
 
   it('sends tenant owner password reset email', async () => {
     const setup = createSetup();
 
-    await setup.sendOwnerPasswordReset(4);
+    await setup.sendOwnerPasswordReset(passwordTenantId);
 
-    expect(postSpy).toHaveBeenCalledWith('/tenants/4/owner/password-reset');
+    expect(postSpy).toHaveBeenCalledWith(`/tenants/${passwordTenantId}/owner/password-reset`);
     expect(notifySuccess).toHaveBeenCalledWith('tenants.owner.passwordReset.success');
   });
 
@@ -120,16 +144,16 @@ describe('TenantsList owner management actions', () => {
     const setup = createSetup();
     setup.all.value = [
       {
-        id: 5,
+        id: resetTenantId,
         name: 'Tenant Five',
-        owner: { id: 6, email: 'old@example.com' },
+        owner: { id: ownerUserId, email: 'old@example.com' },
       },
     ];
 
-    await setup.resetOwnerEmail(5);
+    await setup.resetOwnerEmail(resetTenantId);
 
     expect(swalFire).toHaveBeenCalled();
-    expect(postSpy).toHaveBeenCalledWith('/tenants/5/owner/email-reset', { email: 'updated@example.com' });
+    expect(postSpy).toHaveBeenCalledWith(`/tenants/${resetTenantId}/owner/email-reset`, { email: 'updated@example.com' });
     expect(notifySuccess).toHaveBeenCalledWith('tenants.owner.resetEmail.success');
   });
 });

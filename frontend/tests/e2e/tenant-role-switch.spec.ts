@@ -1,12 +1,16 @@
 import { test, expect } from '@playwright/test';
+import { fakeTenantId } from '../utils/publicIds';
+
+const tenantAId = fakeTenantId('builder-tenant-a');
+const tenantBId = fakeTenantId('builder-tenant-b');
 
 // Simulates the task-type builder flow when switching tenants.
 test('full happy path for builder with tenant switching', async ({ page }) => {
   await page.setContent(`
     <select id="tenant">
       <option value="">Select tenant</option>
-      <option value="a">Tenant A</option>
-      <option value="b">Tenant B</option>
+      <option value="${tenantAId}">Tenant A</option>
+      <option value="${tenantBId}">Tenant B</option>
     </select>
     <div id="gating" role="status">Select tenant to configure permissions</div>
     <div id="roles" hidden></div>
@@ -17,7 +21,7 @@ test('full happy path for builder with tenant switching', async ({ page }) => {
     <div id="transitions"></div>
     <button id="publish">Publish</button>
     <script>
-      const tenants = { a: ['roleA1', 'roleA2'], b: ['roleB1'] };
+      const tenants = { ${JSON.stringify(tenantAId)}: ['roleA1', 'roleA2'], ${JSON.stringify(tenantBId)}: ['roleB1'] };
       window.permissions = {};
       window.fieldRoles = { view: [], edit: [] };
       const statuses = [];
@@ -111,7 +115,7 @@ test('full happy path for builder with tenant switching', async ({ page }) => {
   await expect(page.locator('#roles')).toBeHidden();
 
   // pick tenant A
-  await page.selectOption('#tenant', 'a');
+  await page.selectOption('#tenant', tenantAId);
   await expect(page.locator('#gating')).toBeHidden();
   await expect(page.locator('#roles label')).toHaveCount(2);
   await expect(page.locator('#inspector')).toBeVisible();
@@ -123,7 +127,7 @@ test('full happy path for builder with tenant switching', async ({ page }) => {
   await page.click('#save');
 
   // change tenant to B and ensure roles are sanitized
-  await page.selectOption('#tenant', 'b');
+  await page.selectOption('#tenant', tenantBId);
   await expect(page.locator('#roles label')).toHaveCount(1);
   await expect(page.locator('#roles input')).not.toBeChecked();
   expect(await page.evaluate(() => window.fieldRoles.view.length)).toBe(0);

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import MockAdapter from 'axios-mock-adapter';
 import { setActivePinia, createPinia } from 'pinia';
+import { fakeTenantId } from './utils/publicIds';
 
 let api: any;
 let TENANT_HEADER: any;
@@ -32,10 +33,13 @@ describe('tenant switching', () => {
   });
 
   it('attaches tenant header and exposes abilities on switch', async () => {
+    const tenantOneId = fakeTenantId('alpha');
+    const tenantTwoId = fakeTenantId('beta');
+
     mock.onGet('/tenants').reply(200, {
       data: [
-        { id: 1, feature_abilities: { tasks: ['create'] } },
-        { id: 2, feature_abilities: { tasks: ['edit'] } },
+        { id: tenantOneId, feature_abilities: { tasks: ['create'] } },
+        { id: tenantTwoId, feature_abilities: { tasks: ['edit'] } },
       ],
       meta: {},
     });
@@ -44,21 +48,21 @@ describe('tenant switching', () => {
     await store.loadTenants();
 
     // switch to tenant 1
-    store.setTenant('1');
+    store.setTenant(tenantOneId);
     mock.onGet('/check').reply((config) => {
-      expect(config.headers[TENANT_HEADER]).toBe('1');
+      expect(config.headers[TENANT_HEADER]).toBe(tenantOneId);
       return [200, { ok: true }];
     });
     await api.get('/check');
-    expect(store.tenantAllowedAbilities('1')).toEqual({ tasks: ['create'] });
+    expect(store.tenantAllowedAbilities(tenantOneId)).toEqual({ tasks: ['create'] });
 
     // switch to tenant 2
-    store.setTenant('2');
+    store.setTenant(tenantTwoId);
     mock.onGet('/check').reply((config) => {
-      expect(config.headers[TENANT_HEADER]).toBe('2');
+      expect(config.headers[TENANT_HEADER]).toBe(tenantTwoId);
       return [200, { ok: true }];
     });
     await api.get('/check');
-    expect(store.tenantAllowedAbilities('2')).toEqual({ tasks: ['edit'] });
+    expect(store.tenantAllowedAbilities(tenantTwoId)).toEqual({ tasks: ['edit'] });
   });
 });

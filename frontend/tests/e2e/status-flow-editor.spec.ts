@@ -1,10 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { fakeTenantId } from '../utils/publicIds';
+
+const firstTenantId = fakeTenantId('status-alpha');
+const secondTenantId = fakeTenantId('status-beta');
 
 test('selecting a tenant loads statuses and leaves transitions empty', async ({ page }) => {
   await page.route(/\/task-statuses\?.*/, (route) => {
     const url = new URL(route.request().url());
     const tenantId = url.searchParams.get('tenant_id');
-    const data = tenantId === '2'
+    const data = tenantId === secondTenantId
       ? [{ slug: 'custom' }]
       : [{ slug: 'open' }, { slug: 'closed' }];
     route.fulfill({ json: { data } });
@@ -13,8 +17,8 @@ test('selecting a tenant loads statuses and leaves transitions empty', async ({ 
   await page.setContent(`
     <select id="tenant">
       <option value="">Select tenant</option>
-      <option value="1">Tenant 1</option>
-      <option value="2">Tenant 2</option>
+      <option value="${firstTenantId}">Tenant 1</option>
+      <option value="${secondTenantId}">Tenant 2</option>
     </select>
     <ul id="statuses"></ul>
     <ul id="transitions"></ul>
@@ -32,11 +36,11 @@ test('selecting a tenant loads statuses and leaves transitions empty', async ({ 
     </script>
   `);
 
-  await page.selectOption('#tenant', '1');
+  await page.selectOption('#tenant', firstTenantId);
   await expect(page.locator('#statuses li')).toHaveCount(2);
   await expect(page.locator('#transitions li')).toHaveCount(0);
 
-  await page.selectOption('#tenant', '2');
+  await page.selectOption('#tenant', secondTenantId);
   await expect(page.locator('#statuses li')).toHaveCount(1);
   await expect(page.locator('#transitions li')).toHaveCount(0);
 

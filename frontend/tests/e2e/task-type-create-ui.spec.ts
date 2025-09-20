@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { fakeTaskId } from '../utils/publicIds';
+
+const createdTaskTypeId = fakeTaskId('type-create');
 
 test.describe('task type create UI', () => {
   test('can add field then access preview and inspector', async ({ page }) => {
@@ -110,10 +113,10 @@ test.describe('task type create UI', () => {
       await route.fulfill({
         status: 201,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: 7 }),
+        body: JSON.stringify({ id: '${createdTaskTypeId}' }),
       });
     });
-    await page.route('**/api/task-types/7/automations', async (route) => {
+    await page.route(`**/api/task-types/${createdTaskTypeId}/automations`, async (route) => {
       const data = JSON.parse(route.request().postData() || '{}');
       expect(data.enabled).toBe(false);
       await route.fulfill({ status: 201, body: '{}' });
@@ -139,6 +142,6 @@ test.describe('task type create UI', () => {
     `);
     await page.getByRole('button', { name: 'Save Automation' }).click();
     await page.getByRole('button', { name: 'Save Type' }).click();
-    await page.waitForRequest('**/api/task-types/7/automations');
+    await page.waitForRequest(`**/api/task-types/${createdTaskTypeId}/automations`);
   });
 });

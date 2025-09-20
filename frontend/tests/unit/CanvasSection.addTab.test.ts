@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { createApp } from 'vue';
 import { createI18n } from 'vue-i18n';
 import CanvasSection from '@/components/types/CanvasSection.vue';
+import { fakePublicId } from '../utils/publicIds';
 
 vi.mock('vuedraggable', () => ({
   default: { name: 'draggable', template: '<div><slot /></div>' },
@@ -39,7 +40,7 @@ describe('CanvasSection addTab', () => {
     const section = {
       label: { en: 'Section', el: 'Section' },
       cols: 1,
-      fields: [{ id: 1, key: 'a', label: { en: 'A', el: 'A' } }],
+      fields: [{ id: fakePublicId('canvas-field'), key: 'a', label: { en: 'A', el: 'A' } }],
       tabs: [],
     } as any;
     const i18n = createI18n({ locale: 'en', messages: { en: {}, el: {} } });

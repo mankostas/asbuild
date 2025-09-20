@@ -5,6 +5,7 @@ import { createI18n } from 'vue-i18n';
 import { createPinia, setActivePinia } from 'pinia';
 import TypeMetaBar from '@/components/types/TypeMetaBar.vue';
 import { useTenantStore } from '@/stores/tenant';
+import { fakeClientId, fakeTenantId } from '../utils/publicIds';
 
 vi.mock('@/components/ui/Card/index.vue', () => ({
   default: { name: 'Card', template: '<div><slot /></div>' },
@@ -71,6 +72,10 @@ describe('TypeMetaBar tenant and client selectors', () => {
     setActivePinia(createPinia());
   });
 
+  const defaultTenantId = fakeTenantId('meta-default');
+  const defaultClientId = fakeClientId('meta-default');
+  const lockedTenantId = fakeTenantId('meta-locked');
+
   function mountComponent(props: Record<string, unknown> = {}) {
     const i18n = createI18n({
       legacy: false,
@@ -92,9 +97,9 @@ describe('TypeMetaBar tenant and client selectors', () => {
 
     const app = createApp(TypeMetaBar, {
       name: 'Example',
-      tenantId: 1,
+      tenantId: defaultTenantId,
       clientId: '',
-      clientOptions: [{ value: 10, label: 'Client 1' }],
+      clientOptions: [{ value: defaultClientId, label: 'Client 1' }],
       requireSubtasksComplete: false,
       showTenantSelect: true,
       ...props,
@@ -107,7 +112,7 @@ describe('TypeMetaBar tenant and client selectors', () => {
 
   it('renders tenant and client dropdowns for super admins', () => {
     const tenantStore = useTenantStore();
-    tenantStore.tenants = [{ id: 1, name: 'Alpha Corp' }] as any;
+    tenantStore.tenants = [{ id: defaultTenantId, name: 'Alpha Corp' }] as any;
     const { el } = mountComponent();
 
     expect(el.querySelector('[data-testid="tenant-select"]')).not.toBeNull();
@@ -119,7 +124,7 @@ describe('TypeMetaBar tenant and client selectors', () => {
     tenantStore.tenants = [];
     const { el } = mountComponent({
       showTenantSelect: false,
-      tenantId: 42,
+      tenantId: lockedTenantId,
       tenantName: 'Beta LLC',
     });
 

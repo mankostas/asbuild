@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { fakeTenantId } from '../utils/publicIds';
+
+const rolesTenantEditId = fakeTenantId('roles-tenant-edit');
 
 // No running server in the environment; this test documents the expected flow.
 test.skip('shows abilities only after selecting a tenant', async ({ page }) => {
@@ -17,7 +20,7 @@ test.skip('deselecting a feature hides its abilities immediately', async ({ page
   await page.getByRole('option').first().click();
   await page.getByLabel('Abilities').click();
   await expect(page.getByRole('option', { name: 'tasks.view' })).toBeVisible();
-  await page.goto('/users/tenants/1/edit');
+  await page.goto(`/users/tenants/${rolesTenantEditId}/edit`);
   await page.getByLabel('Features').click();
   await page.getByRole('option', { name: /Tasks/ }).click();
   await page.goto('/roles');
