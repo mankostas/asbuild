@@ -65,7 +65,7 @@ class GdprController extends Controller
     public function requestDelete(Request $request)
     {
         $user = $request->user();
-        DeleteUserData::dispatch($user->id);
+        DeleteUserData::dispatch($user->public_id);
         AuditLog::create([
             'user_id' => $user->id,
             'action' => 'gdpr_delete_request',

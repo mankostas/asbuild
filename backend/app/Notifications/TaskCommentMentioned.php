@@ -22,16 +22,27 @@ class TaskCommentMentioned extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
-            ->line('You were mentioned in a task comment.')
-            ->action('View Task', url('/tasks/' . $this->comment->task_id));
+        $this->comment->loadMissing('task');
+
+        $mail = (new MailMessage)
+            ->line('You were mentioned in a task comment.');
+
+        $taskPublicId = $this->comment->task?->public_id;
+
+        if ($taskPublicId) {
+            $mail->action('View Task', url('/tasks/' . $taskPublicId));
+        }
+
+        return $mail;
     }
 
     public function toArray(object $notifiable): array
     {
+        $this->comment->loadMissing('task');
+
         return [
-            'task_id' => $this->comment->task_id,
-            'comment_id' => $this->comment->id,
+            'task_public_id' => $this->comment->task?->public_id,
+            'comment_public_id' => $this->comment->public_id,
         ];
     }
 }

@@ -66,7 +66,7 @@ class TaskCommentController extends Controller
                     $user,
                     'comment',
                     'You were mentioned in a task comment.',
-                    '/tasks/' . $task->id
+                    '/tasks/' . $task->public_id
                 );
             });
         }
@@ -110,13 +110,14 @@ class TaskCommentController extends Controller
 
         $comment->mentions()->sync($mentions->pluck('id'));
         if ($mentions->isNotEmpty()) {
+            $comment->loadMissing('task');
             $mentions->each(function ($user) use ($comment) {
                 $comment->task->watchers()->firstOrCreate(['user_id' => $user->id]);
                 app(Notifier::class)->send(
                     $user,
                     'comment',
                     'You were mentioned in a task comment.',
-                    '/tasks/' . $comment->task_id
+                    '/tasks/' . $comment->task->public_id
                 );
             });
         }

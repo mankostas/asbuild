@@ -36,8 +36,8 @@ class CalendarController extends Controller
 
         $events = $query->get()->map(function ($t) {
             return [
-                'id' => $t->id,
-                'title' => $t->title ?? $t->type->name ?? 'Task ' . $t->id,
+                'id' => $t->public_id,
+                'title' => $t->title ?? $t->type->name ?? 'Task ' . $t->public_id,
                 'start' => $t->scheduled_at,
                 'end' => $t->sla_end_at ?? $t->scheduled_at,
                 'extendedProps' => [

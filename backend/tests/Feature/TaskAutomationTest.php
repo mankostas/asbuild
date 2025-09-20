@@ -66,7 +66,7 @@ class TaskAutomationTest extends TestCase
             ->postJson("/api/task-types/{$type->id}/automations", [
                 'event' => 'status_changed',
                 'conditions_json' => ['status' => $status],
-                'actions_json' => [['type' => 'notify_team', 'team_id' => $team->id]],
+                'actions_json' => [['type' => 'notify_team', 'team_id' => $team->public_id]],
                 'enabled' => true,
             ])->assertCreated();
 
@@ -86,7 +86,7 @@ class TaskAutomationTest extends TestCase
             ])->assertOk();
 
         Queue::assertPushed(AutomationNotifyTeamJob::class, function ($job) use ($task, $team) {
-            return $job->taskId === $task->id && $job->teamId === $team->id;
+            return $job->taskIdentifier === $task->public_id && $job->teamIdentifier === $team->public_id;
         });
     }
 
